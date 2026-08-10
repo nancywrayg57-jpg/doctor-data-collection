@@ -1,0 +1,5 @@
+*.xlsx binary
+*.xls binary
+*.csv text eol=lf
+*.md text eol=lf
+*.py text eol=lf
