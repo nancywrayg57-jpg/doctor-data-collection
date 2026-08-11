@@ -349,6 +349,10 @@ GENERIC_NAME_BLOCK_TERMS = [
     "公告",
     "新闻",
     "患者",
+    "就诊须知",
+    "住院须知",
+    "联系我们",
+    "门诊时间",
 ]
 
 PROFILE_NOISE_TAGS = {
@@ -543,6 +547,33 @@ def infer_department(text: str) -> str:
     ]
     candidates = [candidate for candidate in candidates if candidate]
     return candidates[-1] if candidates else ""
+
+
+def clean_generic_department(value: str | None) -> str:
+    text = clean_text(value)
+    if not text:
+        return ""
+    text = re.sub(r"^(?:科室|所在科室|出诊科室|专业|专科)\s*[:：]\s*", "", text)
+    stop_pattern = (
+        r"\s*(?:介绍|简介|个人简介|职称|职务|专业擅长|擅长|医疗专长|诊疗专长|"
+        r"技术专长|业务专长|专长|研究方向)\s*[:：]"
+        r"|\s*(?=(?:19|20)\d{2}年)"
+        r"|[。！？；;]"
+    )
+    text = clean_text(re.split(stop_pattern, text, maxsplit=1)[0])
+    match = re.match(
+        r"^[\u4e00-\u9fff、]{1,28}?(?:科|中心|病房|门诊)(?:[一二三四五六七八九十\d]+室)?",
+        text,
+    )
+    if match:
+        return clean_text(match.group(0))
+    return text if len(text) <= 30 else ""
+
+
+def has_department_text_pollution(raw_value: str | None, cleaned_value: str | None) -> bool:
+    raw = clean_text(raw_value)
+    cleaned = clean_text(cleaned_value)
+    return bool(raw and cleaned and raw != cleaned)
 
 
 def read_ledger(path: Path) -> list[dict[str, Any]]:
@@ -874,6 +905,7 @@ def strip_profile_navigation_text(value: str | None) -> str:
     label = r"(?:姓名|科室|所在科室|职称|职务|专业擅长|擅长|专长|简介|个人简介|一、|二、)"
     breadcrumb_patterns = [
         rf"(?:临床专家\s*)?面包屑\s*首页\s*(?:{separator}\s*[^/＞>»›→]{{1,60}}?\s*){{1,10}}(?={label}|$)",
+        rf"(?:你)?当前所在的位置\s*[:：]?\s*[^/＞>»›→]{{0,60}}\s*(?:{separator}\s*[^/＞>»›→]{{1,60}}?\s*){{1,10}}(?={label}|$)",
         rf"当前位置\s*[:：]?\s*首页\s*(?:{separator}\s*[^/＞>»›→]{{1,60}}?\s*){{1,10}}(?={label}|$)",
     ]
     for pattern in breadcrumb_patterns:
@@ -881,6 +913,16 @@ def strip_profile_navigation_text(value: str | None) -> str:
     for phrase in PROFILE_INLINE_NOISE_PHRASES:
         text = text.replace(phrase, " ")
     return clean_text(text)
+
+
+def contains_navigation_text(value: str | None) -> bool:
+    text = clean_text(value)
+    if not text:
+        return False
+    return any(
+        marker in text
+        for marker in ["你当前所在的位置", "当前所在的位置", "当前位置", "面包屑", "首页 >", "首页＞"]
+    )
 
 
 def element_attribute_tokens(element: Any) -> set[str]:
@@ -979,6 +1021,50 @@ def looks_like_person_name(value: str) -> bool:
     return True
 
 
+def matches_generic_directory_detail_url(entry_url: str, candidate_url: str) -> bool:
+    entry_match = re.fullmatch(r"/section/(\d+)/?", urlparse(entry_url).path)
+    if comparable_host(entry_url) != "smukqyy.cn" or not entry_match:
+        return True
+    directory_id = re.escape(entry_match.group(1))
+    return bool(re.fullmatch(rf"/prods/{directory_id}/\d+/?", urlparse(candidate_url).path))
+
+
+def generic_record_quality(
+    name: str,
+    source_link: str,
+    entry_url: str,
+    detail: dict[str, str],
+    item: dict[str, str],
+) -> tuple[bool, list[str]]:
+    valid = looks_like_person_name(name) and matches_generic_directory_detail_url(entry_url, source_link)
+    warnings: list[str] = []
+    if not valid:
+        warnings.append("非医生页面或姓名异常")
+    if detail.get("department_polluted") == "yes" or has_department_text_pollution(
+        item.get("department"), clean_generic_department(item.get("department"))
+    ):
+        warnings.append("科室原文含正文，已清洗")
+    if detail.get("specialty_navigation_polluted") == "yes":
+        warnings.append("擅长原文含导航文本，已清空")
+    return valid, warnings
+
+
+def classify_generic_record(
+    valid_doctor_record: bool,
+    combined_text: str,
+    title_hits: list[str],
+) -> tuple[str, list[str], list[str]]:
+    if not valid_doctor_record:
+        return "", [], []
+    groups, tags = group_tags(combined_text)
+    priority = "普通"
+    if any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups:
+        priority = "高"
+    elif any(term != "医师" for term in title_hits):
+        priority = "中"
+    return priority, groups, tags
+
+
 def extract_person_name(*texts: str | None) -> str:
     for raw in texts:
         text = clean_text(raw)
@@ -1043,6 +1129,8 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
         if canonical_url(href) == canonical_url(page_url):
             continue
         if not is_collectable_url(entry_url, href):
+            continue
+        if not matches_generic_directory_detail_url(entry_url, href):
             continue
         context = nearest_card_text(anchor)
         score = generic_link_score(href, context)
@@ -1175,12 +1263,25 @@ def extract_labeled_value_any(text: str, labels: list[str], stop_labels: list[st
     return clean_text(match.group(1)) if match else ""
 
 
+def extract_explicit_labeled_value(text: str, labels: list[str], stop_labels: list[str]) -> str:
+    value = extract_labeled_value(text, labels, stop_labels)
+    if value:
+        return value
+    lines = [clean_text(line) for line in re.split(r"[\n\r]+", text) if clean_text(line)]
+    for label in labels:
+        value = extract_label_from_lines(lines, label, stop_labels)
+        if value:
+            return value
+    return ""
+
+
 def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
     soup = BeautifulSoup(html, "html.parser")
     title = clean_text(soup.title.get_text(" ", strip=True)) if soup.title else ""
     h1 = first_visible_heading_text(soup)
     navigation_context = extract_navigation_context(soup)
     remove_profile_noise_elements(soup)
+    raw_scope_text = compact_visible_text(soup, 6000)
     main_text = best_detail_scope_text(soup)
     compact = clean_text("\n".join([h1, title, main_text]))
     name = first_nonempty(
@@ -1191,7 +1292,7 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
         ),
         extract_person_name(h1, title, fallback.get("name", ""), fallback.get("list_title", "")),
     )
-    department = first_nonempty(
+    department_raw = first_nonempty(
         extract_labeled_value_any(
             compact,
             ["科室", "所在科室", "出诊科室", "专业", "专科"],
@@ -1201,6 +1302,7 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
         fallback.get("department", ""),
         infer_department(compact[:500]),
     )
+    department = clean_generic_department(department_raw)
     title_field = first_nonempty(
         extract_labeled_value_any(
             compact,
@@ -1210,13 +1312,41 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
         "、".join(extract_terms(compact[:1000], TITLE_TERMS)),
         fallback.get("list_title", ""),
     )
-    specialty = strip_article_tail(
-        extract_labeled_value_any(
+    specialty_labels = [
+        "专业擅长",
+        "擅长",
+        "医疗专长",
+        "诊疗专长",
+        "技术专长",
+        "业务专长",
+        "专长",
+        "研究方向",
+    ]
+    specialty_stop_labels = [
+        "个人简介",
+        "简介",
+        "介绍",
+        "专家简介",
+        "医生简介",
+        "出诊",
+        "门诊",
+        "社会任职",
+        "学术任职",
+    ]
+    specialty_raw = strip_article_tail(
+        extract_explicit_labeled_value(
             compact,
-            ["专业擅长", "擅长", "医疗专长", "诊疗专长", "技术专长", "业务专长", "专长", "研究方向"],
-            ["个人简介", "简介", "专家简介", "医生简介", "出诊", "门诊", "社会任职", "学术任职"],
+            specialty_labels,
+            specialty_stop_labels,
         )
     )
+    specialty_preclean = strip_article_tail(
+        extract_explicit_labeled_value(raw_scope_text, specialty_labels, specialty_stop_labels)
+    )
+    specialty_navigation_polluted = contains_navigation_text(specialty_raw) or contains_navigation_text(
+        specialty_preclean
+    )
+    specialty = "" if specialty_navigation_polluted else specialty_raw
     profile_text = strip_article_tail(
         first_nonempty(
             extract_labeled_value_any(
@@ -1230,8 +1360,12 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
     return {
         "name": clean_text(name),
         "department": clean_text(department),
+        "department_raw": clean_text(department_raw),
+        "department_polluted": "yes" if has_department_text_pollution(department_raw, department) else "no",
         "title_field": clean_text(title_field),
         "specialty": clean_text(specialty),
+        "specialty_raw": clean_text(first_nonempty(specialty_raw, specialty_preclean)),
+        "specialty_navigation_polluted": "yes" if specialty_navigation_polluted else "no",
         "profile_text": clean_text(profile_text),
         "title_text": first_nonempty(h1, title),
     }
@@ -1894,6 +2028,10 @@ def collect_generic(
             "specialty": "",
             "profile_text": "",
             "title_text": "",
+            "department_raw": item.get("department", ""),
+            "department_polluted": "no",
+            "specialty_raw": "",
+            "specialty_navigation_polluted": "no",
         }
         if detail_status == 200:
             detail = parse_generic_detail(detail_html, item)
@@ -1915,24 +2053,21 @@ def collect_generic(
         )
         title_source = first_nonempty(detail.get("title_field"), item.get("list_title"))
         title_hits = extract_terms(title_source, TITLE_TERMS) or extract_terms(combined_text, TITLE_TERMS)
-        groups, tags = group_tags(combined_text)
-        specialty = clip(
-            first_nonempty(
-                detail.get("specialty"),
-                extract_sentences(
-                    combined_text,
-                    ["擅长", "研究方向", "诊治", "治疗", "诊断", "手术", "专长", "复杂", "疑难"],
-                    limit=4,
-                    max_len=520,
-                ),
-            ),
-            520,
+        valid_doctor_record, quality_warnings = generic_record_quality(
+            name,
+            link,
+            target.entry_url,
+            detail,
+            item,
         )
+        priority, groups, tags = classify_generic_record(valid_doctor_record, combined_text, title_hits)
+        specialty = clip(detail.get("specialty"), 520) if valid_doctor_record else ""
         highlights = extract_sentences(combined_text, HIGHLIGHT_TERMS)
 
         warnings: list[str] = []
         if detail_status != 200:
             warnings.append("详情页读取失败")
+        warnings.extend(quality_warnings)
         if not name:
             warnings.append("姓名需人工复核")
         if not department:
@@ -1943,12 +2078,6 @@ def collect_generic(
             warnings.append("详情页正文为空或未识别")
         if int(item.get("score") or 0) < 8:
             warnings.append("通用模板低置信度")
-
-        priority = "普通"
-        if any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups:
-            priority = "高"
-        elif any(term != "医师" for term in title_hits):
-            priority = "中"
 
         rows.append(
             {

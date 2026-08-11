@@ -9,7 +9,15 @@ WORK_DIR = Path(__file__).resolve().parents[1]
 if str(WORK_DIR) not in sys.path:
     sys.path.insert(0, str(WORK_DIR))
 
-from collect_official_doctors_batch import parse_generic_detail  # noqa: E402
+from collect_official_doctors_batch import (  # noqa: E402
+    classify_generic_record,
+    clean_generic_department,
+    discover_generic_detail_links,
+    generic_record_quality,
+    looks_like_person_name,
+    matches_generic_directory_detail_url,
+    parse_generic_detail,
+)
 
 
 class GenericDetailNoiseFilteringTests(unittest.TestCase):
@@ -96,6 +104,105 @@ class GenericDetailNoiseFilteringTests(unittest.TestCase):
         self.assertNotIn("当前位置", detail["profile_text"])
         self.assertNotIn("医疗服务", detail["profile_text"])
         self.assertNotIn("专家介绍", detail["profile_text"])
+
+
+class GenericDirectoryFilteringTests(unittest.TestCase):
+    def test_section_directory_only_accepts_matching_prods_links(self) -> None:
+        entry_url = "https://www.smukqyy.cn/section/364"
+        html = """
+        <div><a href="/prods/364/200">万蕾 主任医师 科室：牙体牙髓病科一室</a></div>
+        <div><a href="/doctor/166">就诊须知 医师 门诊</a></div>
+        <div><a href="/prods/999/200">张三 主任医师 科室：口腔科</a></div>
+        """
+
+        rows = discover_generic_detail_links(html, entry_url, entry_url)
+
+        self.assertEqual([row["source_link"] for row in rows], ["https://www.smukqyy.cn/prods/364/200"])
+        self.assertTrue(matches_generic_directory_detail_url(entry_url, rows[0]["source_link"]))
+        self.assertFalse(matches_generic_directory_detail_url(entry_url, "https://www.smukqyy.cn/doctor/166"))
+        self.assertTrue(
+            matches_generic_directory_detail_url(
+                "https://hospital.example/section/364",
+                "https://hospital.example/doctor/166",
+            )
+        )
+
+    def test_navigation_names_are_blacklisted(self) -> None:
+        for value in ["就诊须知", "住院须知", "联系我们", "门诊时间"]:
+            with self.subTest(value=value):
+                self.assertFalse(looks_like_person_name(value))
+        self.assertTrue(looks_like_person_name("万蕾"))
+
+
+class GenericFieldCleaningTests(unittest.TestCase):
+    def test_department_is_truncated_before_profile_text(self) -> None:
+        raw = "牙体牙髓病科一室 介绍：主任医师，博士，2015年毕业于南方医科大学。"
+        self.assertEqual(clean_generic_department(raw), "牙体牙髓病科一室")
+
+        html = f"""
+        <main><h1>万蕾</h1><p>科室：{raw}</p><p>职称：主任医师</p></main>
+        """
+        detail = parse_generic_detail(html, {})
+        self.assertEqual(detail["department"], "牙体牙髓病科一室")
+        self.assertEqual(detail["department_polluted"], "yes")
+
+    def test_specialty_requires_an_explicit_label(self) -> None:
+        unlabelled = """
+        <main><h1>何敏昭</h1><p>科室：牙体牙髓病科一室</p>
+        <p>擅长龋病、牙髓病及根尖周疾病的诊疗工作。</p></main>
+        """
+        explicit = """
+        <main><h1>万蕾</h1><p>科室：牙体牙髓病科一室</p>
+        <p>擅长：龋病、牙髓病及根尖周疾病的诊疗。</p>
+        <p>介绍：主任医师，长期从事口腔内科临床工作。</p></main>
+        """
+
+        self.assertEqual(parse_generic_detail(unlabelled, {})["specialty"], "")
+        specialty = parse_generic_detail(explicit, {})["specialty"]
+        self.assertIn("龋病", specialty)
+        self.assertNotIn("介绍", specialty)
+        self.assertNotIn("主任医师", specialty)
+
+    def test_navigation_specialty_is_cleared_and_marked(self) -> None:
+        html = """
+        <main><h1>张伟炎</h1><p>科室：牙体牙髓病科一室</p>
+        <p>擅长：你当前所在的位置：首页 &gt; 医疗服务 &gt; 专家介绍</p></main>
+        """
+
+        detail = parse_generic_detail(html, {})
+
+        self.assertEqual(detail["specialty"], "")
+        self.assertEqual(detail["specialty_navigation_polluted"], "yes")
+
+
+class GenericRecordQualityTests(unittest.TestCase):
+    def test_invalid_record_receives_no_priority_or_tags(self) -> None:
+        priority, groups, tags = classify_generic_record(
+            False,
+            "感染 术后 康复 伤口 主任医师",
+            ["主任医师"],
+        )
+
+        self.assertEqual(priority, "")
+        self.assertEqual(groups, [])
+        self.assertEqual(tags, [])
+
+    def test_quality_warnings_cover_all_requested_pollution_types(self) -> None:
+        valid, warnings = generic_record_quality(
+            "就诊须知",
+            "https://www.smukqyy.cn/doctor/166",
+            "https://www.smukqyy.cn/section/364",
+            {
+                "department_polluted": "yes",
+                "specialty_navigation_polluted": "yes",
+            },
+            {"department": "牙体牙髓病科一室 介绍：正文"},
+        )
+
+        self.assertFalse(valid)
+        self.assertIn("非医生页面或姓名异常", warnings)
+        self.assertIn("科室原文含正文，已清洗", warnings)
+        self.assertIn("擅长原文含导航文本，已清空", warnings)
 
 
 if __name__ == "__main__":
