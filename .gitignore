@@ -1,2 +1,15 @@
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+~$*.xlsx
+work/*_trial_payload.json
+work/*_trial_doctors.csv
+work/*_trial_doctors.xlsx
+work/*_trial_report.md
+work/*_official_doctors_preview.png
+work/*_preview.png

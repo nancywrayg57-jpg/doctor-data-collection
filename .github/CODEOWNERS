@@ -1,0 +1,14 @@
+# doctor-data-collection repository ownership gate.
+* @nancywrayg57-jpg
+
+/.github/ @nancywrayg57-jpg
+/.github/workflows/ @nancywrayg57-jpg
+/.github/CODEOWNERS @nancywrayg57-jpg
+/Agent.md @nancywrayg57-jpg
+/codex工程经验.md @nancywrayg57-jpg
+/docs/ @nancywrayg57-jpg
+/docs/agent_prompts/ @nancywrayg57-jpg
+/docs/architecture_decisions/ @nancywrayg57-jpg
+/work/ @nancywrayg57-jpg
+/医生画像仓库/99_资料来源/ @nancywrayg57-jpg
+/医生画像仓库/模板/ @nancywrayg57-jpg

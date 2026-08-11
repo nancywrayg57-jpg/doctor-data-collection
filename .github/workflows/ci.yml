@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  governance-check:
+    name: governance-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify governance baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f Agent.md
+          test -f .gitignore
+          test -f .gitattributes
+          test -f .github/CODEOWNERS
+          test -f .github/workflows/ci.yml
+          grep -Fx '* @nancywrayg57-jpg' .github/CODEOWNERS
+          grep -Fx '/.github/ @nancywrayg57-jpg' .github/CODEOWNERS
+          grep -Fx '/.github/workflows/ @nancywrayg57-jpg' .github/CODEOWNERS
+          grep -Fx '/.github/CODEOWNERS @nancywrayg57-jpg' .github/CODEOWNERS
+          grep -Fx '/docs/architecture_decisions/ @nancywrayg57-jpg' .github/CODEOWNERS
+
+      - name: Block committed secrets, caches, and trial artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          forbidden_files="$(git ls-files | grep -E '(^|/)__pycache__/|\.pyc$|(^|/)\.env(\.|$)|\.log$|\.tmp$|(^|/)~\$.*\.xlsx$|_trial_payload\.json$|_trial_doctors\.csv$|_trial_doctors\.xlsx$|_trial_report\.md$|_official_doctors_preview\.png$|_preview\.png$' || true)"
+          if [ -n "$forbidden_files" ]; then
+            echo "$forbidden_files"
+            exit 1
+          fi
+          if grep -RIqE --binary-files=without-match 'g[h]p_[A-Za-z0-9_]{20,}|github_[p]at_[A-Za-z0-9_]{20,}|s[k]-[A-Za-z0-9_-]{20,}|-----BEGIN .*PRIVATE [K]EY-----' . --exclude-dir=.git; then
+            echo "Potential secret pattern detected."
+            exit 1
+          fi
