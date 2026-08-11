@@ -26,9 +26,11 @@ from collect_official_doctors_batch import (  # noqa: E402
     generic_detail_identity,
     looks_like_person_name,
     matches_generic_directory_detail_url,
+    merge_rows_for_master,
     parse_generic_detail,
     parse_gdskin_detail,
     round_robin_generic_items,
+    validate_gdskin_full_append,
 )
 
 
@@ -329,6 +331,38 @@ class GdskinAspNetExpertTests(unittest.TestCase):
         self.assertIn("主持科研基金项目", detail["profile_text"])
         self.assertIn("发表SCI论文多篇", detail["profile_text"])
 
+    def test_unlabeled_profile_keeps_specialty_blank_and_moves_biography_out_of_title(self) -> None:
+        html = """
+        <html><head><title>李畅畅 医师__医院官网</title></head><body>
+          <div class="labelContent">
+            <p>李畅畅 博士 医师 博士毕业于中山大学，从事性病预防控制近10年。主持科研项目，发表SCI文章4篇。</p>
+          </div>
+        </body></html>
+        """
+
+        detail = parse_gdskin_detail(
+            html,
+            {"name": "李畅畅", "department": "外阴皮肤病/性病科", "list_title": "李畅畅 博士 医师"},
+        )
+
+        self.assertEqual(detail["title_field"], "博士 医师")
+        self.assertEqual(detail["specialty"], "")
+        self.assertIn("博士毕业于中山大学", detail["profile_text"])
+
+    def test_explicit_refresh_replaces_matching_master_row_only(self) -> None:
+        existing = [{"医院": "测试医院", "姓名": "张强", "来源链接": "https://example.test/1", "职称身份原文": "旧职称"}]
+        incoming = [{"医院": "测试医院", "姓名": "张强", "来源链接": "https://example.test/1", "职称身份原文": "新职称"}]
+
+        merged, added, skipped, refreshed, existing_duplicates = merge_rows_for_master(
+            existing,
+            incoming,
+            preserve_existing=True,
+            refresh_incoming=True,
+        )
+
+        self.assertEqual(merged[0]["职称身份原文"], "新职称")
+        self.assertEqual((added, skipped, refreshed, existing_duplicates), (0, 0, 1, 0))
+
     def test_gridview_postback_page_is_materialized(self) -> None:
         html = """
         <form>
@@ -424,7 +458,7 @@ class GdskinAspNetExpertTests(unittest.TestCase):
             patch("collect_official_doctors_batch.fetch", side_effect=fake_fetch),
             patch("collect_official_doctors_batch.time.sleep", return_value=None),
         ):
-            payload = collect_generic(target, "2026-08-11", max_doctors=3, max_pages=5)
+            payload = collect_generic(target, "2026-08-11", max_doctors=None, max_pages=5)
 
         self.assertEqual(payload["meta"]["candidate_membership_count"], 5)
         self.assertEqual(payload["meta"]["unique_candidate_count"], 4)
@@ -434,12 +468,54 @@ class GdskinAspNetExpertTests(unittest.TestCase):
         self.assertEqual(len(payload["entry_reconnaissance"]), 3)
         self.assertEqual([item["unique_detail_count"] for item in payload["entry_reconnaissance"]], [2, 2, 1])
         self.assertEqual(len(payload["cross_entry_duplicates"]), 1)
-        self.assertEqual(len(payload["rows"]), 3)
+        self.assertEqual(len(payload["rows"]), 4)
         self.assertCountEqual(
             payload["meta"]["sample_entry_categories"],
             ["首席专家", "皮肤内科", "激光美肤中心"],
         )
         self.assertEqual({row["采集入口"] for row in payload["rows"]}, set(entry_urls))
+        shared_row = next(row for row in payload["rows"] if row["姓名"] == "张强")
+        self.assertEqual(shared_row["科室_分类页"], "皮肤内科")
+        general_only_row = next(row for row in payload["rows"] if row["姓名"] == "李明")
+        self.assertEqual(general_only_row["科室_分类页"], "")
+        self.assertIn("科室需人工复核", general_only_row["异常提示"])
+
+    def test_full_append_gate_rejects_general_expert_category(self) -> None:
+        counts = {
+            "901": 1,
+            "902": 3,
+            "906": 29,
+            "910": 7,
+            "913": 8,
+            "915": 14,
+            "917": 6,
+            "921": 4,
+            "922": 5,
+            "924": 0,
+        }
+        payload = {
+            "meta": {
+                "unique_candidate_count": 77,
+                "unique_doctor_count": 77,
+                "candidate_membership_count": 77,
+                "cross_entry_duplicate_count": 0,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "excluded_non_doctor_count": 1,
+            },
+            "entry_reconnaissance": [
+                {
+                    "entry_url": f"https://www.gdskin.com/Showclass.aspx?id={entry_id}",
+                    "unique_detail_count": count,
+                    "list_page_count": 2 if entry_id == "906" else 1,
+                }
+                for entry_id, count in counts.items()
+            ],
+            "rows": [{"姓名": "张强", "科室_分类页": "首席专家"}],
+        }
+
+        with self.assertRaisesRegex(RuntimeError, "科室仍为首席/知名专家类目：张强"):
+            validate_gdskin_full_append(payload)
 
 
 class GenericFieldCleaningTests(unittest.TestCase):

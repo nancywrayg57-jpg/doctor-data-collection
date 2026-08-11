@@ -277,6 +277,20 @@ GDSKIN_ENTRY_METADATA = {
         "affiliation": "南方医科大学皮肤病医院·珠江新城医学美容中心",
     },
 }
+GDSKIN_GENERAL_CATEGORIES = {"首席专家", "知名专家"}
+GDSKIN_EXPECTED_ENTRY_COUNTS = {
+    "901": 1,
+    "902": 3,
+    "906": 29,
+    "910": 7,
+    "913": 8,
+    "915": 14,
+    "917": 6,
+    "921": 4,
+    "922": 5,
+    "924": 0,
+}
+GDSKIN_EXPECTED_PAGE_COUNTS = {entry_id: (2 if entry_id == "906" else 1) for entry_id in GDSKIN_ENTRY_METADATA}
 GDSKIN_DOCTOR_ROLE_TERMS = [
     "主任医师",
     "副主任医师",
@@ -744,12 +758,14 @@ def merge_rows_for_master(
     existing_rows: list[dict[str, Any]],
     incoming_rows: list[dict[str, Any]],
     preserve_existing: bool,
-) -> tuple[list[dict[str, Any]], int, int, int]:
+    refresh_incoming: bool = False,
+) -> tuple[list[dict[str, Any]], int, int, int, int]:
     merged: list[dict[str, Any]] = []
     index_by_key: dict[tuple[str, ...], int] = {}
     existing_duplicates = 0
     incoming_added = 0
     incoming_skipped = 0
+    incoming_refreshed = 0
 
     for row in existing_rows:
         normalized = normalize_bottom_row(row)
@@ -766,7 +782,11 @@ def merge_rows_for_master(
         normalized = normalize_bottom_row(row)
         key = doctor_row_key(normalized)
         if key in index_by_key:
-            incoming_skipped += 1
+            if refresh_incoming:
+                merged[index_by_key[key]] = normalized
+                incoming_refreshed += 1
+            else:
+                incoming_skipped += 1
             continue
         index_by_key[key] = len(merged)
         merged.append(normalized)
@@ -774,7 +794,7 @@ def merge_rows_for_master(
 
     for index, row in enumerate(merged, start=1):
         row["序号"] = index
-    return merged, incoming_added, incoming_skipped, existing_duplicates
+    return merged, incoming_added, incoming_skipped, incoming_refreshed, existing_duplicates
 
 
 def build_hospital_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -810,13 +830,15 @@ def build_hospital_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def build_master_payload(
     today: str,
     incoming_payload: dict[str, Any] | None = None,
+    refresh_incoming: bool = False,
 ) -> dict[str, Any]:
     existing_rows, source_label, preserve_existing = load_existing_rows_for_master()
     incoming_rows = incoming_payload["rows"] if incoming_payload else []
-    rows, added, skipped, existing_duplicates = merge_rows_for_master(
+    rows, added, skipped, refreshed, existing_duplicates = merge_rows_for_master(
         existing_rows,
         incoming_rows,
         preserve_existing=preserve_existing,
+        refresh_incoming=refresh_incoming,
     )
 
     category_counter = Counter()
@@ -860,6 +882,7 @@ def build_master_payload(
             "current_batch_rows": len(incoming_rows),
             "new_rows_added": added,
             "duplicate_rows_skipped": skipped,
+            "existing_rows_refreshed": refreshed,
             "existing_duplicate_rows": existing_duplicates,
             "hospital_count": len(hospital_batches),
         },
@@ -1670,6 +1693,16 @@ def parse_gdskin_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
     if name:
         title_field = re.sub(rf"^\s*{re.escape(name)}\s*", "", title_field, count=1)
     title_field = clean_text(title_field).strip("、，,；;_- ")
+    if not first_label_positions and not profile_text:
+        biography_match = re.search(
+            r"(?=(?:(?:博士|硕士|本科)毕业于|毕业于|主要从事|从事|曾赴|曾任|主持|参与|以第一作者|发表))",
+            title_field,
+        )
+        if biography_match and biography_match.start() > 0:
+            candidate_title = clean_text(title_field[: biography_match.start()]).strip("、，,；;_- ")
+            if extract_terms(candidate_title, TITLE_TERMS):
+                profile_text = clean_text(title_field[biography_match.start() :])
+                title_field = candidate_title
 
     department_raw = clean_text(fallback.get("department"))
     department = clean_generic_department(department_raw)
@@ -2416,12 +2449,11 @@ def collect_generic(
         for field in ["name", "list_title", "description"]:
             if row.get(field, "") and len(row.get(field, "")) > len(item.get(field, "")):
                 item[field] = row[field]
-        general_categories = {"首席专家", "知名专家"}
         row_department = row.get("department", "")
         item_department = item.get("department", "")
         if row_department and (
             not item_department
-            or (item_department in general_categories and row_department not in general_categories)
+            or (item_department in GDSKIN_GENERAL_CATEGORIES and row_department not in GDSKIN_GENERAL_CATEGORIES)
             or len(row_department) > len(item_department)
         ):
             item["department"] = row_department
@@ -2437,6 +2469,11 @@ def collect_generic(
             item["list_pages"] = "；".join(pages)
 
     detail_items = round_robin_generic_items(list(by_link.values()), entry_urls, max_doctors)
+    if target.adapter_id == GDSKIN_ADAPTER_ID:
+        for item in detail_items:
+            if item.get("department") in GDSKIN_GENERAL_CATEGORIES:
+                # 首席/知名专家是官网荣誉分组，不是院内科室；官网未给出真实科室时保持空白。
+                item["department"] = ""
 
     existing_links = collect_existing_profile_links()
     rows: list[dict[str, Any]] = []
@@ -2656,6 +2693,63 @@ def collect_generic(
     }
 
 
+def validate_gdskin_full_append(payload: dict[str, Any]) -> None:
+    """Fail before master writes when the owner-audited GDSKIN census has drifted."""
+
+    errors: list[str] = []
+    meta = payload.get("meta", {})
+    expected_total = sum(GDSKIN_EXPECTED_ENTRY_COUNTS.values())
+    if int(meta.get("unique_candidate_count") or 0) != expected_total:
+        errors.append(
+            f"唯一候选预期 {expected_total}，实际 {meta.get('unique_candidate_count', 0)}"
+        )
+    if int(meta.get("unique_doctor_count") or 0) != expected_total:
+        errors.append(f"医生记录预期 {expected_total}，实际 {meta.get('unique_doctor_count', 0)}")
+    if int(meta.get("candidate_membership_count") or 0) != expected_total:
+        errors.append(
+            f"入口候选关系预期 {expected_total}，实际 {meta.get('candidate_membership_count', 0)}"
+        )
+    if int(meta.get("cross_entry_duplicate_count") or 0) != 0:
+        errors.append(f"跨入口重复预期 0，实际 {meta.get('cross_entry_duplicate_count', 0)}")
+    if int(meta.get("category_error_count") or 0) != 0:
+        errors.append(f"列表读取失败 {meta.get('category_error_count', 0)} 条")
+    if int(meta.get("detail_error_count") or 0) != 0:
+        errors.append(f"详情读取失败 {meta.get('detail_error_count', 0)} 条")
+    if int(meta.get("excluded_non_doctor_count") or 0) != 1:
+        errors.append(f"非医生排除预期 1，实际 {meta.get('excluded_non_doctor_count', 0)}")
+
+    reconnaissance_by_id = {
+        entry_id: item
+        for item in payload.get("entry_reconnaissance", [])
+        if (entry_id := gdskin_entry_id(str(item.get("entry_url") or "")))
+    }
+    for entry_id, expected_count in GDSKIN_EXPECTED_ENTRY_COUNTS.items():
+        item = reconnaissance_by_id.get(entry_id)
+        if item is None:
+            errors.append(f"入口 {entry_id} 缺少普查记录")
+            continue
+        actual_count = int(item.get("unique_detail_count") or 0)
+        if actual_count != expected_count:
+            errors.append(f"入口 {entry_id} 唯一详情预期 {expected_count}，实际 {actual_count}")
+        expected_pages = GDSKIN_EXPECTED_PAGE_COUNTS[entry_id]
+        actual_pages = int(item.get("list_page_count") or 0)
+        if actual_pages != expected_pages:
+            errors.append(f"入口 {entry_id} 列表页预期 {expected_pages}，实际 {actual_pages}")
+
+    general_department_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in payload.get("rows", [])
+        if str(row.get("科室_分类页") or "") in GDSKIN_GENERAL_CATEGORIES
+    ]
+    if general_department_rows:
+        errors.append(
+            "科室仍为首席/知名专家类目：" + "、".join(general_department_rows)
+        )
+
+    if errors:
+        raise RuntimeError("GDSKIN 全量写入前门禁失败：" + "；".join(errors))
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=BASE_HEADERS)
@@ -2865,7 +2959,7 @@ def write_master_report(path: Path, payload: dict[str, Any], csv_path: Path, xls
 
 总底表当前包含 {meta['hospital_count']} 家医院、{meta['unique_doctor_count']} 位医生。后续新增医院医生将继续写入同一张总底表，不再默认生成单院 Excel/CSV。
 
-本次批次医院：{meta.get('current_batch_hospital') or '无，本次仅重建总表'}；本次批次原始医生数 {meta.get('current_batch_rows', 0)}；新增写入 {meta.get('new_rows_added', 0)}；重复跳过 {meta.get('duplicate_rows_skipped', 0)}；初始化合并时识别并折叠既有重复 {meta.get('existing_duplicate_rows', 0)}。
+本次批次医院：{meta.get('current_batch_hospital') or '无，本次仅重建总表'}；本次批次原始医生数 {meta.get('current_batch_rows', 0)}；新增写入 {meta.get('new_rows_added', 0)}；重复跳过 {meta.get('duplicate_rows_skipped', 0)}；显式刷新既有记录 {meta.get('existing_rows_refreshed', 0)}；初始化合并时识别并折叠既有重复 {meta.get('existing_duplicate_rows', 0)}。
 
 ## 输出文件
 
@@ -2976,6 +3070,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--trial-only", action="store_true", help="仅试采并输出临时底表/报告，不追加统一总底表；未指定 --max-doctors 时默认试采 10 位")
     parser.add_argument("--force-generic", action="store_true", help="即使已有专用适配器，也强制使用通用模板试采")
     parser.add_argument("--allow-generic-append", action="store_true", help="允许通用模板结果追加统一总底表；建议先完成 --trial-only 人工复核")
+    parser.add_argument(
+        "--refresh-existing-hospital",
+        action="store_true",
+        help="仅在显式指定医院并通过追加门禁时，用本轮官网结果刷新同来源既有记录。",
+    )
     parser.add_argument("--no-xlsx", action="store_true", help="只生成 JSON/CSV/报告，不生成 Excel")
     parser.add_argument("--single-output", action="store_true", help="保留旧模式：按单家医院生成单独底表")
     parser.add_argument("--rebuild-master-only", action="store_true", help="不联网采集，仅用已有底表重建总底表")
@@ -2993,6 +3092,9 @@ def main() -> None:
         targets = confirmed_a_targets(ledger_rows, include_generic=True)
         print(json.dumps([target.__dict__ for target in targets], ensure_ascii=False, indent=2))
         return
+
+    if args.refresh_existing_hospital and (not args.hospital or not args.allow_generic_append):
+        raise RuntimeError("刷新既有医院记录必须同时指定 --hospital 和 --allow-generic-append。")
 
     if args.rebuild_master_only:
         payload = build_master_payload(args.today)
@@ -3113,6 +3215,9 @@ def main() -> None:
             f"{'、'.join(covered_departments) or '无'}"
         )
 
+    if target.adapter_id == GDSKIN_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_gdskin_full_append(payload)
+
     safe_name = safe_file_part(target.hospital)
     json_path = WORK_DIR / f"{safe_name}_official_doctors_payload.json"
     preview_path = WORK_DIR / f"{safe_name}_official_doctors_preview.png"
@@ -3189,7 +3294,11 @@ def main() -> None:
         return
 
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    master_payload = build_master_payload(args.today, incoming_payload=payload)
+    master_payload = build_master_payload(
+        args.today,
+        incoming_payload=payload,
+        refresh_incoming=args.refresh_existing_hospital,
+    )
     MASTER_JSON_PATH.write_text(json.dumps(master_payload, ensure_ascii=False, indent=2), encoding="utf-8")
     write_csv(MASTER_CSV_PATH, master_payload["rows"])
 
@@ -3205,6 +3314,7 @@ def main() -> None:
                 "batch_rows": payload["meta"]["unique_doctor_count"],
                 "new_rows_added": master_payload["meta"]["new_rows_added"],
                 "duplicate_rows_skipped": master_payload["meta"]["duplicate_rows_skipped"],
+                "existing_rows_refreshed": master_payload["meta"]["existing_rows_refreshed"],
                 "master_rows": master_payload["meta"]["unique_doctor_count"],
                 "detail_errors": payload["meta"]["detail_error_count"],
                 "csv": str(MASTER_CSV_PATH),

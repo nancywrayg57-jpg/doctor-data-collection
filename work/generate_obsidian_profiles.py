@@ -13,7 +13,7 @@ from typing import Iterable
 from xml.etree import ElementTree as ET
 
 
-ROOT = Path(r"D:\workspace\信息收集整理")
+ROOT = Path(__file__).resolve().parents[1]
 VAULT = ROOT / "医生画像仓库"
 SOURCE_DIR = VAULT / "99_资料来源"
 PROFILE_ROOT = VAULT / "01_试点医院"
@@ -124,7 +124,7 @@ def title(row: dict[str, str]) -> str:
 
 
 def specialty(row: dict[str, str]) -> str:
-    return first_value(row, "简介/擅长", "擅长诊疗方向摘录", "列表简介")
+    return first_value(row, "简介/擅长", "擅长诊疗方向摘录")
 
 
 def row_number(row: dict[str, str], fallback: int) -> str:
@@ -277,6 +277,17 @@ def validate_source_rows(rows: list[dict[str, str]]) -> list[str]:
         return ["总底表没有可读取记录"]
     fields = set(rows[0].keys())
     return [field for field in CORE_FIELDS if field not in fields]
+
+
+def select_hospital_rows(rows: list[dict[str, str]], hospitals: Iterable[str]) -> list[dict[str, str]]:
+    requested = {value.strip() for value in hospitals if value.strip()}
+    if not requested:
+        return rows
+    available = {str(row.get("医院") or "").strip() for row in rows}
+    missing = sorted(requested - available)
+    if missing:
+        raise ValueError("总底表中不存在指定医院：" + "、".join(missing))
+    return [row for row in rows if str(row.get("医院") or "").strip() in requested]
 
 
 def extract_existing_sources(hospital_dir: Path) -> dict[str, Path]:
@@ -488,8 +499,6 @@ def build_profile(row: dict[str, str], generated_at: str) -> str:
     )
     if specialty_text:
         lines.append(clip(specialty_text, 1100))
-    elif detail_excerpt:
-        lines.append(clip(detail_excerpt, 900))
 
     for title_text, values in profile_fact_sections.items():
         if values:
@@ -1343,6 +1352,7 @@ def generate_profiles(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="从统一总底表生成 Obsidian 医生画像 Markdown。")
     parser.add_argument("--source", help="统一总底表路径，支持 .csv 或 .xlsx；默认优先读取 CSV。")
+    parser.add_argument("--hospital", action="append", default=[], help="只处理指定医院，可重复传入。")
     parser.add_argument("--output-root", default=str(PROFILE_ROOT), help="Obsidian 医生画像输出根目录。")
     parser.add_argument("--report", default=str(DEFAULT_REPORT), help="全量画像生成报告路径。")
     parser.add_argument("--supplement-report", default=str(DEFAULT_SUPPLEMENT_REPORT), help="补充生成报告路径。")
@@ -1375,6 +1385,10 @@ def main() -> None:
     args = parse_args()
     source_path = choose_source(args.source)
     rows = read_master_rows(source_path)
+    try:
+        rows = select_hospital_rows(rows, args.hospital)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     missing_fields = validate_source_rows(rows)
     if missing_fields:
         raise SystemExit("总底表缺少核心字段：" + "、".join(missing_fields))

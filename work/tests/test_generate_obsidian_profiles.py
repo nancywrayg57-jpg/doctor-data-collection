@@ -9,7 +9,11 @@ WORK_DIR = Path(__file__).resolve().parents[1]
 if str(WORK_DIR) not in sys.path:
     sys.path.insert(0, str(WORK_DIR))
 
-from generate_obsidian_profiles import build_profile, extract_profile_fact_sections  # noqa: E402
+from generate_obsidian_profiles import (  # noqa: E402
+    build_profile,
+    extract_profile_fact_sections,
+    select_hospital_rows,
+)
 
 
 class ProfileFactSectionTests(unittest.TestCase):
@@ -52,6 +56,36 @@ class ProfileFactSectionTests(unittest.TestCase):
         self.assertIn("毕业于南方医科大学", profile)
         self.assertIn("主持省级科研基金项目2项", profile)
         self.assertIn("发表SCI论文5篇", profile)
+
+    def test_hospital_filter_limits_single_issue_generation(self) -> None:
+        rows = [
+            {"医院": "南方医科大学皮肤病医院", "姓名": "测试医生"},
+            {"医院": "其他医院", "姓名": "其他医生"},
+        ]
+
+        selected = select_hospital_rows(rows, ["南方医科大学皮肤病医院"])
+
+        self.assertEqual(selected, [rows[0]])
+
+    def test_unlabeled_specialty_does_not_fall_back_to_list_title_or_biography(self) -> None:
+        profile = build_profile(
+            {
+                "医院": "南方医科大学皮肤病医院",
+                "姓名": "测试医生",
+                "科室_分类页": "外阴皮肤病/性病科",
+                "职称身份原文": "主治医师",
+                "擅长诊疗方向摘录": "",
+                "列表简介": "测试医生 主治医师",
+                "详情正文摘录": "毕业于南方医科大学，主持科研项目1项。",
+                "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=5001",
+                "采集日期": "2026-08-11",
+                "复核状态": "待人工复核",
+            },
+            "2026-08-11",
+        )
+
+        specialty_block = profile.split("## 简介/擅长", 1)[1].split("## 教育与进修经历", 1)[0]
+        self.assertEqual(specialty_block.strip(), "")
 
 
 if __name__ == "__main__":
