@@ -734,6 +734,13 @@ def build_hospital_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for hospital, hospital_rows in sorted(grouped.items()):
         dates = sorted({clean_text(str(row.get("采集日期") or "")) for row in hospital_rows if row.get("采集日期")})
         review_count = sum(1 for row in hospital_rows if clean_text(str(row.get("复核状态") or "")) != "已复核")
+        entry_urls = list(
+            dict.fromkeys(
+                clean_text(str(row.get("采集入口") or ""))
+                for row in hospital_rows
+                if clean_text(str(row.get("采集入口") or ""))
+            )
+        )
         batches.append(
             {
                 "医院": hospital,
@@ -741,7 +748,7 @@ def build_hospital_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "采集日期": "、".join(dates),
                 "待复核数": review_count,
                 "已建画像数": sum(1 for row in hospital_rows if clean_text(str(row.get("已建画像") or "")) == "是"),
-                "采集入口": first_nonempty(*(str(row.get("采集入口") or "") for row in hospital_rows)),
+                "采集入口": "、".join(entry_urls),
             }
         )
     return batches

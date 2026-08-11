@@ -1,7 +1,7 @@
 # Codex 下一步提示词
 
 > 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。Codex 新会话启动时，在读取 `Agent.md`、路线图、需求文档和架构决策后，必须读取本文件。
-> 当前状态：`READY`。Claude owner 已在 PR #6 裁决台账序号 10 的入口范围，并下发海珠广场院区 TRIAL-2。
+> 当前状态：`READY`。Claude owner 已通过海珠广场院区 TRIAL-2 审计，并下发 `FULL_APPEND_AND_OBSIDIAN`。
 
 ## GitHub 身份
 
@@ -18,23 +18,24 @@
 
 ```text
 Status: READY
-Phase: TRIAL
+Phase: FULL_APPEND_AND_OBSIDIAN
 LedgerSequence: 10
 Hospital: 南方医科大学口腔医院(海珠广场院区)
 City: 广州市
 OfficialHomeURL: https://www.smukqyy.cn/home
 DoctorDirectoryURL: https://www.smukqyy.cn/section/341 https://www.smukqyy.cn/section/342 https://www.smukqyy.cn/section/434 https://www.smukqyy.cn/section/343 https://www.smukqyy.cn/section/385 https://www.smukqyy.cn/section/384 https://www.smukqyy.cn/section/386 https://www.smukqyy.cn/section/431 https://www.smukqyy.cn/section/504
-ReviewStatus: 确认可采集（入口已由 owner 修正，台账原 /section/364 属总院，留痕待管理员更新台账）
-Difficulty: A-优先自动采集
-Task: 对以上 9 个海珠广场院区官方科室入口试采 10 位医生（须覆盖至少 3 个不同科室），不写入统一总底表；输出试采材料推送本 PR 后停止等待 Claude 审计。
+AuditDecision: 通过
+AuditConditions: ①全量预期约 95 位（95 原始卡片去重后为准），若实际唯一医生数偏离该量级须在回报中说明；②「已清洗」「低置信度」等异常提示原样入库进检查清单；③无显式擅长标签保持留空；④范围严格限于以上 9 入口，禁止纳入总院/其他院区。
+Task: 全量采集并追加统一总底表（--allow-generic-append），检查 XLSX/CSV/更新报告，生成本院 Obsidian 画像并核验索引，清理试采文件，将完整结果提交推送 PR #6 并请求画像审计后停止。
+ObsidianRoot: D:\workspace\信息收集整理\医生画像仓库\01_试点医院
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/5
 ```
 
 执行边界：
 
 1. 只执行 PR #6 owner 评论修正后的当前医院及 9 个海珠广场院区官方科室入口；不扩大到总院、番禺、盘福或沙河院区。
-2. 本轮只运行 `TRIAL-2`，试采 10 位且覆盖至少 3 个科室；不得使用 `--allow-generic-append`，不得写入统一总底表。
-3. 试采材料提交 PR 后停止，等待 Claude owner 在 PR 评论区给出审计结论；通过后由 owner 下发 `FULL_APPEND_AND_OBSIDIAN`。
+2. 本轮执行 `FULL_APPEND_AND_OBSIDIAN`，允许使用 `--allow-generic-append`；全量候选、异常提示和科室覆盖必须按 owner 四项条件核验。
+3. 正式追加后立即生成缺失 Obsidian 画像并核验索引；完整结果提交推送 PR #6 后请求画像审计。
 4. Claude 审计通过且本 PR 已合并关闭前，不得领取下一个 Issue。
 
 ## Claude 下发格式

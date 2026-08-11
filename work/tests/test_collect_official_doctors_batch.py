@@ -11,6 +11,7 @@ if str(WORK_DIR) not in sys.path:
 
 from collect_official_doctors_batch import (  # noqa: E402
     HospitalTarget,
+    build_hospital_batches,
     classify_generic_record,
     clean_generic_department,
     discover_generic_detail_links,
@@ -110,6 +111,29 @@ class GenericDetailNoiseFilteringTests(unittest.TestCase):
 
 
 class GenericDirectoryFilteringTests(unittest.TestCase):
+    def test_hospital_batch_keeps_all_unique_collection_entries(self) -> None:
+        rows = [
+            {
+                "医院": "南方医科大学口腔医院(海珠广场院区)",
+                "采集入口": "https://www.smukqyy.cn/section/341",
+            },
+            {
+                "医院": "南方医科大学口腔医院(海珠广场院区)",
+                "采集入口": "https://www.smukqyy.cn/section/342",
+            },
+            {
+                "医院": "南方医科大学口腔医院(海珠广场院区)",
+                "采集入口": "https://www.smukqyy.cn/section/341",
+            },
+        ]
+
+        batches = build_hospital_batches(rows)
+
+        self.assertEqual(
+            batches[0]["采集入口"],
+            "https://www.smukqyy.cn/section/341、https://www.smukqyy.cn/section/342",
+        )
+
     def test_section_directory_only_accepts_matching_prods_links(self) -> None:
         entry_url = "https://www.smukqyy.cn/section/364"
         html = """

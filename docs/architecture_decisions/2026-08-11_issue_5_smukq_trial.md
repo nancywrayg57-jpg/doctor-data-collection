@@ -142,60 +142,90 @@ TRIAL-2 最终结果：
 - 总底表仍为 5 家医院、1993 位医生、37 条异常提示；目标医院 0 条。XLSX、CSV 和更新报告的 SHA-256 与修改时间均未变化，`master_updated=false`。
 - 本轮使用 `--no-xlsx`，只更新试采 CSV、payload 和报告，没有生成试采 XLSX。
 
+## Claude TRIAL-2 通过与完整执行
+
+Claude owner 在 PR #6 评论 `https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/6#issuecomment-5252272992` 对 TRIAL-2 给出明确结论 `通过`，并下发 `FULL_APPEND_AND_OBSIDIAN`。完整执行范围固定为海珠广场院区 9 个入口，预期约 95 位；不得纳入总院或其他院区。
+
+2026-08-11 正式追加一次完成：
+
+- 9 个入口全部成功，候选数分别为 `12、12、11、10、12、12、12、7、7`，合计 95 条。
+- `mode=master_append`，批次 95 条，新增 95 条，重复跳过 0 条，详情失败 0 条。
+- 目标医院 95 个来源链接全部唯一，均匹配 `https://www.smukqyy.cn/prods/<入口ID>/<数字>`，采集入口 ID 与来源 ID 错配 0 条。
+- 科室覆盖 9 个，数量与各入口候选数完全一致；非医生页、异常姓名和其他院区来源均为 0。
+- 总底表由 5 家、1993 位增加为 6 家、2088 位；全表异常提示记录由 37 条增加为 108 条。
+- 本院异常提示不为空 71 条：63 条 `科室原文含正文，已清洗`，4 条同时含 `已清洗` 与 `通用模板低置信度`，4 条仅 `通用模板低置信度`。这些提示已原样写入总底表和本院索引。
+- 本院 `擅长诊疗方向摘录` 56 条有显式标签内容，39 条无显式标签并保持空白；没有回填或推断。
+- XLSX、CSV 和更新报告均已同步更新；XLSX 共 2089 行（含表头），`复核清单` 109 行（含表头），公式错误扫描 0。
+
+正式追加后发现更新报告对多入口医院只取首个非空入口，导致本院 9 入口被压缩显示为单个入口。根因位于 `build_hospital_batches()` 的 `first_nonempty()` 聚合；已改为按医院保留全部唯一入口并增加回归测试。没有重跑网络采集，也没有重复追加数据。
+
+## Obsidian 画像与清理结果
+
+使用 `--generate-missing-only`，并额外跳过其余 4 家既有医院；默认跳过中山大学附属第五医院，因此本轮只生成目标医院：
+
+- 新增医生画像 95 份，重建 `_索引.md` 1 份，跳过 0 条。
+- 95 个画像来源链接唯一，并与本院总底表 95 个来源链接逐一相等；缺失 0、额外 0、非官方来源 0。
+- `_索引.md` 含 95 个唯一画像链接，全部对应现存 Markdown；异常提示不为空统计为 71，提示与来源逐行对应。
+- 目标目录共 96 个 Markdown（95 份画像 + 1 份索引）；全仓画像根目录 Markdown 由 1960 增加到 2056。
+- 画像文件均带自动生成标记，无文件名覆盖、异常姓名、非医生页或核心字段缺失。
+
+画像和索引核验完成后，已精确删除 3 个试采临时文件：`*_trial_doctors.csv`、`*_trial_payload.json`、`*_trial_report.md`。入口台账、总底表 XLSX/CSV、更新报告、正式 payload、画像和索引均保留。
+
 ## 当前结论与下一步
 
-TRIAL-2 已完成并满足 owner 的入口归属、跨科室覆盖和字段质量门禁。下一步是把本轮代码、测试、提示词、试采工件和本 ADR 提交推送到原分支及 PR #6，请 Claude 复审。只有 owner 明确通过并下发 `FULL_APPEND_AND_OBSIDIAN` 后，才能正式追加总底表和生成画像。
+本院 `FULL_APPEND_AND_OBSIDIAN` 已完成。下一步只剩同一 Issue 的交付门禁：提交全部正式工件，使用 GitHub Git Data API 推送原分支，核对本地/远端 tree SHA；推送成功后启用 `Doctor data single-Issue monitor`，并在 PR #6 请求 Claude 最终画像审计。
 
-在 Claude 最终画像审计明确通过且本 PR 已合并关闭前，不得领取下一个 Issue。
-
-`Doctor data single-Issue monitor` 继续暂停。只有同一医院完成全量追加、总底表验证、Obsidian 画像生成、索引核验，并把结果提交推送后才允许启用；启用后仍须等 Claude 最终画像审计通过且 PR 合并关闭，才能实际领取下一个 Issue。
-
-`Doctor data PR 6 audit monitor` 继续每 4 分钟检查 PR #6 的 Claude 评论、Review 和状态，不领取其他 Issue。
+`Doctor data single-Issue monitor` 启用后仍不得领取下一 Issue。只有 Claude 最终画像审计明确通过，且 PR #6 已合并并关闭，才允许进入下一 Issue。`Doctor data PR 6 audit monitor` 保持每 4 分钟检查本 PR，不检查或领取其他 Issue。
 
 ## Git 交付说明
 
-1. 本地提交为 `dc36210ecd06e7ab9296fe9c36d50fea7e3b7728`。
-2. 两次 Git HTTPS 推送均卡在 `git-remote-https` 传输阶段；远端 API 当时确认分支尚不存在，遗留进程已精确终止，没有重复分支或部分推送。
-3. 后续使用 GitHub Git Data API创建远端提交和分支；远端提交为 `58c96e812113c2179c70817331092f53cd2b36f2`。
-4. 远端 tree SHA 与本地提交 tree SHA 均为 `c966e8d8accea57913ee401e024e1be298fe50ea`，5 个交付文件内容完全一致。
-5. 后续如需返修，应先重新核验 Git HTTPS 传输状态；不得在不确认远端分支状态时重复推送。
+1. TRIAL-2 远端 HEAD 为 `30de8e9ffbdaeba637d573bcdfce4dc5475f499a`，远端 tree 为 `41b5538b27b2412990420418eb185f5e095bcf94`。
+2. 此前普通 Git HTTPS 推送在 `git-remote-https` 传输阶段卡住；本轮继续使用 GitHub Git Data API，不重复尝试普通 HTTPS push。
+3. 正式交付提交必须动态读取提交差异，上传新增/修改 blob，并以当前远端 HEAD 为 parent 创建提交；远端 ref 更新后必须验证 tree SHA 与本地一致。
 
 ## 工件
 
 - `D:\workspace\信息收集整理\work\collect_official_doctors_batch.py`
 - `D:\workspace\信息收集整理\work\tests\test_collect_official_doctors_batch.py`
-- `D:\workspace\信息收集整理\work\南方医科大学口腔医院(海珠广场院区)_trial_doctors.csv`
-- `D:\workspace\信息收集整理\work\南方医科大学口腔医院(海珠广场院区)_trial_payload.json`
-- `D:\workspace\信息收集整理\work\南方医科大学口腔医院(海珠广场院区)_trial_report.md`
+- `D:\workspace\信息收集整理\work\南方医科大学口腔医院(海珠广场院区)_official_doctors_payload.json`
+- `D:\workspace\信息收集整理\work\珠三角三甲医院_医生画像自动采集总底表_payload.json`
+- `D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx`
+- `D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.csv`
+- `D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表_更新报告.md`
+- `D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_Obsidian缺失画像补充生成报告.md`
+- `D:\workspace\信息收集整理\医生画像仓库\01_试点医院\南方医科大学口腔医院(海珠广场院区)`
 - `D:\workspace\信息收集整理\docs\agent_prompts\codex_next_prompt.md`
 
 <Handoff_State>
-Target: 南方医科大学口腔医院(海珠广场院区) TRIAL-2
+Target: Issue #5 南方医科大学口腔医院(海珠广场院区)
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/5
-Phase: TRIAL
+GitHubPR: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/6
+Phase: FULL_APPEND_AND_OBSIDIAN
 Completed:
-- 已按 Claude owner 裁决把范围修正为海珠广场院区 9 个官方科室入口
-- 已扩展采集器支持多入口、轮询抽样、科室门禁和完整性门禁
-- 已生成 TRIAL-2 的 10 条试采 CSV、payload 和报告
-- 已执行 12 项单元测试并全部通过
-- 已确认总底表未写入
+- Claude TRIAL-2 审计已通过
+- 已从 9 个海珠广场院区入口正式追加 95 位医生
+- 已核验总底表、XLSX、CSV、更新报告、异常提示和入口范围
+- 已生成 95 份本院画像和 1 份索引，来源与索引均逐一核验
+- 已清理 3 个试采临时文件并保留全部正式资产
+- 已执行 13 项采集器单元测试并全部通过
 CurrentFacts:
-- 9 个入口共发现 95 个同目录官方医生详情 URL，入口读取错误 0
-- 试采恰好 10 条，覆盖 9 个科室，非医生页 0，详情失败 0
-- 擅长导航或介绍正文污染 0；8 条保留科室原文已清洗告警
-- 固定提示词为海珠广场院区 9 入口 TRIAL-2
-- 总底表仍为 5 家、1993 位、37 条异常，目标医院 0 条
+- 总底表为 6 家、2088 位、108 条异常；本院 95 位、71 条异常
+- 本院 95 个来源唯一，9 科室全覆盖，非医生页/入口错配/详情失败均为 0
+- 本院画像 95 份、索引链接 95 个、跳过 0、文件名覆盖 0
+- single-Issue monitor 在正式工件提交推送前仍须保持 PAUSED
 Next:
-- 将 TRIAL-2 提交推送同一 PR #6，请 Claude 复审
-- 取得 FULL_APPEND_AND_OBSIDIAN 指令后完成全量追加和画像提交推送
-- 审计通过且 PR 合并关闭前不得领取下一个 Issue
+- 提交并通过 Git Data API 推送原 PR #6 分支，验证本地/远端 tree SHA
+- 推送成功后启用 single-Issue monitor，并在 PR #6 请求 Claude 最终画像审计
+- 每 4 分钟轮询审计与 PR 状态；审计通过且 PR 合并关闭前不得领取下一 Issue
 Constraints:
 - 仅医院官方公开渠道
-- 当前未写入总底表
-- 当前禁止使用 --allow-generic-append
-- 只处理海珠广场院区，不扩大到其他院区
+- 只处理海珠广场院区 9 入口，不纳入总院或其他院区
+- 不并行领取或执行其他 Issue
+- 不自行批准或合并 PR
 Artifacts:
-- work\南方医科大学口腔医院(海珠广场院区)_trial_doctors.csv
-- work\南方医科大学口腔医院(海珠广场院区)_trial_payload.json
-- work\南方医科大学口腔医院(海珠广场院区)_trial_report.md
+- work\南方医科大学口腔医院(海珠广场院区)_official_doctors_payload.json
+- 医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
+- 医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.csv
+- 医生画像仓库\99_资料来源\珠三角三甲医院_Obsidian缺失画像补充生成报告.md
+- 医生画像仓库\01_试点医院\南方医科大学口腔医院(海珠广场院区)
 </Handoff_State>
