@@ -15,6 +15,7 @@
 - 台账人工复核：确认可采集
 - 适配器：`generic_official_template`
 - 工作分支：`codex/mhrj/issue-5-smukq-trial`
+- 试采 PR：`https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/6`
 
 台账名称、两条 URL、采集难度和人工复核状态均与 Issue 一致；试采前统一总底表中该院记录数为 0。
 
@@ -65,9 +66,19 @@ python .\work\collect_official_doctors_batch.py --hospital "南方医科大学�
 
 ## 当前结论与下一步
 
-当前样本存在明确非医生页面混入和集中字段污染，不建议在 Claude 审计前正式追加。已保留原始试采材料，等待 Claude owner 在 PR 评论区给出 `通过`、`有条件通过` 或 `不通过` 结论及最小修正要求。
+当前样本存在明确非医生页面混入和集中字段污染，不建议在 Claude 审计前正式追加。试采材料已提交 PR #6，等待 Claude owner 在 PR 评论区给出 `通过`、`有条件通过` 或 `不通过` 结论及最小修正要求。
 
 在 Claude 审计明确通过且本 PR 已合并关闭前，不得领取下一个 Issue。
+
+`Doctor data single-Issue monitor` 已按管理员最新口径暂停；该自动化只允许在 Codex 没有执行中 Issue、没有待处理 PR并等待 Claude 下发新 Issue 时启用。
+
+## Git 交付说明
+
+1. 本地提交为 `dc36210ecd06e7ab9296fe9c36d50fea7e3b7728`。
+2. 两次 Git HTTPS 推送均卡在 `git-remote-https` 传输阶段；远端 API 当时确认分支尚不存在，遗留进程已精确终止，没有重复分支或部分推送。
+3. 后续使用 GitHub Git Data API创建远端提交和分支；远端提交为 `58c96e812113c2179c70817331092f53cd2b36f2`。
+4. 远端 tree SHA 与本地提交 tree SHA 均为 `c966e8d8accea57913ee401e024e1be298fe50ea`，5 个交付文件内容完全一致。
+5. 后续如需返修，应先重新核验 Git HTTPS 传输状态；不得在不确认远端分支状态时重复推送。
 
 ## 工件
 
@@ -89,7 +100,7 @@ CurrentFacts:
 - 8 条医生记录中 7 条科室字段混入简介
 - 详情页失败 0 条，自动异常提示 1 条但实际问题更多
 Next:
-- 创建试采 PR并等待 Claude 在 PR 评论区审计
+- 已创建 PR #6，等待 Claude 在 PR 评论区审计
 - 审计通过且 PR 合并关闭前不得领取下一个 Issue
 Constraints:
 - 仅医院官方公开渠道
