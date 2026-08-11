@@ -349,6 +349,10 @@ GENERIC_NAME_BLOCK_TERMS = [
     "公告",
     "新闻",
     "患者",
+    "就诊须知",
+    "住院须知",
+    "联系我们",
+    "门诊时间",
 ]
 
 PROFILE_NOISE_TAGS = {
@@ -407,6 +411,21 @@ class HospitalTarget:
     difficulty: str
     review: str
     adapter_id: str
+    entry_urls: tuple[str, ...] = ()
+    ledger_entry_url: str = ""
+
+
+def effective_entry_urls(target: HospitalTarget) -> list[str]:
+    values = target.entry_urls or (target.entry_url,)
+    unique: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        cleaned = clean_text(value)
+        key = canonical_url(cleaned)
+        if cleaned and key not in seen:
+            seen.add(key)
+            unique.append(cleaned)
+    return unique
 
 
 def clean_text(value: str | None) -> str:
@@ -543,6 +562,33 @@ def infer_department(text: str) -> str:
     ]
     candidates = [candidate for candidate in candidates if candidate]
     return candidates[-1] if candidates else ""
+
+
+def clean_generic_department(value: str | None) -> str:
+    text = clean_text(value)
+    if not text:
+        return ""
+    text = re.sub(r"^(?:科室|所在科室|出诊科室|专业|专科)\s*[:：]\s*", "", text)
+    stop_pattern = (
+        r"\s*(?:介绍|简介|个人简介|职称|职务|专业擅长|擅长|医疗专长|诊疗专长|"
+        r"技术专长|业务专长|专长|研究方向)\s*[:：]"
+        r"|\s*(?=(?:19|20)\d{2}年)"
+        r"|[。！？；;]"
+    )
+    text = clean_text(re.split(stop_pattern, text, maxsplit=1)[0])
+    match = re.match(
+        r"^[\u4e00-\u9fff、]{1,28}?(?:科|中心|病房|门诊)(?:[一二三四五六七八九十\d]+室)?",
+        text,
+    )
+    if match:
+        return clean_text(match.group(0))
+    return text if len(text) <= 30 else ""
+
+
+def has_department_text_pollution(raw_value: str | None, cleaned_value: str | None) -> bool:
+    raw = clean_text(raw_value)
+    cleaned = clean_text(cleaned_value)
+    return bool(raw and cleaned and raw != cleaned)
 
 
 def read_ledger(path: Path) -> list[dict[str, Any]]:
@@ -688,6 +734,13 @@ def build_hospital_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for hospital, hospital_rows in sorted(grouped.items()):
         dates = sorted({clean_text(str(row.get("采集日期") or "")) for row in hospital_rows if row.get("采集日期")})
         review_count = sum(1 for row in hospital_rows if clean_text(str(row.get("复核状态") or "")) != "已复核")
+        entry_urls = list(
+            dict.fromkeys(
+                clean_text(str(row.get("采集入口") or ""))
+                for row in hospital_rows
+                if clean_text(str(row.get("采集入口") or ""))
+            )
+        )
         batches.append(
             {
                 "医院": hospital,
@@ -695,7 +748,7 @@ def build_hospital_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "采集日期": "、".join(dates),
                 "待复核数": review_count,
                 "已建画像数": sum(1 for row in hospital_rows if clean_text(str(row.get("已建画像") or "")) == "是"),
-                "采集入口": first_nonempty(*(str(row.get("采集入口") or "") for row in hospital_rows)),
+                "采集入口": "、".join(entry_urls),
             }
         )
     return batches
@@ -873,7 +926,14 @@ def strip_profile_navigation_text(value: str | None) -> str:
     separator = r"(?:/|>|＞|»|›|→)"
     label = r"(?:姓名|科室|所在科室|职称|职务|专业擅长|擅长|专长|简介|个人简介|一、|二、)"
     breadcrumb_patterns = [
+        (
+            r"^.*?(?:你)?当前所在的位置\s*[:：]?\s*.*?"
+            r"(?:专家|医师)信息\s*[^。！？；;\n]{0,160}?"
+            r"科室\s*[:：]\s*[\u4e00-\u9fff、（）()]{1,30}?"
+            r"(?:科(?:一室|二室)?|中心)\s*"
+        ),
         rf"(?:临床专家\s*)?面包屑\s*首页\s*(?:{separator}\s*[^/＞>»›→]{{1,60}}?\s*){{1,10}}(?={label}|$)",
+        rf"(?:你)?当前所在的位置\s*[:：]?\s*[^/＞>»›→]{{0,60}}\s*(?:{separator}\s*[^/＞>»›→]{{1,60}}?\s*){{1,10}}(?={label}|$)",
         rf"当前位置\s*[:：]?\s*首页\s*(?:{separator}\s*[^/＞>»›→]{{1,60}}?\s*){{1,10}}(?={label}|$)",
     ]
     for pattern in breadcrumb_patterns:
@@ -881,6 +941,24 @@ def strip_profile_navigation_text(value: str | None) -> str:
     for phrase in PROFILE_INLINE_NOISE_PHRASES:
         text = text.replace(phrase, " ")
     return clean_text(text)
+
+
+def contains_navigation_text(value: str | None) -> bool:
+    text = clean_text(value)
+    if not text:
+        return False
+    return any(
+        marker in text
+        for marker in ["你当前所在的位置", "当前所在的位置", "当前位置", "面包屑", "首页 >", "首页＞"]
+    )
+
+
+def extract_clean_highlights(value: str | None) -> str:
+    cleaned_source = strip_profile_navigation_text(value)
+    highlights = extract_sentences(cleaned_source, HIGHLIGHT_TERMS)
+    if contains_navigation_text(highlights):
+        return ""
+    return highlights
 
 
 def element_attribute_tokens(element: Any) -> set[str]:
@@ -979,6 +1057,50 @@ def looks_like_person_name(value: str) -> bool:
     return True
 
 
+def matches_generic_directory_detail_url(entry_url: str, candidate_url: str) -> bool:
+    entry_match = re.fullmatch(r"/section/(\d+)/?", urlparse(entry_url).path)
+    if comparable_host(entry_url) != "smukqyy.cn" or not entry_match:
+        return True
+    directory_id = re.escape(entry_match.group(1))
+    return bool(re.fullmatch(rf"/prods/{directory_id}/\d+/?", urlparse(candidate_url).path))
+
+
+def generic_record_quality(
+    name: str,
+    source_link: str,
+    entry_url: str,
+    detail: dict[str, str],
+    item: dict[str, str],
+) -> tuple[bool, list[str]]:
+    valid = looks_like_person_name(name) and matches_generic_directory_detail_url(entry_url, source_link)
+    warnings: list[str] = []
+    if not valid:
+        warnings.append("非医生页面或姓名异常")
+    if detail.get("department_polluted") == "yes" or has_department_text_pollution(
+        item.get("department"), clean_generic_department(item.get("department"))
+    ):
+        warnings.append("科室原文含正文，已清洗")
+    if detail.get("specialty_navigation_polluted") == "yes":
+        warnings.append("擅长原文含导航文本，已清空")
+    return valid, warnings
+
+
+def classify_generic_record(
+    valid_doctor_record: bool,
+    combined_text: str,
+    title_hits: list[str],
+) -> tuple[str, list[str], list[str]]:
+    if not valid_doctor_record:
+        return "", [], []
+    groups, tags = group_tags(combined_text)
+    priority = "普通"
+    if any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups:
+        priority = "高"
+    elif any(term != "医师" for term in title_hits):
+        priority = "中"
+    return priority, groups, tags
+
+
 def extract_person_name(*texts: str | None) -> str:
     for raw in texts:
         text = clean_text(raw)
@@ -1038,15 +1160,20 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
     soup = BeautifulSoup(html, "html.parser")
     rows: list[dict[str, str]] = []
     seen: set[str] = set()
+    strict_smukq_directory = comparable_host(entry_url) == "smukqyy.cn" and bool(
+        re.fullmatch(r"/section/\d+/?", urlparse(entry_url).path)
+    )
     for anchor in soup.find_all("a", href=True):
         href = urljoin(page_url, anchor["href"])
         if canonical_url(href) == canonical_url(page_url):
             continue
         if not is_collectable_url(entry_url, href):
             continue
+        if not matches_generic_directory_detail_url(entry_url, href):
+            continue
         context = nearest_card_text(anchor)
         score = generic_link_score(href, context)
-        if score < 6:
+        if score < 6 and not strict_smukq_directory:
             continue
         key = canonical_url(href)
         if key in seen:
@@ -1175,12 +1302,27 @@ def extract_labeled_value_any(text: str, labels: list[str], stop_labels: list[st
     return clean_text(match.group(1)) if match else ""
 
 
+def extract_explicit_labeled_value(text: str, labels: list[str], stop_labels: list[str]) -> str:
+    value = extract_labeled_value(text, labels, stop_labels)
+    if value:
+        return value
+    lines = [clean_text(line) for line in re.split(r"[\n\r]+", text) if clean_text(line)]
+    for label in labels:
+        value = extract_label_from_lines(lines, label, stop_labels)
+        if value:
+            return value
+    return ""
+
+
 def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
     soup = BeautifulSoup(html, "html.parser")
     title = clean_text(soup.title.get_text(" ", strip=True)) if soup.title else ""
     h1 = first_visible_heading_text(soup)
     navigation_context = extract_navigation_context(soup)
     remove_profile_noise_elements(soup)
+    raw_scope_text = compact_visible_text(soup, 6000)
+    raw_highlights = extract_sentences(raw_scope_text, HIGHLIGHT_TERMS)
+    highlight_navigation_polluted = contains_navigation_text(raw_highlights)
     main_text = best_detail_scope_text(soup)
     compact = clean_text("\n".join([h1, title, main_text]))
     name = first_nonempty(
@@ -1191,7 +1333,7 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
         ),
         extract_person_name(h1, title, fallback.get("name", ""), fallback.get("list_title", "")),
     )
-    department = first_nonempty(
+    department_raw = first_nonempty(
         extract_labeled_value_any(
             compact,
             ["科室", "所在科室", "出诊科室", "专业", "专科"],
@@ -1201,6 +1343,7 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
         fallback.get("department", ""),
         infer_department(compact[:500]),
     )
+    department = clean_generic_department(department_raw)
     title_field = first_nonempty(
         extract_labeled_value_any(
             compact,
@@ -1210,13 +1353,41 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
         "、".join(extract_terms(compact[:1000], TITLE_TERMS)),
         fallback.get("list_title", ""),
     )
-    specialty = strip_article_tail(
-        extract_labeled_value_any(
+    specialty_labels = [
+        "专业擅长",
+        "擅长",
+        "医疗专长",
+        "诊疗专长",
+        "技术专长",
+        "业务专长",
+        "专长",
+        "研究方向",
+    ]
+    specialty_stop_labels = [
+        "个人简介",
+        "简介",
+        "介绍",
+        "专家简介",
+        "医生简介",
+        "出诊",
+        "门诊",
+        "社会任职",
+        "学术任职",
+    ]
+    specialty_raw = strip_article_tail(
+        extract_explicit_labeled_value(
             compact,
-            ["专业擅长", "擅长", "医疗专长", "诊疗专长", "技术专长", "业务专长", "专长", "研究方向"],
-            ["个人简介", "简介", "专家简介", "医生简介", "出诊", "门诊", "社会任职", "学术任职"],
+            specialty_labels,
+            specialty_stop_labels,
         )
     )
+    specialty_preclean = strip_article_tail(
+        extract_explicit_labeled_value(raw_scope_text, specialty_labels, specialty_stop_labels)
+    )
+    specialty_navigation_polluted = contains_navigation_text(specialty_raw) or contains_navigation_text(
+        specialty_preclean
+    )
+    specialty = "" if specialty_navigation_polluted else specialty_raw
     profile_text = strip_article_tail(
         first_nonempty(
             extract_labeled_value_any(
@@ -1230,8 +1401,13 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
     return {
         "name": clean_text(name),
         "department": clean_text(department),
+        "department_raw": clean_text(department_raw),
+        "department_polluted": "yes" if has_department_text_pollution(department_raw, department) else "no",
         "title_field": clean_text(title_field),
         "specialty": clean_text(specialty),
+        "specialty_raw": clean_text(first_nonempty(specialty_raw, specialty_preclean)),
+        "specialty_navigation_polluted": "yes" if specialty_navigation_polluted else "no",
+        "highlight_navigation_polluted": "yes" if highlight_navigation_polluted else "no",
         "profile_text": clean_text(profile_text),
         "title_text": first_nonempty(h1, title),
     }
@@ -1823,6 +1999,36 @@ def collect_nbkj(target: HospitalTarget, today: str, max_doctors: int | None = N
     }
 
 
+def round_robin_generic_items(
+    items: list[dict[str, str]],
+    entry_urls: list[str],
+    max_items: int | None,
+) -> list[dict[str, str]]:
+    grouped: dict[str, list[dict[str, str]]] = {canonical_url(url): [] for url in entry_urls}
+    for item in items:
+        grouped.setdefault(canonical_url(item.get("entry_url", "")), []).append(item)
+    for values in grouped.values():
+        values.sort(key=lambda item: item["source_link"])
+
+    ordered: list[dict[str, str]] = []
+    offsets = {key: 0 for key in grouped}
+    while True:
+        added = False
+        for entry_url in entry_urls:
+            key = canonical_url(entry_url)
+            values = grouped.get(key, [])
+            offset = offsets.get(key, 0)
+            if offset >= len(values):
+                continue
+            ordered.append(values[offset])
+            offsets[key] = offset + 1
+            added = True
+            if max_items and len(ordered) >= max_items:
+                return ordered
+        if not added:
+            return ordered
+
+
 def collect_generic(
     target: HospitalTarget,
     today: str,
@@ -1830,27 +2036,61 @@ def collect_generic(
     max_pages: int = GENERIC_MAX_PAGES_DEFAULT,
 ) -> dict[str, Any]:
     session = create_official_session()
-    status, entry_html, entry_error = fetch(session, target.entry_url)
-    if status != 200:
-        raise RuntimeError(f"入口页读取失败：{entry_error}")
+    entry_urls = effective_entry_urls(target)
+    if not entry_urls:
+        raise RuntimeError("通用模板未提供医生目录入口。")
 
-    page_urls = discover_generic_list_pages(target.entry_url, entry_html, max_pages=max_pages)
+    categories: list[dict[str, str]] = []
     page_errors: list[dict[str, str]] = []
     raw_rows: list[dict[str, str]] = []
-    for index, page_url in enumerate(page_urls, start=1):
-        if index == 1:
-            html = entry_html
-            page_status = status
-            page_error = ""
-        else:
-            page_status, html, page_error = fetch(session, page_url)
-        if page_status != 200:
-            page_errors.append({"page": str(index), "url": page_url, "error": page_error})
+    entry_candidate_counts: dict[str, int] = {entry_url: 0 for entry_url in entry_urls}
+    accessible_entry_count = 0
+    for entry_index, entry_url in enumerate(entry_urls, start=1):
+        status, entry_html, entry_error = fetch(session, entry_url)
+        if status != 200:
+            page_errors.append({"page": "1", "entry_url": entry_url, "url": entry_url, "error": entry_error})
             continue
-        page_rows = discover_generic_detail_links(html, page_url, target.entry_url)
-        raw_rows.extend(page_rows)
-        print(f"[{index}/{len(page_urls)}] generic list rows: {len(page_rows)}")
-        time.sleep(0.2)
+        accessible_entry_count += 1
+        page_urls = discover_generic_list_pages(entry_url, entry_html, max_pages=max_pages)
+        for page_index, page_url in enumerate(page_urls, start=1):
+            categories.append(
+                {
+                    "category_id": f"{entry_index}-{page_index}",
+                    "category_name": f"通用模板入口{entry_index}列表第{page_index}页",
+                    "url": page_url,
+                    "entry_url": entry_url,
+                }
+            )
+            if page_index == 1:
+                html = entry_html
+                page_status = status
+                page_error = ""
+            else:
+                page_status, html, page_error = fetch(session, page_url)
+            if page_status != 200:
+                page_errors.append(
+                    {
+                        "page": str(page_index),
+                        "entry_url": entry_url,
+                        "url": page_url,
+                        "error": page_error,
+                    }
+                )
+                continue
+            page_rows = discover_generic_detail_links(html, page_url, entry_url)
+            for row in page_rows:
+                row["entry_url"] = entry_url
+            raw_rows.extend(page_rows)
+            entry_candidate_counts[entry_url] += len(page_rows)
+            print(
+                f"[entry {entry_index}/{len(entry_urls)} page {page_index}/{len(page_urls)}] "
+                f"generic list rows: {len(page_rows)}"
+            )
+            time.sleep(0.2)
+
+    if accessible_entry_count == 0:
+        errors = "；".join(error.get("error", "") for error in page_errors if error.get("error"))
+        raise RuntimeError(f"全部医生目录入口读取失败：{errors}")
 
     by_link: dict[str, dict[str, str]] = {}
     for row in raw_rows:
@@ -1865,6 +2105,7 @@ def collect_generic(
                 "description": row.get("description", ""),
                 "list_pages": "",
                 "score": row.get("score", ""),
+                "entry_url": row.get("entry_url", ""),
             },
         )
         for field in ["name", "list_title", "department", "description"]:
@@ -1877,9 +2118,7 @@ def collect_generic(
             pages.append(row["list_page"])
             item["list_pages"] = "；".join(pages)
 
-    detail_items = sorted(by_link.values(), key=lambda item: item["source_link"])
-    if max_doctors:
-        detail_items = detail_items[:max_doctors]
+    detail_items = round_robin_generic_items(list(by_link.values()), entry_urls, max_doctors)
 
     existing_links = collect_existing_profile_links()
     rows: list[dict[str, Any]] = []
@@ -1894,6 +2133,11 @@ def collect_generic(
             "specialty": "",
             "profile_text": "",
             "title_text": "",
+            "department_raw": item.get("department", ""),
+            "department_polluted": "no",
+            "specialty_raw": "",
+            "specialty_navigation_polluted": "no",
+            "highlight_navigation_polluted": "no",
         }
         if detail_status == 200:
             detail = parse_generic_detail(detail_html, item)
@@ -1915,24 +2159,21 @@ def collect_generic(
         )
         title_source = first_nonempty(detail.get("title_field"), item.get("list_title"))
         title_hits = extract_terms(title_source, TITLE_TERMS) or extract_terms(combined_text, TITLE_TERMS)
-        groups, tags = group_tags(combined_text)
-        specialty = clip(
-            first_nonempty(
-                detail.get("specialty"),
-                extract_sentences(
-                    combined_text,
-                    ["擅长", "研究方向", "诊治", "治疗", "诊断", "手术", "专长", "复杂", "疑难"],
-                    limit=4,
-                    max_len=520,
-                ),
-            ),
-            520,
+        valid_doctor_record, quality_warnings = generic_record_quality(
+            name,
+            link,
+            item.get("entry_url", target.entry_url),
+            detail,
+            item,
         )
-        highlights = extract_sentences(combined_text, HIGHLIGHT_TERMS)
+        priority, groups, tags = classify_generic_record(valid_doctor_record, combined_text, title_hits)
+        specialty = clip(detail.get("specialty"), 520) if valid_doctor_record else ""
+        highlights = extract_clean_highlights(combined_text)
 
         warnings: list[str] = []
         if detail_status != 200:
             warnings.append("详情页读取失败")
+        warnings.extend(quality_warnings)
         if not name:
             warnings.append("姓名需人工复核")
         if not department:
@@ -1943,12 +2184,10 @@ def collect_generic(
             warnings.append("详情页正文为空或未识别")
         if int(item.get("score") or 0) < 8:
             warnings.append("通用模板低置信度")
-
-        priority = "普通"
-        if any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups:
-            priority = "高"
-        elif any(term != "医师" for term in title_hits):
-            priority = "中"
+        if detail.get("highlight_navigation_polluted") == "yes":
+            warnings.append(
+                "亮眼经历含导航文本，已清洗" if highlights else "亮眼经历含导航文本，已清空"
+            )
 
         rows.append(
             {
@@ -1968,7 +2207,7 @@ def collect_generic(
                 "详情正文摘录": clip(detail.get("profile_text", ""), 1800),
                 "来源类型": "医院官网",
                 "来源链接": link,
-                "采集入口": target.entry_url,
+                "采集入口": item.get("entry_url", target.entry_url),
                 "采集方式": "医院官网通用模板：列表页自动发现+详情页文本抽取",
                 "采集日期": today,
                 "详情页状态": "200" if detail_status == 200 else "失败",
@@ -2004,10 +2243,14 @@ def collect_generic(
             "city": target.city,
             "hospital": target.hospital,
             "homepage": target.homepage,
-            "entry_url": target.entry_url,
+            "entry_url": " ".join(entry_urls),
+            "entry_url_count": len(entry_urls),
+            "entry_candidate_counts": entry_candidate_counts,
+            "entry_url_source": "Claude owner PR #6 显式修正" if target.entry_urls else "官网入口台账",
+            "ledger_entry_url": target.ledger_entry_url or target.entry_url,
             "adapter_id": target.adapter_id,
             "collected_at": today,
-            "category_count": len(page_urls),
+            "category_count": len(categories),
             "raw_card_rows": len(raw_rows),
             "unique_doctor_count": len(rows),
             "category_error_count": len(page_errors),
@@ -2018,10 +2261,7 @@ def collect_generic(
             "generic_template": "yes",
             "generic_max_pages": max_pages,
         },
-        "categories": [
-            {"category_id": str(index), "category_name": f"通用模板列表第{index}页", "url": url}
-            for index, url in enumerate(page_urls, start=1)
-        ],
+        "categories": categories,
         "category_errors": page_errors,
         "detail_errors": detail_errors,
         "category_counts": category_counter.most_common(),
@@ -2047,6 +2287,7 @@ def render_counter_table(counter: dict[str, int] | list[tuple[str, int]], empty:
 
 def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path: Path) -> None:
     meta = payload["meta"]
+    xlsx_output = f"`{xlsx_path}`" if xlsx_path.exists() else "未生成（本轮使用 --no-xlsx）"
     top_departments = render_counter_table(payload["category_counts"][:20])
     group_lines = render_counter_table(dict(sorted(payload["group_counts"].items())))
     warning_lines = render_counter_table(payload["warning_counts"])
@@ -2073,13 +2314,13 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 适配器: {meta['adapter_id']}
 ---
 
-# {meta['hospital']} 全院医生自动采集试跑报告
+# {meta['hospital']} 官方医生自动采集试跑报告
 
 ## 结论
 
 本次试跑只读取医院官网公开专家列表页和医生详情页。系统没有使用第三方平台、没有绕过登录或验证码、没有采集私人联系方式或患者信息。
 
-本轮生成全院医生自动采集底表，共 {meta['unique_doctor_count']} 位唯一医生；官网列表页原始卡片记录 {meta['raw_card_rows']} 条；识别到官网列表分页 {meta['category_count']} 页；详情页失败 {meta['detail_error_count']} 条。
+本轮生成医生自动采集试采底表，共 {meta['unique_doctor_count']} 位唯一医生；官网列表页原始卡片记录 {meta['raw_card_rows']} 条；识别到官网列表分页 {meta['category_count']} 页；覆盖 {meta.get('department_coverage_count', 0)} 个科室；详情页失败 {meta['detail_error_count']} 条。
 
 ## 台账来源
 
@@ -2088,13 +2329,15 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 | 城市 | {meta['city']} |
 | 医院 | {meta['hospital']} |
 | 官网首页 | {meta['homepage']} |
-| 医生入口 | {meta['entry_url']} |
+| 本轮医生入口 | {meta['entry_url']} |
+| 入口来源 | {meta.get('entry_url_source', '官网入口台账')} |
+| 原台账医生入口 | {meta.get('ledger_entry_url', meta['entry_url'])} |
 | 台账人工复核 | {meta['ledger_review']} |
 | 采集难度初判 | {meta['ledger_difficulty']} |
 
 ## 输出文件
 
-- Excel 底表：`{xlsx_path}`
+- Excel 底表：{xlsx_output}
 - CSV 底表：`{csv_path}`
 
 ## 采集统计
@@ -2104,6 +2347,7 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 | 官网列表分页数 | {meta['category_count']} |
 | 原始医生卡片记录 | {meta['raw_card_rows']} |
 | 唯一医生详情页 | {meta['unique_doctor_count']} |
+| 覆盖科室数 | {meta.get('department_coverage_count', 0)} |
 | 列表页失败数 | {meta['category_error_count']} |
 | 详情页失败数 | {meta['detail_error_count']} |
 | 已建画像匹配数 | {meta['existing_profile_count']} |
@@ -2276,8 +2520,15 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="从已人工确认的医院官网入口批量采集医生基础画像底表。")
     parser.add_argument("--ledger", default=str(LEDGER_PATH), help="官网入口台账路径")
     parser.add_argument("--hospital", default="", help="指定医院名称；为空则选择首个已确认A级且已有适配器的医院")
+    parser.add_argument(
+        "--entry-url",
+        action="append",
+        default=[],
+        help="显式覆盖医生目录入口；多入口时重复传入，且必须与医院官网同域",
+    )
     parser.add_argument("--today", default=date.today().isoformat(), help="采集日期")
     parser.add_argument("--max-doctors", type=int, default=0, help="仅测试前 N 位医生；0 表示全量")
+    parser.add_argument("--min-departments", type=int, default=0, help="要求结果至少覆盖的非空科室数；0 表示不设门禁")
     parser.add_argument("--max-pages", type=int, default=GENERIC_MAX_PAGES_DEFAULT, help="通用模板最多读取的列表分页数")
     parser.add_argument("--trial-only", action="store_true", help="仅试采并输出临时底表/报告，不追加统一总底表；未指定 --max-doctors 时默认试采 10 位")
     parser.add_argument("--force-generic", action="store_true", help="即使已有专用适配器，也强制使用通用模板试采")
@@ -2324,9 +2575,36 @@ def main() -> None:
         return
 
     target = select_target(ledger_rows, args.hospital or None)
+    if args.entry_url:
+        if not args.hospital:
+            raise RuntimeError("使用 --entry-url 覆盖入口时必须同时指定 --hospital。")
+        override_urls: list[str] = []
+        seen_override_urls: set[str] = set()
+        official_host = comparable_host(target.homepage)
+        for raw_url in args.entry_url:
+            value = clean_text(raw_url)
+            parsed = urlparse(value)
+            if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+                raise RuntimeError(f"无效的医生目录入口：{value}")
+            if comparable_host(value) != official_host:
+                raise RuntimeError(f"医生目录入口与医院官网不同域，拒绝执行：{value}")
+            key = canonical_url(value)
+            if key not in seen_override_urls:
+                seen_override_urls.add(key)
+                override_urls.append(value)
+        target = replace(
+            target,
+            entry_url=override_urls[0],
+            entry_urls=tuple(override_urls),
+            ledger_entry_url=target.entry_url,
+            adapter_id=adapter_for(override_urls[0], include_generic=True),
+        )
     if args.force_generic:
         target = replace(target, adapter_id=GENERIC_ADAPTER_ID)
-    print(f"selected: {target.city} {target.hospital} {target.entry_url} adapter={target.adapter_id}")
+    print(
+        f"selected: {target.city} {target.hospital} "
+        f"{' '.join(effective_entry_urls(target))} adapter={target.adapter_id}"
+    )
 
     if (
         target.adapter_id == GENERIC_ADAPTER_ID
@@ -2349,6 +2627,35 @@ def main() -> None:
     else:
         raise RuntimeError(f"暂不支持的适配器：{target.adapter_id}")
 
+    if args.entry_url:
+        failed_entries = [
+            entry_url
+            for entry_url, count in payload["meta"].get("entry_candidate_counts", {}).items()
+            if int(count) == 0
+        ]
+        if payload["meta"].get("category_error_count") or failed_entries:
+            raise RuntimeError(
+                "显式多入口采集不完整："
+                f"列表错误 {payload['meta'].get('category_error_count', 0)} 条，"
+                f"无候选入口 {'、'.join(failed_entries) or '无'}"
+            )
+
+    covered_departments = sorted(
+        {
+            clean_text(str(row.get("科室_分类页") or ""))
+            for row in payload["rows"]
+            if clean_text(str(row.get("科室_分类页") or ""))
+            and "非医生页面或姓名异常" not in str(row.get("异常提示") or "")
+        }
+    )
+    payload["meta"]["department_coverage_count"] = len(covered_departments)
+    payload["meta"]["covered_departments"] = covered_departments
+    if args.min_departments and len(covered_departments) < args.min_departments:
+        raise RuntimeError(
+            f"科室覆盖门禁不满足：要求至少 {args.min_departments} 个，实际 {len(covered_departments)} 个："
+            f"{'、'.join(covered_departments) or '无'}"
+        )
+
     safe_name = safe_file_part(target.hospital)
     json_path = WORK_DIR / f"{safe_name}_official_doctors_payload.json"
     preview_path = WORK_DIR / f"{safe_name}_official_doctors_preview.png"
@@ -2361,8 +2668,8 @@ def main() -> None:
 
         payload["meta"]["json_path"] = str(json_path)
         payload["meta"]["csv_path"] = str(csv_path)
-        payload["meta"]["xlsx_path"] = str(xlsx_path)
-        payload["meta"]["preview_path"] = str(preview_path)
+        payload["meta"]["xlsx_path"] = "" if args.no_xlsx else str(xlsx_path)
+        payload["meta"]["preview_path"] = "" if args.no_xlsx else str(preview_path)
 
         json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         write_csv(csv_path, payload["rows"])
@@ -2380,7 +2687,7 @@ def main() -> None:
                     "rows": payload["meta"]["unique_doctor_count"],
                     "detail_errors": payload["meta"]["detail_error_count"],
                     "csv": str(csv_path),
-                    "xlsx": str(xlsx_path),
+                    "xlsx": "" if args.no_xlsx else str(xlsx_path),
                     "report": str(report_path),
                     "master_updated": False,
                 },
