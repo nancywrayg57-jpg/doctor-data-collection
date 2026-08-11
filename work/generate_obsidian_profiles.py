@@ -13,7 +13,7 @@ from typing import Iterable
 from xml.etree import ElementTree as ET
 
 
-ROOT = Path(r"D:\workspace\信息收集整理")
+ROOT = Path(__file__).resolve().parents[1]
 VAULT = ROOT / "医生画像仓库"
 SOURCE_DIR = VAULT / "99_资料来源"
 PROFILE_ROOT = VAULT / "01_试点医院"
@@ -37,6 +37,11 @@ GROUP_ORDER = [
 ]
 
 CORE_FIELDS = ("医院", "姓名", "来源链接")
+PROFILE_FACT_SECTION_TERMS = {
+    "教育与进修经历": ["毕业", "学位", "博士后", "进修", "访问学者", "留学", "培训"],
+    "科研项目与成果": ["科研", "课题", "基金", "项目", "专利", "成果", "实验室"],
+    "论文与学术产出": ["发表", "论文", "SCI", "著作", "主编", "参编", "期刊"],
+}
 
 
 def clean(value: object | None) -> str:
@@ -90,6 +95,18 @@ def split_sentences(value: object | None, limit: int = 6, max_each: int = 160) -
     return result
 
 
+def extract_profile_fact_sections(value: object | None) -> dict[str, list[str]]:
+    sentences = split_sentences(value, limit=18, max_each=260)
+    return {
+        title_text: [
+            sentence
+            for sentence in sentences
+            if any(term.lower() in sentence.lower() for term in terms)
+        ][:4]
+        for title_text, terms in PROFILE_FACT_SECTION_TERMS.items()
+    }
+
+
 def first_value(row: dict[str, str], *fields: str) -> str:
     for field in fields:
         value = clean(row.get(field))
@@ -107,7 +124,7 @@ def title(row: dict[str, str]) -> str:
 
 
 def specialty(row: dict[str, str]) -> str:
-    return first_value(row, "简介/擅长", "擅长诊疗方向摘录", "列表简介")
+    return first_value(row, "简介/擅长", "擅长诊疗方向摘录")
 
 
 def row_number(row: dict[str, str], fallback: int) -> str:
@@ -262,6 +279,17 @@ def validate_source_rows(rows: list[dict[str, str]]) -> list[str]:
     return [field for field in CORE_FIELDS if field not in fields]
 
 
+def select_hospital_rows(rows: list[dict[str, str]], hospitals: Iterable[str]) -> list[dict[str, str]]:
+    requested = {value.strip() for value in hospitals if value.strip()}
+    if not requested:
+        return rows
+    available = {str(row.get("医院") or "").strip() for row in rows}
+    missing = sorted(requested - available)
+    if missing:
+        raise ValueError("总底表中不存在指定医院：" + "、".join(missing))
+    return [row for row in rows if str(row.get("医院") or "").strip() in requested]
+
+
 def extract_existing_sources(hospital_dir: Path) -> dict[str, Path]:
     sources: dict[str, Path] = {}
     if not hospital_dir.exists():
@@ -410,6 +438,7 @@ def build_profile(row: dict[str, str], generated_at: str) -> str:
     specialty_text = official_profile_text(row)
     detail_excerpt = clean(row.get("详情正文摘录"))
     highlight_text = clean(row.get("亮眼经历线索"))
+    profile_fact_sections = extract_profile_fact_sections(detail_excerpt)
     review_status = clean(row.get("复核状态"))
     direction = unique_terms(focus, disease_tags)[:12]
     evidence_items = []
@@ -470,8 +499,10 @@ def build_profile(row: dict[str, str], generated_at: str) -> str:
     )
     if specialty_text:
         lines.append(clip(specialty_text, 1100))
-    elif detail_excerpt:
-        lines.append(clip(detail_excerpt, 900))
+
+    for title_text, values in profile_fact_sections.items():
+        if values:
+            add_term_section(lines, title_text, values)
 
     lines.extend(["", "## 可包装亮点", ""])
     highlight_items = split_sentences(highlight_text or specialty_text, limit=5, max_each=180)
@@ -1321,6 +1352,7 @@ def generate_profiles(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="从统一总底表生成 Obsidian 医生画像 Markdown。")
     parser.add_argument("--source", help="统一总底表路径，支持 .csv 或 .xlsx；默认优先读取 CSV。")
+    parser.add_argument("--hospital", action="append", default=[], help="只处理指定医院，可重复传入。")
     parser.add_argument("--output-root", default=str(PROFILE_ROOT), help="Obsidian 医生画像输出根目录。")
     parser.add_argument("--report", default=str(DEFAULT_REPORT), help="全量画像生成报告路径。")
     parser.add_argument("--supplement-report", default=str(DEFAULT_SUPPLEMENT_REPORT), help="补充生成报告路径。")
@@ -1353,6 +1385,10 @@ def main() -> None:
     args = parse_args()
     source_path = choose_source(args.source)
     rows = read_master_rows(source_path)
+    try:
+        rows = select_hospital_rows(rows, args.hospital)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     missing_fields = validate_source_rows(rows)
     if missing_fields:
         raise SystemExit("总底表缺少核心字段：" + "、".join(missing_fields))
