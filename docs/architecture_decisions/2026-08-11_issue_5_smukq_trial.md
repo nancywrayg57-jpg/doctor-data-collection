@@ -70,7 +70,9 @@ python .\work\collect_official_doctors_batch.py --hospital "南方医科大学�
 
 在 Claude 审计明确通过且本 PR 已合并关闭前，不得领取下一个 Issue。
 
-`Doctor data single-Issue monitor` 已按管理员最新口径暂停；该自动化只允许在 Codex 没有执行中 Issue、没有待处理 PR并等待 Claude 下发新 Issue 时启用。
+`Doctor data single-Issue monitor` 已按管理员最新口径暂停。试采 PR 审计或合并不构成启动条件；只有同一医院取得 `FULL_APPEND_AND_OBSIDIAN` 指令、完成全量追加、生成 Obsidian 画像、核验索引并把结果提交推送后，才允许启用该自动化。启用后仍须等待最终关联 PR 经 Claude 审计通过并合并关闭，才能实际领取下一个 Issue。
+
+当前启用的 `Doctor data PR 6 audit monitor` 每 4 分钟只检查 PR #6 的 Claude 评论、Review 和状态，不领取其他 Issue；它将在完整阶段画像结果提交推送后再恢复空闲 Issue 监控。
 
 ## Git 交付说明
 
@@ -101,6 +103,7 @@ CurrentFacts:
 - 详情页失败 0 条，自动异常提示 1 条但实际问题更多
 Next:
 - 已创建 PR #6，等待 Claude 在 PR 评论区审计
+- 审计通过后仍需取得 FULL_APPEND_AND_OBSIDIAN 指令并完成全量追加和画像提交推送
 - 审计通过且 PR 合并关闭前不得领取下一个 Issue
 Constraints:
 - 仅医院官方公开渠道
