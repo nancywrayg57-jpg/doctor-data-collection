@@ -1,91 +1,75 @@
 # Codex 下一步提示词
 
-> 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。Codex 新会话启动时，在读取 `Agent.md`、路线图、需求文档和架构决策后，必须读取本文件。
-> 当前状态：`IMAGE_REPAIR_IN_PROGRESS`。Claude owner 的首次画像审计为不通过；当前仅执行 31 条 `亮眼经历线索` 导航污染的最小返修，不得重新追加或扩大范围。
+> 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。Codex 新会话必须先读取项目宪法、路线图、需求文档和 Issue #7 ADR。
+> 当前状态：`WAITING_CLAUDE_TRIAL_AUDIT`。Issue #7 试采材料已准备，仅等待 Claude owner 审计；禁止正式追加或生成本院画像。
 
 ## GitHub 身份
 
-目标仓库：`https://github.com/nancywrayg57-jpg/doctor-data-collection.git`
+- 仓库：`https://github.com/nancywrayg57-jpg/doctor-data-collection.git`
+- Codex developer：`xtzhou247`
+- Claude owner：`nancywrayg57-jpg`
+- 工作分支：`codex/mhrj/issue-7-gdskin-trial`
+- GitHub Issue：`https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/7`
 
-1. Codex 是 developer，GitHub 账号为 `xtzhou247`。
-2. Claude 是 owner，GitHub 账号为 `nancywrayg57-jpg`。
-3. Codex 负责实现、采集、检查、文档沉淀、分支提交和 PR。
-4. Claude 负责审计结果、指导下一步、输出 Codex 提示词、审批或合并 PR。
-5. Codex 不直接推送或合并 `main`。
-6. Codex 远端写入前必须确认 GitHub 登录身份为 `xtzhou247`；若当前身份是 `nancywrayg57-jpg`，只允许只读检查。
+Codex 不直接推送或合并 `main`，不自行批准 PR。任何远端写入前必须再次确认登录身份为 `xtzhou247`。
 
 ## 当前动作
 
 ```text
-Status: IMAGE_REPAIR_IN_PROGRESS
-Phase: FULL_APPEND_AND_OBSIDIAN_REPAIR
-LedgerSequence: 10
-Hospital: 南方医科大学口腔医院(海珠广场院区)
-City: 广州市
-OfficialHomeURL: https://www.smukqyy.cn/home
-DoctorDirectoryURL: https://www.smukqyy.cn/section/341 https://www.smukqyy.cn/section/342 https://www.smukqyy.cn/section/434 https://www.smukqyy.cn/section/343 https://www.smukqyy.cn/section/385 https://www.smukqyy.cn/section/384 https://www.smukqyy.cn/section/386 https://www.smukqyy.cn/section/431 https://www.smukqyy.cn/section/504
-AuditDecision: 不通过（画像阶段；其余数量、来源和字段均已通过）
-AuditSource: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/6#issuecomment-5252683492
-AuditBlocker: 本院 31/95 条亮眼经历线索包含导航文本，且被画像原样渲染。
-RepairScope: 仅修正本院 31 行的亮眼经历线索与异常提示；仅覆盖对应 31 份本轮自动画像；不得触碰其他医院、其他字段或人工精修画像。
-Task: 复用导航剥离逻辑清洗亮眼经历；无有效经历则留空；增加「亮眼经历含导航文本，已清洗/已清空」提示；同步单院/总 payload、CSV/XLSX 和更新报告；刷新对应 31 份自动画像；保持本院 95 行、95 份画像和 95 个索引链接；新增测试、提交推送 PR #6 并请求 Claude 返修复审。
-ObsidianRoot: D:\workspace\信息收集整理\医生画像仓库\01_试点医院
-GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/5
-```
-
-执行边界：
-
-1. 只执行 PR #6 owner 评论修正后的当前医院及 9 个海珠广场院区官方科室入口；不扩大到总院、番禺、盘福或沙河院区。
-2. 当前禁止再次运行正式追加或使用 `--allow-generic-append`；底表只允许修改本院受污染 31 行的 `亮眼经历线索` 与 `异常提示`。
-3. 画像覆盖只限对应 31 份本轮自动生成文件；不得覆盖其他医院或人工精修画像；索引须保持 95 个有效链接。
-4. 返修结果提交并成功推送后请求 Claude 复审；Claude 明确通过且 PR 已合并关闭前，不得领取下一个 Issue。
-5. `Doctor data single-Issue monitor` 已在首次完整画像生成并提交推送后启用；当前只监控 Issue #5 / PR #6，不得提前领取下一 Issue。
-
-## Claude 下发格式
-
-Claude 选择目标后必须把本文件更新为以下两个阶段之一。
-
-### 试采阶段
-
-```text
-Status: READY
+Status: WAITING_CLAUDE_TRIAL_AUDIT
 Phase: TRIAL
-LedgerSequence: <台账序号，当前不得大于 39>
-Hospital: <医院名称>
-City: <城市>
-OfficialHomeURL: <医院官网首页完整 URL>
-DoctorDirectoryURL: <医生目录官方入口完整 URL>
+LedgerSequence: 12
+Hospital: 南方医科大学皮肤病医院
+City: 广州市
+OfficialHomeURL: https://www.gdskin.com/
+DoctorDirectoryURL: https://www.gdskin.com/Showclass.aspx?id=901 https://www.gdskin.com/Showclass.aspx?id=902 https://www.gdskin.com/Showclass.aspx?id=906 https://www.gdskin.com/Showclass.aspx?id=910 https://www.gdskin.com/Showclass.aspx?id=913 https://www.gdskin.com/Showclass.aspx?id=915 https://www.gdskin.com/Showclass.aspx?id=917 https://www.gdskin.com/Showclass.aspx?id=921 https://www.gdskin.com/ShowClass.aspx?id=922 https://www.gdskin.com/ShowClass.aspx?id=924
 ReviewStatus: 确认可采集
-Difficulty: <台账采集难度>
-Task: 试采 10 位医生，不写入统一总底表；输出试采材料后停止等待 Claude 审计。
+Difficulty: A-优先自动采集
+Adapter: gdskin_aspnet_expert
+Task: 已完成10入口普查和10位试采，不写统一总底表；提交PR后停止，等待Claude给出通过、有条件通过或不通过。
 ```
 
-### 完整执行阶段
+## 已验证试采事实
 
-```text
-Status: READY
-Phase: FULL_APPEND_AND_OBSIDIAN
-LedgerSequence: <与试采一致>
-Hospital: <与试采一致>
-City: <与试采一致>
-OfficialHomeURL: <与试采一致>
-DoctorDirectoryURL: <与试采一致>
-AuditDecision: 通过 | 有条件通过
-AuditConditions: <无则写“无”>
-Task: 全量采集并追加统一总底表，检查 XLSX/CSV/更新报告，生成本院 Obsidian 画像并核验索引，清理试采文件，向 Claude 回报后停止。
-ObsidianRoot: D:\workspace\信息收集整理\医生画像仓库\01_试点医院
-```
+- 10 个入口唯一医生详情数：`1、3、29、7、8、14、6、4、5、0`。
+- 906 为 2 页；924 当前没有可采医生详情。
+- 入口候选关系 77，按详情 URL 去重后唯一候选 77，现场跨入口重复 0。
+- 917 的 `王辉 主管护师` 已排除。
+- 试采 10 位、10 个唯一官网详情 URL，覆盖 9 个分类。
+- 列表失败 0、详情失败 0、样本异常提示 0。
+- CSV 与 payload 逐字段差异 0。
+- 总底表 XLSX/CSV、总 payload、更新报告的 SHA-256 均未变化。
+- Python 编译及 23 项测试通过。
 
-完成台账序号 39 `广州市中医院` 后，Claude 应将状态改为：
+## 管理员新增字段口径
 
-```text
-Status: STOP_WAITING_FOR_LEDGER_UPDATE
-Reason: 管理员当前只标注到序号 39，等待更新入口台账标注。
-```
+管理员 2026-08-11 明确允许收录医院官网公开的学历、科研和论文段落，并允许在画像模板新增对应区块。
+
+执行口径：
+
+1. 专长字段只保存专长/擅长段落，不混入学历、科研或论文。
+2. 学历、科研、论文保留在官方详情正文和亮眼经历证据链中。
+3. 画像模板/生成器已增加可选的“教育与进修经历”“科研项目与成果”“论文与学术产出”区块，仅有官方证据时渲染。
+4. 当前仍为 TRIAL，本院未生成任何画像；只有 Claude 试采审计通过并明确下发 `FULL_APPEND_AND_OBSIDIAN` 后才可使用。
+
+## 审计材料
+
+- `work/南方医科大学皮肤病医院_trial_doctors.csv`
+- `work/南方医科大学皮肤病医院_trial_payload.json`
+- `work/南方医科大学皮肤病医院_trial_report.md`
+- `docs/architecture_decisions/2026-08-11_issue_7_gdskin_trial.md`
+
+## 当前门禁
+
+1. Claude owner 只在 PR 评论或 Review 中以“通过”“有条件通过”“不通过”给出有效结论。
+2. 未明确通过时，不运行正式追加，不修改统一总底表，不生成本院 Obsidian 画像。
+3. Claude 通过后必须先把本文件更新为 `FULL_APPEND_AND_OBSIDIAN`，再执行全量采集、追加、画像和索引核验。
+4. 最终画像仍需 Claude 审计；只有画像审计通过且 PR 已合并关闭，才可领取下一 Issue。
+5. 本 Issue 完成前不领取或执行其他 Issue，不自行批准或合并 PR。
 
 ## 合规红线
 
-1. 仅使用医院官网等官方公开渠道。
-2. 禁止第三方平台、患者评价、隐私、登录或验证码绕过。
-3. 官网没有的信息保持空白，不推断、不补造。
-4. 不生成疗效承诺、排名、患者评价或无来源亮点。
+- 仅使用医院官网公开渠道。
+- 禁止第三方平台、患者评价、排名、隐私、登录或验证码绕过。
+- 官网没有的信息保持空白，不推断、不补造。
+- 学历、科研和论文只保留可追溯原文证据，不转化为疗效承诺或无来源营销包装。

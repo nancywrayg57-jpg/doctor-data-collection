@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 WORK_DIR = Path(__file__).resolve().parents[1]
@@ -14,13 +15,19 @@ from collect_official_doctors_batch import (  # noqa: E402
     build_hospital_batches,
     classify_generic_record,
     clean_generic_department,
+    collect_generic,
+    dedicated_adapter_for,
+    discover_gdskin_excluded_links,
+    discover_gdskin_postback_documents,
     discover_generic_detail_links,
     effective_entry_urls,
     extract_clean_highlights,
     generic_record_quality,
+    generic_detail_identity,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     parse_generic_detail,
+    parse_gdskin_detail,
     round_robin_generic_items,
 )
 
@@ -237,6 +244,202 @@ class GenericDirectoryFilteringTests(unittest.TestCase):
 
         self.assertEqual([item["entry_url"] for item in selected], entry_urls)
         self.assertEqual(selected[0]["source_link"], "https://www.smukqyy.cn/prods/341/1")
+
+
+class GdskinAspNetExpertTests(unittest.TestCase):
+    ENTRY_URL = "https://www.gdskin.com/Showclass.aspx?id=917"
+
+    def test_adapter_and_detail_url_scope_are_strict(self) -> None:
+        self.assertEqual(dedicated_adapter_for(self.ENTRY_URL), "gdskin_aspnet_expert")
+        self.assertTrue(
+            matches_generic_directory_detail_url(
+                self.ENTRY_URL,
+                "https://www.gdskin.com/ShowNews.ASPX?ID=5000",
+            )
+        )
+        self.assertFalse(
+            matches_generic_directory_detail_url(
+                self.ENTRY_URL,
+                "https://www.gdskin.com/ShowNews.ASPX?ID=3992&t?id=163",
+            )
+        )
+        self.assertEqual(
+            generic_detail_identity("https://www.gdskin.com/shownews.aspx?id=5000"),
+            "gdskin:5000",
+        )
+
+    def test_gridview_keeps_doctors_and_reports_nurse_exclusion(self) -> None:
+        html = """
+        <table class="masterTitleH">
+          <tr><td><a href="ShowNews.ASPX?ID=5000">刘振锋 主任医师 医学博士</a></td></tr>
+          <tr><td><a href="ShowNews.ASPX?ID=5737">王辉 主管护师</a></td></tr>
+        </table>
+        """
+
+        rows = discover_generic_detail_links(html, self.ENTRY_URL, self.ENTRY_URL)
+        excluded = discover_gdskin_excluded_links(html, self.ENTRY_URL, self.ENTRY_URL)
+
+        self.assertEqual([row["name"] for row in rows], ["刘振锋"])
+        self.assertEqual(rows[0]["department"], "激光美肤中心")
+        self.assertEqual([row["list_title"] for row in excluded], ["王辉 主管护师"])
+
+    def test_label_content_parser_avoids_site_navigation(self) -> None:
+        html = """
+        <html><head><title>曲永彬 主任医师__医院官网</title></head><body>
+          <nav>网站首页 医院概况 专家团队</nav>
+          <div class="labelContent">预约挂号 曲永彬 主任医师、医学硕士
+          专长：银屑病、痤疮、黄褐斑
+          简介：从事中医皮肤病临床工作20年，发表学术论文10余篇。</div>
+        </body></html>
+        """
+
+        detail = parse_gdskin_detail(
+            html,
+            {"name": "曲永彬", "department": "中医皮肤科", "list_title": "曲永彬 主任医师"},
+        )
+
+        self.assertEqual(detail["name"], "曲永彬")
+        self.assertEqual(detail["department"], "中医皮肤科")
+        self.assertEqual(detail["specialty"], "银屑病、痤疮、黄褐斑")
+        self.assertIn("发表学术论文10余篇", detail["profile_text"])
+        self.assertNotIn("网站首页", detail["profile_text"])
+
+    def test_label_content_paragraphs_separate_specialty_from_academic_profile(self) -> None:
+        html = """
+        <html><head><title>刘振锋 主任医师__医院官网</title></head><body>
+          <div class="labelContent">
+            <p><a href="appointment">预约挂号</a></p>
+            <p>刘振锋 主任医师 医学博士 硕士研究生导师</p>
+            <p>专长：痤疮、色素性疾病、血管性疾病、皮肤激光美容、面部年轻化</p>
+            <p>国家重点学科博士毕业。从事临床工作10余年。主持科研基金项目，发表SCI论文多篇。</p>
+          </div>
+        </body></html>
+        """
+
+        detail = parse_gdskin_detail(
+            html,
+            {"name": "刘振锋", "department": "激光美肤中心", "list_title": "刘振锋 主任医师"},
+        )
+
+        self.assertEqual(
+            detail["specialty"],
+            "痤疮、色素性疾病、血管性疾病、皮肤激光美容、面部年轻化",
+        )
+        self.assertNotIn("博士毕业", detail["specialty"])
+        self.assertIn("主持科研基金项目", detail["profile_text"])
+        self.assertIn("发表SCI论文多篇", detail["profile_text"])
+
+    def test_gridview_postback_page_is_materialized(self) -> None:
+        html = """
+        <form>
+          <input type="hidden" name="__VIEWSTATE" value="state" />
+          <input type="hidden" name="__EVENTVALIDATION" value="validation" />
+          <table class="masterTitleH"><tr><td>
+            <a href="javascript:__doPostBack('doctorGrid','Page$2')">2</a>
+          </td></tr></table>
+        </form>
+        """
+
+        class FakeResponse:
+            status_code = 200
+            apparent_encoding = "utf-8"
+            encoding = "utf-8"
+            text = "<table class='masterTitleH'><a href='ShowNews.ASPX?ID=5575'>余晓玲 主治医师</a></table>"
+
+        class FakeSession:
+            def __init__(self) -> None:
+                self.calls: list[tuple[str, dict[str, str]]] = []
+
+            def post(self, url: str, data: dict[str, str], timeout: int) -> FakeResponse:
+                self.calls.append((url, data))
+                return FakeResponse()
+
+        session = FakeSession()
+        documents, errors = discover_gdskin_postback_documents(session, self.ENTRY_URL, html, 5)
+
+        self.assertEqual(errors, [])
+        self.assertEqual([document["page"] for document in documents], ["1", "2"])
+        self.assertEqual(session.calls[0][1]["__EVENTTARGET"], "doctorGrid")
+        self.assertEqual(session.calls[0][1]["__EVENTARGUMENT"], "Page$2")
+
+    def test_collect_generic_returns_complete_gdskin_payload(self) -> None:
+        entry_urls = (
+            "https://www.gdskin.com/Showclass.aspx?id=901",
+            "https://www.gdskin.com/Showclass.aspx?id=906",
+            "https://www.gdskin.com/Showclass.aspx?id=917",
+        )
+        list_html = {
+            entry_urls[0]: """
+                <table class="masterTitleH">
+                  <a href="ShowNews.ASPX?ID=5000">张强 主任医师</a>
+                  <a href="ShowNews.ASPX?ID=5001">李明 副主任医师</a>
+                </table>
+            """,
+            entry_urls[1]: """
+                <table class="masterTitleH">
+                  <a href="ShowNews.ASPX?ID=5000">张强 主任医师</a>
+                  <a href="ShowNews.ASPX?ID=5002">王敏 主治医师</a>
+                </table>
+            """,
+            entry_urls[2]: """
+                <table class="masterTitleH">
+                  <a href="ShowNews.ASPX?ID=5003">赵芳 主治医师</a>
+                  <a href="ShowNews.ASPX?ID=5737">王辉 主管护师</a>
+                </table>
+            """,
+        }
+        details = {
+            "5000": ("张强", "主任医师"),
+            "5001": ("李明", "副主任医师"),
+            "5002": ("王敏", "主治医师"),
+            "5003": ("赵芳", "主治医师"),
+        }
+
+        def fake_fetch(_session: object, url: str, retries: int = 3) -> tuple[int, str, str]:
+            del retries
+            if url in list_html:
+                return 200, list_html[url], ""
+            detail_id = url.rsplit("=", 1)[-1]
+            name, title = details[detail_id]
+            return (
+                200,
+                f'<div class="labelContent">{name} {title} 专长：皮肤病规范诊疗。简介：从事临床工作十年。</div>',
+                "",
+            )
+
+        target = HospitalTarget(
+            city="广州市",
+            hospital="南方医科大学皮肤病医院",
+            homepage="https://www.gdskin.com/",
+            entry_url=entry_urls[0],
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="gdskin_aspnet_expert",
+            entry_urls=entry_urls,
+            ledger_entry_url=entry_urls[0],
+        )
+        with (
+            patch("collect_official_doctors_batch.create_official_session", return_value=object()),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+            patch("collect_official_doctors_batch.fetch", side_effect=fake_fetch),
+            patch("collect_official_doctors_batch.time.sleep", return_value=None),
+        ):
+            payload = collect_generic(target, "2026-08-11", max_doctors=3, max_pages=5)
+
+        self.assertEqual(payload["meta"]["candidate_membership_count"], 5)
+        self.assertEqual(payload["meta"]["unique_candidate_count"], 4)
+        self.assertEqual(payload["meta"]["cross_entry_duplicate_count"], 1)
+        self.assertEqual(payload["meta"]["sample_entry_coverage_count"], 3)
+        self.assertEqual(payload["meta"]["excluded_non_doctor_count"], 1)
+        self.assertEqual(len(payload["entry_reconnaissance"]), 3)
+        self.assertEqual([item["unique_detail_count"] for item in payload["entry_reconnaissance"]], [2, 2, 1])
+        self.assertEqual(len(payload["cross_entry_duplicates"]), 1)
+        self.assertEqual(len(payload["rows"]), 3)
+        self.assertCountEqual(
+            payload["meta"]["sample_entry_categories"],
+            ["首席专家", "皮肤内科", "激光美肤中心"],
+        )
+        self.assertEqual({row["采集入口"] for row in payload["rows"]}, set(entry_urls))
 
 
 class GenericFieldCleaningTests(unittest.TestCase):

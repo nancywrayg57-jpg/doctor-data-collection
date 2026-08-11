@@ -37,6 +37,11 @@ GROUP_ORDER = [
 ]
 
 CORE_FIELDS = ("医院", "姓名", "来源链接")
+PROFILE_FACT_SECTION_TERMS = {
+    "教育与进修经历": ["毕业", "学位", "博士后", "进修", "访问学者", "留学", "培训"],
+    "科研项目与成果": ["科研", "课题", "基金", "项目", "专利", "成果", "实验室"],
+    "论文与学术产出": ["发表", "论文", "SCI", "著作", "主编", "参编", "期刊"],
+}
 
 
 def clean(value: object | None) -> str:
@@ -88,6 +93,18 @@ def split_sentences(value: object | None, limit: int = 6, max_each: int = 160) -
         if len(result) >= limit:
             break
     return result
+
+
+def extract_profile_fact_sections(value: object | None) -> dict[str, list[str]]:
+    sentences = split_sentences(value, limit=18, max_each=260)
+    return {
+        title_text: [
+            sentence
+            for sentence in sentences
+            if any(term.lower() in sentence.lower() for term in terms)
+        ][:4]
+        for title_text, terms in PROFILE_FACT_SECTION_TERMS.items()
+    }
 
 
 def first_value(row: dict[str, str], *fields: str) -> str:
@@ -410,6 +427,7 @@ def build_profile(row: dict[str, str], generated_at: str) -> str:
     specialty_text = official_profile_text(row)
     detail_excerpt = clean(row.get("详情正文摘录"))
     highlight_text = clean(row.get("亮眼经历线索"))
+    profile_fact_sections = extract_profile_fact_sections(detail_excerpt)
     review_status = clean(row.get("复核状态"))
     direction = unique_terms(focus, disease_tags)[:12]
     evidence_items = []
@@ -472,6 +490,10 @@ def build_profile(row: dict[str, str], generated_at: str) -> str:
         lines.append(clip(specialty_text, 1100))
     elif detail_excerpt:
         lines.append(clip(detail_excerpt, 900))
+
+    for title_text, values in profile_fact_sections.items():
+        if values:
+            add_term_section(lines, title_text, values)
 
     lines.extend(["", "## 可包装亮点", ""])
     highlight_items = split_sentences(highlight_text or specialty_text, limit=5, max_each=180)

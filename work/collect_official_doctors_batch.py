@@ -233,7 +233,60 @@ HIGHLIGHT_TERMS = [
 ]
 
 GENERIC_ADAPTER_ID = "generic_official_template"
+GDSKIN_ADAPTER_ID = "gdskin_aspnet_expert"
 GENERIC_MAX_PAGES_DEFAULT = 60
+GDSKIN_ENTRY_METADATA = {
+    "901": {
+        "category_name": "首席专家",
+        "affiliation": "南方医科大学皮肤病医院（官网专家团队栏目）",
+    },
+    "902": {
+        "category_name": "知名专家",
+        "affiliation": "南方医科大学皮肤病医院（官网专家团队栏目）",
+    },
+    "906": {
+        "category_name": "皮肤内科",
+        "affiliation": "南方医科大学皮肤病医院（官网专家团队栏目）",
+    },
+    "910": {
+        "category_name": "外阴皮肤病/性病科",
+        "affiliation": "南方医科大学皮肤病医院（官网专家团队栏目）",
+    },
+    "913": {
+        "category_name": "整形美容外科",
+        "affiliation": "南方医科大学皮肤病医院（官网专家团队栏目）",
+    },
+    "915": {
+        "category_name": "中医皮肤科",
+        "affiliation": "南方医科大学皮肤病医院（官网专家团队栏目）",
+    },
+    "917": {
+        "category_name": "激光美肤中心",
+        "affiliation": "南方医科大学皮肤病医院（官网专家团队栏目）",
+    },
+    "921": {
+        "category_name": "皮肤外科",
+        "affiliation": "南方医科大学皮肤病医院（官网专家团队栏目）",
+    },
+    "922": {
+        "category_name": "儿童皮肤科",
+        "affiliation": "南方医科大学皮肤病医院（官网专家团队栏目）",
+    },
+    "924": {
+        "category_name": "珠江新城医学美容中心",
+        "affiliation": "南方医科大学皮肤病医院·珠江新城医学美容中心",
+    },
+}
+GDSKIN_DOCTOR_ROLE_TERMS = [
+    "主任医师",
+    "副主任医师",
+    "主治医师",
+    "住院医师",
+    "主管医师",
+    "医师",
+    "医生",
+    "首席专家",
+]
 GENERIC_DETAIL_PATH_HINTS = [
     "doctor",
     "expert",
@@ -826,6 +879,14 @@ def dedicated_adapter_for(entry_url: str) -> str:
     parsed = urlparse(entry_url or "")
     host = parsed.netloc.lower()
     path = parsed.path.lower()
+    if host.removeprefix("www.") == "gdskin.com" and path == "/showclass.aspx":
+        entry_ids = [
+            value
+            for name, value in parse_qsl(parsed.query, keep_blank_values=True)
+            if name.lower() == "id"
+        ]
+        if entry_ids and entry_ids[0] in GDSKIN_ENTRY_METADATA:
+            return GDSKIN_ADAPTER_ID
     if "gzzoc.org.cn" in host and "/expert-introduction" in path:
         return "gzzoc_drupal_doctor"
     if "nbkjyy.mil.cn" in host and "/expert" in path:
@@ -894,6 +955,31 @@ def with_query_param(url: str, key: str, value: str | int) -> str:
 def comparable_host(url: str) -> str:
     host = urlparse(url).netloc.lower()
     return host[4:] if host.startswith("www.") else host
+
+
+def gdskin_entry_id(url: str | None) -> str:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "gdskin.com" or parsed.path.lower() != "/showclass.aspx":
+        return ""
+    for name, value in parse_qsl(parsed.query, keep_blank_values=True):
+        if name.lower() == "id" and value in GDSKIN_ENTRY_METADATA:
+            return value
+    return ""
+
+
+def gdskin_detail_id(url: str | None) -> str:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "gdskin.com" or parsed.path.lower() != "/shownews.aspx":
+        return ""
+    pairs = parse_qsl(parsed.query, keep_blank_values=True)
+    if len(pairs) != 1 or pairs[0][0].lower() != "id" or not pairs[0][1].isdigit():
+        return ""
+    return pairs[0][1]
+
+
+def generic_detail_identity(url: str) -> str:
+    detail_id = gdskin_detail_id(url)
+    return f"gdskin:{detail_id}" if detail_id else canonical_url(url)
 
 
 def is_same_official_host(base_url: str, candidate_url: str) -> bool:
@@ -1058,6 +1144,8 @@ def looks_like_person_name(value: str) -> bool:
 
 
 def matches_generic_directory_detail_url(entry_url: str, candidate_url: str) -> bool:
+    if gdskin_entry_id(entry_url):
+        return bool(gdskin_detail_id(candidate_url))
     entry_match = re.fullmatch(r"/section/(\d+)/?", urlparse(entry_url).path)
     if comparable_host(entry_url) != "smukqyy.cn" or not entry_match:
         return True
@@ -1074,6 +1162,16 @@ def generic_record_quality(
 ) -> tuple[bool, list[str]]:
     valid = looks_like_person_name(name) and matches_generic_directory_detail_url(entry_url, source_link)
     warnings: list[str] = []
+    if gdskin_entry_id(entry_url):
+        role_text = " ".join(
+            [
+                clean_text(detail.get("title_field")),
+                clean_text(item.get("list_title")),
+            ]
+        )
+        if not any(term in role_text for term in GDSKIN_DOCTOR_ROLE_TERMS):
+            valid = False
+            warnings.append("专家团队列表身份不属于医生角色")
     if not valid:
         warnings.append("非医生页面或姓名异常")
     if detail.get("department_polluted") == "yes" or has_department_text_pollution(
@@ -1119,9 +1217,13 @@ def extract_person_name(*texts: str | None) -> str:
     return ""
 
 
-def generic_link_score(href: str, context: str) -> int:
+def generic_link_score(href: str, context: str, entry_url: str = "") -> int:
     parsed = urlparse(href)
     path = parsed.path.lower()
+    if gdskin_entry_id(entry_url) and gdskin_detail_id(href):
+        has_name = bool(extract_person_name(context))
+        has_doctor_role = any(term in context for term in GDSKIN_DOCTOR_ROLE_TERMS)
+        return 12 if has_name and has_doctor_role else -10
     if any(hint in path for hint in GENERIC_PATH_BLOCK_HINTS):
         return -10
 
@@ -1160,10 +1262,12 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
     soup = BeautifulSoup(html, "html.parser")
     rows: list[dict[str, str]] = []
     seen: set[str] = set()
+    gdskin_id = gdskin_entry_id(entry_url)
     strict_smukq_directory = comparable_host(entry_url) == "smukqyy.cn" and bool(
         re.fullmatch(r"/section/\d+/?", urlparse(entry_url).path)
     )
-    for anchor in soup.find_all("a", href=True):
+    anchors = soup.select("table.masterTitleH a[href]") if gdskin_id else soup.find_all("a", href=True)
+    for anchor in anchors:
         href = urljoin(page_url, anchor["href"])
         if canonical_url(href) == canonical_url(page_url):
             continue
@@ -1171,8 +1275,12 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
             continue
         if not matches_generic_directory_detail_url(entry_url, href):
             continue
-        context = nearest_card_text(anchor)
-        score = generic_link_score(href, context)
+        context = (
+            strip_profile_navigation_text(compact_visible_text(anchor, 700))
+            if gdskin_id
+            else nearest_card_text(anchor)
+        )
+        score = generic_link_score(href, context, entry_url)
         if score < 6 and not strict_smukq_directory:
             continue
         key = canonical_url(href)
@@ -1185,10 +1293,40 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
                 "source_link": href,
                 "name": name,
                 "list_title": clip(context, 500),
-                "department": infer_department(context),
+                "department": (
+                    GDSKIN_ENTRY_METADATA[gdskin_id]["category_name"]
+                    if gdskin_id
+                    else infer_department(context)
+                ),
                 "description": clip(context, 700),
                 "list_page": page_url,
                 "score": str(score),
+            }
+        )
+    return rows
+
+
+def discover_gdskin_excluded_links(html: str, page_url: str, entry_url: str) -> list[dict[str, str]]:
+    if not gdskin_entry_id(entry_url):
+        return []
+    soup = BeautifulSoup(html, "html.parser")
+    rows: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for anchor in soup.select("table.masterTitleH a[href]"):
+        href = urljoin(page_url, anchor["href"])
+        detail_id = gdskin_detail_id(href)
+        if not detail_id or detail_id in seen:
+            continue
+        seen.add(detail_id)
+        context = strip_profile_navigation_text(compact_visible_text(anchor, 700))
+        if any(term in context for term in GDSKIN_DOCTOR_ROLE_TERMS):
+            continue
+        rows.append(
+            {
+                "entry_url": entry_url,
+                "source_link": href,
+                "list_title": context,
+                "reason": "专家团队列表身份不属于医生角色，已排除",
             }
         )
     return rows
@@ -1228,6 +1366,65 @@ def discover_generic_list_pages(entry_url: str, html: str, max_pages: int) -> li
         if len(pages) >= max_pages:
             break
     return pages
+
+
+def discover_gdskin_postback_documents(
+    session: requests.Session,
+    entry_url: str,
+    entry_html: str,
+    max_pages: int,
+) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    documents = [{"page": "1", "url": entry_url, "html": entry_html}]
+    errors: list[dict[str, str]] = []
+    soup = BeautifulSoup(entry_html, "html.parser")
+    postback_pages: dict[int, str] = {}
+    for anchor in soup.find_all("a", href=True):
+        match = re.search(r"__doPostBack\('([^']+)','Page\$(\d+)'\)", anchor["href"])
+        if not match:
+            continue
+        page_number = int(match.group(2))
+        if 1 < page_number <= max_pages:
+            postback_pages[page_number] = match.group(1)
+
+    base_payload: dict[str, str] = {}
+    for field in soup.select("form input[name]"):
+        if clean_text(field.get("type")).lower() in {"submit", "button", "image", "file"}:
+            continue
+        base_payload[str(field["name"])] = str(field.get("value") or "")
+
+    for page_number, event_target in sorted(postback_pages.items()):
+        payload = dict(base_payload)
+        payload["__EVENTTARGET"] = event_target
+        payload["__EVENTARGUMENT"] = f"Page${page_number}"
+        page_error = ""
+        for attempt in range(1, 4):
+            try:
+                response = session.post(entry_url, data=payload, timeout=35)
+                if response.status_code == 200:
+                    response.encoding = response.apparent_encoding or response.encoding or "utf-8"
+                    documents.append(
+                        {
+                            "page": str(page_number),
+                            "url": f"{entry_url}#postback-page-{page_number}",
+                            "html": response.text,
+                        }
+                    )
+                    page_error = ""
+                    break
+                page_error = f"HTTP {response.status_code}"
+            except Exception as exc:  # noqa: BLE001 - keep collection failure visible
+                page_error = str(exc)
+            time.sleep(0.8 * attempt)
+        if page_error:
+            errors.append(
+                {
+                    "page": str(page_number),
+                    "entry_url": entry_url,
+                    "url": f"{entry_url}#postback-page-{page_number}",
+                    "error": page_error,
+                }
+            )
+    return documents, errors
 
 
 def best_detail_scope_text(soup: BeautifulSoup) -> str:
@@ -1413,6 +1610,85 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
     }
 
 
+def parse_gdskin_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
+    soup = BeautifulSoup(html, "html.parser")
+    content_element = soup.select_one(".labelContent")
+    if not content_element:
+        return parse_generic_detail(html, fallback)
+
+    title = clean_text(soup.title.get_text(" ", strip=True)) if soup.title else ""
+    content = strip_article_tail(compact_visible_text(content_element, 6000))
+    content = re.sub(r"^预约挂号\s*", "", content)
+    content_paragraphs: list[str] = []
+    for paragraph in content_element.find_all("p"):
+        paragraph_text = strip_article_tail(compact_visible_text(paragraph, 2400))
+        paragraph_text = re.sub(r"^预约挂号\s*", "", paragraph_text)
+        if paragraph_text and paragraph_text not in content_paragraphs:
+            content_paragraphs.append(paragraph_text)
+    name = first_nonempty(
+        fallback.get("name"),
+        extract_person_name(title, content[:160], fallback.get("list_title", "")),
+    )
+
+    specialty_raw = ""
+    profile_text = ""
+    for paragraph_index, paragraph_text in enumerate(content_paragraphs):
+        specialty_match = re.match(r"^(?:专长|擅长)\s*[:：]\s*(.+)$", paragraph_text, flags=re.S)
+        if not specialty_match:
+            continue
+        specialty_parts = re.split(r"简介\s*[:：]", specialty_match.group(1), maxsplit=1)
+        specialty_raw = clean_text(specialty_parts[0])
+        if len(specialty_parts) > 1:
+            profile_text = clean_text(specialty_parts[1])
+        else:
+            following_paragraphs = [
+                clean_text(re.sub(r"^简介\s*[:：]\s*", "", value))
+                for value in content_paragraphs[paragraph_index + 1 :]
+            ]
+            profile_text = clean_text(" ".join(value for value in following_paragraphs if value))
+        break
+    if not specialty_raw:
+        specialty_match = re.search(
+            r"(?:专长|擅长)\s*[:：]\s*(.+?)(?=简介\s*[:：]|$)",
+            content,
+            flags=re.S,
+        )
+        specialty_raw = clean_text(specialty_match.group(1)) if specialty_match else ""
+    specialty_navigation_polluted = contains_navigation_text(specialty_raw)
+    specialty = "" if specialty_navigation_polluted else specialty_raw
+
+    if not profile_text:
+        profile_match = re.search(r"简介\s*[:：]\s*(.+)$", content, flags=re.S)
+        profile_text = clean_text(profile_match.group(1)) if profile_match else ""
+
+    first_label_positions = [
+        position
+        for marker in ["专长：", "专长:", "擅长：", "擅长:", "简介：", "简介:"]
+        if (position := content.find(marker)) >= 0
+    ]
+    title_field = content[: min(first_label_positions)] if first_label_positions else content
+    if name:
+        title_field = re.sub(rf"^\s*{re.escape(name)}\s*", "", title_field, count=1)
+    title_field = clean_text(title_field).strip("、，,；;_- ")
+
+    department_raw = clean_text(fallback.get("department"))
+    department = clean_generic_department(department_raw)
+    raw_highlights = extract_sentences(content, HIGHLIGHT_TERMS)
+    return {
+        "name": clean_text(name),
+        "department": department,
+        "department_raw": department_raw,
+        "department_polluted": "yes" if has_department_text_pollution(department_raw, department) else "no",
+        "title_field": title_field,
+        "specialty": specialty,
+        "specialty_raw": specialty_raw,
+        "specialty_navigation_polluted": "yes" if specialty_navigation_polluted else "no",
+        "highlight_navigation_polluted": "yes" if contains_navigation_text(raw_highlights) else "no",
+        "profile_text": profile_text,
+        "title_text": first_nonempty(name, title),
+    }
+
+
 def gzzoc_list_pages(entry_url: str, html: str) -> list[str]:
     soup = BeautifulSoup(html, "html.parser")
     max_page = 0
@@ -1543,7 +1819,7 @@ def collect_gzzoc(target: HospitalTarget, today: str, max_doctors: int | None = 
 
     by_link: dict[str, dict[str, str]] = {}
     for row in raw_rows:
-        key = canonical_url(row["source_link"])
+        key = generic_detail_identity(row["source_link"])
         item = by_link.setdefault(
             key,
             {
@@ -2043,7 +2319,8 @@ def collect_generic(
     categories: list[dict[str, str]] = []
     page_errors: list[dict[str, str]] = []
     raw_rows: list[dict[str, str]] = []
-    entry_candidate_counts: dict[str, int] = {entry_url: 0 for entry_url in entry_urls}
+    excluded_candidates_by_link: dict[str, dict[str, str]] = {}
+    entry_candidate_links: dict[str, set[str]] = {entry_url: set() for entry_url in entry_urls}
     accessible_entry_count = 0
     for entry_index, entry_url in enumerate(entry_urls, start=1):
         status, entry_html, entry_error = fetch(session, entry_url)
@@ -2051,42 +2328,69 @@ def collect_generic(
             page_errors.append({"page": "1", "entry_url": entry_url, "url": entry_url, "error": entry_error})
             continue
         accessible_entry_count += 1
-        page_urls = discover_generic_list_pages(entry_url, entry_html, max_pages=max_pages)
-        for page_index, page_url in enumerate(page_urls, start=1):
+        if gdskin_entry_id(entry_url):
+            page_documents, postback_errors = discover_gdskin_postback_documents(
+                session,
+                entry_url,
+                entry_html,
+                max_pages=max_pages,
+            )
+            page_errors.extend(postback_errors)
+        else:
+            page_documents = []
+            for page_index, page_url in enumerate(
+                discover_generic_list_pages(entry_url, entry_html, max_pages=max_pages),
+                start=1,
+            ):
+                if page_index == 1:
+                    html = entry_html
+                    page_status = status
+                    page_error = ""
+                else:
+                    page_status, html, page_error = fetch(session, page_url)
+                if page_status != 200:
+                    page_errors.append(
+                        {
+                            "page": str(page_index),
+                            "entry_url": entry_url,
+                            "url": page_url,
+                            "error": page_error,
+                        }
+                    )
+                    continue
+                page_documents.append({"page": str(page_index), "url": page_url, "html": html})
+
+        for page_document in page_documents:
+            page_number = page_document["page"]
+            page_url = page_document["url"]
             categories.append(
                 {
-                    "category_id": f"{entry_index}-{page_index}",
-                    "category_name": f"通用模板入口{entry_index}列表第{page_index}页",
+                    "category_id": f"{entry_index}-{page_number}",
+                    "category_name": f"通用模板入口{entry_index}列表第{page_number}页",
                     "url": page_url,
                     "entry_url": entry_url,
                 }
             )
-            if page_index == 1:
-                html = entry_html
-                page_status = status
-                page_error = ""
-            else:
-                page_status, html, page_error = fetch(session, page_url)
-            if page_status != 200:
-                page_errors.append(
-                    {
-                        "page": str(page_index),
-                        "entry_url": entry_url,
-                        "url": page_url,
-                        "error": page_error,
-                    }
+            page_rows = discover_generic_detail_links(page_document["html"], page_url, entry_url)
+            for excluded in discover_gdskin_excluded_links(page_document["html"], page_url, entry_url):
+                excluded_candidates_by_link.setdefault(
+                    generic_detail_identity(excluded["source_link"]),
+                    excluded,
                 )
-                continue
-            page_rows = discover_generic_detail_links(html, page_url, entry_url)
             for row in page_rows:
                 row["entry_url"] = entry_url
+                entry_candidate_links[entry_url].add(generic_detail_identity(row["source_link"]))
             raw_rows.extend(page_rows)
-            entry_candidate_counts[entry_url] += len(page_rows)
             print(
-                f"[entry {entry_index}/{len(entry_urls)} page {page_index}/{len(page_urls)}] "
+                f"[entry {entry_index}/{len(entry_urls)} page {page_number}/{len(page_documents)}] "
                 f"generic list rows: {len(page_rows)}"
             )
             time.sleep(0.2)
+
+    entry_candidate_counts = {
+        entry_url: len(candidate_links)
+        for entry_url, candidate_links in entry_candidate_links.items()
+    }
 
     if accessible_entry_count == 0:
         errors = "；".join(error.get("error", "") for error in page_errors if error.get("error"))
@@ -2106,13 +2410,27 @@ def collect_generic(
                 "list_pages": "",
                 "score": row.get("score", ""),
                 "entry_url": row.get("entry_url", ""),
+                "all_entry_urls": row.get("entry_url", ""),
             },
         )
-        for field in ["name", "list_title", "department", "description"]:
+        for field in ["name", "list_title", "description"]:
             if row.get(field, "") and len(row.get(field, "")) > len(item.get(field, "")):
                 item[field] = row[field]
+        general_categories = {"首席专家", "知名专家"}
+        row_department = row.get("department", "")
+        item_department = item.get("department", "")
+        if row_department and (
+            not item_department
+            or (item_department in general_categories and row_department not in general_categories)
+            or len(row_department) > len(item_department)
+        ):
+            item["department"] = row_department
         if int(row.get("score") or 0) > int(item.get("score") or 0):
             item["score"] = row.get("score", "")
+        entry_members = [value for value in item["all_entry_urls"].split("；") if value]
+        if row.get("entry_url", "") and row["entry_url"] not in entry_members:
+            entry_members.append(row["entry_url"])
+            item["all_entry_urls"] = "；".join(entry_members)
         pages = [value for value in item["list_pages"].split("；") if value]
         if row["list_page"] not in pages:
             pages.append(row["list_page"])
@@ -2140,7 +2458,11 @@ def collect_generic(
             "highlight_navigation_polluted": "no",
         }
         if detail_status == 200:
-            detail = parse_generic_detail(detail_html, item)
+            detail = (
+                parse_gdskin_detail(detail_html, item)
+                if gdskin_detail_id(link)
+                else parse_generic_detail(detail_html, item)
+            )
         else:
             detail_errors.append({"source_link": link, "error": detail_error})
 
@@ -2208,7 +2530,11 @@ def collect_generic(
                 "来源类型": "医院官网",
                 "来源链接": link,
                 "采集入口": item.get("entry_url", target.entry_url),
-                "采集方式": "医院官网通用模板：列表页自动发现+详情页文本抽取",
+                "采集方式": (
+                    "医院官网 ASP.NET 专家团队：GridView 列表+详情页结构化抽取"
+                    if gdskin_detail_id(link)
+                    else "医院官网通用模板：列表页自动发现+详情页文本抽取"
+                ),
                 "采集日期": today,
                 "详情页状态": "200" if detail_status == 200 else "失败",
                 "已建画像": "是" if canonical_url(link) in existing_links else "否",
@@ -2238,6 +2564,52 @@ def collect_generic(
             if warning:
                 warning_counter[warning] += 1
 
+    sample_entry_urls: list[str] = []
+    seen_sample_entries: set[str] = set()
+    for row in rows:
+        entry_url = clean_text(row.get("采集入口"))
+        entry_key = canonical_url(entry_url)
+        if entry_url and entry_key not in seen_sample_entries:
+            seen_sample_entries.add(entry_key)
+            sample_entry_urls.append(entry_url)
+    sample_entry_categories = [
+        GDSKIN_ENTRY_METADATA[entry_id]["category_name"]
+        for entry_url in sample_entry_urls
+        if (entry_id := gdskin_entry_id(entry_url))
+    ]
+    entry_page_counts = Counter(category.get("entry_url", "") for category in categories)
+    entry_reconnaissance: list[dict[str, Any]] = []
+    for entry_url in entry_urls:
+        entry_id = gdskin_entry_id(entry_url)
+        candidate_count = entry_candidate_counts.get(entry_url, 0)
+        metadata = GDSKIN_ENTRY_METADATA.get(entry_id, {})
+        entry_reconnaissance.append(
+            {
+                "entry_url": entry_url,
+                "category_name": metadata.get("category_name", f"入口 {entry_id or entry_url}"),
+                "page_nature": (
+                    "医院官网 ASP.NET GridView 专家列表"
+                    if candidate_count
+                    else "医院官网专家团队分类页（当前未列出可采医生详情）"
+                ),
+                "unique_detail_count": candidate_count,
+                "list_page_count": entry_page_counts.get(entry_url, 0),
+                "affiliation": metadata.get("affiliation", target.hospital),
+                "independent_entity_check": "未发现独立挂牌机构；页面保持在医院官网同站专家团队栏目",
+            }
+        )
+
+    cross_entry_duplicates = [
+        {
+            "source_link": item["source_link"],
+            "name": item.get("name", ""),
+            "entry_urls": item.get("all_entry_urls", "").split("；"),
+        }
+        for item in by_link.values()
+        if len([value for value in item.get("all_entry_urls", "").split("；") if value]) > 1
+    ]
+    candidate_membership_count = sum(entry_candidate_counts.values())
+
     return {
         "meta": {
             "city": target.city,
@@ -2246,22 +2618,34 @@ def collect_generic(
             "entry_url": " ".join(entry_urls),
             "entry_url_count": len(entry_urls),
             "entry_candidate_counts": entry_candidate_counts,
-            "entry_url_source": "Claude owner PR #6 显式修正" if target.entry_urls else "官网入口台账",
+            "entry_url_source": "Claude owner Issue 显式多入口" if target.entry_urls else "官网入口台账",
             "ledger_entry_url": target.ledger_entry_url or target.entry_url,
             "adapter_id": target.adapter_id,
             "collected_at": today,
             "category_count": len(categories),
             "raw_card_rows": len(raw_rows),
+            "candidate_membership_count": candidate_membership_count,
+            "unique_candidate_count": len(by_link),
+            "cross_entry_duplicate_count": candidate_membership_count - len(by_link),
             "unique_doctor_count": len(rows),
             "category_error_count": len(page_errors),
             "detail_error_count": len(detail_errors),
             "existing_profile_count": sum(1 for row in rows if row["已建画像"] == "是"),
             "ledger_review": target.review,
             "ledger_difficulty": target.difficulty,
-            "generic_template": "yes",
+            "generic_template": "yes" if target.adapter_id == GENERIC_ADAPTER_ID else "no",
+            "site_adapter_profile": (
+                "gdskin_aspnet_gridview" if target.adapter_id == GDSKIN_ADAPTER_ID else "generic"
+            ),
             "generic_max_pages": max_pages,
+            "sample_entry_coverage_count": len(sample_entry_urls),
+            "sample_entry_categories": sample_entry_categories,
+            "excluded_non_doctor_count": len(excluded_candidates_by_link),
         },
         "categories": categories,
+        "entry_reconnaissance": entry_reconnaissance,
+        "cross_entry_duplicates": cross_entry_duplicates,
+        "excluded_candidates": list(excluded_candidates_by_link.values()),
         "category_errors": page_errors,
         "detail_errors": detail_errors,
         "category_counts": category_counter.most_common(),
@@ -2285,6 +2669,10 @@ def render_counter_table(counter: dict[str, int] | list[tuple[str, int]], empty:
     return "\n".join(lines) if lines else empty
 
 
+def markdown_table_cell(value: Any) -> str:
+    return clean_text(str(value or "")).replace("|", "\\|")
+
+
 def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path: Path) -> None:
     meta = payload["meta"]
     xlsx_output = f"`{xlsx_path}`" if xlsx_path.exists() else "未生成（本轮使用 --no-xlsx）"
@@ -2303,6 +2691,29 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
     )
     if not detail_error_lines:
         detail_error_lines = "| 无 | 无 |"
+    entry_recon_lines = "\n".join(
+        (
+            f"| {item.get('category_name', '')} | {item.get('entry_url', '')} | "
+            f"{item.get('page_nature', '')} | {item.get('list_page_count', 0)} | "
+            f"{item.get('unique_detail_count', 0)} | {item.get('affiliation', '')} | "
+            f"{item.get('independent_entity_check', '')} |"
+        )
+        for item in payload.get("entry_reconnaissance", [])
+    ) or "| 无 | 无 | 无 | 0 | 0 | 无 | 无 |"
+    excluded_lines = "\n".join(
+        (
+            f"| {item.get('entry_url', '')} | {markdown_table_cell(item.get('list_title', ''))} | "
+            f"{item.get('source_link', '')} | {item.get('reason', '')} |"
+        )
+        for item in payload.get("excluded_candidates", [])
+    ) or "| 无 | 无 | 无 | 无 |"
+    duplicate_lines = "\n".join(
+        (
+            f"| {item.get('name', '')} | {item.get('source_link', '')} | "
+            f"{'；'.join(item.get('entry_urls', []))} |"
+        )
+        for item in payload.get("cross_entry_duplicates", [])
+    ) or "| 无 | 无 | 无 |"
 
     report = f"""---
 类型: 自动采集试跑报告
@@ -2335,6 +2746,29 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 | 台账人工复核 | {meta['ledger_review']} |
 | 采集难度初判 | {meta['ledger_difficulty']} |
 
+## 入口普查表
+
+| 分类 | 官方入口 | 页面性质 | 列表分页 | 唯一医生详情 URL | 归属医院/中心 | 独立实体核验 |
+|---|---|---|---:|---:|---|---|
+{entry_recon_lines}
+
+## 跨入口去重与试采覆盖
+
+- 各入口唯一医生详情 URL 关系数：{meta.get('candidate_membership_count', meta['raw_card_rows'])}
+- 跨入口去重后唯一候选：{meta.get('unique_candidate_count', meta['unique_doctor_count'])}
+- 跨入口重复关系：{meta.get('cross_entry_duplicate_count', 0)}
+- 试采覆盖入口分类：{meta.get('sample_entry_coverage_count', 0)} 个（{'、'.join(meta.get('sample_entry_categories', [])) or '无'}）
+
+| 重复医生 | 唯一详情 URL | 出现入口 |
+|---|---|---|
+{duplicate_lines}
+
+## 已排除非医生候选
+
+| 入口 | 列表身份 | 来源链接 | 排除原因 |
+|---|---|---|---|
+{excluded_lines}
+
 ## 输出文件
 
 - Excel 底表：{xlsx_output}
@@ -2346,6 +2780,9 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 |---|---:|
 | 官网列表分页数 | {meta['category_count']} |
 | 原始医生卡片记录 | {meta['raw_card_rows']} |
+| 跨入口去重前候选关系 | {meta.get('candidate_membership_count', meta['raw_card_rows'])} |
+| 跨入口去重后唯一候选 | {meta.get('unique_candidate_count', meta['unique_doctor_count'])} |
+| 排除非医生候选 | {meta.get('excluded_non_doctor_count', 0)} |
 | 唯一医生详情页 | {meta['unique_doctor_count']} |
 | 覆盖科室数 | {meta.get('department_coverage_count', 0)} |
 | 列表页失败数 | {meta['category_error_count']} |
@@ -2387,7 +2824,7 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 1. 优先复核“异常提示”不为空的医生。
 2. “亮眼经历线索”只作为官方证据线索，不直接改写为对外宣传语。
 3. 官网没有展示的擅长、经历、疾病标签保持空白，不补造。
-4. 专用适配器结果可直接进入正式追加；通用模板结果需先完成小样本试采复核，确认字段质量后再全量追加。
+4. 标记为试采门禁的适配器必须先完成小样本复核；只有取得 Claude 明确通过指令后才可全量追加。
 
 ## 合规边界
 
@@ -2529,6 +2966,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--today", default=date.today().isoformat(), help="采集日期")
     parser.add_argument("--max-doctors", type=int, default=0, help="仅测试前 N 位医生；0 表示全量")
     parser.add_argument("--min-departments", type=int, default=0, help="要求结果至少覆盖的非空科室数；0 表示不设门禁")
+    parser.add_argument(
+        "--min-entry-categories",
+        type=int,
+        default=0,
+        help="要求试采结果至少覆盖的显式入口分类数；0 表示不设门禁",
+    )
     parser.add_argument("--max-pages", type=int, default=GENERIC_MAX_PAGES_DEFAULT, help="通用模板最多读取的列表分页数")
     parser.add_argument("--trial-only", action="store_true", help="仅试采并输出临时底表/报告，不追加统一总底表；未指定 --max-doctors 时默认试采 10 位")
     parser.add_argument("--force-generic", action="store_true", help="即使已有专用适配器，也强制使用通用模板试采")
@@ -2607,13 +3050,13 @@ def main() -> None:
     )
 
     if (
-        target.adapter_id == GENERIC_ADAPTER_ID
+        target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID}
         and not args.trial_only
         and not args.single_output
         and not args.allow_generic_append
     ):
         raise RuntimeError(
-            "通用模板结果存在误识别风险。请先运行 --trial-only --max-doctors 10 试采复核；"
+            "试采门禁适配器结果存在误识别风险。请先运行 --trial-only --max-doctors 10 试采复核；"
             "确认质量可接受后，再增加 --allow-generic-append 全量追加统一总底表。"
         )
 
@@ -2622,7 +3065,7 @@ def main() -> None:
         payload = collect_gzzoc(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id == "nbkjyy_static_expert":
         payload = collect_nbkj(target, args.today, max_doctors=max_doctors)
-    elif target.adapter_id == GENERIC_ADAPTER_ID:
+    elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID}:
         payload = collect_generic(target, args.today, max_doctors=max_doctors, max_pages=args.max_pages)
     else:
         raise RuntimeError(f"暂不支持的适配器：{target.adapter_id}")
@@ -2633,11 +3076,25 @@ def main() -> None:
             for entry_url, count in payload["meta"].get("entry_candidate_counts", {}).items()
             if int(count) == 0
         ]
-        if payload["meta"].get("category_error_count") or failed_entries:
+        empty_entries_blocking = [
+            entry_url
+            for entry_url in failed_entries
+            if target.adapter_id != GDSKIN_ADAPTER_ID or gdskin_entry_id(entry_url) != "924"
+        ]
+        if payload["meta"].get("category_error_count") or empty_entries_blocking:
             raise RuntimeError(
                 "显式多入口采集不完整："
                 f"列表错误 {payload['meta'].get('category_error_count', 0)} 条，"
-                f"无候选入口 {'、'.join(failed_entries) or '无'}"
+                f"无候选入口 {'、'.join(empty_entries_blocking) or '无'}"
+            )
+
+    if args.min_entry_categories:
+        coverage_count = int(payload["meta"].get("sample_entry_coverage_count") or 0)
+        if coverage_count < args.min_entry_categories:
+            raise RuntimeError(
+                "入口分类覆盖门禁不满足："
+                f"要求至少 {args.min_entry_categories} 个，实际 {coverage_count} 个："
+                f"{'、'.join(payload['meta'].get('sample_entry_categories', [])) or '无'}"
             )
 
     covered_departments = sorted(
