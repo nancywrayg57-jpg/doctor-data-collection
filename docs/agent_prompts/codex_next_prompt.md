@@ -1,7 +1,7 @@
 # Codex 下一步提示词
 
 > 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。Codex 新会话启动时，在读取 `Agent.md`、路线图、需求文档和架构决策后，必须读取本文件。
-> 当前状态：`READY`。Claude owner 已通过海珠广场院区 TRIAL-2 审计，并下发 `FULL_APPEND_AND_OBSIDIAN`。
+> 当前状态：`IMAGE_REPAIR_IN_PROGRESS`。Claude owner 的首次画像审计为不通过；当前仅执行 31 条 `亮眼经历线索` 导航污染的最小返修，不得重新追加或扩大范围。
 
 ## GitHub 身份
 
@@ -17,16 +17,18 @@
 ## 当前动作
 
 ```text
-Status: READY
-Phase: FULL_APPEND_AND_OBSIDIAN
+Status: IMAGE_REPAIR_IN_PROGRESS
+Phase: FULL_APPEND_AND_OBSIDIAN_REPAIR
 LedgerSequence: 10
 Hospital: 南方医科大学口腔医院(海珠广场院区)
 City: 广州市
 OfficialHomeURL: https://www.smukqyy.cn/home
 DoctorDirectoryURL: https://www.smukqyy.cn/section/341 https://www.smukqyy.cn/section/342 https://www.smukqyy.cn/section/434 https://www.smukqyy.cn/section/343 https://www.smukqyy.cn/section/385 https://www.smukqyy.cn/section/384 https://www.smukqyy.cn/section/386 https://www.smukqyy.cn/section/431 https://www.smukqyy.cn/section/504
-AuditDecision: 通过
-AuditConditions: ①全量预期约 95 位（95 原始卡片去重后为准），若实际唯一医生数偏离该量级须在回报中说明；②「已清洗」「低置信度」等异常提示原样入库进检查清单；③无显式擅长标签保持留空；④范围严格限于以上 9 入口，禁止纳入总院/其他院区。
-Task: 全量采集并追加统一总底表（--allow-generic-append），检查 XLSX/CSV/更新报告，生成本院 Obsidian 画像并核验索引，清理试采文件，将完整结果提交推送 PR #6 并请求画像审计后停止。
+AuditDecision: 不通过（画像阶段；其余数量、来源和字段均已通过）
+AuditSource: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/6#issuecomment-5252683492
+AuditBlocker: 本院 31/95 条亮眼经历线索包含导航文本，且被画像原样渲染。
+RepairScope: 仅修正本院 31 行的亮眼经历线索与异常提示；仅覆盖对应 31 份本轮自动画像；不得触碰其他医院、其他字段或人工精修画像。
+Task: 复用导航剥离逻辑清洗亮眼经历；无有效经历则留空；增加「亮眼经历含导航文本，已清洗/已清空」提示；同步单院/总 payload、CSV/XLSX 和更新报告；刷新对应 31 份自动画像；保持本院 95 行、95 份画像和 95 个索引链接；新增测试、提交推送 PR #6 并请求 Claude 返修复审。
 ObsidianRoot: D:\workspace\信息收集整理\医生画像仓库\01_试点医院
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/5
 ```
@@ -34,9 +36,10 @@ GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/5
 执行边界：
 
 1. 只执行 PR #6 owner 评论修正后的当前医院及 9 个海珠广场院区官方科室入口；不扩大到总院、番禺、盘福或沙河院区。
-2. 本轮执行 `FULL_APPEND_AND_OBSIDIAN`，允许使用 `--allow-generic-append`；全量候选、异常提示和科室覆盖必须按 owner 四项条件核验。
-3. 正式追加后立即生成缺失 Obsidian 画像并核验索引；完整结果提交推送 PR #6 后请求画像审计。
-4. Claude 审计通过且本 PR 已合并关闭前，不得领取下一个 Issue。
+2. 当前禁止再次运行正式追加或使用 `--allow-generic-append`；底表只允许修改本院受污染 31 行的 `亮眼经历线索` 与 `异常提示`。
+3. 画像覆盖只限对应 31 份本轮自动生成文件；不得覆盖其他医院或人工精修画像；索引须保持 95 个有效链接。
+4. 返修结果提交并成功推送后请求 Claude 复审；Claude 明确通过且 PR 已合并关闭前，不得领取下一个 Issue。
+5. `Doctor data single-Issue monitor` 已在首次完整画像生成并提交推送后启用；当前只监控 Issue #5 / PR #6，不得提前领取下一 Issue。
 
 ## Claude 下发格式
 

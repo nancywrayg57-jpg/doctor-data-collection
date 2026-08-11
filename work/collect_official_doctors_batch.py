@@ -926,6 +926,12 @@ def strip_profile_navigation_text(value: str | None) -> str:
     separator = r"(?:/|>|＞|»|›|→)"
     label = r"(?:姓名|科室|所在科室|职称|职务|专业擅长|擅长|专长|简介|个人简介|一、|二、)"
     breadcrumb_patterns = [
+        (
+            r"^.*?(?:你)?当前所在的位置\s*[:：]?\s*.*?"
+            r"(?:专家|医师)信息\s*[^。！？；;\n]{0,160}?"
+            r"科室\s*[:：]\s*[\u4e00-\u9fff、（）()]{1,30}?"
+            r"(?:科(?:一室|二室)?|中心)\s*"
+        ),
         rf"(?:临床专家\s*)?面包屑\s*首页\s*(?:{separator}\s*[^/＞>»›→]{{1,60}}?\s*){{1,10}}(?={label}|$)",
         rf"(?:你)?当前所在的位置\s*[:：]?\s*[^/＞>»›→]{{0,60}}\s*(?:{separator}\s*[^/＞>»›→]{{1,60}}?\s*){{1,10}}(?={label}|$)",
         rf"当前位置\s*[:：]?\s*首页\s*(?:{separator}\s*[^/＞>»›→]{{1,60}}?\s*){{1,10}}(?={label}|$)",
@@ -945,6 +951,14 @@ def contains_navigation_text(value: str | None) -> bool:
         marker in text
         for marker in ["你当前所在的位置", "当前所在的位置", "当前位置", "面包屑", "首页 >", "首页＞"]
     )
+
+
+def extract_clean_highlights(value: str | None) -> str:
+    cleaned_source = strip_profile_navigation_text(value)
+    highlights = extract_sentences(cleaned_source, HIGHLIGHT_TERMS)
+    if contains_navigation_text(highlights):
+        return ""
+    return highlights
 
 
 def element_attribute_tokens(element: Any) -> set[str]:
@@ -1307,6 +1321,8 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
     navigation_context = extract_navigation_context(soup)
     remove_profile_noise_elements(soup)
     raw_scope_text = compact_visible_text(soup, 6000)
+    raw_highlights = extract_sentences(raw_scope_text, HIGHLIGHT_TERMS)
+    highlight_navigation_polluted = contains_navigation_text(raw_highlights)
     main_text = best_detail_scope_text(soup)
     compact = clean_text("\n".join([h1, title, main_text]))
     name = first_nonempty(
@@ -1391,6 +1407,7 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
         "specialty": clean_text(specialty),
         "specialty_raw": clean_text(first_nonempty(specialty_raw, specialty_preclean)),
         "specialty_navigation_polluted": "yes" if specialty_navigation_polluted else "no",
+        "highlight_navigation_polluted": "yes" if highlight_navigation_polluted else "no",
         "profile_text": clean_text(profile_text),
         "title_text": first_nonempty(h1, title),
     }
@@ -2120,6 +2137,7 @@ def collect_generic(
             "department_polluted": "no",
             "specialty_raw": "",
             "specialty_navigation_polluted": "no",
+            "highlight_navigation_polluted": "no",
         }
         if detail_status == 200:
             detail = parse_generic_detail(detail_html, item)
@@ -2150,7 +2168,7 @@ def collect_generic(
         )
         priority, groups, tags = classify_generic_record(valid_doctor_record, combined_text, title_hits)
         specialty = clip(detail.get("specialty"), 520) if valid_doctor_record else ""
-        highlights = extract_sentences(combined_text, HIGHLIGHT_TERMS)
+        highlights = extract_clean_highlights(combined_text)
 
         warnings: list[str] = []
         if detail_status != 200:
@@ -2166,6 +2184,10 @@ def collect_generic(
             warnings.append("详情页正文为空或未识别")
         if int(item.get("score") or 0) < 8:
             warnings.append("通用模板低置信度")
+        if detail.get("highlight_navigation_polluted") == "yes":
+            warnings.append(
+                "亮眼经历含导航文本，已清洗" if highlights else "亮眼经历含导航文本，已清空"
+            )
 
         rows.append(
             {

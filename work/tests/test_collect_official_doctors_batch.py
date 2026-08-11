@@ -16,6 +16,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     clean_generic_department,
     discover_generic_detail_links,
     effective_entry_urls,
+    extract_clean_highlights,
     generic_record_quality,
     looks_like_person_name,
     matches_generic_directory_detail_url,
@@ -108,6 +109,34 @@ class GenericDetailNoiseFilteringTests(unittest.TestCase):
         self.assertNotIn("当前位置", detail["profile_text"])
         self.assertNotIn("医疗服务", detail["profile_text"])
         self.assertNotIn("专家介绍", detail["profile_text"])
+
+    def test_smukq_navigation_block_is_removed_before_highlight_extraction(self) -> None:
+        html = """
+        <main class="content">
+          <h1>谢跃强</h1>
+          <div>你当前所在的位置： 海珠广场院区/ 口腔正畸科 /详细
+          海珠广场院区 口腔种植修复科 牙体牙髓病科一室 口腔正畸科
+          专家信息 谢跃强 主治医师，正畸学硕士 科室：口腔正畸科
+          中华口腔正畸专业委员会会员，隐形病例荣获全国中青年正畸医师病例大赛50强。</div>
+        </main>
+        """
+
+        detail = parse_generic_detail(html, {})
+        highlights = extract_clean_highlights(detail["profile_text"])
+
+        self.assertEqual(detail["highlight_navigation_polluted"], "yes")
+        self.assertNotIn("你当前所在的位置", detail["profile_text"])
+        self.assertNotIn("口腔种植修复科", detail["profile_text"])
+        self.assertIn("荣获全国中青年正畸医师病例大赛50强", highlights)
+
+    def test_highlight_is_empty_when_navigation_removal_leaves_no_evidence(self) -> None:
+        raw = (
+            "你当前所在的位置：海珠广场院区/儿童口腔科/详细 "
+            "海珠广场院区 口腔种植修复科 儿童口腔科 "
+            "医师信息 陈焱 主治医师 科室：儿童口腔科"
+        )
+
+        self.assertEqual(extract_clean_highlights(raw), "")
 
 
 class GenericDirectoryFilteringTests(unittest.TestCase):
