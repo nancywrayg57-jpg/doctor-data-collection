@@ -4,17 +4,17 @@
 城市: 广州市
 采集日期: 2026-08-11
 来源范围: 医院官网
-采集入口: https://www.smukqyy.cn/section/364
+采集入口: https://www.smukqyy.cn/section/341 https://www.smukqyy.cn/section/342 https://www.smukqyy.cn/section/434 https://www.smukqyy.cn/section/343 https://www.smukqyy.cn/section/385 https://www.smukqyy.cn/section/384 https://www.smukqyy.cn/section/386 https://www.smukqyy.cn/section/431 https://www.smukqyy.cn/section/504
 适配器: generic_official_template
 ---
 
-# 南方医科大学口腔医院(海珠广场院区) 全院医生自动采集试跑报告
+# 南方医科大学口腔医院(海珠广场院区) 官方医生自动采集试跑报告
 
 ## 结论
 
 本次试跑只读取医院官网公开专家列表页和医生详情页。系统没有使用第三方平台、没有绕过登录或验证码、没有采集私人联系方式或患者信息。
 
-本轮生成全院医生自动采集底表，共 10 位唯一医生；官网列表页原始卡片记录 15 条；识别到官网列表分页 1 页；详情页失败 0 条。
+本轮生成医生自动采集试采底表，共 10 位唯一医生；官网列表页原始卡片记录 95 条；识别到官网列表分页 9 页；覆盖 9 个科室；详情页失败 0 条。
 
 ## 台账来源
 
@@ -23,22 +23,25 @@
 | 城市 | 广州市 |
 | 医院 | 南方医科大学口腔医院(海珠广场院区) |
 | 官网首页 | https://www.smukqyy.cn/home |
-| 医生入口 | https://www.smukqyy.cn/section/364 |
+| 本轮医生入口 | https://www.smukqyy.cn/section/341 https://www.smukqyy.cn/section/342 https://www.smukqyy.cn/section/434 https://www.smukqyy.cn/section/343 https://www.smukqyy.cn/section/385 https://www.smukqyy.cn/section/384 https://www.smukqyy.cn/section/386 https://www.smukqyy.cn/section/431 https://www.smukqyy.cn/section/504 |
+| 入口来源 | Claude owner PR #6 显式修正 |
+| 原台账医生入口 | https://www.smukqyy.cn/section/364 |
 | 台账人工复核 | 确认可采集 |
 | 采集难度初判 | A-优先自动采集 |
 
 ## 输出文件
 
-- Excel 底表：`D:\workspace\信息收集整理\work\南方医科大学口腔医院(海珠广场院区)_trial_doctors.xlsx`
+- Excel 底表：未生成（本轮使用 --no-xlsx）
 - CSV 底表：`D:\workspace\信息收集整理\work\南方医科大学口腔医院(海珠广场院区)_trial_doctors.csv`
 
 ## 采集统计
 
 | 指标 | 数量 |
 |---|---:|
-| 官网列表分页数 | 1 |
-| 原始医生卡片记录 | 15 |
+| 官网列表分页数 | 9 |
+| 原始医生卡片记录 | 95 |
 | 唯一医生详情页 | 10 |
+| 覆盖科室数 | 9 |
 | 列表页失败数 | 0 |
 | 详情页失败数 | 0 |
 | 已建画像匹配数 | 0 |
@@ -47,19 +50,28 @@
 
 | 范围 | 医生数 |
 |---|---:|
-| 疑难重症 | 1 |
+| 疑难重症 | 2 |
 
 ## 科室数量 Top 20
 
 | 科室 | 医生数 |
 |---|---:|
-| 牙体牙髓病科一室 | 10 |
+| 口腔种植修复科 | 2 |
+| 口腔正畸科 | 1 |
+| 牙体牙髓病科二室 | 1 |
+| 牙周黏膜病科 | 1 |
+| 儿童口腔科 | 1 |
+| 口腔预防科 | 1 |
+| 口腔颌面外科 | 1 |
+| 牙体牙髓病科一室 | 1 |
+| 舒适化治疗中心 | 1 |
 
 ## 异常与复核提示
 
 | 提示 | 数量 |
 |---|---:|
 | 科室原文含正文，已清洗 | 8 |
+| 通用模板低置信度 | 1 |
 
 ## 列表页读取异常
 

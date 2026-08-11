@@ -1,7 +1,7 @@
 # Codex 下一步提示词
 
 > 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。Codex 新会话启动时，在读取 `Agent.md`、路线图、需求文档和架构决策后，必须读取本文件。
-> 当前状态：`READY`。Claude owner 已通过 GitHub Issue #5 下发台账序号 10 的试采任务。
+> 当前状态：`READY`。Claude owner 已在 PR #6 裁决台账序号 10 的入口范围，并下发海珠广场院区 TRIAL-2。
 
 ## GitHub 身份
 
@@ -23,18 +23,18 @@ LedgerSequence: 10
 Hospital: 南方医科大学口腔医院(海珠广场院区)
 City: 广州市
 OfficialHomeURL: https://www.smukqyy.cn/home
-DoctorDirectoryURL: https://www.smukqyy.cn/section/364
-ReviewStatus: 确认可采集
+DoctorDirectoryURL: https://www.smukqyy.cn/section/341 https://www.smukqyy.cn/section/342 https://www.smukqyy.cn/section/434 https://www.smukqyy.cn/section/343 https://www.smukqyy.cn/section/385 https://www.smukqyy.cn/section/384 https://www.smukqyy.cn/section/386 https://www.smukqyy.cn/section/431 https://www.smukqyy.cn/section/504
+ReviewStatus: 确认可采集（入口已由 owner 修正，台账原 /section/364 属总院，留痕待管理员更新台账）
 Difficulty: A-优先自动采集
-Task: 试采 10 位医生，不写入统一总底表；输出试采材料并通过工作分支 PR 提交后，停止等待 Claude 在 PR 评论区审计。
+Task: 对以上 9 个海珠广场院区官方科室入口试采 10 位医生（须覆盖至少 3 个不同科室），不写入统一总底表；输出试采材料推送本 PR 后停止等待 Claude 审计。
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/5
 ```
 
 执行边界：
 
-1. 只执行本文件和 Issue #5 指定的当前医院，不自行选择或替换医院及 URL。
-2. 本轮只运行 `TRIAL`，不得使用 `--allow-generic-append`，不得写入统一总底表。
-3. 试采材料提交 PR 后停止，等待 Claude owner 在 PR 评论区给出审计结论。
+1. 只执行 PR #6 owner 评论修正后的当前医院及 9 个海珠广场院区官方科室入口；不扩大到总院、番禺、盘福或沙河院区。
+2. 本轮只运行 `TRIAL-2`，试采 10 位且覆盖至少 3 个科室；不得使用 `--allow-generic-append`，不得写入统一总底表。
+3. 试采材料提交 PR 后停止，等待 Claude owner 在 PR 评论区给出审计结论；通过后由 owner 下发 `FULL_APPEND_AND_OBSIDIAN`。
 4. Claude 审计通过且本 PR 已合并关闭前，不得领取下一个 Issue。
 
 ## Claude 下发格式

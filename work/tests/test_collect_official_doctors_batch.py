@@ -10,13 +10,16 @@ if str(WORK_DIR) not in sys.path:
     sys.path.insert(0, str(WORK_DIR))
 
 from collect_official_doctors_batch import (  # noqa: E402
+    HospitalTarget,
     classify_generic_record,
     clean_generic_department,
     discover_generic_detail_links,
+    effective_entry_urls,
     generic_record_quality,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     parse_generic_detail,
+    round_robin_generic_items,
 )
 
 
@@ -111,13 +114,20 @@ class GenericDirectoryFilteringTests(unittest.TestCase):
         entry_url = "https://www.smukqyy.cn/section/364"
         html = """
         <div><a href="/prods/364/200">万蕾 主任医师 科室：牙体牙髓病科一室</a></div>
+        <div><a href="/prods/364/201">张三 临床硕士生...</a></div>
         <div><a href="/doctor/166">就诊须知 医师 门诊</a></div>
         <div><a href="/prods/999/200">张三 主任医师 科室：口腔科</a></div>
         """
 
         rows = discover_generic_detail_links(html, entry_url, entry_url)
 
-        self.assertEqual([row["source_link"] for row in rows], ["https://www.smukqyy.cn/prods/364/200"])
+        self.assertEqual(
+            [row["source_link"] for row in rows],
+            [
+                "https://www.smukqyy.cn/prods/364/200",
+                "https://www.smukqyy.cn/prods/364/201",
+            ],
+        )
         self.assertTrue(matches_generic_directory_detail_url(entry_url, rows[0]["source_link"]))
         self.assertFalse(matches_generic_directory_detail_url(entry_url, "https://www.smukqyy.cn/doctor/166"))
         self.assertTrue(
@@ -132,6 +142,48 @@ class GenericDirectoryFilteringTests(unittest.TestCase):
             with self.subTest(value=value):
                 self.assertFalse(looks_like_person_name(value))
         self.assertTrue(looks_like_person_name("万蕾"))
+
+    def test_multi_entry_urls_are_deduplicated_in_owner_order(self) -> None:
+        target = HospitalTarget(
+            city="广州市",
+            hospital="南方医科大学口腔医院(海珠广场院区)",
+            homepage="https://www.smukqyy.cn/home",
+            entry_url="https://www.smukqyy.cn/section/341",
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="generic_official_template",
+            entry_urls=(
+                "https://www.smukqyy.cn/section/341",
+                "https://www.smukqyy.cn/section/342",
+                "https://www.smukqyy.cn/section/341/",
+            ),
+        )
+
+        self.assertEqual(
+            effective_entry_urls(target),
+            [
+                "https://www.smukqyy.cn/section/341",
+                "https://www.smukqyy.cn/section/342",
+            ],
+        )
+
+    def test_multi_entry_trial_sampling_round_robins_across_sections(self) -> None:
+        entry_urls = [
+            "https://www.smukqyy.cn/section/341",
+            "https://www.smukqyy.cn/section/342",
+            "https://www.smukqyy.cn/section/434",
+        ]
+        items = [
+            {"entry_url": entry_urls[0], "source_link": "https://www.smukqyy.cn/prods/341/2"},
+            {"entry_url": entry_urls[0], "source_link": "https://www.smukqyy.cn/prods/341/1"},
+            {"entry_url": entry_urls[1], "source_link": "https://www.smukqyy.cn/prods/342/1"},
+            {"entry_url": entry_urls[2], "source_link": "https://www.smukqyy.cn/prods/434/1"},
+        ]
+
+        selected = round_robin_generic_items(items, entry_urls, max_items=3)
+
+        self.assertEqual([item["entry_url"] for item in selected], entry_urls)
+        self.assertEqual(selected[0]["source_link"], "https://www.smukqyy.cn/prods/341/1")
 
 
 class GenericFieldCleaningTests(unittest.TestCase):

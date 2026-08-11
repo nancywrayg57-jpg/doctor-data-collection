@@ -117,15 +117,40 @@ Claude owner 在 PR #6 对返修试采给出 `有条件通过`，但把“全量
 1. 固定提示词 `docs/agent_prompts/codex_next_prompt.md` 现场仍为 `Phase: TRIAL`，尚未切换为 `FULL_APPEND_AND_OBSIDIAN`。
 2. Issue 名称指定 `海珠广场院区`，但台账和固定提示词给出的 `/section/364` 属于总院。需要 Claude owner 或管理员明确：是修正为上述 9 个海珠广场院区入口，还是扩大为所有院区/全院入口；Codex 不自行改变医院或 URL。
 
+## Claude 范围裁决与 TRIAL-2
+
+Claude owner 在 PR #6 接受上述覆盖核验，确认台账原 `/section/364` 为错误入口，并裁决本 Issue 只处理 `南方医科大学口腔医院(海珠广场院区)` 的 9 个官方科室入口，不扩大到总院、番禺、盘福或沙河院区。由于首轮返修样本实际来自总院，owner 下发 TRIAL-2：重新试采 10 位医生、至少覆盖 3 个科室、不写总底表。
+
+固定提示词已按 owner 评论更新为 9 个入口。采集器做了以下最小扩展：
+
+1. 新增可重复传入的 `--entry-url`，只接受与医院官网同域的显式入口，并保留原台账入口和 owner 覆盖来源。
+2. 多入口候选使用轮询方式抽样，避免 `--max-doctors 10` 全部落在第一个科室。
+3. 新增 `--min-departments` 结果门禁；显式多入口出现列表错误或任一入口无候选时直接失败，防止部分入口成功却误报完整。
+4. 对 SMUKQ `/section/N` 只接受同目录 `/prods/N/数字`；精确匹配链接不再因卡片职称文本被截断而被通用评分误删，仍拒绝 `/doctor/N` 和跨目录 `/prods/`。
+5. 每条结果记录实际 `采集入口`，payload 和报告记录 9 个入口、原台账错误入口、入口来源及科室覆盖数；`--no-xlsx` 时不再误报已生成 Excel。
+
+单元测试扩展到 12 项，覆盖多入口顺序去重、跨入口轮询抽样、SMUKQ 同目录低文本链接保留以及首轮六项修正，结果全部通过。
+
+TRIAL-2 最终结果：
+
+- 9 个入口全部读取成功，候选详情 URL 数依次为 `12、12、11、10、12、12、12、7、7`，合计 95 条，与覆盖核验一致。
+- 最终试采 10 位医生，覆盖 9 个不同科室，超过 owner 要求的至少 3 个科室。
+- 10/10 来源均为 `https://www.smukqyy.cn/prods/<入口ID>/<数字>`，入口 ID 与来源 ID 全部一致；非医生记录 0 条。
+- 列表页失败 0 条，详情页失败 0 条，擅长导航/介绍正文污染 0 条。
+- 8 条保留 `科室原文含正文，已清洗` 告警，其中郑俊发另有 `通用模板低置信度`；该记录姓名、科室、职称、官方详情 URL 均可追溯。
+- 无显式擅长标签的 9 条记录保持空白；1 条显式标签内容保持原文，不回填、不推断。
+- 总底表仍为 5 家医院、1993 位医生、37 条异常提示；目标医院 0 条。XLSX、CSV 和更新报告的 SHA-256 与修改时间均未变化，`master_updated=false`。
+- 本轮使用 `--no-xlsx`，只更新试采 CSV、payload 和报告，没有生成试采 XLSX。
+
 ## 当前结论与下一步
 
-返修后的 10 条试采已获 Claude `有条件通过`，但科室覆盖硬门禁核验不通过：当前入口只覆盖总院单一科室，并且与 Issue 指定的海珠广场院区不一致。已停止正式追加，等待 Claude owner 或管理员修正固定提示词、确认执行范围及官方入口集合。
+TRIAL-2 已完成并满足 owner 的入口归属、跨科室覆盖和字段质量门禁。下一步是把本轮代码、测试、提示词、试采工件和本 ADR 提交推送到原分支及 PR #6，请 Claude 复审。只有 owner 明确通过并下发 `FULL_APPEND_AND_OBSIDIAN` 后，才能正式追加总底表和生成画像。
 
-在 Claude 审计明确通过且本 PR 已合并关闭前，不得领取下一个 Issue。
+在 Claude 最终画像审计明确通过且本 PR 已合并关闭前，不得领取下一个 Issue。
 
-`Doctor data single-Issue monitor` 已按管理员最新口径暂停。试采 PR 审计或合并不构成启动条件；只有同一医院取得 `FULL_APPEND_AND_OBSIDIAN` 指令、完成全量追加、生成 Obsidian 画像、核验索引并把结果提交推送后，才允许启用该自动化。启用后仍须等待最终关联 PR 经 Claude 审计通过并合并关闭，才能实际领取下一个 Issue。
+`Doctor data single-Issue monitor` 继续暂停。只有同一医院完成全量追加、总底表验证、Obsidian 画像生成、索引核验，并把结果提交推送后才允许启用；启用后仍须等 Claude 最终画像审计通过且 PR 合并关闭，才能实际领取下一个 Issue。
 
-`Doctor data PR 6 audit monitor` 在返修提交推送并请求复审后恢复为每 4 分钟检查 PR #6 的 Claude 评论、Review 和状态，不领取其他 Issue。`Doctor data single-Issue monitor` 只有在完整阶段画像生成、索引核验和结果提交推送后才允许启动；启动后也必须等 Claude 对最终结果审计通过且 PR 合并关闭，才能领取下一 Issue。
+`Doctor data PR 6 audit monitor` 继续每 4 分钟检查 PR #6 的 Claude 评论、Review 和状态，不领取其他 Issue。
 
 ## Git 交付说明
 
@@ -137,34 +162,38 @@ Claude owner 在 PR #6 对返修试采给出 `有条件通过`，但把“全量
 
 ## 工件
 
+- `D:\workspace\信息收集整理\work\collect_official_doctors_batch.py`
+- `D:\workspace\信息收集整理\work\tests\test_collect_official_doctors_batch.py`
 - `D:\workspace\信息收集整理\work\南方医科大学口腔医院(海珠广场院区)_trial_doctors.csv`
 - `D:\workspace\信息收集整理\work\南方医科大学口腔医院(海珠广场院区)_trial_payload.json`
 - `D:\workspace\信息收集整理\work\南方医科大学口腔医院(海珠广场院区)_trial_report.md`
 - `D:\workspace\信息收集整理\docs\agent_prompts\codex_next_prompt.md`
 
 <Handoff_State>
-Target: 南方医科大学口腔医院(海珠广场院区) 10 位医生试采
+Target: 南方医科大学口腔医院(海珠广场院区) TRIAL-2
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/5
 Phase: TRIAL
 Completed:
-- 已核验台账序号 10、官方 URL、确认可采集和总底表未追加状态
-- 已生成 10 条试采 CSV、payload 和报告
+- 已按 Claude owner 裁决把范围修正为海珠广场院区 9 个官方科室入口
+- 已扩展采集器支持多入口、轮询抽样、科室门禁和完整性门禁
+- 已生成 TRIAL-2 的 10 条试采 CSV、payload 和报告
+- 已执行 12 项单元测试并全部通过
 - 已确认总底表未写入
 CurrentFacts:
-- 返修试采恰好 10 条，全部为 /prods/364/N 官方医生页，非医生页 0 条
-- 10 条科室字段均清洗为牙体牙髓病科一室，擅长字段无导航或介绍正文污染
-- 详情页失败 0 条，8 条记录保留科室原文污染已清洗告警
-- Claude 返修复审为有条件通过，但 /section/364 属于总院单科室，不是海珠广场院区入口
-- 海珠广场院区需使用 9 个独立科室入口，官网只读统计共 95 个详情 URL
+- 9 个入口共发现 95 个同目录官方医生详情 URL，入口读取错误 0
+- 试采恰好 10 条，覆盖 9 个科室，非医生页 0，详情失败 0
+- 擅长导航或介绍正文污染 0；8 条保留科室原文已清洗告警
+- 固定提示词为海珠广场院区 9 入口 TRIAL-2
+- 总底表仍为 5 家、1993 位、37 条异常，目标医院 0 条
 Next:
-- 将覆盖核验提交同一 PR #6，请 Claude/管理员确认执行范围并修正固定提示词入口
-- 取得准确的 FULL_APPEND_AND_OBSIDIAN 指令后完成全量追加和画像提交推送
+- 将 TRIAL-2 提交推送同一 PR #6，请 Claude 复审
+- 取得 FULL_APPEND_AND_OBSIDIAN 指令后完成全量追加和画像提交推送
 - 审计通过且 PR 合并关闭前不得领取下一个 Issue
 Constraints:
 - 仅医院官方公开渠道
 - 当前未写入总底表
-- 只实施 Claude 点名的六项最小修正
-- 覆盖不足或入口范围未确认时禁止使用 --allow-generic-append
+- 当前禁止使用 --allow-generic-append
+- 只处理海珠广场院区，不扩大到其他院区
 Artifacts:
 - work\南方医科大学口腔医院(海珠广场院区)_trial_doctors.csv
 - work\南方医科大学口腔医院(海珠广场院区)_trial_payload.json
