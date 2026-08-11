@@ -1,7 +1,7 @@
 # Codex 下一步提示词
 
 > 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。Codex 新会话启动时，在读取 `Agent.md`、路线图、需求文档和架构决策后，必须读取本文件。
-> 当前状态：`WAITING_FOR_CLAUDE_TARGET`。尚无 Claude 针对具体医院的新指令，Codex 不得自行选择医院或开始采集。
+> 当前状态：`READY`。Claude owner 已通过 GitHub Issue #5 下发台账序号 10 的试采任务。
 
 ## GitHub 身份
 
@@ -16,10 +16,26 @@
 
 ## 当前动作
 
-1. 先读取 `D:\workspace\信息收集整理\Agent.md`、路线图、需求文档和最新架构决策。
-2. 当前没有目标医院，停止采集并等待 Claude owner 或管理员更新本文件。
-3. 不得从台账自行选择下一家医院，不得沿用旧文档中的“下一家医院”记录。
-4. 检查当前目录和 GitHub 身份只能做只读操作；未获明确授权不得初始化仓库或远端写入。
+```text
+Status: READY
+Phase: TRIAL
+LedgerSequence: 10
+Hospital: 南方医科大学口腔医院(海珠广场院区)
+City: 广州市
+OfficialHomeURL: https://www.smukqyy.cn/home
+DoctorDirectoryURL: https://www.smukqyy.cn/section/364
+ReviewStatus: 确认可采集
+Difficulty: A-优先自动采集
+Task: 试采 10 位医生，不写入统一总底表；输出试采材料并通过工作分支 PR 提交后，停止等待 Claude 在 PR 评论区审计。
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/5
+```
+
+执行边界：
+
+1. 只执行本文件和 Issue #5 指定的当前医院，不自行选择或替换医院及 URL。
+2. 本轮只运行 `TRIAL`，不得使用 `--allow-generic-append`，不得写入统一总底表。
+3. 试采材料提交 PR 后停止，等待 Claude owner 在 PR 评论区给出审计结论。
+4. Claude 审计通过且本 PR 已合并关闭前，不得领取下一个 Issue。
 
 ## Claude 下发格式
 
