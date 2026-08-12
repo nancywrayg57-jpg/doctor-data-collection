@@ -1,7 +1,7 @@
 # Codex 下一步提示词
 
 > 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。Codex 新会话启动时，在读取 `Agent.md`、路线图、需求文档和架构决策后，必须读取本文件。
-> 当前状态：`SKIP_AWAITING_OWNER_AUDIT`。Claude owner 已明确裁决 Issue #14 跳过本院；台账序号 18 已按要求留痕，现等待 owner 审计、合并 PR #16 并关闭 Issue #14。
+> 当前状态：`READY`（TRIAL）。序号 18 已按 owner 裁决跳过（PR #16 合并、Issue #14 关闭、台账留痕）；当前任务为 **Issue #17 序号 22 广东省第二中医院试采**，完整指令见 Issue #17。
 
 ## GitHub 身份
 
@@ -12,30 +12,30 @@
 ## 当前指令
 
 ```text
-Status: SKIP_AWAITING_OWNER_AUDIT
-Phase: SKIP
-LedgerSequence: 18
-Hospital: 广东省中医院芳村分院
+Status: READY
+Phase: TRIAL
+LedgerSequence: 22
+Hospital: 广东省第二中医院
 City: 广州市
-OfficialHomeURL: https://www.gdhtcm.com/college/index_100000301137599.html
-DoctorDirectoryURL: https://www.gdhtcm.com/expert/index_100000000817179.html
-ReviewStatus: owner 已裁决跳过；台账序号 18 已标记“跳过-无全院官方目录入口”并留痕，未采集医生、未写总底表
+OfficialHomeURL: https://www.gdzy5413.com/main/main.aspx
+DoctorDirectoryURL: https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850 https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850
+ReviewStatus: 确认可采集（owner 预核验：入口 curl 200 有效；详情模式 doctor/specialist.aspx?typeid=N；UA 敏感属正常 HTTP 头非绕过）
 Difficulty: A-优先自动采集
-Task: 等待 owner 审计本次跳过台账工件、合并 PR #16 并关闭 Issue #14；双门禁完成前不领取序号 22 或任何其他 Issue。若 owner 提出返修，仅处理 Issue #14 原分支和 PR #16。
-GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/14
+Task: 逐入口普查（851 名医名家/852 各科专家），按 typeid 去重后试采 10 位（≥3 科室），不写入总底表；材料推送 PR 后停止等待 Claude 审计。
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/17
 ```
 
-裁决与工件：owner 在 PR #16 明确选择“跳过本院”，否决仅采 18 位精选子集。台账序号 18 的 `人工复核结果` 已更新为 `跳过-无全院官方目录入口`，`人工备注` 保留两个指定 URL 的实际性质、200+ 与 18 位非全院覆盖差异、未采集/未写总底表及复排条件，`更新时间` 为 2026-08-12。双门禁完成后，通用监控将自动检查 owner 下发的下一家，无需管理员再次发送执行指令。
+执行要点：名医名家为荣誉分类，与各科专家去重、荣誉归职称/亮眼线索、科室优先真实科室；两块牌子单一实体按"广东省第二中医院"入库；分院区条目熔断回报；遇真实挑战/验证码按既定规则熔断跳过。
 
 ## 流程口径（管理员 2026-08-11/12）
 
-领取 Issue 第一步 approve 提示词同步 PR → 试采审计通过 → FULL_APPEND_AND_OBSIDIAN（追加无中途审计）→ **画像审计** → 通过后合并 PR → 关闭 Issue 后才可领取下一家。同时只允许一个 open 任务 Issue。
+领取 Issue 第一步 approve 提示词同步 PR → 试采审计通过 → FULL_APPEND_AND_OBSIDIAN（追加无中途审计）→ **画像审计** → 通过后合并 PR → 关闭 Issue 后才可领取下一家。同时只允许一个 open 任务 Issue。无法采集则跳过。
 
 ## 待管理员事项（留痕）
 
 1. 台账序号 10、12 行入口字段修正（PR #6 / Issue #7 留痕）。
 2. 存量 5 家医院「亮眼经历线索」导航污染 343 条，待裁决清理。
-3. 序号 13 已标记『跳过-反爬拦截』（PR #10）。
+3. 序号 13『跳过-反爬拦截』（PR #10）；序号 18『跳过-无全院官方目录入口』（PR #16，补全院入口后可复排）。
 
 ## 合规红线
 
