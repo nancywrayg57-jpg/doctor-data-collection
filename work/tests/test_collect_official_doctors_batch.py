@@ -15,6 +15,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     build_hospital_batches,
     classify_generic_record,
     clean_generic_department,
+    collect_gykqyy,
     collect_generic,
     dedicated_adapter_for,
     discover_gdskin_excluded_links,
@@ -42,6 +43,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     parse_gdzy5413_ksdoctor_detail,
     parse_ny5y_detail,
     round_robin_generic_items,
+    select_gykqyy_trial_doctors,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
     validate_gdzy5413_full_append,
@@ -162,6 +164,110 @@ class GenericDetailNoiseFilteringTests(unittest.TestCase):
         )
 
         self.assertEqual(extract_clean_highlights(raw), "")
+
+
+class GykqyyPublicDoctorApiTests(unittest.TestCase):
+    ENTRY_URL = "https://www.gykqyy.com/list.html?category=55"
+
+    @staticmethod
+    def directory_payload() -> dict[str, object]:
+        departments = []
+        doctor_id = 1
+        for department_id, department_name in enumerate(
+            ["荔湾院区牙体牙髓科", "越秀院区牙周病科", "全科口腔中心", "麻醉手术中心"],
+            start=10,
+        ):
+            doctors = []
+            for _ in range(3):
+                doctors.append(
+                    {
+                        "id": doctor_id,
+                        "title": f"医生{doctor_id}",
+                        "intro": f"擅长{department_name}常见疾病。",
+                        "keshi": department_name,
+                        "zhicheng": "主任医师",
+                        "weigh": 100 - doctor_id,
+                    }
+                )
+                doctor_id += 1
+            departments.append({"id": department_id, "name": department_name, "child": doctors})
+        return {
+            "code": 1,
+            "msg": "ok",
+            "data": {
+                "banner": [item for department in departments for item in department["child"]],
+                "list": [{"id": 1, "name": "官网院区", "child": departments}],
+            },
+        }
+
+    def test_adapter_scope_is_exact(self) -> None:
+        self.assertEqual(dedicated_adapter_for(self.ENTRY_URL), "gykqyy_public_doctor_api")
+        self.assertEqual(dedicated_adapter_for(f"{self.ENTRY_URL}&id=195"), "gykqyy_public_doctor_api")
+        self.assertEqual(dedicated_adapter_for("https://www.gykqyy.com/list.html?category=56"), "")
+        self.assertEqual(dedicated_adapter_for("https://api.gykqyy.com/list.html?category=55"), "")
+
+    def test_trial_selection_spreads_across_departments(self) -> None:
+        doctors = [
+            {"id": str(index), "departments": [f"科室{(index - 1) // 4}"]}
+            for index in range(1, 13)
+        ]
+        selected = select_gykqyy_trial_doctors(doctors, 10)
+
+        self.assertEqual(len(selected), 10)
+        self.assertGreaterEqual(len({item["departments"][0] for item in selected}), 3)
+
+    def test_collect_uses_only_page_declared_public_json_apis(self) -> None:
+        target = HospitalTarget(
+            city="广州市",
+            hospital="广州医科大学附属口腔医院",
+            homepage="https://www.gykqyy.com/",
+            entry_url=self.ENTRY_URL,
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="gykqyy_public_doctor_api",
+        )
+        entry_html = """
+        <script>
+        axios.get("https://www.gykqyy.com/api/article/getZhuanjiaList");
+        axios.get("https://www.gykqyy.com/api/article/getArticleDetail");
+        </script>
+        """
+        directory_payload = self.directory_payload()
+
+        def fake_fetch_json(_session, url, params=None):
+            if url.endswith("getZhuanjiaList"):
+                return 200, directory_payload, ""
+            doctor_id = str((params or {})["article_id"])
+            return (
+                200,
+                {
+                    "code": 1,
+                    "data": {
+                        "detail": {
+                            "id": int(doctor_id),
+                            "title": f"医生{doctor_id}",
+                            "intro": f"擅长科室{doctor_id}常见疾病。",
+                            "content": f"<p>医生{doctor_id}，主任医师。擅长疑难口腔疾病。</p>",
+                        }
+                    },
+                },
+                "",
+            )
+
+        with (
+            patch("collect_official_doctors_batch.create_official_session", return_value=__import__("requests").Session()),
+            patch("collect_official_doctors_batch.fetch", return_value=(200, entry_html, "")),
+            patch("collect_official_doctors_batch.fetch_json", side_effect=fake_fetch_json),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+        ):
+            payload = collect_gykqyy(target, "2026-08-13", max_doctors=10)
+
+        self.assertEqual(len(payload["rows"]), 10)
+        self.assertEqual(payload["meta"]["census_unique_detail_count"], 12)
+        self.assertEqual(payload["meta"]["census_department_count"], 4)
+        self.assertEqual(payload["meta"]["pagination_count"], 1)
+        self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
+        self.assertTrue(all("详情接口" in row["采集方式"] for row in payload["rows"]))
 
 
 class NodeRuntimeResolutionTests(unittest.TestCase):
