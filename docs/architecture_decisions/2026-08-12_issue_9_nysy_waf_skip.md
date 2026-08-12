@@ -64,15 +64,23 @@ owner 在 Issue #9 评论 `issuecomment-5255218176` 明确裁决：若常规访�
 - 解决：以用户本轮明确的“继续执行 Issue #9”、GitHub Issue 正文、owner 评论和当前分支四方证据恢复执行，并将固定提示词更新为 Issue #9 的 WAF 跳过等待状态。
 - 防复发：每次领取 Issue 后立即在首个提交前更新固定提示词；通用监控继续把分支、Issue、PR、提示词和 ADR 一致性作为硬门禁。
 
+### 3. GitHub API 传输连续超时
+
+- 阻塞：本地提交完成后，Git Data API 推送连续三轮无法通过前置只读检查；前两轮为 TLS handshake timeout，第三轮在有限重试后为 `20.205.243.168:443` TCP 连接超时。
+- 影响：失败均发生在 `gh api user` 或读取 `main` 引用阶段；没有上传 blob、创建 GitHub commit、创建远端分支、PR 或 Issue 评论。
+- 根因假设：当前 Windows 主机到 `api.github.com:443` 的链路临时不可达或不稳定，而不是仓库权限、身份、提交内容或 Git Data API Schema 错误。失败前已成功核验身份为 `xtzhou247`，并确认远端 `main=d5422061d1fb38de9456e8956e549f2c85929953`。
+- 已采取措施：先做单次最小重试，再给临时推送器增加有限传输重试和“引用创建结果不明时先只读核验”保护；网络仍未恢复。
+- 熔断与恢复：按 Agent.md 连续失败上限停止远端命令。待 GitHub API 连通后，从 `gh api user --jq .login`、远端分支不存在性和 `origin/main` 父提交一致性重新核验；只允许非强制 Git Data API 推送当前本地提交，不得改用绕过既有门禁的强制推送。
+
 ## 当前结论与下一步
 
-Issue #9 已按 owner 裁决完成本地跳过记录。下一步仅允许提交、以 `xtzhou247` 身份非强制推送原分支、创建关联 `Closes #9` 的 PR，并在 Issue 回报 WAF 证据。随后等待 owner 审计、合并 PR 并关闭 Issue；在这些门禁完成前不得领取其他 Issue。
+Issue #9 已按 owner 裁决完成本地跳过记录并形成提交，但 GitHub API 网络熔断导致尚未推送。连通性恢复后的下一步仅允许：重新核验 `xtzhou247` 身份与远端状态，非强制推送原分支，创建关联 `Closes #9` 的 PR，并在 Issue 回报 WAF 证据。随后等待 owner 审计、合并 PR 并关闭 Issue；在这些门禁完成前不得领取其他 Issue。
 
 <Handoff_State>
 Target: Issue #9 南方医科大学第三附属医院 WAF 跳过审计
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/9
 Branch: codex/mhrj/issue-9-nysy-trial
-Phase: READY_TO_SUBMIT_WAF_SKIP
+Phase: REMOTE_PUSH_BLOCKED
 Completed:
 - 普通 GET 复核官网首页 HTTP 412、指定入口 HTTP 405，Server 均为 CT2-WAAP
 - 未绕过反爬、未运行试采、未写入统一总底表
@@ -81,7 +89,8 @@ CurrentFacts:
 - 总底表 2165 行，本院 0 行
 - 工作簿公式错误 0，五表视觉核验完成
 Next:
-- 提交并通过非强制 Git Data API 推送当前分支
+- GitHub API 连通后重新核验身份、main 父提交与远端分支状态
+- 通过非强制 Git Data API 推送当前本地提交
 - 创建关联 Closes #9 的 PR，并在 Issue 回报证据
 - 等待 owner 审计、合并 PR、关闭 Issue
 Constraints:

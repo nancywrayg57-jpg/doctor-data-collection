@@ -1,7 +1,7 @@
 # Codex 下一步提示词
 
 > 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。
-> 当前状态：`READY_TO_SUBMIT_WAF_SKIP`。Issue #9 已按 owner 裁决停止试采并完成台账跳过记录，只允许提交、推送、创建 PR 和回报证据。
+> 当前状态：`REMOTE_PUSH_BLOCKED`。Issue #9 已按 owner 裁决停止试采并完成台账跳过记录及本地提交；GitHub API 连续超时触发熔断，只允许在连通性恢复后继续原分支推送、创建 PR 和回报证据。
 
 ## GitHub 身份与范围
 
@@ -17,7 +17,7 @@
 ## 当前动作
 
 ```text
-Status: READY_TO_SUBMIT_WAF_SKIP
+Status: REMOTE_PUSH_BLOCKED
 Phase: WAF_SKIP
 LedgerSequence: 13
 Hospital: 南方医科大学第三附属医院
@@ -25,7 +25,7 @@ City: 广州市
 OfficialHomeURL: http://www.nysy.com.cn/
 DoctorDirectoryURL: http://www.nysy.com.cn/cn/ksts/
 ReviewStatus: 跳过-反爬拦截
-Task: 提交并推送台账、WAF 报告、ADR 和本提示词；创建关联 Closes #9 的 PR；在 Issue #9 回报证据后停止。
+Task: GitHub API 连通后重新核验 xtzhou247 身份、main 父提交与远端分支状态；推送本地提交，创建关联 Closes #9 的 PR；在 Issue #9 回报证据后停止。
 ```
 
 ## Owner 裁决与现场证据
@@ -44,14 +44,17 @@ Task: 提交并推送台账、WAF 报告、ADR 和本提示词；创建关联 Cl
 - 台账序号 13 已标记为 `跳过-反爬拦截`。
 - 台账仅修改 8 个目标单元格；五个工作表已完成视觉核验，公式错误 0。
 - 最新 ADR：`docs/architecture_decisions/2026-08-12_issue_9_nysy_waf_skip.md`。
+- 本地提交：`349e288`（WAF 跳过工件）；尚未推送。
+- GitHub API 已连续出现 TLS/TCP 连接超时，熔断期间不得重复远端命令。
 
 ## 当前门禁
 
-1. 只处理 Issue #9、当前分支和由该分支创建的唯一 PR。
+1. 只处理 Issue #9、当前分支和恢复后由该分支创建的唯一 PR。
 2. 创建 PR 后，只等待 `nancywrayg57-jpg` 对 WAF 跳过结果的审计、合并和 Issue 关闭。
 3. PR 必须明确 `Closes #9`；不得自行批准或合并。
 4. 只有 owner 审计通过、PR 已合并关闭、Issue #9 已关闭且必需 CI 成功后，才允许检查下一 Issue。
 5. 通用单 Issue 监控在本轮提交推送和 PR/Issue 回报完成前保持 `PAUSED`。
+6. 恢复远端动作前必须先确认 GitHub API 连通、身份为 `xtzhou247`、远端分支仍不存在且 `main` 未偏离本地父提交；任何冲突只报告，不强制覆盖。
 
 ## 合规红线
 
