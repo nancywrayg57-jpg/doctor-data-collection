@@ -1,7 +1,7 @@
 # Codex 下一步提示词
 
 > 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。Codex 新会话启动时，在读取 `Agent.md`、路线图、需求文档和架构决策后，必须读取本文件。
-> 当前状态：`READY`（TRIAL）。序号 14 全流程已完成（PR #13 已合并、Issue #11 已关闭，总底表 2299）；当前任务为 **Issue #14 序号 18 广东省中医院芳村分院试采**，完整指令见 Issue #14。
+> 当前状态：`SKIP_AWAITING_OWNER_AUDIT`。Claude owner 已明确裁决 Issue #14 跳过本院；台账序号 18 已按要求留痕，现等待 owner 审计、合并 PR #16 并关闭 Issue #14。
 
 ## GitHub 身份
 
@@ -12,20 +12,20 @@
 ## 当前指令
 
 ```text
-Status: READY
-Phase: TRIAL
+Status: SKIP_AWAITING_OWNER_AUDIT
+Phase: SKIP
 LedgerSequence: 18
 Hospital: 广东省中医院芳村分院
 City: 广州市
 OfficialHomeURL: https://www.gdhtcm.com/college/index_100000301137599.html
 DoctorDirectoryURL: https://www.gdhtcm.com/expert/index_100000000817179.html
-ReviewStatus: 确认可采集（owner 预核验受限：站点从海外审计环境不可达，Codex 须现场核验可达性与入口性质）
+ReviewStatus: owner 已裁决跳过；台账序号 18 已标记“跳过-无全院官方目录入口”并留痕，未采集医生、未写总底表
 Difficulty: A-优先自动采集
-Task: ①核验入口可达性与性质；②【硬门禁】院区归属核验（多院区体系，须确认芳村分院专属/标注，全集团共用无标注则熔断回报）；③普查后试采 10 位（≥3 科室），不写入总底表；材料推送 PR 后停止等待 Claude 审计。
+Task: 等待 owner 审计本次跳过台账工件、合并 PR #16 并关闭 Issue #14；双门禁完成前不领取序号 22 或任何其他 Issue。若 owner 提出返修，仅处理 Issue #14 原分支和 PR #16。
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/14
 ```
 
-处置规则：现场无法访问或反爬拦截 → 按管理员裁决直接跳过该院（标记+证据回报，owner 关 Issue 后下发序号 22 广东省第二中医院）。
+裁决与工件：owner 在 PR #16 明确选择“跳过本院”，否决仅采 18 位精选子集。台账序号 18 的 `人工复核结果` 已更新为 `跳过-无全院官方目录入口`，`人工备注` 保留两个指定 URL 的实际性质、200+ 与 18 位非全院覆盖差异、未采集/未写总底表及复排条件，`更新时间` 为 2026-08-12。双门禁完成后，通用监控将自动检查 owner 下发的下一家，无需管理员再次发送执行指令。
 
 ## 流程口径（管理员 2026-08-11/12）
 
