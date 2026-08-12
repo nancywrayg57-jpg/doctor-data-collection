@@ -898,6 +898,18 @@ def sync_profile_flags(rows: list[dict[str, Any]], profile_links: set[str]) -> N
         row["已建画像"] = "是" if source and source in normalized_profile_links else "否"
 
 
+def covered_department_names(rows: list[dict[str, Any]]) -> list[str]:
+    return sorted(
+        {
+            clean_text(department)
+            for row in rows
+            if "非医生页面或姓名异常" not in str(row.get("异常提示") or "")
+            for department in clean_text(str(row.get("科室_分类页") or "")).split("、")
+            if clean_text(department)
+        }
+    )
+
+
 def build_master_payload(
     today: str,
     incoming_payload: dict[str, Any] | None = None,
@@ -2658,6 +2670,39 @@ def select_gyfyyy_trial_doctors(
     return select_gykqyy_trial_doctors(doctors, max_doctors)
 
 
+GYFYYY_SCHEDULE_LABEL_PATTERN = re.compile(
+    r"(?:专家门诊时间|门诊出诊时间|出诊时间|开诊时间|开诊院区)\s*[:：]?\s*.*?"
+    r"(?=(?:擅长|专长|简介|教育经历|职称|专业方向|专业特长|现任|本人|从事|研究方向|"
+    r"社会任职|学术任职|主持|参与|发表|中华|中国|广东|广州市|医学博士|主任医师|"
+    r"副主任医师|主治医师|教授|博士研究生导师|泌尿外科主任|科室副主任)\s*[:：]?|$)",
+    flags=re.IGNORECASE,
+)
+GYFYYY_WEEKLY_CLINIC_PATTERN = re.compile(
+    r"(?:专家门诊|特需门诊|专科门诊)[^。；]*?(?:每?周[一二三四五六日天]|周末)[^。；]*(?:[。；]|$)",
+    flags=re.IGNORECASE,
+)
+GYFYYY_BARE_SCHEDULE_PATTERN = re.compile(
+    r"(?:[^。；]{0,40}(?:门诊|出诊)\s*[（(][^）)]*[）)]\s*[:：]?\s*)?"
+    r"(?:每?周[一二三四五六日天](?:[、,，及和至到\-]\s*(?:周)?[一二三四五六日天])*)"
+    r"(?:上午|下午|晚上|夜诊|全天|早上)?(?:\s*[:：]?\s*\d{1,2}[:：]\d{2}\s*(?:--?|至)\s*\d{1,2}[:：]\d{2})?"
+    r"(?:出诊)?(?:[。；]|$)",
+    flags=re.IGNORECASE,
+)
+
+
+def strip_gyfyyy_schedule_text(value: str | None) -> str:
+    """Remove public appointment schedules, which are outside profile fields."""
+
+    text = clean_text(value)
+    previous = None
+    while text != previous:
+        previous = text
+        text = GYFYYY_SCHEDULE_LABEL_PATTERN.sub(" ", text)
+    text = GYFYYY_WEEKLY_CLINIC_PATTERN.sub(" ", text)
+    text = GYFYYY_BARE_SCHEDULE_PATTERN.sub(" ", text)
+    return clean_text(text)
+
+
 def parse_gyfyyy_detail(html: str, fallback: dict[str, Any]) -> dict[str, str]:
     soup = BeautifulSoup(html, "html.parser")
     card = soup.select_one("section.doctorcard")
@@ -2677,14 +2722,14 @@ def parse_gyfyyy_detail(html: str, fallback: dict[str, Any]) -> dict[str, str]:
         )
         if value
     )
-    specialty = clean_text(re.sub(r"^擅长\s*[:：]?\s*", "", specialty))
-    profile_text = " ".join(
+    specialty = clean_text(re.sub(r"^(?:擅长\s*[:：]?\s*)+", "", specialty))
+    profile_text = strip_gyfyyy_schedule_text(" ".join(
         value
         for value in (
             clean_text(node.get_text(" ", strip=True)) for node in (intro.select("p") if intro else [])
         )
         if value
-    )
+    ))
     return {
         "name": first_nonempty(name, str(fallback.get("name") or "")),
         "title": first_nonempty(title, str(fallback.get("list_title") or "")),
@@ -2863,14 +2908,31 @@ def collect_gyfyyy(target: HospitalTarget, today: str, max_doctors: int | None =
             }
         )
 
-    names = Counter(clean_text(str(row.get("姓名") or "")) for row in rows if clean_text(str(row.get("姓名") or "")))
-    same_names = {name for name, count in names.items() if count > 1}
-    for row in rows:
-        if row["姓名"] in same_names and "同名待甄别" not in row["异常提示"]:
-            row["异常提示"] = "；".join(value for value in [row["异常提示"], "同名待甄别"] if value)
-            row["重点优先级"] = "普通"
-            row["重点关注范围"] = ""
-            row["重点疾病标签"] = ""
+    raw_rows = rows
+    detail_reconciliation = identity_reconciliation
+    ids_by_name: dict[str, list[str]] = {}
+    for row in raw_rows:
+        name = clean_text(str(row.get("姓名") or ""))
+        detail_id = gyfyyy_detail_id(str(row.get("来源链接") or ""))
+        if name and detail_id:
+            ids_by_name.setdefault(name, []).append(detail_id)
+    same_name_groups = {
+        name: sorted(set(ids), key=int)
+        for name, ids in ids_by_name.items()
+        if len(set(ids)) > 1
+    }
+    rows, identity_reconciliation = merge_gyfyyy_identity_rows(raw_rows)
+    for new_index, row in enumerate(rows, start=1):
+        row["序号"] = new_index
+    identity_count_by_name = Counter(
+        clean_text(str(item.get("name") or "")) for item in identity_reconciliation
+    )
+    distinct_same_name_groups = {
+        name for name, count in identity_count_by_name.items() if name and count > 1
+    }
+    same_identity_merge_count = sum(
+        1 for item in identity_reconciliation if int(item.get("relation_count") or 0) > 1
+    )
 
     category_counter = Counter(row["科室_分类页"] for row in rows if row["科室_分类页"])
     priority_counter = Counter(row["重点优先级"] for row in rows)
@@ -2904,8 +2966,14 @@ def collect_gyfyyy(target: HospitalTarget, today: str, max_doctors: int | None =
             "census_unique_detail_count": len(all_doctors),
             "census_department_count": len(departments),
             "census_group_count": 0,
-            "census_same_name_group_count": len(same_names),
-            "census_same_name_groups": {},
+            "census_same_name_group_count": len(same_name_groups),
+            "census_same_name_groups": same_name_groups,
+            "gyfyyy_final_identity_count": len(rows),
+            "gyfyyy_same_identity_merge_group_count": same_identity_merge_count,
+            "gyfyyy_distinct_same_name_group_count": len(distinct_same_name_groups),
+            "gyfyyy_distinct_same_name_row_count": sum(
+                identity_count_by_name[name] for name in distinct_same_name_groups
+            ),
             "excluded_non_doctor_count": len(excluded_candidates),
             "pagination_count": len(departments),
             "pagination_method": "每个科室单个 doctorList.html 一次性列出团队，无分页参数或加载更多",
@@ -2929,6 +2997,7 @@ def collect_gyfyyy(target: HospitalTarget, today: str, max_doctors: int | None =
             }
             for item in cross_department
         ],
+        "gyfyyy_detail_reconciliation": detail_reconciliation,
         "gyfyyy_identity_reconciliation": identity_reconciliation,
         "category_errors": category_errors,
         "detail_errors": detail_errors,
@@ -3702,6 +3771,125 @@ def merge_gdzy5413_identity_rows(
                         member.get("来源链接", "")
                         for member in cluster
                         if member.get("来源链接") != merged.get("来源链接")
+                    ],
+                    "departments": departments,
+                    "relation_count": len(cluster),
+                }
+            )
+
+    return merged_rows, reconciliation
+
+
+def merge_gyfyyy_identity_rows(
+    rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Cluster same-name GYFYYY detail IDs using official identity fields."""
+
+    by_name: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        by_name.setdefault(gdzy5413_normalized_name(row.get("姓名")), []).append(row)
+
+    merged_rows: list[dict[str, Any]] = []
+    reconciliation: list[dict[str, Any]] = []
+    longest_fields = [
+        "擅长诊疗方向摘录",
+        "亮眼经历线索",
+        "列表简介",
+        "详情正文摘录",
+    ]
+    for name, name_rows in by_name.items():
+        clusters: list[list[dict[str, Any]]] = []
+        for row in name_rows:
+            for cluster in clusters:
+                if any(gdzy5413_rows_same_identity(row, member) for member in cluster):
+                    cluster.append(row)
+                    break
+            else:
+                clusters.append([row])
+
+        distinct_same_name = len(clusters) > 1
+        for identity_index, cluster in enumerate(clusters, start=1):
+            primary = max(cluster, key=gdzy5413_primary_row_score)
+            merged = dict(primary)
+            departments: list[str] = []
+            for member in cluster:
+                for field in ["科室_分类页", "科室_列表卡片"]:
+                    for department in clean_text(member.get(field)).split("、"):
+                        department = clean_text(department)
+                        if department and department not in departments:
+                            departments.append(department)
+                for field in longest_fields:
+                    if len(clean_text(member.get(field))) > len(clean_text(merged.get(field))):
+                        merged[field] = member.get(field, "")
+
+            merged["科室_分类页"] = "、".join(departments)
+            merged["科室_列表卡片"] = "、".join(departments)
+            merged["职称_关键词"] = "、".join(
+                extract_terms(clean_text(primary.get("职称身份原文")), TITLE_TERMS)
+            )
+            warnings = [
+                warning
+                for member in cluster
+                for warning in clean_text(member.get("异常提示")).split("；")
+                if warning
+            ]
+            distinct_titles = {
+                clean_text(member.get("职称身份原文"))
+                for member in cluster
+                if clean_text(member.get("职称身份原文"))
+            }
+            if len(distinct_titles) > 1:
+                warnings.append("多详情职称不一致")
+            if distinct_same_name:
+                warnings.append("同名待甄别")
+            merged["异常提示"] = "；".join(dict.fromkeys(warnings))
+
+            combined_text = "\n".join(
+                clean_text(str(merged.get(field) or ""))
+                for field in [
+                    "医院",
+                    "科室_分类页",
+                    "职称身份原文",
+                    "擅长诊疗方向摘录",
+                    "详情正文摘录",
+                ]
+            )
+            groups_found, tags = group_tags(combined_text)
+            if merged["异常提示"]:
+                groups_found = []
+                tags = []
+            merged["重点关注范围"] = "、".join(groups_found)
+            merged["重点疾病标签"] = "、".join(tags)
+            merged["重点优先级"] = "普通"
+            if not merged["异常提示"] and (
+                any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups_found
+            ):
+                merged["重点优先级"] = "高"
+            elif not merged["异常提示"] and any(
+                term != "医师" for term in extract_terms(merged["职称身份原文"], TITLE_TERMS)
+            ):
+                merged["重点优先级"] = "中"
+
+            primary_source = clean_text(str(merged.get("来源链接") or ""))
+            source_links = [
+                clean_text(str(member.get("来源链接") or "")) for member in cluster
+            ]
+            merged_rows.append(merged)
+            reconciliation.append(
+                {
+                    "name": name,
+                    "identity_index": identity_index,
+                    "resolution": (
+                        "同名待甄别"
+                        if distinct_same_name
+                        else "同一人归并"
+                        if len(cluster) > 1
+                        else "唯一身份"
+                    ),
+                    "detail_ids": [gyfyyy_detail_id(source) for source in source_links],
+                    "primary_source_link": primary_source,
+                    "merged_source_links": [
+                        source for source in source_links if source != primary_source
                     ],
                     "departments": departments,
                     "relation_count": len(cluster),
@@ -4518,6 +4706,133 @@ def validate_gykqyy_full_append(payload: dict[str, Any]) -> None:
         raise RuntimeError("GYKQYY FULL 写入前门禁失败：" + "；".join(errors))
 
 
+def validate_gyfyyy_full_append(payload: dict[str, Any]) -> None:
+    meta = payload["meta"]
+    rows = payload["rows"]
+    excluded = payload.get("excluded_candidates", [])
+    detail_reconciliation = payload.get("gyfyyy_detail_reconciliation", [])
+    identity_reconciliation = payload.get("gyfyyy_identity_reconciliation", [])
+    errors: list[str] = []
+    expected = {
+        "category_count": 59,
+        "candidate_membership_count": 650,
+        "census_unique_detail_count": 646,
+        "cross_entry_duplicate_count": 4,
+        "gyfyyy_cross_department_identity_count": 4,
+        "excluded_non_doctor_count": 9,
+        "category_error_count": 0,
+        "detail_error_count": 0,
+    }
+    for field, expected_value in expected.items():
+        actual = int(meta.get(field) or 0)
+        if actual != expected_value:
+            errors.append(f"{field} 应为 {expected_value}，实际 {actual}")
+    expected_detail_rows = 646 - 9
+    expected_final_identities = 616
+    if len(detail_reconciliation) != expected_detail_rows:
+        errors.append(
+            f"合规详情 ID 对账应为 {expected_detail_rows} 行，实际 {len(detail_reconciliation)}"
+        )
+    if (
+        len(rows) != expected_final_identities
+        or int(meta.get("unique_doctor_count") or 0) != expected_final_identities
+        or int(meta.get("gyfyyy_final_identity_count") or 0) != expected_final_identities
+    ):
+        errors.append(f"最终身份应为 {expected_final_identities}，实际 {len(rows)}")
+    if len(identity_reconciliation) != len(rows):
+        errors.append(
+            f"身份聚类对账应为 {len(rows)} 行，实际 {len(identity_reconciliation)}"
+        )
+    nursing_exclusions = [
+        item for item in excluded if "仅标注护理身份" in str(item.get("reason") or "")
+    ]
+    if len(nursing_exclusions) != 9:
+        errors.append(f"纯护理身份排除应为 9，实际 {len(nursing_exclusions)}")
+    primary_source_ids = [gyfyyy_detail_id(str(row.get("来源链接") or "")) for row in rows]
+    if any(not source_id for source_id in primary_source_ids):
+        errors.append("存在非授权 gyfyyy.cn doctor_<数字ID>.html 来源")
+    if len(set(primary_source_ids)) != len(rows):
+        errors.append("最终身份主详情存在重复 doctor ID")
+    if any(not clean_text(str(row.get("姓名") or "")) for row in rows):
+        errors.append("正式行存在空姓名")
+    prefixed_specialties = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if re.match(r"^\s*擅长\s*[:：]?", str(row.get("擅长诊疗方向摘录") or ""))
+    ]
+    if prefixed_specialties:
+        errors.append("擅长字段仍保留前缀：" + "、".join(prefixed_specialties[:10]))
+    tagged_abnormal = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if clean_text(str(row.get("异常提示") or ""))
+        and (
+            clean_text(str(row.get("重点关注范围") or ""))
+            or clean_text(str(row.get("重点疾病标签") or ""))
+            or clean_text(str(row.get("重点优先级") or "")) != "普通"
+        )
+    ]
+    if tagged_abnormal:
+        errors.append("异常行仍被打标签或提升优先级：" + "、".join(tagged_abnormal[:10]))
+    detail_ids = {
+        str(item.get("detail_id") or "") for item in detail_reconciliation
+        if str(item.get("detail_id") or "")
+    }
+    mapped_ids = {
+        str(detail_id)
+        for item in identity_reconciliation
+        for detail_id in item.get("detail_ids", [])
+        if str(detail_id)
+    }
+    if len(detail_ids) != expected_detail_rows or mapped_ids != detail_ids:
+        errors.append(
+            f"身份聚类未完整映射合规详情 ID：对账 {len(detail_ids)} / 映射 {len(mapped_ids)}"
+        )
+    cross_ids = {
+        str(item.get("detail_id") or "")
+        for item in detail_reconciliation
+        if int(item.get("relation_count") or 0) > 1
+    }
+    if cross_ids != {"101", "549", "607", "618"}:
+        errors.append(f"跨科室详情 ID 不符合审计基线：{sorted(cross_ids)}")
+    merged_groups = [
+        item for item in identity_reconciliation if int(item.get("relation_count") or 0) > 1
+    ]
+    if len(merged_groups) != 21 or int(meta.get("gyfyyy_same_identity_merge_group_count") or 0) != 21:
+        errors.append(f"同一人归并组应为 21，实际 {len(merged_groups)}")
+    identity_name_counts = Counter(
+        clean_text(str(item.get("name") or "")) for item in identity_reconciliation
+    )
+    distinct_names = {name for name, count in identity_name_counts.items() if name and count > 1}
+    distinct_rows = sum(identity_name_counts[name] for name in distinct_names)
+    if (
+        len(distinct_names) != 4
+        or distinct_rows != 8
+        or int(meta.get("gyfyyy_distinct_same_name_group_count") or 0) != 4
+        or int(meta.get("gyfyyy_distinct_same_name_row_count") or 0) != 8
+    ):
+        errors.append(f"实质不同同名身份应为 4 组 8 行，实际 {len(distinct_names)} 组 {distinct_rows} 行")
+    distinct_sources = {
+        clean_text(str(item.get("primary_source_link") or ""))
+        for item in identity_reconciliation
+        if clean_text(str(item.get("name") or "")) in distinct_names
+    }
+    distinct_rows_by_source = {
+        clean_text(str(row.get("来源链接") or "")): row for row in rows
+    }
+    if any(
+        "同名待甄别" not in str(distinct_rows_by_source.get(source, {}).get("异常提示") or "")
+        for source in distinct_sources
+    ):
+        errors.append("实质不同的同名身份未全部保留“同名待甄别”")
+    if int(meta.get("census_same_name_group_count") or 0) != 25:
+        errors.append(
+            f"同名详情组应为 25，实际 {meta.get('census_same_name_group_count', 0)}"
+        )
+    if errors:
+        raise RuntimeError("GYFYYY FULL 写入前门禁失败：" + "；".join(errors))
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=BASE_HEADERS)
@@ -4603,6 +4918,19 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         )
         for item in payload.get("gykqyy_identity_reconciliation", [])
     ) or "| 无 | 无 | 无 | 无 | 无 | 无 |"
+    gyfyyy_reconciliation_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('name', ''))} | "
+            f"{','.join(str(value) for value in item.get('detail_ids', []))} | "
+            f"{item.get('resolution', '')} | {item.get('relation_count', 0)} | "
+            f"{'、'.join(item.get('departments', [])) or '无'} | "
+            f"{item.get('primary_source_link', '')} | "
+            f"{'；'.join(item.get('merged_source_links', [])) or '无'} |"
+        )
+        for item in payload.get("gyfyyy_identity_reconciliation", [])
+        if int(item.get("relation_count") or 0) > 1
+        or item.get("resolution") == "同名待甄别"
+    ) or "| 无 | 无 | 无 | 0 | 无 | 无 | 无 |"
 
     report = f"""---
 类型: {report_label}
@@ -4618,7 +4946,7 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 
 ## 结论
 
-本次试跑只读取医院官网公开专家列表页和医生详情页。系统没有使用第三方平台、没有绕过登录或验证码、没有采集私人联系方式或患者信息。
+本次{run_label}只读取医院官网公开专家列表页和医生详情页。系统没有使用第三方平台、没有绕过登录或验证码、没有采集私人联系方式或患者信息。
 
 本轮生成医生自动采集{run_label}底表，共 {meta['unique_doctor_count']} 位唯一医生；官网列表页原始卡片记录 {meta['raw_card_rows']} 条；读取入口分类 {meta['category_count']} 个；覆盖 {meta.get('department_coverage_count', 0)} 个科室；详情页失败 {meta['detail_error_count']} 条。
 
@@ -4692,6 +5020,17 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 |---|---|---|---|---|---|
 {gykqyy_reconciliation_lines}
 
+## 广医一院同名详情身份聚类对账
+
+- 合规详情 ID：{len(payload.get('gyfyyy_detail_reconciliation', []))}
+- 最终身份：{meta.get('gyfyyy_final_identity_count', 0)}
+- 同一人归并组：{meta.get('gyfyyy_same_identity_merge_group_count', 0)}
+- 实质不同同名身份：{meta.get('gyfyyy_distinct_same_name_group_count', 0)} 组 / {meta.get('gyfyyy_distinct_same_name_row_count', 0)} 行
+
+| 姓名 | 详情 ID | 裁决 | 详情关系 | 合并科室 | 主详情 | 其余详情 |
+|---|---|---|---:|---|---|---|
+{gyfyyy_reconciliation_lines}
+
 ## 已排除或范围外候选
 
 | 入口 | 列表身份 | 来源链接 | 排除原因 |
@@ -4712,7 +5051,8 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 | 跨入口去重前候选关系 | {meta.get('candidate_membership_count', meta['raw_card_rows'])} |
 | 跨入口去重后唯一候选 | {meta.get('unique_candidate_count', meta['unique_doctor_count'])} |
 | 排除非医生候选 | {meta.get('excluded_non_doctor_count', 0)} |
-| 唯一医生详情页 | {meta['unique_doctor_count']} |
+| 合规医生详情页 | {meta.get('census_unique_detail_count', meta['unique_doctor_count']) - meta.get('excluded_non_doctor_count', 0)} |
+| 最终医生身份 | {meta['unique_doctor_count']} |
 | 覆盖科室数 | {meta.get('department_coverage_count', 0)} |
 | 列表页失败数 | {meta['category_error_count']} |
 | 详情页失败数 | {meta['detail_error_count']} |
@@ -5062,14 +5402,7 @@ def main() -> None:
                 f"{'、'.join(payload['meta'].get('sample_entry_categories', [])) or '无'}"
             )
 
-    covered_departments = sorted(
-        {
-            clean_text(str(row.get("科室_分类页") or ""))
-            for row in payload["rows"]
-            if clean_text(str(row.get("科室_分类页") or ""))
-            and "非医生页面或姓名异常" not in str(row.get("异常提示") or "")
-        }
-    )
+    covered_departments = covered_department_names(payload["rows"])
     payload["meta"]["department_coverage_count"] = len(covered_departments)
     payload["meta"]["covered_departments"] = covered_departments
     if args.min_departments and len(covered_departments) < args.min_departments:
@@ -5085,6 +5418,8 @@ def main() -> None:
         validate_gdzy5413_full_append(payload)
     if target.adapter_id == GYKQYY_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gykqyy_full_append(payload)
+    if target.adapter_id == GYFYYY_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_gyfyyy_full_append(payload)
     if target.adapter_id == GDSKIN_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdskin_full_append(payload)
     if target.adapter_id == NY5Y_ADAPTER_ID and not args.trial_only and not args.single_output:

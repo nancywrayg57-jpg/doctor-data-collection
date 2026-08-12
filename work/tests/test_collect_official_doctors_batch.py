@@ -16,6 +16,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     build_hospital_batches,
     classify_generic_record,
     clean_generic_department,
+    covered_department_names,
     collect_gyfyyy,
     collect_gykqyy,
     collect_generic,
@@ -36,10 +37,12 @@ from collect_official_doctors_batch import (  # noqa: E402
     gdzy5413_rows_same_identity,
     gyfyyy_detail_id,
     parse_gyfyyy_detail,
+    strip_gyfyyy_schedule_text,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     merge_rows_for_master,
     merge_gdzy5413_identity_rows,
+    merge_gyfyyy_identity_rows,
     ny5y_detail_id,
     ny5y_entry_kind,
     parse_generic_detail,
@@ -52,6 +55,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     select_gykqyy_trial_doctors,
     sync_profile_flags,
     validate_gykqyy_full_append,
+    validate_gyfyyy_full_append,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
     validate_gdzy5413_full_append,
@@ -421,6 +425,45 @@ class GyfyyyStaticDepartmentTreeTests(unittest.TestCase):
         self.assertNotIn("患者评价", detail["profile_text"])
         self.assertNotIn("医院新闻", detail["profile_text"])
 
+    def test_repeated_specialty_prefixes_are_fully_removed(self) -> None:
+        html = """
+        <section class="doctorcard">
+          <strong>测试医生</strong><b>主任医师</b><p>擅长：擅长 肺癌规范化诊疗。</p>
+        </section>
+        <section class="doctorintro"><p>长期从事临床工作。</p></section>
+        """
+        detail = parse_gyfyyy_detail(html, {})
+        self.assertEqual(detail["specialty"], "肺癌规范化诊疗。")
+
+    def test_schedule_blocks_are_removed_without_dropping_clinical_profile(self) -> None:
+        html = """
+        <section class="doctorcard">
+          <strong>测试医生</strong><b>主任医师</b><p>擅长肺癌诊疗。</p>
+        </section>
+        <section class="doctorintro">
+          <p>开诊院区: 沿江院区 开诊时间：周一上午 擅长：肺癌规范化诊疗。</p>
+          <p>简介：长期从事临床工作。专家门诊每周二上午、特需门诊每周四晚上。</p>
+        </section>
+        """
+
+        detail = parse_gyfyyy_detail(html, {})
+
+        self.assertEqual(detail["profile_text"], "擅长：肺癌规范化诊疗。 简介：长期从事临床工作。")
+        self.assertNotRegex(detail["profile_text"], r"开诊|出诊|每?周[一二三四五六日天]|上午|晚上")
+        self.assertEqual(strip_gyfyyy_schedule_text("门诊出诊时间：总院周一下午。"), "")
+        self.assertEqual(
+            strip_gyfyyy_schedule_text(
+                "开诊时间：海印院区 周三下午14：30-19：00 泌尿外科主任，医学博士。"
+            ),
+            "泌尿外科主任，医学博士。",
+        )
+        self.assertEqual(strip_gyfyyy_schedule_text("每周一下午出诊"), "")
+        self.assertEqual(
+            strip_gyfyyy_schedule_text("教授，硕士生导师。 胸部影像诊断门诊（沿江综合楼）：周一、周四全天"),
+            "教授，硕士生导师。",
+        )
+        self.assertEqual(strip_gyfyyy_schedule_text("擅长脊柱外科技术。 周三下午：14:30--17:30"), "擅长脊柱外科技术。")
+
     def test_trial_selection_spreads_across_departments(self) -> None:
         doctors = [
             {"id": str(index), "departments": [f"科室{(index - 1) // 4}"]}
@@ -524,6 +567,124 @@ class GyfyyyStaticDepartmentTreeTests(unittest.TestCase):
         self.assertEqual(len(payload["excluded_candidates"]), 1)
         self.assertIn("护理身份", payload["excluded_candidates"][0]["reason"])
         self.assertEqual(payload["meta"]["detail_error_count"], 0)
+
+        covered_departments = covered_department_names(
+            [
+                {"科室_分类页": "呼吸与危重症医学科、变态反应科", "异常提示": ""},
+                {"科室_分类页": "心血管内科", "异常提示": ""},
+                {"科室_分类页": "内科门诊", "异常提示": ""},
+            ]
+        )
+        self.assertEqual(
+            set(covered_departments),
+            {"呼吸与危重症医学科", "变态反应科", "心血管内科", "内科门诊"},
+        )
+
+    def test_full_gate_requires_complete_authorized_reconciliation(self) -> None:
+        rows = []
+        detail_reconciliation = []
+        identity_reconciliation = []
+        excluded = []
+        nursing_ids = {str(value) for value in range(700, 709)}
+        cross_ids = {"101", "549", "607", "618"}
+        for doctor_id in range(1, 617):
+            distinct_index = (doctor_id - 1) // 2 + 1
+            name = f"同名{distinct_index}" if doctor_id <= 8 else f"医生{doctor_id}"
+            warning = "同名待甄别" if doctor_id <= 8 else ""
+            rows.append(
+                {
+                    "姓名": name,
+                    "来源链接": f"https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_{doctor_id}.html",
+                    "擅长诊疗方向摘录": "呼吸系统疾病。",
+                    "异常提示": warning,
+                    "重点关注范围": "",
+                    "重点疾病标签": "",
+                    "重点优先级": "普通",
+                }
+            )
+            merged_id = doctor_id + 608 if 9 <= doctor_id <= 29 else None
+            detail_ids = [str(doctor_id)] + ([str(merged_id)] if merged_id else [])
+            identity_reconciliation.append(
+                {
+                    "name": name,
+                    "detail_ids": detail_ids,
+                    "primary_source_link": rows[-1]["来源链接"],
+                    "relation_count": len(detail_ids),
+                }
+            )
+        for doctor_id in range(1, 638):
+            detail_reconciliation.append(
+                {
+                    "detail_id": str(doctor_id),
+                    "relation_count": 2 if str(doctor_id) in cross_ids else 1,
+                }
+            )
+        for doctor_id in sorted(nursing_ids):
+            excluded.append(
+                {
+                    "source_link": f"https://www.gyfyyy.cn/cn/ks/wk/bnwk/doctor_{doctor_id}.html",
+                    "reason": "官网团队卡片仅标注护理身份，排除医生画像采集范围",
+                }
+            )
+        payload = {
+            "meta": {
+                "category_count": 59,
+                "candidate_membership_count": 650,
+                "census_unique_detail_count": 646,
+                "cross_entry_duplicate_count": 4,
+                "gyfyyy_cross_department_identity_count": 4,
+                "excluded_non_doctor_count": 9,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "unique_doctor_count": 616,
+                "gyfyyy_final_identity_count": 616,
+                "gyfyyy_same_identity_merge_group_count": 21,
+                "gyfyyy_distinct_same_name_group_count": 4,
+                "gyfyyy_distinct_same_name_row_count": 8,
+                "census_same_name_group_count": 25,
+            },
+            "rows": rows,
+            "excluded_candidates": excluded,
+            "gyfyyy_detail_reconciliation": detail_reconciliation,
+            "gyfyyy_identity_reconciliation": identity_reconciliation,
+        }
+        validate_gyfyyy_full_append(payload)
+        payload["meta"]["candidate_membership_count"] = 649
+        with self.assertRaisesRegex(RuntimeError, "candidate_membership_count 应为 650"):
+            validate_gyfyyy_full_append(payload)
+
+    def test_same_name_identity_clustering_merges_and_preserves_distinct_rows(self) -> None:
+        def row(doctor_id: int, name: str, department: str, title: str, specialty: str) -> dict[str, object]:
+            return {
+                "姓名": name,
+                "医院": "广州医科大学附属第一医院",
+                "科室_分类页": department,
+                "科室_列表卡片": department,
+                "职称身份原文": title,
+                "异常提示": "",
+                "擅长诊疗方向摘录": specialty,
+                "详情正文摘录": "",
+                "来源链接": f"https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_{doctor_id}.html",
+            }
+
+        source_rows = [
+            row(1, "同一医生", "呼吸科", "主任医师", "慢阻肺和哮喘诊疗。"),
+            row(2, "同一医生", "变态反应科", "主任医师", "慢阻肺和哮喘诊疗。"),
+            row(3, "同名医生", "心血管内科", "副主任医师", "高血压和冠心病诊疗。"),
+            row(4, "同名医生", "呼吸科", "副主任医师", "肺动脉高压和肺栓塞诊疗。"),
+        ]
+
+        merged, reconciliation = merge_gyfyyy_identity_rows(source_rows)
+
+        self.assertEqual(len(merged), 3)
+        same_identity = next(item for item in reconciliation if item["name"] == "同一医生")
+        self.assertEqual(same_identity["resolution"], "同一人归并")
+        self.assertEqual(same_identity["detail_ids"], ["1", "2"])
+        self.assertIn("呼吸科", same_identity["departments"])
+        self.assertIn("变态反应科", same_identity["departments"])
+        distinct_rows = [item for item in merged if item["姓名"] == "同名医生"]
+        self.assertEqual(len(distinct_rows), 2)
+        self.assertTrue(all("同名待甄别" in item["异常提示"] for item in distinct_rows))
 
 
 class NodeRuntimeResolutionTests(unittest.TestCase):

@@ -151,3 +151,86 @@ Artifacts:
 - D:\workspace\信息收集整理\work\广州医科大学附属第一医院_trial_report.md
 - D:\workspace\信息收集整理\docs\architecture_decisions\2026-08-13_issue_25_gyfyyy_trial.md
 </Handoff_State>
+
+## FULL_APPEND_AND_OBSIDIAN（2026-08-13）
+
+### Owner 门禁
+
+`nancywrayg57-jpg` 于 PR #26 明确审计 TRIAL 为“通过”，并下发 `Phase: FULL_APPEND_AND_OBSIDIAN`。执行约束包括：59 科室 / 650 关系 / 646 唯一 ID / 9 个纯护理身份排除对账；同名多详情按身份聚类；跨科室归属合并；排班时段不入库；异常提示保留；清理 TRIAL 工件后请求最终画像审计。
+
+### FULL 失败、根因、解决与防复发
+
+1. 第一次 FULL 在正式写表前门禁停止：部分官网详情正文连续出现多个“擅长”前缀，原清洗只剥离一次。该次没有写入正式资产。最小修正为重复剥离全部前缀，并增加专项测试；完整测试随后通过。
+2. 初版 FULL 生成 637 个合规详情 ID 行，但把 25 组同名不同 ID 全部简单标记为“同名待甄别”，没有执行 owner 指定的身份聚类。根因是 `collect_gyfyyy` 只有同名计数，没有复用现有的官方字段相似度与身份聚类规则。最小修正后：21 组可由姓名、职称、擅长/简介官方字段确认的同一人归并；4 组实质不同或无法确认的同名保留 8 行并继续标记“同名待甄别”。最终 637 个合规详情 ID 对账为 616 个身份，全部详情 ID 在 `gyfyyy_detail_reconciliation` 与 `gyfyyy_identity_reconciliation` 留痕。
+3. 画像生成后曾误先执行 `--rebuild-master-only`；该命令按旧 XLSX（2938 行）重建，短暂把 CSV/JSON 回退到旧基线。根因是 XLSX 尚未完成更新，重建源顺序错误。医院正式 payload、画像和旧 XLSX 均未受损；随后以“旧 XLSX 基线 + 已验证 616 行正式 payload”离线恢复到 3554 行。防复发：当 CSV 已领先 XLSX 时，不得先调用 `--rebuild-master-only`；必须先更新 XLSX，或显式以正式 payload 构建 master。
+4. 报告一度把合并后的顿号科室字符串当成一个科室，覆盖统计显示 66。最小修正为按顿号拆分原子科室；排除 2 条姓名格式异常行后的正式覆盖为 53 个原子科室。该问题只影响统计展示，不影响身份或数据行。
+5. 最终禁入扫描发现官网 `doctorintro` 白名单区块内仍混有排班字段：103 行详情正文命中“开诊/出诊/每周时段”，其中 10 行还进入亮眼经历线索。根因是 DOM 白名单只排除了页面外部污染，没有剥离白名单区块内部的排班片段。新增统一排班清洗，覆盖带标签排班段、专家/特需门诊每周句、裸“每周出诊”和纯日期时段；离线刷新正式 payload、总表、616 份画像和 XLSX 后，上述四个正式文本字段排班命中均为 0，临床、教育、科研正文保留。防复发测试已加入解析器专项用例。
+6. 最终跨格式断言再次发现：本院 official payload 已完成排班清洗，但 master payload / CSV / XLSX 仍保留旧本院文本，10 份自动画像也由旧 master 生成。根因是上一步只刷新了医院正式 payload，master 合并时未显式启用同院刷新，导致同来源旧行被跳过；这不是采集器清洗失效。使用现有 `build_master_payload(..., refresh_incoming=True)` 纯离线原位刷新 616 行（新增 0、跳过 0），随后重建 CSV / XLSX / 报告，并用 `--generate-missing-only --refresh-auto-generated --hospital` 只刷新本院 616 份带自动标记画像和索引，人工画像及其他医院均未覆盖。防复发：正式字段修正必须按“医院 payload → master payload/CSV → XLSX/报告 → 自动画像/索引”顺序同步，并在提交前分别扫描每一层，不能只验证源 payload。
+
+以上没有触发连续 2 次真实采集失败：同名缺口是首次完整结果审计发现并一次修正；重建顺序错误是离线资产构建顺序问题，已从未损坏的正式 payload 一次恢复。
+
+### 最终 FULL 对账
+
+- 官网科室：59；医生-科室关系：650；唯一详情 ID：646。
+- 纯护理身份排除：9；合规详情 ID：637。
+- 跨科室详情 ID：4，仍按 ID 归并科室归属。
+- 同名不同详情 ID：25 组；其中同一人归并 21 组，实质不同同名保留 4 组 / 8 行。
+- 最终本院身份：616；列表读取失败 0；详情读取失败 0。
+- 最终异常提示行：36，其中同名待甄别 8、职称/身份需人工复核 12、详情正文为空或未识别 11、姓名格式异常 2、多详情职称不一致 4；复合提示会同时计入不同原因。异常行不打疾病标签、不提升优先级。
+- 来源链接均为 `https://www.gyfyyy.cn/cn/ks/.../doctor_<数字ID>.html`；主来源 616 个唯一；归并详情链接在身份对账中留痕。
+- 总底表从 2938 行增至 3554 行；当前 11 家医院。本院 616 行，`已建画像=是` 616。
+- 未使用第三方平台；未绕过登录、验证码或反爬；未入库患者评价、隐私或排班时段。排班禁入扫描覆盖 `擅长诊疗方向摘录`、`亮眼经历线索`、`列表简介`、`详情正文摘录`，最终命中均为 0。
+
+### Obsidian 与 XLSX
+
+- 本院正式画像：616 份；全部带自动生成标记。
+- `_索引.md`：616 个唯一 Wiki 链接、616 个唯一官方来源链接；缺失 0、跳过 0。
+- 初版 637 份画像中，21 份次要详情链接画像在身份归并后成为本轮未提交冗余自动工件；核验全部带自动标记后精确删除。其他医院、人工画像、总底表和索引未删除。
+- 使用 `@oai/artifact-tool` 导入旧 XLSX 并更新原有 6 张工作表，保留表名、列宽、冻结窗格和 `TableStyleMedium2` 蓝白交替样式。
+- 最终工作表范围：主表 `A1:W3555`、复核清单 `A1:W327`、科室统计 `A1:B328`、重点范围统计 `A1:B7`、医院统计 `A1:F12`、采集说明 `A1:B23`。
+- 六张表均完成顶部视觉渲染；另核验主表尾部、复核清单尾部和医院统计。本院医院统计为医生数 616、待复核 616、已建画像 616；公式错误扫描 0。
+- `py_compile` 通过；完整单元测试 69 项通过。最终跨资产断言确认 JSON / CSV / XLSX 均为 3554 行，本院 616 行、616 个唯一主来源、616 份画像、616 个唯一索引 Wiki 链接及官方来源链接；总表四个正式文本字段和全部本院画像的排班命中均为 0。
+- 精确清理三份已完成使命的 TRIAL 工件；正式 payload、正式报告、总底表和画像保留。
+
+### 最终工件
+
+- `work/广州医科大学附属第一医院_official_doctors_payload.json`
+- `work/广州医科大学附属第一医院_official_doctors_report.md`
+- `work/广州医科大学附属第一医院_obsidian_missing_report.md`
+- `work/珠三角三甲医院_医生画像自动采集总底表_payload.json`
+- `医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv`
+- `医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx`
+- `医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表_更新报告.md`
+- `医生画像仓库/01_试点医院/广州医科大学附属第一医院/`
+
+<Handoff_State>
+Target: Issue #25 广州医科大学附属第一医院最终画像审计
+AgentConstitution: D:\workspace\信息收集整理\Agent.md
+RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
+RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/25
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/26
+Branch: codex/mhrj/issue-25-gyfyyy-trial
+InstructionChannel: Issue #25 + PR #26 owner 评论/Review
+Completed:
+- owner TRIAL 审计通过后完成 FULL_APPEND_AND_OBSIDIAN
+- 637 个合规详情 ID 经身份聚类形成 616 个最终身份；21 组同一人归并、4 组同名实质不同保留双行
+- 总底表 3554 行，本院 616 行；XLSX/CSV/JSON/报告一致
+- 本院 616 份画像与 616 条唯一索引链接完成，TRIAL 工件已清理
+CurrentFacts:
+- 59 科室、650 关系、646 唯一 ID、9 护理排除、0 列表/详情读取失败
+- 本院 36 行带保守异常提示，均保留在画像与索引供最终审计；异常行未打标签
+- 当前只等待 owner 最终画像审计、CI、PR 合并和 Issue 关闭双门禁
+Next:
+- Codex 提交并非强制更新原分支，在 PR #26 请求最终画像审计后停止
+- 不自行合并 PR、关闭 Issue 或领取下一 Issue
+Constraints:
+- 仅官方公开渠道；禁止第三方、患者评价、隐私、登录/验证码绕过和排班时段入库
+- 不覆盖其他医院或人工画像，不自行处理其他 Issue
+Artifacts:
+- D:\workspace\信息收集整理\work\广州医科大学附属第一医院_official_doctors_payload.json
+- D:\workspace\信息收集整理\work\广州医科大学附属第一医院_official_doctors_report.md
+- D:\workspace\信息收集整理\work\广州医科大学附属第一医院_obsidian_missing_report.md
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
+- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广州医科大学附属第一医院\_索引.md
+</Handoff_State>
