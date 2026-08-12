@@ -1,7 +1,7 @@
 # Codex 下一步提示词
 
-> 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。
-> 当前状态：`TRIAL_WAITING_CLAUDE_AUDIT`。Issue #11 的入口普查、10 位试采、测试和总底表未变化核验已完成；提交推送并创建 TRIAL PR 后，只等待 Claude 审计。
+> 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。Codex 新会话启动时，在读取 `Agent.md`、路线图、需求文档和当前 Issue 最新架构决策后，必须读取本文件。
+> 当前状态：`FULL_WAITING_FINAL_PROFILE_AUDIT`。Issue #11 的 134 位全量追加、总底表验证、134 份 Obsidian 画像与索引核验已完成；提交推送后只等待 Claude 最终画像审计。
 
 ## GitHub 身份与范围
 
@@ -14,41 +14,42 @@
 
 任何远端写入前必须确认登录身份为 `xtzhou247`。Codex 不直接推送或合并 `main`，不自行批准 PR。
 
-## 当前动作
+## 当前指令
 
 ```text
-Status: TRIAL_WAITING_CLAUDE_AUDIT
-Phase: TRIAL
+Status: FULL_WAITING_FINAL_PROFILE_AUDIT
+Phase: FULL_APPEND_AND_OBSIDIAN
 LedgerSequence: 14
 Hospital: 南方医科大学第五附属医院
 City: 广州市
 OfficialHomeURL: http://www.ny5y.cn/
 DoctorDirectoryURL: http://www.ny5y.cn/zhuanjia_mingyi.php?id=100 http://www.ny5y.cn/zhuanjia_lingnan.php?id=162
-ReviewStatus: 确认可采集
-Task: 把 Issue #11 TRIAL 代码、测试、入口普查表、试采 CSV/payload/报告、ADR 和本提示词提交推送并创建关联 PR；随后停止业务执行，等待 Claude 试采审计。
+AuditDecision: 通过
+AuditConditions: ①全量预期 134 位（去重后），偏离须回报；②岭南名医独有记录科室留空+复核标记，荣誉身份归职称/亮眼线索；③擅长字段统一剥离“擅长：”前缀；④异常提示原样入库；⑤无显式擅长标签留空；⑥范围严格限于两入口，科室介绍/导师简介不纳入。
+Task: 把 Issue #11 FULL 代码、总底表、正式 payload、134 份画像、索引、报告、ADR 和本提示词提交推送到 PR #13 原分支；随后停止业务执行，等待 Claude 最终画像审计。
+ObsidianRoot: D:\workspace\信息收集整理\医生画像仓库\01_试点医院
 ```
 
 ## 已完成事实
 
-- 两入口普通 HTTP GET 均为 200，无登录、验证码或反爬挑战。
-- 专家风采：原始详情链接 134，唯一详情 133，单页。
-- 岭南名医：原始/唯一详情 80，单页。
-- 候选关系 213，跨入口重叠 79，去重后唯一详情 134。
-- 试采 10 位，覆盖两个入口、9 个真实科室；列表失败 0、详情失败 0。
-- 黄艺洪为岭南独有详情，官网没有给真实科室，科室留空并标记 `科室需人工复核`。
-- 10 个来源均严格匹配同站 `yisheng_xq.php?id=<数字>`；未纳入科室介绍或研究生导师栏目。
-- payload/CSV 各 10 行，逐字段差异 0；34 项测试通过。
-- 统一总底表 XLSX/CSV、总 payload、更新报告哈希前后不变，本院仍为 0 行。
-- TRIAL PR：`https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/13`；仅使用 `Refs #11` 关联，未提前关闭 Issue。
-- 最新 ADR：`docs/architecture_decisions/2026-08-12_issue_11_ny5y_trial.md`。
+- PR #12 已由 `xtzhou247` 审批并由 owner 合并；当前分支已同步该 main 变更。
+- 专家风采唯一详情 133、岭南名医唯一详情 80；候选关系 213、跨入口重叠 79、去重后唯一详情 134。
+- 试采 10 位，覆盖两个入口和 9 个真实科室；列表失败 0、详情失败 0、非医生混入 0。
+- 黄艺洪为岭南名医入口唯一独有详情，官网未给真实科室，科室留空并标记 `科室需人工复核`。
+- payload/CSV 各 10 行且逐字段一致；34 项测试通过；TRIAL 阶段总底表未变化。
+- Claude owner 在 PR #13 明确审计“通过”，授权执行本文件中的 FULL 指令。
+- 全量采集 134 位，列表失败 0、详情失败 0、非医生排除 0；本院 payload/CSV/XLSX 各 134 行且逐业务字段差异 0。
+- 总底表现为 8 家医院、2299 位医生；本批新增 134、重复跳过 0。
+- 本院正式画像 134 份、索引双链 134、来源缺失/多余 0；教育/科研/论文可选区块与官网正文证据错配 0。
+- 39 项测试、六表视觉核验、公式错误扫描和合规扫描均通过；三份 TRIAL 临时工件已清理。
 
 ## 当前门禁
 
-1. 只处理 Issue #11、当前分支和后续对应 PR。
-2. TRIAL PR 创建后，只等待 `nancywrayg57-jpg` 对试采给出明确“通过”“有条件通过”或“不通过”。
-3. 只有 Claude 明确通过且本提示词切换为 `FULL_APPEND_AND_OBSIDIAN` 后，才允许全量追加、总底表验证和本院画像生成。
-4. 审计通过前不得使用 `--allow-generic-append`，不得生成本院正式画像，不得领取其他 Issue。
-5. 若 Claude 要求返修，只对 Issue #11 当前分支做最小修正，并继续使用非强制 Git Data API 更新远端引用。
+1. 只处理 Issue #11、当前分支和 PR #13。
+2. FULL 结果已完成；只允许提交推送当前工件并请求最终画像审计，不再重复采集或覆盖画像。
+3. 若 Claude 要求返修，只对 Issue #11 当前分支做最小修正并重新验证受影响范围。
+4. 最终画像审计明确通过、PR #13 已合并关闭、Issue #11 已关闭且必需 CI 成功前，不得领取其他 Issue。
+5. 仅通过非强制 Git Data API 更新原分支；不得自行批准或合并 PR #13。
 
 ## 合规红线
 

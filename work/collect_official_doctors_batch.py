@@ -39,7 +39,14 @@ MASTER_XLSX_PATH = SOURCE_DIR / f"{MASTER_BASENAME}.xlsx"
 MASTER_PREVIEW_PATH = WORK_DIR / f"{MASTER_BASENAME}_preview.png"
 MASTER_REPORT_PATH = SOURCE_DIR / f"{MASTER_BASENAME}_更新报告.md"
 BUNDLED_NODE = Path(
-    r"C:\Users\zhouxinting\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe"
+    Path.home()
+    / ".cache"
+    / "codex-runtimes"
+    / "codex-primary-runtime"
+    / "dependencies"
+    / "node"
+    / "bin"
+    / "node.exe"
 )
 
 BASE_HEADERS = [
@@ -315,6 +322,9 @@ NY5Y_ENTRY_METADATA = {
     },
 }
 NY5Y_GENERAL_CATEGORIES = {"专家风采", "岭南名医"}
+NY5Y_EXPECTED_ENTRY_COUNTS = {"100": 133, "162": 80}
+NY5Y_EXPECTED_UNIQUE_COUNT = 134
+NY5Y_EXPECTED_CROSS_ENTRY_DUPLICATES = 79
 GENERIC_DETAIL_PATH_HINTS = [
     "doctor",
     "expert",
@@ -1703,7 +1713,8 @@ def parse_ny5y_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
     if department in NY5Y_GENERAL_CATEGORIES:
         department = ""
     title_field = first_nonempty(selected_text(".xq_zhicheng", 500), fallback.get("list_title", ""))
-    specialty = selected_text(".xq_content", 1200)
+    specialty_raw = selected_text(".xq_content", 1200)
+    specialty = clean_text(re.sub(r"^\s*擅长\s*[:：]\s*", "", specialty_raw))
     profile_text = selected_text(".xq_xiangxi_jieshao_xq", 6000)
     raw_highlights = extract_sentences(profile_text, HIGHLIGHT_TERMS)
     return {
@@ -1714,7 +1725,7 @@ def parse_ny5y_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
         "department_polluted": "no",
         "title_field": clean_text(title_field),
         "specialty": clean_text(specialty),
-        "specialty_raw": clean_text(specialty),
+        "specialty_raw": clean_text(specialty_raw),
         "specialty_navigation_polluted": "yes" if contains_navigation_text(specialty) else "no",
         "highlight_navigation_polluted": "yes" if contains_navigation_text(raw_highlights) else "no",
         "profile_text": clean_text(profile_text),
@@ -2904,6 +2915,79 @@ def validate_gdskin_full_append(payload: dict[str, Any]) -> None:
         raise RuntimeError("GDSKIN 全量写入前门禁失败：" + "；".join(errors))
 
 
+def validate_ny5y_full_append(payload: dict[str, Any]) -> None:
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    errors: list[str] = []
+
+    if int(meta.get("unique_doctor_count") or 0) != NY5Y_EXPECTED_UNIQUE_COUNT:
+        errors.append(
+            f"医生记录预期 {NY5Y_EXPECTED_UNIQUE_COUNT}，实际 {meta.get('unique_doctor_count', 0)}"
+        )
+    if len(rows) != NY5Y_EXPECTED_UNIQUE_COUNT:
+        errors.append(f"结果行数预期 {NY5Y_EXPECTED_UNIQUE_COUNT}，实际 {len(rows)}")
+    if int(meta.get("unique_candidate_count") or 0) != NY5Y_EXPECTED_UNIQUE_COUNT:
+        errors.append(
+            f"去重候选预期 {NY5Y_EXPECTED_UNIQUE_COUNT}，实际 {meta.get('unique_candidate_count', 0)}"
+        )
+    expected_memberships = sum(NY5Y_EXPECTED_ENTRY_COUNTS.values())
+    if int(meta.get("candidate_membership_count") or 0) != expected_memberships:
+        errors.append(
+            f"入口候选关系预期 {expected_memberships}，实际 {meta.get('candidate_membership_count', 0)}"
+        )
+    if int(meta.get("cross_entry_duplicate_count") or 0) != NY5Y_EXPECTED_CROSS_ENTRY_DUPLICATES:
+        errors.append(
+            "跨入口重复预期 "
+            f"{NY5Y_EXPECTED_CROSS_ENTRY_DUPLICATES}，实际 {meta.get('cross_entry_duplicate_count', 0)}"
+        )
+    if int(meta.get("category_error_count") or 0) != 0:
+        errors.append(f"列表读取失败 {meta.get('category_error_count', 0)} 条")
+    if int(meta.get("detail_error_count") or 0) != 0:
+        errors.append(f"详情读取失败 {meta.get('detail_error_count', 0)} 条")
+    if int(meta.get("excluded_non_doctor_count") or 0) != 0:
+        errors.append(f"非医生排除预期 0，实际 {meta.get('excluded_non_doctor_count', 0)}")
+
+    actual_entry_counts: dict[str, int] = {}
+    for entry_url, count in meta.get("entry_candidate_counts", {}).items():
+        if entry_id := ny5y_entry_kind(str(entry_url)):
+            actual_entry_counts[entry_id] = int(count)
+    for entry_id, expected_count in NY5Y_EXPECTED_ENTRY_COUNTS.items():
+        actual_count = actual_entry_counts.get(entry_id)
+        if actual_count != expected_count:
+            errors.append(f"入口 {entry_id} 唯一详情预期 {expected_count}，实际 {actual_count}")
+
+    source_ids = [ny5y_detail_id(str(row.get("来源链接") or "")) for row in rows]
+    if any(not source_id for source_id in source_ids):
+        errors.append("存在非授权 yisheng_xq.php?id=<数字> 来源")
+    if len({source_id for source_id in source_ids if source_id}) != len(rows):
+        errors.append("结果中存在重复来源详情 ID")
+
+    prefixed_specialties = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if re.match(r"^\s*擅长\s*[:：]", str(row.get("擅长诊疗方向摘录") or ""))
+    ]
+    if prefixed_specialties:
+        errors.append("擅长字段仍保留前缀：" + "、".join(prefixed_specialties[:10]))
+
+    huang_rows = [row for row in rows if clean_text(str(row.get("姓名") or "")) == "黄艺洪"]
+    if len(huang_rows) != 1:
+        errors.append(f"黄艺洪记录预期 1，实际 {len(huang_rows)}")
+    else:
+        huang = huang_rows[0]
+        if clean_text(str(huang.get("科室_分类页") or "")):
+            errors.append("黄艺洪真实科室应保持空白")
+        if "科室需人工复核" not in str(huang.get("异常提示") or ""):
+            errors.append("黄艺洪缺少科室需人工复核标记")
+        if "岭南名医" not in " ".join(
+            [str(huang.get("职称身份原文") or ""), str(huang.get("亮眼经历线索") or "")]
+        ):
+            errors.append("黄艺洪缺少岭南名医官方荣誉证据")
+
+    if errors:
+        raise RuntimeError("NY5Y 全量写入前门禁失败：" + "；".join(errors))
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=BASE_HEADERS)
@@ -3371,6 +3455,8 @@ def main() -> None:
 
     if target.adapter_id == GDSKIN_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdskin_full_append(payload)
+    if target.adapter_id == NY5Y_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_ny5y_full_append(payload)
 
     safe_name = safe_file_part(target.hospital)
     json_path = WORK_DIR / f"{safe_name}_official_doctors_payload.json"

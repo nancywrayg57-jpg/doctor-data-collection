@@ -22,6 +22,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     discover_generic_detail_links,
     effective_entry_urls,
     extract_clean_highlights,
+    find_node,
     generic_record_quality,
     generic_detail_identity,
     looks_like_person_name,
@@ -34,6 +35,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     parse_ny5y_detail,
     round_robin_generic_items,
     validate_gdskin_full_append,
+    validate_ny5y_full_append,
 )
 
 
@@ -149,6 +151,34 @@ class GenericDetailNoiseFilteringTests(unittest.TestCase):
         )
 
         self.assertEqual(extract_clean_highlights(raw), "")
+
+
+class NodeRuntimeResolutionTests(unittest.TestCase):
+    def test_bundled_runtime_is_preferred_without_hardcoded_user(self) -> None:
+        bundled = Path("C:/Users/current/.cache/codex-runtimes/node.exe")
+        with (
+            patch("collect_official_doctors_batch.BUNDLED_NODE", bundled),
+            patch.object(Path, "exists", return_value=True),
+            patch("collect_official_doctors_batch.shutil.which", return_value="C:/node.exe"),
+        ):
+            self.assertEqual(find_node(), str(bundled))
+
+    def test_path_runtime_is_used_when_bundled_runtime_is_missing(self) -> None:
+        with (
+            patch("collect_official_doctors_batch.BUNDLED_NODE", Path("C:/missing/node.exe")),
+            patch.object(Path, "exists", return_value=False),
+            patch("collect_official_doctors_batch.shutil.which", return_value="C:/node.exe"),
+        ):
+            self.assertEqual(find_node(), "C:/node.exe")
+
+    def test_missing_runtime_is_reported(self) -> None:
+        with (
+            patch("collect_official_doctors_batch.BUNDLED_NODE", Path("C:/missing/node.exe")),
+            patch.object(Path, "exists", return_value=False),
+            patch("collect_official_doctors_batch.shutil.which", return_value=None),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "未找到 Node.js"):
+                find_node()
 
 
 class GenericDirectoryFilteringTests(unittest.TestCase):
@@ -588,7 +618,7 @@ class Ny5yOfficialExpertTests(unittest.TestCase):
         <div class="yuanzhang">赵汉民 <span>创伤骨科副主任</span></div>
         <a href="keshi_jianjie.php?id=125"><div class="suoshulei">进入创伤骨科</div></a>
         <div class="xq_zhicheng">副主任医师</div>
-        <div class="xq_content">足踝外科、儿童骨科、运动系统创伤。</div>
+        <div class="xq_content">擅长：足踝外科、儿童骨科、运动系统创伤。</div>
         <div class="xq_xiangxi_jieshao_xq">副主任医师。专业擅长：足踝外科；从事临床工作十余年。</div>
         <footer>网站地图 采购公告</footer>
         """
@@ -598,7 +628,8 @@ class Ny5yOfficialExpertTests(unittest.TestCase):
         self.assertEqual(detail["name"], "赵汉民")
         self.assertEqual(detail["department"], "创伤骨科")
         self.assertEqual(detail["title_field"], "副主任医师")
-        self.assertIn("足踝外科", detail["specialty"])
+        self.assertEqual(detail["specialty"], "足踝外科、儿童骨科、运动系统创伤。")
+        self.assertEqual(detail["specialty_raw"], "擅长：足踝外科、儿童骨科、运动系统创伤。")
         self.assertIn("从事临床工作十余年", detail["profile_text"])
         for pollution in ["医院首页", "联系我们", "网站地图", "采购公告"]:
             self.assertNotIn(pollution, detail["profile_text"])
@@ -616,6 +647,63 @@ class Ny5yOfficialExpertTests(unittest.TestCase):
         self.assertEqual(detail["name"], "黄艺洪")
         self.assertEqual(detail["department"], "")
         self.assertIn("岭南名医", detail["title_field"])
+
+    def test_missing_explicit_specialty_stays_empty(self) -> None:
+        html = """
+        <div class="yuanzhang">无专长医生</div>
+        <div class="suoshulei">进入全科</div>
+        <div class="xq_zhicheng">医师</div>
+        <div class="xq_xiangxi_jieshao_xq">长期从事临床工作。</div>
+        """
+
+        detail = parse_ny5y_detail(html, {})
+
+        self.assertEqual(detail["specialty"], "")
+        self.assertEqual(detail["specialty_raw"], "")
+
+    def test_full_append_gate_runs_before_master_write(self) -> None:
+        rows = [
+            {
+                "姓名": f"医生{doctor_id}",
+                "科室_分类页": "全科",
+                "擅长诊疗方向摘录": "疾病规范诊疗。",
+                "职称身份原文": "主任医师",
+                "亮眼经历线索": "",
+                "来源链接": f"http://www.ny5y.cn/yisheng_xq.php?id={doctor_id}",
+                "异常提示": "",
+            }
+            for doctor_id in range(1, 135)
+        ]
+        rows[-1].update(
+            {
+                "姓名": "黄艺洪",
+                "科室_分类页": "",
+                "职称身份原文": "主任医师、岭南名医",
+                "亮眼经历线索": "岭南名医",
+                "异常提示": "科室需人工复核",
+            }
+        )
+        payload = {
+            "meta": {
+                "unique_doctor_count": 134,
+                "unique_candidate_count": 134,
+                "candidate_membership_count": 213,
+                "cross_entry_duplicate_count": 79,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "excluded_non_doctor_count": 0,
+                "entry_candidate_counts": {
+                    self.ENTRY_MAIN: 133,
+                    self.ENTRY_LINGNAN: 80,
+                },
+            },
+            "rows": rows,
+        }
+
+        validate_ny5y_full_append(payload)
+        payload["meta"]["unique_doctor_count"] = 133
+        with self.assertRaisesRegex(RuntimeError, "医生记录预期 134，实际 133"):
+            validate_ny5y_full_append(payload)
 
     def test_collect_generic_returns_complete_ny5y_payload(self) -> None:
         shared_ids = list(range(1, 80))
