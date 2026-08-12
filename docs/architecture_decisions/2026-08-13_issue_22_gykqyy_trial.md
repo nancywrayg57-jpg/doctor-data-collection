@@ -80,11 +80,12 @@ python .\work\collect_official_doctors_batch.py --hospital "广州医科大学�
 
 ## 阻塞、根因、解决与防复发
 
-1. 早期 `git fetch` 多次出现 TLS/连接失败；随后重新 fetch 成功并以 fast-forward 同步到 `origin/main@45f9340`。目录页、接口、GitHub API 与真实 TRIAL 均成功，证明当前不再是网络阻塞。
+1. 早期 `git fetch` 多次出现 TLS/连接失败；随后重新 fetch 成功并以 fast-forward 同步到 `origin/main@45f9340`。最终推送前 `git fetch` 又出现 GitHub 443 连接超时，但同轮 GitHub API 身份、remote main 与分支查询成功，目录页、业务接口和真实 TRIAL 也成功。结论是 Git HTTPS 链路存在间歇性网络故障，不是持续断网；使用 GitHub API 复核远端并通过非强制 Git Data API 发布。
 2. 默认 `python` 是 Microsoft Store 占位符；改用 bundled Python。
 3. bundled Python 缺少 `requests` 与 `beautifulsoup4`；为避免污染仓库和系统环境，仅安装到 Issue 临时目录，并通过 `PYTHONPATH` 注入。
 4. 第一次专项单测 mock 返回普通 `object`，缺少 `session.headers`；这是测试桩错误，改为真实空 `requests.Session` 后通过。未修改业务接口逻辑。
 5. 执行前预判“医生有分页”与现场事实不一致；适配器不猜测分页接口，以 HTML 实际分支与公开 API 响应为证，并在报告中明确记录为单一数据页。
+6. 首次检查远端分支时，PowerShell 将 `gh api` 的 404 JSON 错误正文捕获成非空字符串，误判为分支存在；改为以 `gh` 退出码判断 404，remote main SHA 与本地父提交仍完全一致，未发生远端冲突或写入。
 
 防复发措施：严格域名/路径/分类匹配；接口调用前验证页面声明；JSON Content-Type 和结构防御；目录 ID 去重；同名不同 ID 不自动合并；真实 TRIAL 强制 `--min-departments 3`；总底表与画像目录用 Git 路径 diff 独立确认未改。
 
@@ -125,7 +126,7 @@ Completed:
 CurrentFacts:
 - TRIAL 工件已生成，未写统一总底表，未生成正式 Obsidian 画像
 - 方颖与赵稚宁分别存在同名不同 ID，FULL 时不得自动合并
-- 当前网络正常；此前网络错误已恢复
+- GitHub API 与官网访问正常；Git HTTPS 仍有间歇性 443 超时，发布改走非强制 Git Data API
 Next:
 - 提交并推送当前分支，创建关联 Issue #22 的 PR
 - 停止等待 nancywrayg57-jpg 对 TRIAL 给出明确通过/有条件通过/不通过
