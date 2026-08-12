@@ -19,7 +19,6 @@ from collect_official_doctors_batch import (  # noqa: E402
     dedicated_adapter_for,
     discover_gdskin_excluded_links,
     discover_gdskin_postback_documents,
-    discover_gdzy5413_out_of_scope_links,
     discover_generic_detail_links,
     effective_entry_urls,
     extract_clean_highlights,
@@ -28,6 +27,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     generic_detail_identity,
     gdzy5413_detail_id,
     gdzy5413_entry_kind,
+    gdzy5413_ksdoctor_detail_id,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     merge_rows_for_master,
@@ -36,6 +36,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     parse_generic_detail,
     parse_gdskin_detail,
     parse_gdzy5413_detail,
+    parse_gdzy5413_ksdoctor_detail,
     parse_ny5y_detail,
     round_robin_generic_items,
     validate_gdskin_full_append,
@@ -799,8 +800,16 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
             generic_detail_identity("https://gdzy5413.com/main/doctor/specialist.aspx?typeid=1290"),
             "gdzy5413:1290",
         )
+        ksdoctor_url = (
+            "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?"
+            "bid=22&typeid=20&cid=22&ksid=20&id=47"
+        )
+        self.assertEqual(gdzy5413_ksdoctor_detail_id(ksdoctor_url), "47")
+        self.assertEqual(generic_detail_identity(ksdoctor_url), "gdzy5413:ksdoctor:47")
+        self.assertTrue(matches_generic_directory_detail_url(self.ENTRY_EXPERTS, ksdoctor_url))
         for invalid in [
             "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?ksid=1&id=1290",
+            "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=22&typeid=20&cid=23&ksid=20&id=47",
             "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=1290&extra=1",
             "https://example.com/main/doctor/specialist.aspx?typeid=1290",
         ]:
@@ -825,17 +834,22 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
         self.assertEqual(rows[0]["department"], "内分泌科")
         self.assertEqual(rows[0]["list_title"], "内分泌科主任、主任中医师、教授")
 
-    def test_out_of_scope_template_is_reported_without_becoming_candidate(self) -> None:
+    def test_852_directory_uses_explicit_department_and_strict_ksdoctor_urls(self) -> None:
         html = """
-        <a href="ks/templet2/ksdoctorinfo.aspx?ksid=1&id=10">张医生</a>
-        <a href="ks/templet2/ksdoctorinfo.aspx?ksid=2&id=10">张医生重复</a>
-        <a href="ks/templet2/ksdoctorinfo.aspx?ksid=1&id=11">李医生</a>
+        <div class="contentinfo">
+          <div class="ks_title">心血管科</div>
+          <div class="pudocname">
+            <a href="ks/templet2/ksdoctorinfo.aspx?bid=22&amp;typeid=20&amp;cid=22&amp;ksid=20&amp;id=47">王 清 海</a>
+          </div>
+        </div>
+        <a href="ks/templet2/ksdoctorinfo.aspx?ksid=1&amp;id=10">参数不完整</a>
         """
 
-        self.assertEqual(discover_generic_detail_links(html, self.ENTRY_EXPERTS, self.ENTRY_EXPERTS), [])
-        excluded = discover_gdzy5413_out_of_scope_links(html, self.ENTRY_EXPERTS, self.ENTRY_EXPERTS)
-        self.assertEqual(len(excluded), 2)
-        self.assertTrue(all("不请求采集" in item["reason"] for item in excluded))
+        rows = discover_generic_detail_links(html, self.ENTRY_EXPERTS, self.ENTRY_EXPERTS)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["name"], "王清海")
+        self.assertEqual(rows[0]["department"], "心血管科")
+        self.assertEqual(gdzy5413_ksdoctor_detail_id(rows[0]["source_link"]), "47")
 
     def test_detail_dom_ignores_generic_title_and_uses_explicit_department_evidence(self) -> None:
         html = """
@@ -860,6 +874,25 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
         self.assertIn("主持科研课题多项", detail["profile_text"])
         self.assertNotIn("招标公告", detail["profile_text"])
 
+    def test_ksdoctor_detail_uses_breadcrumb_and_labeled_sections(self) -> None:
+        html = """
+        <div class="newslistbg_m_c">
+          <div class="typeall_right">您现在所在的位置：官网&gt;科室列表&gt;临床科室&gt;内科&gt;心血管科&gt;专家介绍&gt;</div>
+          <div>【基本资料】 姓名：王清海 职称：主任中医师、教授、博士生导师 擅长：中医治疗高血压、冠心病。</div>
+          <div>【医生简介】 广东省名中医，承担省部级科研课题多项。</div>
+          <div>【出诊安排】 星期一上午</div>
+        </div>
+        """
+
+        detail = parse_gdzy5413_ksdoctor_detail(html, {"name": "王清海", "department": "心血管科"})
+
+        self.assertEqual(detail["name"], "王清海")
+        self.assertEqual(detail["department"], "心血管科")
+        self.assertEqual(detail["title_field"], "主任中医师、教授、博士生导师")
+        self.assertEqual(detail["specialty"], "中医治疗高血压、冠心病。")
+        self.assertIn("承担省部级科研课题", detail["profile_text"])
+        self.assertNotIn("星期一", detail["profile_text"])
+
     def test_collect_generic_records_scope_evidence_and_department_spread(self) -> None:
         famous_ids = list(range(1, 22))
         names = ["张三", "李四", "王五", "赵六", "陈明", "刘强", "杨敏", "黄芳", "周军", "吴静", "徐勇", "孙丽", "胡伟", "朱燕", "高峰", "林涛", "何娟", "郭鹏", "罗英", "梁杰", "宋梅"]
@@ -875,8 +908,15 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
             )
             for doctor_id in famous_ids
         )
+        expert_names = names[:20] + [f"张{chr(0x4E00 + doctor_id)}" for doctor_id in range(21, 347)]
         expert_html = "".join(
-            f'<a href="ks/templet2/ksdoctorinfo.aspx?ksid=1&id={doctor_id}">范围外医生</a>'
+            (
+                '<div class="contentinfo">'
+                f'<div class="ks_title">{departments[(doctor_id - 1) % len(departments)]}</div>'
+                '<div class="pudocname">'
+                f'<a href="ks/templet2/ksdoctorinfo.aspx?bid={doctor_id}&amp;typeid={doctor_id + 1000}&amp;cid={doctor_id}&amp;ksid={doctor_id + 1000}&amp;id={doctor_id}">'
+                f'{expert_names[doctor_id - 1]}</a></div></div>'
+            )
             for doctor_id in range(1, 347)
         )
 
@@ -888,6 +928,16 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
                 return 200, expert_html, ""
             doctor_id = int(url.rsplit("=", 1)[-1])
             department = departments[(doctor_id - 1) % len(departments)]
+            if "ksdoctorinfo" in url:
+                name = expert_names[doctor_id - 1]
+                return (
+                    200,
+                    '<div class="newslistbg_m_c">'
+                    f'<div class="typeall_right">官网&gt;科室列表&gt;临床科室&gt;{department}&gt;专家介绍&gt;</div>'
+                    f'<div>【基本资料】 姓名：{name} 职称：主任医师 擅长：{department}常见疾病。</div>'
+                    f'<div>【医生简介】 {name}长期从事临床工作。</div><div>【出诊安排】</div></div>',
+                    "",
+                )
             return (
                 200,
                 f'<div id="news_info_plAll"><div class="news_info_s">擅长治疗：{department}常见疾病。</div></div>',
@@ -911,17 +961,24 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
             patch("collect_official_doctors_batch.fetch", side_effect=fake_fetch),
             patch("collect_official_doctors_batch.time.sleep", return_value=None),
         ):
-            payload = collect_generic(target, "2026-08-12", max_doctors=10, max_pages=5)
+            payload = collect_generic(
+                target,
+                "2026-08-12",
+                max_doctors=10,
+                max_pages=5,
+                gdzy5413_trial2=True,
+            )
 
         self.assertEqual(payload["meta"]["entry_candidate_counts"][self.ENTRY_FAMOUS], 21)
-        self.assertEqual(payload["meta"]["entry_candidate_counts"][self.ENTRY_EXPERTS], 0)
-        self.assertEqual(payload["meta"]["unique_candidate_count"], 21)
+        self.assertEqual(payload["meta"]["entry_candidate_counts"][self.ENTRY_EXPERTS], 346)
+        self.assertEqual(payload["meta"]["unique_candidate_count"], 367)
         self.assertEqual(payload["meta"]["excluded_non_doctor_count"], 0)
-        self.assertEqual(payload["meta"]["out_of_scope_candidate_count"], 346)
-        self.assertEqual(payload["entry_reconnaissance"][1]["out_of_scope_detail_count"], 346)
+        self.assertEqual(payload["meta"]["out_of_scope_candidate_count"], 0)
+        self.assertEqual(payload["entry_reconnaissance"][1]["out_of_scope_detail_count"], 0)
+        self.assertEqual(payload["meta"]["gdzy5413_cross_mode_name_match_count"], 20)
         self.assertEqual(len(payload["rows"]), 10)
         self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
-        self.assertTrue(all(gdzy5413_detail_id(row["来源链接"]) for row in payload["rows"]))
+        self.assertTrue(all(gdzy5413_ksdoctor_detail_id(row["来源链接"]) for row in payload["rows"]))
         self.assertTrue(all(not row["亮眼经历线索"].startswith("广东省第二中医院") for row in payload["rows"]))
 
 

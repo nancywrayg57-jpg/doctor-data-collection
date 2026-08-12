@@ -1,7 +1,7 @@
 # Codex 下一步提示词
 
 > 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。Codex 新会话启动时，在读取 `Agent.md`、路线图、需求文档和架构决策后，必须读取本文件。
-> 当前状态：`READY`（TRIAL）。序号 18 已按 owner 裁决跳过（PR #16 合并、Issue #14 关闭、台账留痕）；当前任务为 **Issue #17 序号 22 广东省第二中医院试采**，完整指令见 Issue #17。
+> 当前状态：`TRIAL_SCOPE_BLOCKED`（TRIAL-2）。序号 18 已按 owner 裁决跳过（PR #16 合并、Issue #14 关闭、台账留痕）；当前任务为 **Issue #17 序号 22 广东省第二中医院补充试采范围裁决**，完整证据见 PR #19 和当前 Issue ADR。
 
 ## GitHub 身份
 
@@ -12,20 +12,21 @@
 ## 当前指令
 
 ```text
-Status: READY
+Status: TRIAL_SCOPE_BLOCKED
 Phase: TRIAL
 LedgerSequence: 22
 Hospital: 广东省第二中医院
 City: 广州市
 OfficialHomeURL: https://www.gdzy5413.com/main/main.aspx
 DoctorDirectoryURL: https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850 https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850
+AllowedDetailPatterns: doctor/specialist.aspx?typeid=N + ksdoctorinfo（852 同站官方详情）
 ReviewStatus: 确认可采集（owner 预核验：入口 curl 200 有效；详情模式 doctor/specialist.aspx?typeid=N；UA 敏感属正常 HTTP 头非绕过）
 Difficulty: A-优先自动采集
-Task: 逐入口普查（851 名医名家/852 各科专家），按 typeid 去重后试采 10 位（≥3 科室），不写入总底表；材料推送 PR 后停止等待 Claude 审计。
+Task: 852 普查发现白云院区 79 条及淘金/五山门诊 32 条；按“分院区条目熔断回报”停止。等待 owner 明确这些范围是全部纳入、排除白云院区、同时排除院区和门诊，或给出其他精确范围。裁决同步后才抽样试采 10 位（≥3 真实科室），不写入总底表。851 部分无需重试。
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/17
 ```
 
-执行要点：名医名家为荣誉分类，与各科专家去重、荣誉归职称/亮眼线索、科室优先真实科室；两块牌子单一实体按"广东省第二中医院"入库；分院区条目熔断回报；遇真实挑战/验证码按既定规则熔断跳过。
+执行要点：名医名家为荣誉分类，与各科专家按医生身份（姓名+详情标识）跨模式去重、荣誉归职称/亮眼线索、科室优先真实科室；两块牌子单一实体按"广东省第二中医院"入库；分院区条目熔断回报；遇真实挑战/验证码按既定规则熔断跳过。
 
 ## 流程口径（管理员 2026-08-11/12）
 
