@@ -44,6 +44,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     round_robin_generic_items,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
+    validate_gdzy5413_full_append,
     validate_gdzy5413_trial2,
     validate_ny5y_full_append,
 )
@@ -949,8 +950,92 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
         self.assertEqual(len(merged), 1)
         self.assertEqual(merged[0]["来源链接"], "u125")
         self.assertEqual(merged[0]["科室_分类页"], "特诊室、心血管科")
+        self.assertEqual(merged[0]["职称身份原文"], "副主任中医师、医学博士")
         self.assertEqual(reconciliation[0]["merged_source_links"], ["u658"])
         self.assertEqual(reconciliation[0]["resolution"], "同一人归并")
+
+    def test_identity_merge_keeps_primary_title_and_flags_title_mismatch(self) -> None:
+        secondary = {
+            "姓名": "张医生",
+            "科室_分类页": "门诊部",
+            "科室_列表卡片": "门诊部",
+            "职称_关键词": "主任医师、教授",
+            "职称身份原文": "主任医师、教授、硕士研究生导师",
+            "擅长诊疗方向摘录": "高血压、冠心病。",
+            "详情正文摘录": "",
+            "来源链接": "u2",
+            "异常提示": "",
+        }
+        primary = {
+            **secondary,
+            "科室_分类页": "心血管科",
+            "科室_列表卡片": "心血管科",
+            "职称_关键词": "主任医师",
+            "职称身份原文": "主任医师",
+            "详情正文摘录": "长期从事心血管临床工作，擅长高血压、冠心病诊治。",
+            "来源链接": "u1",
+        }
+
+        merged, _ = merge_gdzy5413_identity_rows([secondary, primary])
+
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0]["来源链接"], "u1")
+        self.assertEqual(merged[0]["职称身份原文"], "主任医师")
+        self.assertEqual(merged[0]["职称_关键词"], "主任医师")
+        self.assertIn("多详情职称不一致", merged[0]["异常提示"])
+
+    def test_full_append_gate_requires_complete_authorized_reconciliation(self) -> None:
+        specialist_links = [
+            f"https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid={value}"
+            for value in range(1, 22)
+        ]
+        ksdoctor_links = [
+            "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?"
+            f"bid=81&typeid=1&cid=81&ksid=1&id={value}"
+            for value in range(1, 347)
+        ]
+        relation_links = specialist_links + ksdoctor_links
+        rows = [
+            {
+                "医院": "广东省第二中医院",
+                "姓名": f"医生{value}",
+                "职称_关键词": "主任医师",
+                "职称身份原文": "主任医师",
+                "擅长诊疗方向摘录": "",
+                "来源链接": relation_links[value],
+            }
+            for value in range(290)
+        ]
+        reconciliation = [
+            {
+                "primary_source_link": relation_links[value],
+                "merged_source_links": relation_links[290:] if value == 0 else [],
+                "relation_count": 78 if value == 0 else 1,
+            }
+            for value in range(290)
+        ]
+        payload = {
+            "meta": {
+                "entry_candidate_counts": {
+                    "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850": 21,
+                    "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850": 346,
+                },
+                "gdzy5413_851_unique_name_count": 21,
+                "gdzy5413_852_unique_name_count": 289,
+                "gdzy5413_cross_mode_name_match_count": 20,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+            },
+            "rows": rows,
+            "gdzy5413_identity_reconciliation": reconciliation,
+        }
+
+        validate_gdzy5413_full_append(payload)
+        payload["gdzy5413_identity_reconciliation"][0]["primary_source_link"] = (
+            "https://example.com/not-authorized"
+        )
+        with self.assertRaisesRegex(RuntimeError, "非授权"):
+            validate_gdzy5413_full_append(payload)
 
     def test_distinct_same_name_rows_are_retained_and_flagged(self) -> None:
         heart = {
@@ -979,6 +1064,12 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
         self.assertEqual(len(merged), 2)
         self.assertTrue(all("同名待甄别" in row["异常提示"] for row in merged))
         self.assertTrue(all(item["resolution"] == "同名待甄别" for item in reconciliation))
+
+        master_rows, added, skipped, refreshed, duplicates = merge_rows_for_master(
+            [], merged, preserve_existing=True
+        )
+        self.assertEqual(len(master_rows), 2)
+        self.assertEqual((added, skipped, refreshed, duplicates), (2, 0, 0, 0))
 
     def test_collect_generic_records_scope_evidence_and_department_spread(self) -> None:
         famous_ids = list(range(1, 22))

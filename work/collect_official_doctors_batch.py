@@ -748,6 +748,9 @@ def doctor_row_key(row: dict[str, Any]) -> tuple[str, ...]:
         str(row.get("科室_列表卡片") or ""),
     )
     source = clean_text(str(row.get("来源链接") or ""))
+    warnings = clean_text(str(row.get("异常提示") or ""))
+    if "同名待甄别" in warnings and hospital and source:
+        return ("source", hospital, canonical_url(source))
     if hospital and name and department:
         return ("doctor", hospital, name, department)
     if hospital and source:
@@ -888,9 +891,19 @@ def build_master_payload(
     today: str,
     incoming_payload: dict[str, Any] | None = None,
     refresh_incoming: bool = False,
+    replace_incoming_hospital: bool = False,
 ) -> dict[str, Any]:
     existing_rows, source_label, preserve_existing = load_existing_rows_for_master()
     incoming_rows = incoming_payload["rows"] if incoming_payload else []
+    incoming_hospital = clean_text(
+        str((incoming_payload or {}).get("meta", {}).get("hospital") or "")
+    )
+    if replace_incoming_hospital and incoming_hospital:
+        existing_rows = [
+            row
+            for row in existing_rows
+            if clean_text(str(row.get("医院") or "")) != incoming_hospital
+        ]
     rows, added, skipped, refreshed, existing_duplicates = merge_rows_for_master(
         existing_rows,
         incoming_rows,
@@ -2805,7 +2818,6 @@ def merge_gdzy5413_identity_rows(
     merged_rows: list[dict[str, Any]] = []
     reconciliation: list[dict[str, Any]] = []
     longest_fields = [
-        "职称身份原文",
         "擅长诊疗方向摘录",
         "亮眼经历线索",
         "列表简介",
@@ -2838,10 +2850,7 @@ def merge_gdzy5413_identity_rows(
             merged["科室_分类页"] = "、".join(departments)
             merged["科室_列表卡片"] = "、".join(departments)
             merged["职称_关键词"] = "、".join(
-                extract_terms(
-                    " ".join(clean_text(member.get("职称身份原文")) for member in cluster),
-                    TITLE_TERMS,
-                )
+                extract_terms(clean_text(primary.get("职称身份原文")), TITLE_TERMS)
             )
             warnings = [
                 warning
@@ -2849,6 +2858,13 @@ def merge_gdzy5413_identity_rows(
                 for warning in clean_text(member.get("异常提示")).split("；")
                 if warning
             ]
+            distinct_titles = {
+                clean_text(member.get("职称身份原文"))
+                for member in cluster
+                if clean_text(member.get("职称身份原文"))
+            }
+            if len(distinct_titles) > 1:
+                warnings.append("多详情职称不一致")
             if distinct_same_name:
                 warnings.append("同名待甄别")
             merged["异常提示"] = "；".join(dict.fromkeys(warnings))
@@ -3367,6 +3383,8 @@ def collect_generic(
             "gdzy5413_851_unique_name_count": len(gdzy5413_names_by_mode["851"]),
             "gdzy5413_852_unique_name_count": len(gdzy5413_names_by_mode["852"]),
             "gdzy5413_cross_mode_name_match_count": len(gdzy5413_cross_mode_matches),
+            "gdzy5413_detail_relation_count": len(detail_items),
+            "gdzy5413_final_identity_count": len(rows),
             "gdzy5413_trial2_sample_relation_count": len(detail_items),
             "gdzy5413_trial2_sample_identity_count": len(rows),
             "gdzy5413_trial2_baiyun_sample_count": sum(
@@ -3493,6 +3511,77 @@ def validate_gdzy5413_trial2(payload: dict[str, Any], expected_identities: int =
         raise RuntimeError("GDZY5413 TRIAL-2 门禁失败：" + "；".join(errors))
 
 
+def validate_gdzy5413_full_append(payload: dict[str, Any]) -> None:
+    """Fail before master writes when the owner-audited FULL census or identity audit drifts."""
+
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    reconciliation = payload.get("gdzy5413_identity_reconciliation", [])
+    errors: list[str] = []
+    entry_counts = {
+        gdzy5413_entry_kind(str(entry_url)): int(count)
+        for entry_url, count in meta.get("entry_candidate_counts", {}).items()
+        if gdzy5413_entry_kind(str(entry_url))
+    }
+    if entry_counts != {"851": 21, "852": 346}:
+        errors.append(f"851/852 唯一详情应为 21/346，实际 {entry_counts}")
+    if int(meta.get("gdzy5413_851_unique_name_count") or 0) != 21:
+        errors.append(f"851 唯一姓名应为 21，实际 {meta.get('gdzy5413_851_unique_name_count')}")
+    if int(meta.get("gdzy5413_852_unique_name_count") or 0) != 289:
+        errors.append(f"852 唯一姓名应为 289，实际 {meta.get('gdzy5413_852_unique_name_count')}")
+    if int(meta.get("gdzy5413_cross_mode_name_match_count") or 0) != 20:
+        errors.append(
+            "851/852 同名应为 20，实际 "
+            f"{meta.get('gdzy5413_cross_mode_name_match_count')}"
+        )
+    if int(meta.get("category_error_count") or 0) or int(meta.get("detail_error_count") or 0):
+        errors.append("列表或详情存在读取失败")
+    if not 290 <= len(rows) <= 367:
+        errors.append(f"最终身份数应在姓名并集 290 与详情关系 367 之间，实际 {len(rows)}")
+    if len(reconciliation) != len(rows):
+        errors.append(f"归并对账行数应等于最终身份数，实际 {len(reconciliation)}/{len(rows)}")
+
+    relation_links = [
+        str(link)
+        for item in reconciliation
+        for link in [item.get("primary_source_link"), *item.get("merged_source_links", [])]
+        if link
+    ]
+    relation_count = sum(int(item.get("relation_count") or 0) for item in reconciliation)
+    if len(relation_links) != 367 or relation_count != 367:
+        errors.append(f"归并详情关系应为 367，实际链接 {len(relation_links)} / 对账 {relation_count}")
+    if len(set(relation_links)) != len(relation_links):
+        errors.append("归并对账存在重复详情链接")
+    specialist_links = [link for link in relation_links if gdzy5413_detail_id(link)]
+    ksdoctor_links = [link for link in relation_links if gdzy5413_ksdoctor_detail_id(link)]
+    if len(specialist_links) != 21 or len(ksdoctor_links) != 346:
+        errors.append(
+            f"归并对账授权链接应为 specialist 21 / ksdoctorinfo 346，实际 "
+            f"{len(specialist_links)} / {len(ksdoctor_links)}"
+        )
+    if len(specialist_links) + len(ksdoctor_links) != len(relation_links):
+        errors.append("归并对账含非授权详情链接")
+
+    for row in rows:
+        if clean_text(row.get("医院")) != "广东省第二中医院":
+            errors.append("存在医院字段未统一为广东省第二中医院")
+            break
+        source_link = str(row.get("来源链接") or "")
+        if not (gdzy5413_detail_id(source_link) or gdzy5413_ksdoctor_detail_id(source_link)):
+            errors.append("最终行含非授权主详情链接")
+            break
+        expected_titles = "、".join(extract_terms(clean_text(row.get("职称身份原文")), TITLE_TERMS))
+        if clean_text(row.get("职称_关键词")) != expected_titles:
+            errors.append(f"{row.get('姓名', '未命名')} 的职称关键词未严格取自主详情")
+            break
+        if re.match(r"^\s*擅长\s*[:：]", str(row.get("擅长诊疗方向摘录") or "")):
+            errors.append(f"{row.get('姓名', '未命名')} 的擅长字段仍保留前缀")
+            break
+
+    if errors:
+        raise RuntimeError("GDZY5413 FULL 写入前门禁失败：" + "；".join(errors))
+
+
 def validate_ny5y_full_append(payload: dict[str, Any]) -> None:
     meta = payload.get("meta", {})
     rows = payload.get("rows", [])
@@ -3585,6 +3674,10 @@ def markdown_table_cell(value: Any) -> str:
 
 def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path: Path) -> None:
     meta = payload["meta"]
+    full_append = meta.get("execution_mode") == "full_append"
+    report_label = "全量采集归并审计报告" if full_append else "自动采集试跑报告"
+    report_title = "官方医生全量采集归并审计报告" if full_append else "官方医生自动采集试跑报告"
+    run_label = "全量采集" if full_append else "试采"
     xlsx_output = f"`{xlsx_path}`" if xlsx_path.exists() else "未生成（本轮使用 --no-xlsx）"
     top_departments = render_counter_table(payload["category_counts"][:20])
     group_lines = render_counter_table(dict(sorted(payload["group_counts"].items())))
@@ -3637,7 +3730,7 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
     ) or "| 无 | 无 | 0 | 无 | 无 | 无 |"
 
     report = f"""---
-类型: 自动采集试跑报告
+类型: {report_label}
 医院: {meta['hospital']}
 城市: {meta['city']}
 采集日期: {meta['collected_at']}
@@ -3646,13 +3739,13 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 适配器: {meta['adapter_id']}
 ---
 
-# {meta['hospital']} 官方医生自动采集试跑报告
+# {meta['hospital']} {report_title}
 
 ## 结论
 
 本次试跑只读取医院官网公开专家列表页和医生详情页。系统没有使用第三方平台、没有绕过登录或验证码、没有采集私人联系方式或患者信息。
 
-本轮生成医生自动采集试采底表，共 {meta['unique_doctor_count']} 位唯一医生；官网列表页原始卡片记录 {meta['raw_card_rows']} 条；读取入口分类 {meta['category_count']} 个；覆盖 {meta.get('department_coverage_count', 0)} 个科室；详情页失败 {meta['detail_error_count']} 条。
+本轮生成医生自动采集{run_label}底表，共 {meta['unique_doctor_count']} 位唯一医生；官网列表页原始卡片记录 {meta['raw_card_rows']} 条；读取入口分类 {meta['category_count']} 个；覆盖 {meta.get('department_coverage_count', 0)} 个科室；详情页失败 {meta['detail_error_count']} 条。
 
 ## 台账来源
 
@@ -3684,10 +3777,10 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 |---|---|---|
 {duplicate_lines}
 
-## 广东省第二中医院 TRIAL-2 同名归并对账
+## 广东省第二中医院同名归并对账
 
-- 抽样详情关系：{meta.get('gdzy5413_trial2_sample_relation_count', 0)}
-- 抽样最终身份：{meta.get('gdzy5413_trial2_sample_identity_count', 0)}
+- 详情关系：{meta.get('gdzy5413_detail_relation_count', meta.get('gdzy5413_trial2_sample_relation_count', 0))}
+- 最终身份：{meta.get('gdzy5413_final_identity_count', meta.get('gdzy5413_trial2_sample_identity_count', 0))}
 - 白云院区样本：{meta.get('gdzy5413_trial2_baiyun_sample_count', 0)}
 - 多链接同一人归并样本：{meta.get('gdzy5413_trial2_merged_identity_count', 0)}
 
@@ -4072,6 +4165,8 @@ def main() -> None:
     if args.gdzy5413_trial2:
         validate_gdzy5413_trial2(payload, expected_identities=max_doctors or 10)
 
+    if target.adapter_id == GDZY5413_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_gdzy5413_full_append(payload)
     if target.adapter_id == GDSKIN_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdskin_full_append(payload)
     if target.adapter_id == NY5Y_ADAPTER_ID and not args.trial_only and not args.single_output:
@@ -4082,6 +4177,7 @@ def main() -> None:
     preview_path = WORK_DIR / f"{safe_name}_official_doctors_preview.png"
 
     if args.trial_only:
+        payload["meta"]["execution_mode"] = "trial"
         json_path = WORK_DIR / f"{safe_name}_trial_payload.json"
         csv_path = WORK_DIR / f"{safe_name}_trial_doctors.csv"
         xlsx_path = WORK_DIR / f"{safe_name}_trial_doctors.xlsx"
@@ -4152,11 +4248,13 @@ def main() -> None:
         )
         return
 
+    payload["meta"]["execution_mode"] = "full_append"
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     master_payload = build_master_payload(
         args.today,
         incoming_payload=payload,
         refresh_incoming=args.refresh_existing_hospital,
+        replace_incoming_hospital=target.adapter_id == GDZY5413_ADAPTER_ID,
     )
     MASTER_JSON_PATH.write_text(json.dumps(master_payload, ensure_ascii=False, indent=2), encoding="utf-8")
     write_csv(MASTER_CSV_PATH, master_payload["rows"])
@@ -4165,6 +4263,8 @@ def main() -> None:
         build_workbook(MASTER_JSON_PATH, MASTER_XLSX_PATH, MASTER_PREVIEW_PATH)
 
     write_master_report(MASTER_REPORT_PATH, master_payload, MASTER_CSV_PATH, MASTER_XLSX_PATH)
+    full_report_path = WORK_DIR / f"{safe_name}_official_doctors_report.md"
+    write_report(full_report_path, payload, MASTER_CSV_PATH, MASTER_XLSX_PATH)
     print(
         json.dumps(
             {
@@ -4179,6 +4279,7 @@ def main() -> None:
                 "csv": str(MASTER_CSV_PATH),
                 "xlsx": str(MASTER_XLSX_PATH),
                 "report": str(MASTER_REPORT_PATH),
+                "hospital_audit_report": str(full_report_path),
             },
             ensure_ascii=False,
             indent=2,

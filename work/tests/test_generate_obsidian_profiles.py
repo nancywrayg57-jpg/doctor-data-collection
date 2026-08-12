@@ -86,6 +86,7 @@ class ProfileFactSectionTests(unittest.TestCase):
 
         specialty_block = profile.split("## 简介/擅长", 1)[1].split("## 教育与进修经历", 1)[0]
         self.assertEqual(specialty_block.strip(), "")
+        self.assertFalse(any(line != line.rstrip() for line in profile.splitlines()))
 
 
 if __name__ == "__main__":
