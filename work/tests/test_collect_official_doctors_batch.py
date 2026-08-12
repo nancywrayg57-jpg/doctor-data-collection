@@ -21,20 +21,31 @@ from collect_official_doctors_batch import (  # noqa: E402
     discover_gdskin_postback_documents,
     discover_generic_detail_links,
     effective_entry_urls,
+    expand_gdzy5413_full_detail_items,
     extract_clean_highlights,
     find_node,
     generic_record_quality,
     generic_detail_identity,
+    gdzy5413_detail_id,
+    gdzy5413_entry_kind,
+    gdzy5413_ksdoctor_detail_id,
+    gdzy5413_rows_same_identity,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     merge_rows_for_master,
+    merge_gdzy5413_identity_rows,
     ny5y_detail_id,
     ny5y_entry_kind,
     parse_generic_detail,
     parse_gdskin_detail,
+    parse_gdzy5413_detail,
+    parse_gdzy5413_ksdoctor_detail,
     parse_ny5y_detail,
     round_robin_generic_items,
+    select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
+    validate_gdzy5413_full_append,
+    validate_gdzy5413_trial2,
     validate_ny5y_full_append,
 )
 
@@ -777,6 +788,400 @@ class Ny5yOfficialExpertTests(unittest.TestCase):
         lingnan_row = next(row for row in payload["rows"] if row["采集入口"] == self.ENTRY_LINGNAN)
         self.assertNotEqual(lingnan_row["科室_分类页"], "岭南名医")
         self.assertIn("岭南名医", lingnan_row["亮眼经历线索"])
+
+
+class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
+    ENTRY_FAMOUS = "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850"
+    ENTRY_EXPERTS = "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850"
+
+    def test_entry_and_detail_scope_are_strict(self) -> None:
+        self.assertEqual(gdzy5413_entry_kind(self.ENTRY_FAMOUS), "851")
+        self.assertEqual(gdzy5413_entry_kind(self.ENTRY_EXPERTS), "852")
+        self.assertEqual(dedicated_adapter_for(self.ENTRY_FAMOUS), "gdzy5413_official_specialist")
+        self.assertEqual(
+            gdzy5413_detail_id("https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=1290"),
+            "1290",
+        )
+        self.assertEqual(
+            generic_detail_identity("https://gdzy5413.com/main/doctor/specialist.aspx?typeid=1290"),
+            "gdzy5413:1290",
+        )
+        ksdoctor_url = (
+            "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?"
+            "bid=22&typeid=20&cid=22&ksid=20&id=47"
+        )
+        self.assertEqual(gdzy5413_ksdoctor_detail_id(ksdoctor_url), "47")
+        self.assertEqual(generic_detail_identity(ksdoctor_url), "gdzy5413:ksdoctor:47")
+        self.assertTrue(matches_generic_directory_detail_url(self.ENTRY_EXPERTS, ksdoctor_url))
+        for invalid in [
+            "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?ksid=1&id=1290",
+            "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=22&typeid=20&cid=23&ksid=20&id=47",
+            "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=1290&extra=1",
+            "https://example.com/main/doctor/specialist.aspx?typeid=1290",
+        ]:
+            with self.subTest(invalid=invalid):
+                self.assertFalse(matches_generic_directory_detail_url(self.ENTRY_FAMOUS, invalid))
+
+    def test_directory_uses_card_fields_and_typeid_identity(self) -> None:
+        html = """
+        <li class="xinyutitle1">
+          <div class="doc_img"><a href="doctor/specialist.aspx?typeid=634"></a></div>
+          <div class="docnameall">吕 雄</div>
+          <div class="docjich">内分泌科主任、主任中医师、教授</div>
+          <a href="doctor/specialist.aspx?typeid=634">了解详情</a>
+        </li>
+        <a href="ks/templet2/ksdoctorinfo.aspx?ksid=1&id=634">另一模板</a>
+        """
+
+        rows = discover_generic_detail_links(html, self.ENTRY_FAMOUS, self.ENTRY_FAMOUS)
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["name"], "吕雄")
+        self.assertEqual(rows[0]["department"], "内分泌科")
+        self.assertEqual(rows[0]["list_title"], "内分泌科主任、主任中医师、教授")
+
+    def test_852_directory_uses_explicit_department_and_strict_ksdoctor_urls(self) -> None:
+        html = """
+        <div class="contentinfo">
+          <div class="ks_title">心血管科</div>
+          <div class="pudocname">
+            <a href="ks/templet2/ksdoctorinfo.aspx?bid=22&amp;typeid=20&amp;cid=22&amp;ksid=20&amp;id=47">王 清 海</a>
+          </div>
+        </div>
+        <a href="ks/templet2/ksdoctorinfo.aspx?ksid=1&amp;id=10">参数不完整</a>
+        """
+
+        rows = discover_generic_detail_links(html, self.ENTRY_EXPERTS, self.ENTRY_EXPERTS)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["name"], "王清海")
+        self.assertEqual(rows[0]["department"], "心血管科")
+        self.assertEqual(gdzy5413_ksdoctor_detail_id(rows[0]["source_link"]), "47")
+
+    def test_detail_dom_ignores_generic_title_and_uses_explicit_department_evidence(self) -> None:
+        html = """
+        <html><head><title>广东省第二中医院--广东省中医药工程技术研究院</title></head><body>
+          <nav>医院首页 新闻动态 招标公告</nav>
+          <div id="news_info_plAll"><div class="news_info_s">
+            范德辉，主任中医师、二级教授，广东省第二中医院针灸康复科五区区长。
+            主持科研课题多项。擅长治疗：中风病、颈椎病及各种创伤术后康复等。
+          </div></div>
+          <footer>网站地图 采购公告</footer>
+        </body></html>
+        """
+
+        detail = parse_gdzy5413_detail(
+            html,
+            {"name": "范德辉", "list_title": "广东省名中医、主任中医师、针康五区区长"},
+        )
+
+        self.assertEqual(detail["name"], "范德辉")
+        self.assertEqual(detail["department"], "针灸康复科五区")
+        self.assertIn("中风病", detail["specialty"])
+        self.assertIn("主持科研课题多项", detail["profile_text"])
+        self.assertNotIn("招标公告", detail["profile_text"])
+
+    def test_ksdoctor_detail_uses_breadcrumb_and_labeled_sections(self) -> None:
+        html = """
+        <div class="newslistbg_m_c">
+          <div class="typeall_right">您现在所在的位置：官网&gt;科室列表&gt;临床科室&gt;内科&gt;心血管科&gt;专家介绍&gt;</div>
+          <div>【基本资料】 姓名：王清海 职称：主任中医师、教授、博士生导师 擅长：中医治疗高血压、冠心病。</div>
+          <div>【医生简介】 广东省名中医，承担省部级科研课题多项。</div>
+          <div>【出诊安排】 星期一上午</div>
+        </div>
+        """
+
+        detail = parse_gdzy5413_ksdoctor_detail(html, {"name": "王清海", "department": "心血管科"})
+
+        self.assertEqual(detail["name"], "王清海")
+        self.assertEqual(detail["department"], "心血管科")
+        self.assertEqual(detail["title_field"], "主任中医师、教授、博士生导师")
+        self.assertEqual(detail["specialty"], "中医治疗高血压、冠心病。")
+        self.assertIn("承担省部级科研课题", detail["profile_text"])
+        self.assertNotIn("星期一", detail["profile_text"])
+
+    def test_trial2_selection_includes_duplicate_group_and_baiyun_identity(self) -> None:
+        items = [
+            {"name": "黄培红", "department": "心血管科", "source_link": "u125"},
+            {"name": "黄培红", "department": "心血管科", "source_link": "u658"},
+            {"name": "白云医生", "department": "白云院区骨科", "source_link": "u749"},
+            {"name": "妇科医生", "department": "妇科", "source_link": "u1"},
+            {"name": "儿科医生", "department": "儿科", "source_link": "u2"},
+        ]
+
+        selected = select_gdzy5413_trial2_items(items, 4)
+
+        self.assertEqual(len({item["name"] for item in selected}), 4)
+        self.assertEqual(sum(1 for item in selected if item["name"] == "黄培红"), 2)
+        self.assertTrue(any("白云院区" in item["department"] for item in selected))
+
+    def test_full_detail_expansion_keeps_all_same_name_links(self) -> None:
+        items = [
+            {"name": "王清海", "source_link": "u47"},
+            {"name": "张三", "source_link": "u1"},
+            {"name": "王清海", "source_link": "u598"},
+        ]
+
+        expanded = expand_gdzy5413_full_detail_items(items)
+
+        self.assertEqual([item["source_link"] for item in expanded], ["u47", "u598", "u1"])
+
+    def test_identity_merge_chooses_richest_link_and_combines_departments(self) -> None:
+        sparse = {
+            "姓名": "黄培红",
+            "科室_分类页": "特诊室",
+            "科室_列表卡片": "特诊室",
+            "职称身份原文": "副主任中医师、医学博士",
+            "擅长诊疗方向摘录": "心力衰竭、冠心病、高血压。",
+            "详情正文摘录": "",
+            "来源链接": "u658",
+            "异常提示": "",
+        }
+        rich = {
+            **sparse,
+            "科室_分类页": "心血管科",
+            "科室_列表卡片": "心血管科",
+            "详情正文摘录": "副主任中医师，医学博士，主要研究方向为心血管急重症的诊治，擅长心力衰竭、冠心病、高血压。",
+            "来源链接": "u125",
+        }
+
+        self.assertTrue(gdzy5413_rows_same_identity(sparse, rich))
+        merged, reconciliation = merge_gdzy5413_identity_rows([sparse, rich])
+
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0]["来源链接"], "u125")
+        self.assertEqual(merged[0]["科室_分类页"], "特诊室、心血管科")
+        self.assertEqual(merged[0]["职称身份原文"], "副主任中医师、医学博士")
+        self.assertEqual(reconciliation[0]["merged_source_links"], ["u658"])
+        self.assertEqual(reconciliation[0]["resolution"], "同一人归并")
+
+    def test_identity_merge_keeps_primary_title_and_flags_title_mismatch(self) -> None:
+        secondary = {
+            "姓名": "张医生",
+            "科室_分类页": "门诊部",
+            "科室_列表卡片": "门诊部",
+            "职称_关键词": "主任医师、教授",
+            "职称身份原文": "主任医师、教授、硕士研究生导师",
+            "擅长诊疗方向摘录": "高血压、冠心病。",
+            "详情正文摘录": "",
+            "来源链接": "u2",
+            "异常提示": "",
+        }
+        primary = {
+            **secondary,
+            "科室_分类页": "心血管科",
+            "科室_列表卡片": "心血管科",
+            "职称_关键词": "主任医师",
+            "职称身份原文": "主任医师",
+            "详情正文摘录": "长期从事心血管临床工作，擅长高血压、冠心病诊治。",
+            "来源链接": "u1",
+        }
+
+        merged, _ = merge_gdzy5413_identity_rows([secondary, primary])
+
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0]["来源链接"], "u1")
+        self.assertEqual(merged[0]["职称身份原文"], "主任医师")
+        self.assertEqual(merged[0]["职称_关键词"], "主任医师")
+        self.assertIn("多详情职称不一致", merged[0]["异常提示"])
+
+    def test_full_append_gate_requires_complete_authorized_reconciliation(self) -> None:
+        specialist_links = [
+            f"https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid={value}"
+            for value in range(1, 22)
+        ]
+        ksdoctor_links = [
+            "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?"
+            f"bid=81&typeid=1&cid=81&ksid=1&id={value}"
+            for value in range(1, 347)
+        ]
+        relation_links = specialist_links + ksdoctor_links
+        rows = [
+            {
+                "医院": "广东省第二中医院",
+                "姓名": f"医生{value}",
+                "职称_关键词": "主任医师",
+                "职称身份原文": "主任医师",
+                "擅长诊疗方向摘录": "",
+                "来源链接": relation_links[value],
+            }
+            for value in range(290)
+        ]
+        reconciliation = [
+            {
+                "primary_source_link": relation_links[value],
+                "merged_source_links": relation_links[290:] if value == 0 else [],
+                "relation_count": 78 if value == 0 else 1,
+            }
+            for value in range(290)
+        ]
+        payload = {
+            "meta": {
+                "entry_candidate_counts": {
+                    "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850": 21,
+                    "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850": 346,
+                },
+                "gdzy5413_851_unique_name_count": 21,
+                "gdzy5413_852_unique_name_count": 289,
+                "gdzy5413_cross_mode_name_match_count": 20,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+            },
+            "rows": rows,
+            "gdzy5413_identity_reconciliation": reconciliation,
+        }
+
+        validate_gdzy5413_full_append(payload)
+        payload["gdzy5413_identity_reconciliation"][0]["primary_source_link"] = (
+            "https://example.com/not-authorized"
+        )
+        with self.assertRaisesRegex(RuntimeError, "非授权"):
+            validate_gdzy5413_full_append(payload)
+
+    def test_distinct_same_name_rows_are_retained_and_flagged(self) -> None:
+        heart = {
+            "姓名": "李桂明",
+            "科室_分类页": "心血管科",
+            "科室_列表卡片": "心血管科",
+            "职称身份原文": "主任中医师",
+            "擅长诊疗方向摘录": "高血压病、冠心病、心力衰竭。",
+            "详情正文摘录": "长期从事心血管科临床工作。",
+            "来源链接": "u317",
+            "异常提示": "",
+        }
+        kidney = {
+            **heart,
+            "科室_分类页": "内科",
+            "科室_列表卡片": "内科",
+            "职称身份原文": "主任中医师、教授、硕士研究生导师",
+            "擅长诊疗方向摘录": "慢性肾衰、急慢性肾炎、糖尿病肾病。",
+            "详情正文摘录": "长期从事肾病临床工作。",
+            "来源链接": "u553",
+        }
+
+        self.assertFalse(gdzy5413_rows_same_identity(heart, kidney))
+        merged, reconciliation = merge_gdzy5413_identity_rows([heart, kidney])
+
+        self.assertEqual(len(merged), 2)
+        self.assertTrue(all("同名待甄别" in row["异常提示"] for row in merged))
+        self.assertTrue(all(item["resolution"] == "同名待甄别" for item in reconciliation))
+
+        master_rows, added, skipped, refreshed, duplicates = merge_rows_for_master(
+            [], merged, preserve_existing=True
+        )
+        self.assertEqual(len(master_rows), 2)
+        self.assertEqual((added, skipped, refreshed, duplicates), (2, 0, 0, 0))
+
+    def test_collect_generic_records_scope_evidence_and_department_spread(self) -> None:
+        famous_ids = list(range(1, 22))
+        names = ["张三", "李四", "王五", "赵六", "陈明", "刘强", "杨敏", "黄芳", "周军", "吴静", "徐勇", "孙丽", "胡伟", "朱燕", "高峰", "林涛", "何娟", "郭鹏", "罗英", "梁杰", "宋梅"]
+        departments = ["内分泌科", "妇科", "儿科", "肿瘤科", "呼吸科", "脑病科", "心血管科"]
+
+        famous_html = "".join(
+            (
+                '<li class="xinyutitle1">'
+                f'<div class="doc_img"><a href="doctor/specialist.aspx?typeid={doctor_id}"></a></div>'
+                f'<div class="docnameall">{names[doctor_id - 1]}</div>'
+                f'<div class="docjich">{departments[(doctor_id - 1) % len(departments)]}主任、主任医师</div>'
+                "</li>"
+            )
+            for doctor_id in famous_ids
+        )
+        expert_names = names[:20] + [f"张{chr(0x4E00 + doctor_id)}" for doctor_id in range(21, 347)]
+        expert_names[124] = "黄培红"
+        expert_names[344] = "黄培红"
+        expert_html = "".join(
+            (
+                '<div class="contentinfo">'
+                f'<div class="ks_title">{"白云院区骨科" if doctor_id == 346 else departments[(doctor_id - 1) % len(departments)]}</div>'
+                '<div class="pudocname">'
+                f'<a href="ks/templet2/ksdoctorinfo.aspx?bid={doctor_id}&amp;typeid={doctor_id + 1000}&amp;cid={doctor_id}&amp;ksid={doctor_id + 1000}&amp;id={doctor_id}">'
+                f'{expert_names[doctor_id - 1]}</a></div></div>'
+            )
+            for doctor_id in range(1, 347)
+        )
+
+        def fake_fetch(_session: object, url: str, retries: int = 3) -> tuple[int, str, str]:
+            del retries
+            if url == self.ENTRY_FAMOUS:
+                return 200, famous_html, ""
+            if url == self.ENTRY_EXPERTS:
+                return 200, expert_html, ""
+            doctor_id = int(url.rsplit("=", 1)[-1])
+            department = departments[(doctor_id - 1) % len(departments)]
+            if doctor_id == 346:
+                department = "白云院区骨科"
+            if "ksdoctorinfo" in url:
+                name = expert_names[doctor_id - 1]
+                return (
+                    200,
+                    '<div class="newslistbg_m_c">'
+                    f'<div class="typeall_right">官网&gt;科室列表&gt;临床科室&gt;{department}&gt;专家介绍&gt;</div>'
+                    f'<div>【基本资料】 姓名：{name} 职称：主任医师 擅长：{department}常见疾病。</div>'
+                    f'<div>【医生简介】 {name}长期从事临床工作。</div><div>【出诊安排】</div></div>',
+                    "",
+                )
+            return (
+                200,
+                f'<div id="news_info_plAll"><div class="news_info_s">擅长治疗：{department}常见疾病。</div></div>',
+                "",
+            )
+
+        target = HospitalTarget(
+            city="广州市",
+            hospital="广东省第二中医院",
+            homepage="https://www.gdzy5413.com/main/main.aspx",
+            entry_url=self.ENTRY_FAMOUS,
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="gdzy5413_official_specialist",
+            entry_urls=(self.ENTRY_FAMOUS, self.ENTRY_EXPERTS),
+            ledger_entry_url=self.ENTRY_FAMOUS,
+        )
+        with (
+            patch("collect_official_doctors_batch.create_official_session", return_value=object()),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+            patch("collect_official_doctors_batch.fetch", side_effect=fake_fetch),
+            patch("collect_official_doctors_batch.time.sleep", return_value=None),
+        ):
+            payload = collect_generic(
+                target,
+                "2026-08-12",
+                max_doctors=10,
+                max_pages=5,
+                gdzy5413_trial2=True,
+            )
+
+        self.assertEqual(payload["meta"]["entry_candidate_counts"][self.ENTRY_FAMOUS], 21)
+        self.assertEqual(payload["meta"]["entry_candidate_counts"][self.ENTRY_EXPERTS], 346)
+        self.assertEqual(payload["meta"]["unique_candidate_count"], 367)
+        self.assertEqual(payload["meta"]["excluded_non_doctor_count"], 0)
+        self.assertEqual(payload["meta"]["out_of_scope_candidate_count"], 0)
+        self.assertEqual(payload["entry_reconnaissance"][1]["out_of_scope_detail_count"], 0)
+        self.assertIn(
+            "院区/门诊均属同一法人实体授权范围",
+            payload["entry_reconnaissance"][1]["independent_entity_check"],
+        )
+        self.assertEqual(payload["meta"]["gdzy5413_cross_mode_name_match_count"], 20)
+        self.assertEqual(len(payload["rows"]), 10)
+        self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
+        self.assertTrue(all(gdzy5413_ksdoctor_detail_id(row["来源链接"]) for row in payload["rows"]))
+        self.assertTrue(all(not row["亮眼经历线索"].startswith("广东省第二中医院") for row in payload["rows"]))
+        self.assertGreaterEqual(payload["meta"]["gdzy5413_trial2_baiyun_sample_count"], 1)
+        self.assertGreaterEqual(payload["meta"]["gdzy5413_trial2_merged_identity_count"], 1)
+        self.assertGreater(payload["meta"]["gdzy5413_trial2_sample_relation_count"], 10)
+        payload["meta"]["department_coverage_count"] = len(
+            {row["科室_分类页"] for row in payload["rows"]}
+        )
+        payload["meta"]["gdzy5413_852_unique_name_count"] = 289
+        validate_gdzy5413_trial2(payload)
+        merged_item = next(
+            item
+            for item in payload["gdzy5413_identity_reconciliation"]
+            if item["merged_source_links"]
+        )
+        merged_item["merged_source_links"] = ["https://example.com/not-authorized"]
+        with self.assertRaisesRegex(RuntimeError, "非授权 ksdoctorinfo"):
+            validate_gdzy5413_trial2(payload)
 
 
 class GenericFieldCleaningTests(unittest.TestCase):

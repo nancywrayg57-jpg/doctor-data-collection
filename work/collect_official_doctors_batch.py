@@ -11,6 +11,7 @@ import time
 from collections import Counter
 from dataclasses import dataclass, replace
 from datetime import date
+from difflib import SequenceMatcher
 from html import unescape
 from pathlib import Path
 from typing import Any
@@ -76,6 +77,9 @@ BASE_HEADERS = [
 ]
 
 TITLE_TERMS = [
+    "主任中医师",
+    "副主任中医师",
+    "主治中医师",
     "主任医师",
     "副主任医师",
     "主治医师",
@@ -242,6 +246,7 @@ HIGHLIGHT_TERMS = [
 GENERIC_ADAPTER_ID = "generic_official_template"
 GDSKIN_ADAPTER_ID = "gdskin_aspnet_expert"
 NY5Y_ADAPTER_ID = "ny5y_official_expert"
+GDZY5413_ADAPTER_ID = "gdzy5413_official_specialist"
 GENERIC_MAX_PAGES_DEFAULT = 60
 GDSKIN_ENTRY_METADATA = {
     "901": {
@@ -325,6 +330,16 @@ NY5Y_GENERAL_CATEGORIES = {"专家风采", "岭南名医"}
 NY5Y_EXPECTED_ENTRY_COUNTS = {"100": 133, "162": 80}
 NY5Y_EXPECTED_UNIQUE_COUNT = 134
 NY5Y_EXPECTED_CROSS_ENTRY_DUPLICATES = 79
+GDZY5413_ENTRY_METADATA = {
+    "851": {
+        "category_name": "名医名家",
+        "affiliation": "广东省第二中医院（官网名医名家栏目）",
+    },
+    "852": {
+        "category_name": "各科专家",
+        "affiliation": "广东省第二中医院（官网各科专家栏目）",
+    },
+}
 GENERIC_DETAIL_PATH_HINTS = [
     "doctor",
     "expert",
@@ -676,6 +691,24 @@ def clean_generic_department(value: str | None) -> str:
     return text if len(text) <= 30 else ""
 
 
+def extract_gdzy5413_department(title_text: str | None, profile_text: str | None) -> str:
+    source = clean_text(" ".join(value for value in [title_text, profile_text] if value))
+    patterns = [
+        r"广东省第二中医院([\u4e00-\u9fff\d]{1,20}(?:科|中心)(?:[一二三四五六七八九十\d]+区)?)\s*(?:主任|区长|负责人)",
+        r"([\u4e00-\u9fff\d]{1,20}(?:科|中心)(?:[一二三四五六七八九十\d]+区)?)\s*(?:主任|区长|负责人)",
+        r"([\u4e00-\u9fff\d]{1,20}科)主任(?:中|西)医师",
+    ]
+    blocked = {"医务科"}
+    for pattern in patterns:
+        match = re.search(pattern, source)
+        if not match:
+            continue
+        candidate = clean_text(match.group(1))
+        if candidate and candidate not in blocked:
+            return candidate
+    return ""
+
+
 def has_department_text_pollution(raw_value: str | None, cleaned_value: str | None) -> bool:
     raw = clean_text(raw_value)
     cleaned = clean_text(cleaned_value)
@@ -715,6 +748,9 @@ def doctor_row_key(row: dict[str, Any]) -> tuple[str, ...]:
         str(row.get("科室_列表卡片") or ""),
     )
     source = clean_text(str(row.get("来源链接") or ""))
+    warnings = clean_text(str(row.get("异常提示") or ""))
+    if "同名待甄别" in warnings and hospital and source:
+        return ("source", hospital, canonical_url(source))
     if hospital and name and department:
         return ("doctor", hospital, name, department)
     if hospital and source:
@@ -855,9 +891,19 @@ def build_master_payload(
     today: str,
     incoming_payload: dict[str, Any] | None = None,
     refresh_incoming: bool = False,
+    replace_incoming_hospital: bool = False,
 ) -> dict[str, Any]:
     existing_rows, source_label, preserve_existing = load_existing_rows_for_master()
     incoming_rows = incoming_payload["rows"] if incoming_payload else []
+    incoming_hospital = clean_text(
+        str((incoming_payload or {}).get("meta", {}).get("hospital") or "")
+    )
+    if replace_incoming_hospital and incoming_hospital:
+        existing_rows = [
+            row
+            for row in existing_rows
+            if clean_text(str(row.get("医院") or "")) != incoming_hospital
+        ]
     rows, added, skipped, refreshed, existing_duplicates = merge_rows_for_master(
         existing_rows,
         incoming_rows,
@@ -936,6 +982,8 @@ def dedicated_adapter_for(entry_url: str) -> str:
             return GDSKIN_ADAPTER_ID
     if ny5y_entry_kind(entry_url):
         return NY5Y_ADAPTER_ID
+    if gdzy5413_entry_kind(entry_url):
+        return GDZY5413_ADAPTER_ID
     if "gzzoc.org.cn" in host and "/expert-introduction" in path:
         return "gzzoc_drupal_doctor"
     if "nbkjyy.mil.cn" in host and "/expert" in path:
@@ -1050,12 +1098,61 @@ def ny5y_detail_id(url: str | None) -> str:
     return pairs[0][1]
 
 
+def gdzy5413_entry_kind(url: str | None) -> str:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "gdzy5413.com" or parsed.path.lower() != "/main/famousdoctorinfo.aspx":
+        return ""
+    pairs = parse_qsl(parsed.query, keep_blank_values=True)
+    if len(pairs) != 3:
+        return ""
+    params = {name.lower(): value for name, value in pairs}
+    if len(params) != 3 or params.get("fid") != "81" or params.get("pid") != "850":
+        return ""
+    cid = params.get("cid", "")
+    return cid if cid in GDZY5413_ENTRY_METADATA else ""
+
+
+def gdzy5413_detail_id(url: str | None) -> str:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "gdzy5413.com" or parsed.path.lower() != "/main/doctor/specialist.aspx":
+        return ""
+    pairs = parse_qsl(parsed.query, keep_blank_values=True)
+    if len(pairs) != 1 or pairs[0][0].lower() != "typeid" or not pairs[0][1].isdigit():
+        return ""
+    return pairs[0][1]
+
+
+def gdzy5413_ksdoctor_detail_id(url: str | None) -> str:
+    parsed = urlparse(clean_text(url))
+    if (
+        comparable_host(parsed.geturl()) != "gdzy5413.com"
+        or parsed.path.lower() != "/main/ks/templet2/ksdoctorinfo.aspx"
+    ):
+        return ""
+    pairs = parse_qsl(parsed.query, keep_blank_values=True)
+    allowed = {"bid", "typeid", "cid", "ksid", "id"}
+    if len(pairs) != 5 or {name.lower() for name, _value in pairs} != allowed:
+        return ""
+    params = {name.lower(): value for name, value in pairs}
+    if any(not params[name].isdigit() for name in allowed):
+        return ""
+    if not (params["bid"] == params["cid"] and params["typeid"] == params["ksid"]):
+        return ""
+    return params["id"]
+
+
 def generic_detail_identity(url: str) -> str:
     detail_id = gdskin_detail_id(url)
     if detail_id:
         return f"gdskin:{detail_id}"
     detail_id = ny5y_detail_id(url)
-    return f"ny5y:{detail_id}" if detail_id else canonical_url(url)
+    if detail_id:
+        return f"ny5y:{detail_id}"
+    detail_id = gdzy5413_detail_id(url)
+    if detail_id:
+        return f"gdzy5413:{detail_id}"
+    detail_id = gdzy5413_ksdoctor_detail_id(url)
+    return f"gdzy5413:ksdoctor:{detail_id}" if detail_id else canonical_url(url)
 
 
 def is_same_official_host(base_url: str, candidate_url: str) -> bool:
@@ -1224,6 +1321,11 @@ def matches_generic_directory_detail_url(entry_url: str, candidate_url: str) -> 
         return bool(gdskin_detail_id(candidate_url))
     if ny5y_entry_kind(entry_url):
         return bool(ny5y_detail_id(candidate_url))
+    if (gdzy5413_id := gdzy5413_entry_kind(entry_url)):
+        return bool(
+            gdzy5413_detail_id(candidate_url)
+            or (gdzy5413_id == "852" and gdzy5413_ksdoctor_detail_id(candidate_url))
+        )
     entry_match = re.fullmatch(r"/section/(\d+)/?", urlparse(entry_url).path)
     if comparable_host(entry_url) != "smukqyy.cn" or not entry_match:
         return True
@@ -1304,6 +1406,10 @@ def generic_link_score(href: str, context: str, entry_url: str = "") -> int:
         return 12 if has_name and has_doctor_role else -10
     if ny5y_entry_kind(entry_url) and ny5y_detail_id(href):
         return 12
+    if gdzy5413_entry_kind(entry_url) and (
+        gdzy5413_detail_id(href) or gdzy5413_ksdoctor_detail_id(href)
+    ):
+        return 12
     if any(hint in path for hint in GENERIC_PATH_BLOCK_HINTS):
         return -10
 
@@ -1344,10 +1450,19 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
     seen: set[str] = set()
     gdskin_id = gdskin_entry_id(entry_url)
     ny5y_id = ny5y_entry_kind(entry_url)
+    gdzy5413_id = gdzy5413_entry_kind(entry_url)
     strict_smukq_directory = comparable_host(entry_url) == "smukqyy.cn" and bool(
         re.fullmatch(r"/section/\d+/?", urlparse(entry_url).path)
     )
-    anchors = soup.select("table.masterTitleH a[href]") if gdskin_id else soup.find_all("a", href=True)
+    anchors = (
+        soup.select("table.masterTitleH a[href]")
+        if gdskin_id
+        else soup.select("li.xinyutitle1 a[href]")
+        if gdzy5413_id == "851"
+        else soup.select("div.contentinfo div.pudocname a[href]")
+        if gdzy5413_id == "852"
+        else soup.find_all("a", href=True)
+    )
     for anchor in anchors:
         href = urljoin(page_url, anchor["href"])
         if canonical_url(href) == canonical_url(page_url):
@@ -1356,7 +1471,14 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
             continue
         if not matches_generic_directory_detail_url(entry_url, href):
             continue
+        gdzy5413_card = anchor.find_parent("li", class_="xinyutitle1") if gdzy5413_id == "851" else None
+        gdzy5413_department_block = (
+            anchor.find_parent("div", class_="contentinfo") if gdzy5413_id == "852" else None
+        )
         context = (
+            compact_visible_text(gdzy5413_card, 700)
+            if gdzy5413_card
+            else
             strip_profile_navigation_text(compact_visible_text(anchor, 700))
             if gdskin_id or ny5y_id
             else nearest_card_text(anchor)
@@ -1368,20 +1490,39 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
         if key in seen:
             continue
         seen.add(key)
-        name = extract_person_name(context)
+        name_element = gdzy5413_card.select_one(".docnameall") if gdzy5413_card else None
+        honor_element = gdzy5413_card.select_one(".docjich") if gdzy5413_card else None
+        name = (
+            re.sub(r"\s+", "", clean_text(name_element.get_text(" ", strip=True)))
+            if name_element
+            else re.sub(r"\s+", "", clean_text(anchor.get_text(" ", strip=True)))
+            if gdzy5413_department_block
+            else extract_person_name(context)
+        )
+        list_title = clean_text(honor_element.get_text(" ", strip=True)) if honor_element else context
+        gdzy5413_department = ""
+        if gdzy5413_department_block:
+            department_element = gdzy5413_department_block.select_one(".ks_title")
+            gdzy5413_department = clean_generic_department(
+                compact_visible_text(department_element, 200) if department_element else ""
+            )
         rows.append(
             {
                 "source_link": href,
                 "name": name,
-                "list_title": clip(context, 500),
+                "list_title": clip(list_title, 500),
                 "department": (
                     GDSKIN_ENTRY_METADATA[gdskin_id]["category_name"]
                     if gdskin_id
                     else NY5Y_ENTRY_METADATA[ny5y_id]["category_name"]
                     if ny5y_id
+                    else gdzy5413_department
+                    if gdzy5413_id == "852"
+                    else extract_gdzy5413_department(list_title, "")
+                    if gdzy5413_id == "851"
                     else infer_department(context)
                 ),
-                "description": clip(context, 700),
+                "description": clip(list_title if gdzy5413_id == "851" else context, 700),
                 "list_page": page_url,
                 "score": str(score),
             }
@@ -1415,9 +1556,24 @@ def discover_gdskin_excluded_links(html: str, page_url: str, entry_url: str) -> 
     return rows
 
 
+def gdzy5413_raw_detail_relation_count(html: str, page_url: str, entry_url: str) -> int:
+    if not gdzy5413_entry_kind(entry_url):
+        return 0
+    soup = BeautifulSoup(html, "html.parser")
+    return sum(
+        1
+        for anchor in soup.find_all("a", href=True)
+        if gdzy5413_detail_id(urljoin(page_url, anchor["href"]))
+        or (
+            gdzy5413_entry_kind(entry_url) == "852"
+            and gdzy5413_ksdoctor_detail_id(urljoin(page_url, anchor["href"]))
+        )
+    )
+
+
 def discover_generic_list_pages(entry_url: str, html: str, max_pages: int) -> list[str]:
-    if ny5y_entry_kind(entry_url):
-        # Owner 指定的两个 NY5Y 入口均为单页完整目录；其他栏目不得自行扩围。
+    if ny5y_entry_kind(entry_url) or gdzy5413_entry_kind(entry_url):
+        # Owner 指定入口均按现场证据视为单页目录；其他栏目或模板不得自行扩围。
         return [entry_url]
     soup = BeautifulSoup(html, "html.parser")
     pages = [entry_url]
@@ -1730,6 +1886,84 @@ def parse_ny5y_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
         "highlight_navigation_polluted": "yes" if contains_navigation_text(raw_highlights) else "no",
         "profile_text": clean_text(profile_text),
         "title_text": clean_text(name),
+    }
+
+
+def parse_gdzy5413_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
+    soup = BeautifulSoup(html, "html.parser")
+    profile_element = (
+        soup.select_one("#news_info_plAll .news_info_s")
+        or soup.select_one("#news_info_plAll")
+        or soup.select_one(".news_info_s")
+    )
+    profile_text = compact_visible_text(profile_element, 6000) if profile_element else ""
+    profile_text = re.sub(r"\s*了解详情[>＞]*\s*$", "", profile_text)
+    name = re.sub(r"\s+", "", clean_text(fallback.get("name", "")))
+    title_field = first_nonempty(
+        fallback.get("list_title", ""),
+        re.split(r"[。；;]", profile_text, maxsplit=1)[0] if profile_text else "",
+    )
+    department = extract_gdzy5413_department(title_field, profile_text)
+    specialty_raw = ""
+    specialty_match = re.search(
+        r"(?:主攻方向为|主攻|专长于|专长|尤其擅长|擅长治疗|擅长诊治|擅长|擅治|长于|善于|善用|专科)\s*[:：]?\s*(.+)$",
+        profile_text,
+    )
+    if specialty_match:
+        specialty_raw = clean_text(specialty_match.group(1))
+    specialty_raw = re.split(r"(?<=。)\s*(?:主持|承担|发表|获|出版|现任)", specialty_raw, maxsplit=1)[0]
+    return {
+        "name": name,
+        "department": department,
+        "department_raw": department,
+        "department_polluted": "no",
+        "title_field": title_field,
+        "specialty": clip(specialty_raw, 1200),
+        "specialty_raw": clip(specialty_raw, 1200),
+        "specialty_navigation_polluted": "no",
+        "highlight_navigation_polluted": "no",
+        "profile_text": profile_text,
+        "title_text": name,
+    }
+
+
+def parse_gdzy5413_ksdoctor_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
+    soup = BeautifulSoup(html, "html.parser")
+    content = soup.select_one(".newslistbg_m_c") or soup.select_one("table.newslist")
+    content_text = compact_visible_text(content, 12000) if content else ""
+    breadcrumb_element = content.select_one(".typeall_right") if content else None
+    breadcrumb = compact_visible_text(breadcrumb_element, 500) if breadcrumb_element else ""
+    department_match = re.search(r">\s*([^>]{1,40}?)\s*>\s*专家介绍", breadcrumb)
+    department = clean_generic_department(department_match.group(1) if department_match else "")
+    if not department:
+        department = clean_generic_department(fallback.get("department", ""))
+
+    basic_match = re.search(r"【基本资料】\s*(.*?)(?=【医生简介】|【出诊安排】|$)", content_text)
+    profile_match = re.search(r"【医生简介】\s*(.*?)(?=【出诊安排】|$)", content_text)
+    basic_text = clean_text(basic_match.group(1)) if basic_match else ""
+    profile_text = clean_text(profile_match.group(1)) if profile_match else ""
+    name_match = re.search(r"姓名\s*[:：]\s*([\u4e00-\u9fff·\s]{2,10}?)(?=\s*职称\s*[:：]|$)", basic_text)
+    title_match = re.search(r"职称\s*[:：]\s*(.*?)(?=\s*擅长\s*[:：]|$)", basic_text)
+    specialty_match = re.search(r"擅长\s*[:：]\s*(.*)$", basic_text)
+    name = re.sub(
+        r"\s+",
+        "",
+        clean_text(name_match.group(1) if name_match else fallback.get("name", "")),
+    )
+    title_field = clean_text(title_match.group(1)) if title_match else ""
+    specialty = clean_text(specialty_match.group(1)) if specialty_match else ""
+    return {
+        "name": name,
+        "department": department,
+        "department_raw": department,
+        "department_polluted": "no",
+        "title_field": title_field,
+        "specialty": clip(specialty, 1200),
+        "specialty_raw": clip(specialty, 1200),
+        "specialty_navigation_polluted": "no",
+        "highlight_navigation_polluted": "no",
+        "profile_text": clip(profile_text, 6000),
+        "title_text": name,
     }
 
 
@@ -2449,11 +2683,223 @@ def round_robin_generic_items(
             return ordered
 
 
+def gdzy5413_normalized_name(value: str | None) -> str:
+    return re.sub(r"\s+", "", clean_text(value))
+
+
+def select_gdzy5413_trial2_items(
+    items: list[dict[str, str]],
+    max_doctors: int | None,
+) -> list[dict[str, str]]:
+    """Select auditable 852 name groups, including one merge case and one Baiyun record."""
+
+    if not max_doctors:
+        return items
+    groups: dict[str, list[dict[str, str]]] = {}
+    for item in items:
+        name = gdzy5413_normalized_name(item.get("name"))
+        if name:
+            groups.setdefault(name, []).append(item)
+
+    duplicate_groups = [values for values in groups.values() if len(values) > 1]
+    duplicate_groups.sort(
+        key=lambda values: (
+            len({clean_text(item.get("department")) for item in values}) != 1,
+        )
+    )
+    selected_names: list[str] = []
+    if duplicate_groups:
+        selected_names.append(gdzy5413_normalized_name(duplicate_groups[0][0].get("name")))
+
+    baiyun_names = [
+        name
+        for name, values in groups.items()
+        if len(values) == 1 and "白云院区" in clean_text(values[0].get("department"))
+    ]
+    if baiyun_names and baiyun_names[0] not in selected_names:
+        selected_names.append(baiyun_names[0])
+
+    covered_departments = {
+        clean_text(item.get("department"))
+        for name in selected_names
+        for item in groups[name]
+        if clean_text(item.get("department"))
+    }
+    unique_groups = [(name, values) for name, values in groups.items() if len(values) == 1]
+    for name, values in unique_groups:
+        if len(selected_names) >= max_doctors:
+            break
+        department = clean_text(values[0].get("department"))
+        if name in selected_names or not department or department in covered_departments:
+            continue
+        selected_names.append(name)
+        covered_departments.add(department)
+    for name, _values in unique_groups:
+        if len(selected_names) >= max_doctors:
+            break
+        if name not in selected_names:
+            selected_names.append(name)
+
+    selected: list[dict[str, str]] = []
+    for name in selected_names[:max_doctors]:
+        selected.extend(groups[name])
+    return selected
+
+
+def expand_gdzy5413_full_detail_items(items: list[dict[str, str]]) -> list[dict[str, str]]:
+    """FULL must fetch every same-name link so the owner identity rule has complete evidence."""
+
+    groups: dict[str, list[dict[str, str]]] = {}
+    order: list[str] = []
+    for item in items:
+        name = gdzy5413_normalized_name(item.get("name"))
+        if name not in groups:
+            groups[name] = []
+            order.append(name)
+        groups[name].append(item)
+    return [item for name in order for item in groups[name]]
+
+
+def gdzy5413_identity_text(value: str | None) -> str:
+    return re.sub(r"[^\u4e00-\u9fffA-Za-z0-9]+", "", clean_text(value)).lower()
+
+
+def gdzy5413_text_similarity(left: str | None, right: str | None) -> float:
+    first = gdzy5413_identity_text(left)
+    second = gdzy5413_identity_text(right)
+    if not first or not second:
+        return 0.0
+    if first in second or second in first:
+        return 1.0
+    return SequenceMatcher(None, first, second).ratio()
+
+
+def gdzy5413_rows_same_identity(left: dict[str, Any], right: dict[str, Any]) -> bool:
+    if gdzy5413_normalized_name(left.get("姓名")) != gdzy5413_normalized_name(right.get("姓名")):
+        return False
+    left_titles = set(extract_terms(clean_text(left.get("职称身份原文")), TITLE_TERMS))
+    right_titles = set(extract_terms(clean_text(right.get("职称身份原文")), TITLE_TERMS))
+    title_consistent = bool(left_titles & right_titles) or not left_titles or not right_titles
+    specialty_similarity = gdzy5413_text_similarity(
+        left.get("擅长诊疗方向摘录"), right.get("擅长诊疗方向摘录")
+    )
+    profile_similarity = gdzy5413_text_similarity(
+        left.get("详情正文摘录"), right.get("详情正文摘录")
+    )
+    specialty_evidence = bool(
+        gdzy5413_identity_text(left.get("擅长诊疗方向摘录"))
+        and gdzy5413_identity_text(right.get("擅长诊疗方向摘录"))
+    )
+    if specialty_evidence:
+        return title_consistent and specialty_similarity >= 0.55
+    return title_consistent and profile_similarity >= 0.7
+
+
+def gdzy5413_primary_row_score(row: dict[str, Any]) -> int:
+    """Prefer the detail with the richest clinical biography over noisy title repetition."""
+
+    return (
+        len(clean_text(row.get("详情正文摘录"))) * 5
+        + len(clean_text(row.get("擅长诊疗方向摘录"))) * 2
+        + len(clean_text(row.get("职称身份原文")))
+        + len(clean_text(row.get("亮眼经历线索")))
+    )
+
+
+def merge_gdzy5413_identity_rows(
+    rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Apply the owner rule: merge materially consistent names, preserve distinct identities."""
+
+    by_name: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        by_name.setdefault(gdzy5413_normalized_name(row.get("姓名")), []).append(row)
+
+    merged_rows: list[dict[str, Any]] = []
+    reconciliation: list[dict[str, Any]] = []
+    longest_fields = [
+        "擅长诊疗方向摘录",
+        "亮眼经历线索",
+        "列表简介",
+        "详情正文摘录",
+    ]
+    for name, name_rows in by_name.items():
+        clusters: list[list[dict[str, Any]]] = []
+        for row in name_rows:
+            for cluster in clusters:
+                if any(gdzy5413_rows_same_identity(row, member) for member in cluster):
+                    cluster.append(row)
+                    break
+            else:
+                clusters.append([row])
+
+        distinct_same_name = len(clusters) > 1
+        for identity_index, cluster in enumerate(clusters, start=1):
+            primary = max(cluster, key=gdzy5413_primary_row_score)
+            merged = dict(primary)
+            departments: list[str] = []
+            for member in cluster:
+                for field in ["科室_分类页", "科室_列表卡片"]:
+                    for department in clean_text(member.get(field)).split("、"):
+                        department = clean_text(department)
+                        if department and department not in departments:
+                            departments.append(department)
+                for field in longest_fields:
+                    if len(clean_text(member.get(field))) > len(clean_text(merged.get(field))):
+                        merged[field] = member.get(field, "")
+            merged["科室_分类页"] = "、".join(departments)
+            merged["科室_列表卡片"] = "、".join(departments)
+            merged["职称_关键词"] = "、".join(
+                extract_terms(clean_text(primary.get("职称身份原文")), TITLE_TERMS)
+            )
+            warnings = [
+                warning
+                for member in cluster
+                for warning in clean_text(member.get("异常提示")).split("；")
+                if warning
+            ]
+            distinct_titles = {
+                clean_text(member.get("职称身份原文"))
+                for member in cluster
+                if clean_text(member.get("职称身份原文"))
+            }
+            if len(distinct_titles) > 1:
+                warnings.append("多详情职称不一致")
+            if distinct_same_name:
+                warnings.append("同名待甄别")
+            merged["异常提示"] = "；".join(dict.fromkeys(warnings))
+            merged_rows.append(merged)
+            reconciliation.append(
+                {
+                    "name": name,
+                    "identity_index": identity_index,
+                    "resolution": (
+                        "同名待甄别"
+                        if distinct_same_name
+                        else "同一人归并"
+                        if len(cluster) > 1
+                        else "唯一身份"
+                    ),
+                    "primary_source_link": merged.get("来源链接", ""),
+                    "merged_source_links": [
+                        member.get("来源链接", "")
+                        for member in cluster
+                        if member.get("来源链接") != merged.get("来源链接")
+                    ],
+                    "departments": departments,
+                    "relation_count": len(cluster),
+                }
+            )
+
+    return merged_rows, reconciliation
+
+
 def collect_generic(
     target: HospitalTarget,
     today: str,
     max_doctors: int | None = None,
     max_pages: int = GENERIC_MAX_PAGES_DEFAULT,
+    gdzy5413_trial2: bool = False,
 ) -> dict[str, Any]:
     session = create_official_session()
     entry_urls = effective_entry_urls(target)
@@ -2465,6 +2911,7 @@ def collect_generic(
     raw_rows: list[dict[str, str]] = []
     excluded_candidates_by_link: dict[str, dict[str, str]] = {}
     entry_candidate_links: dict[str, set[str]] = {entry_url: set() for entry_url in entry_urls}
+    entry_raw_relation_counts: dict[str, int] = {entry_url: 0 for entry_url in entry_urls}
     accessible_entry_count = 0
     for entry_index, entry_url in enumerate(entry_urls, start=1):
         status, entry_html, entry_error = fetch(session, entry_url)
@@ -2516,6 +2963,9 @@ def collect_generic(
                 }
             )
             page_rows = discover_generic_detail_links(page_document["html"], page_url, entry_url)
+            entry_raw_relation_counts[entry_url] += gdzy5413_raw_detail_relation_count(
+                page_document["html"], page_url, entry_url
+            )
             for excluded in discover_gdskin_excluded_links(page_document["html"], page_url, entry_url):
                 excluded_candidates_by_link.setdefault(
                     generic_detail_identity(excluded["source_link"]),
@@ -2582,11 +3032,26 @@ def collect_generic(
             pages.append(row["list_page"])
             item["list_pages"] = "；".join(pages)
 
+    sampling_items = list(by_link.values())
+    sampling_entry_urls = entry_urls
+    if gdzy5413_trial2:
+        sampling_items = [
+            item
+            for item in sampling_items
+            if gdzy5413_entry_kind(item.get("entry_url")) == "852"
+            and gdzy5413_ksdoctor_detail_id(item.get("source_link"))
+        ]
+        sampling_items = select_gdzy5413_trial2_items(sampling_items, max_doctors)
+        sampling_entry_urls = [
+            entry_url for entry_url in entry_urls if gdzy5413_entry_kind(entry_url) == "852"
+        ]
+    elif target.adapter_id == GDZY5413_ADAPTER_ID and max_doctors is None:
+        sampling_items = expand_gdzy5413_full_detail_items(sampling_items)
     detail_items = round_robin_generic_items(
-        list(by_link.values()),
-        entry_urls,
-        max_doctors,
-        spread=target.adapter_id == NY5Y_ADAPTER_ID,
+        sampling_items,
+        sampling_entry_urls,
+        None if gdzy5413_trial2 else max_doctors,
+        spread=target.adapter_id in {NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID},
     )
     if target.adapter_id == GDSKIN_ADAPTER_ID:
         for item in detail_items:
@@ -2624,6 +3089,10 @@ def collect_generic(
                 if gdskin_detail_id(link)
                 else parse_ny5y_detail(detail_html, item)
                 if ny5y_detail_id(link)
+                else parse_gdzy5413_detail(detail_html, item)
+                if gdzy5413_detail_id(link)
+                else parse_gdzy5413_ksdoctor_detail(detail_html, item)
+                if gdzy5413_ksdoctor_detail_id(link)
                 else parse_generic_detail(detail_html, item)
             )
         else:
@@ -2653,9 +3122,18 @@ def collect_generic(
         )
         priority, groups, tags = classify_generic_record(valid_doctor_record, combined_text, title_hits)
         specialty = clip(detail.get("specialty"), 520) if valid_doctor_record else ""
-        highlights = extract_clean_highlights(
-            detail.get("profile_text", "") if ny5y_detail_id(link) else combined_text
+        highlight_source = (
+            detail.get("profile_text", "")
+            if ny5y_detail_id(link) or gdzy5413_detail_id(link) or gdzy5413_ksdoctor_detail_id(link)
+            else combined_text
         )
+        highlights = extract_clean_highlights(highlight_source)
+        gdzy5413_honor = ""
+        if gdzy5413_detail_id(link) and any(
+            term in item.get("list_title", "")
+            for term in ["国务院特殊津贴", "名中医", "名老中医", "学科带头人", "优秀中医临床人才"]
+        ):
+            gdzy5413_honor = item.get("list_title", "")
 
         warnings: list[str] = []
         if detail_status != 200:
@@ -2701,6 +3179,7 @@ def collect_generic(
                                     if entry_url
                                 )
                                 else "",
+                                gdzy5413_honor,
                                 highlights,
                             ]
                             if part
@@ -2718,6 +3197,10 @@ def collect_generic(
                     if gdskin_detail_id(link)
                     else "医院官网专家栏目：指定入口普查+医生详情 DOM 结构化抽取"
                     if ny5y_detail_id(link)
+                    else "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取"
+                    if gdzy5413_detail_id(link)
+                    else "医院官网各科专家栏目：严格 ksdoctorinfo 参数过滤+详情 DOM 结构化抽取"
+                    if gdzy5413_ksdoctor_detail_id(link)
                     else "医院官网通用模板：列表页自动发现+详情页文本抽取"
                 ),
                 "采集日期": today,
@@ -2731,6 +3214,9 @@ def collect_generic(
             print(f"generic details: {index}/{len(detail_items)}")
         time.sleep(0.18)
 
+    gdzy5413_identity_reconciliation: list[dict[str, Any]] = []
+    if target.adapter_id == GDZY5413_ADAPTER_ID:
+        rows, gdzy5413_identity_reconciliation = merge_gdzy5413_identity_rows(rows)
     rows.sort(key=lambda row: (row["重点优先级"] != "高", row["科室_分类页"], row["姓名"]))
     for new_index, row in enumerate(rows, start=1):
         row["序号"] = new_index
@@ -2762,11 +3248,34 @@ def collect_generic(
             GDSKIN_ENTRY_METADATA[entry_id]["category_name"]
             if (entry_id := gdskin_entry_id(entry_url))
             else NY5Y_ENTRY_METADATA[ny5y_id]["category_name"]
+            if (ny5y_id := ny5y_entry_kind(entry_url))
+            else GDZY5413_ENTRY_METADATA[gdzy5413_id]["category_name"]
         )
         for entry_url in sample_entry_urls
-        if (entry_id := gdskin_entry_id(entry_url)) or (ny5y_id := ny5y_entry_kind(entry_url))
+        if (entry_id := gdskin_entry_id(entry_url))
+        or (ny5y_id := ny5y_entry_kind(entry_url))
+        or (gdzy5413_id := gdzy5413_entry_kind(entry_url))
     ]
     entry_page_counts = Counter(category.get("entry_url", "") for category in categories)
+    gdzy5413_names_by_mode: dict[str, dict[str, dict[str, str]]] = {"851": {}, "852": {}}
+    for row in raw_rows:
+        entry_kind = gdzy5413_entry_kind(row.get("entry_url"))
+        name = re.sub(r"\s+", "", clean_text(row.get("name")))
+        if entry_kind in gdzy5413_names_by_mode and name:
+            gdzy5413_names_by_mode[entry_kind].setdefault(
+                name,
+                {"name": name, "source_link": row.get("source_link", ""), "department": row.get("department", "")},
+            )
+    gdzy5413_cross_mode_matches = [
+        {
+            "name": name,
+            "specialist_source_link": gdzy5413_names_by_mode["851"][name]["source_link"],
+            "specialist_department": gdzy5413_names_by_mode["851"][name]["department"],
+            "ksdoctor_source_link": gdzy5413_names_by_mode["852"][name]["source_link"],
+            "ksdoctor_department": gdzy5413_names_by_mode["852"][name]["department"],
+        }
+        for name in sorted(set(gdzy5413_names_by_mode["851"]) & set(gdzy5413_names_by_mode["852"]))
+    ]
     entry_reconnaissance: list[dict[str, Any]] = []
     for entry_url in entry_urls:
         entry_id = gdskin_entry_id(entry_url)
@@ -2776,7 +3285,16 @@ def collect_generic(
             GDSKIN_ENTRY_METADATA.get(entry_id, {})
             if entry_id
             else NY5Y_ENTRY_METADATA.get(ny5y_id, {})
+            if ny5y_id
+            else GDZY5413_ENTRY_METADATA.get(gdzy5413_entry_kind(entry_url), {})
         )
+        gdzy5413_id = gdzy5413_entry_kind(entry_url)
+        out_of_scope_count = sum(
+            1
+            for item in excluded_candidates_by_link.values()
+            if item.get("entry_url") == entry_url and "另一详情模板" in item.get("reason", "")
+        )
+        list_page_count = entry_page_counts.get(entry_url, 0)
         entry_reconnaissance.append(
             {
                 "entry_url": entry_url,
@@ -2786,14 +3304,23 @@ def collect_generic(
                     if entry_id and candidate_count
                     else "医院官网单页专家名单"
                     if ny5y_id and candidate_count
+                    else "医院官网名医名家单页名单"
+                    if gdzy5413_id == "851"
+                    else "医院官网各科专家单页主目录（ksdoctorinfo 已获 TRIAL-2 授权）"
+                    if gdzy5413_id == "852"
                     else "医院官网专家团队分类页（当前未列出可采医生详情）"
                 ),
+                "raw_detail_relation_count": entry_raw_relation_counts.get(entry_url, 0),
                 "unique_detail_count": candidate_count,
-                "list_page_count": entry_page_counts.get(entry_url, 0),
+                "out_of_scope_detail_count": out_of_scope_count,
+                "list_page_count": list_page_count,
+                "pagination_evidence": "未发现分页证据" if list_page_count == 1 else f"发现 {list_page_count} 个列表文档",
                 "affiliation": metadata.get("affiliation", target.hospital),
                 "independent_entity_check": (
                     "未发现独立院区归属；页面保持在本院官网同站专家栏目"
                     if ny5y_id
+                    else "owner 已裁决院区/门诊均属同一法人实体授权范围"
+                    if gdzy5413_id
                     else "未发现独立挂牌机构；页面保持在医院官网同站专家团队栏目"
                 ),
             }
@@ -2809,6 +3336,11 @@ def collect_generic(
         if len([value for value in item.get("all_entry_urls", "").split("；") if value]) > 1
     ]
     candidate_membership_count = sum(entry_candidate_counts.values())
+    out_of_scope_candidate_count = sum(
+        1
+        for item in excluded_candidates_by_link.values()
+        if "另一详情模板" in item.get("reason", "")
+    )
 
     return {
         "meta": {
@@ -2818,6 +3350,7 @@ def collect_generic(
             "entry_url": " ".join(entry_urls),
             "entry_url_count": len(entry_urls),
             "entry_candidate_counts": entry_candidate_counts,
+            "entry_raw_relation_counts": entry_raw_relation_counts,
             "entry_url_source": "Claude owner Issue 显式多入口" if target.entry_urls else "官网入口台账",
             "ledger_entry_url": target.ledger_entry_url or target.entry_url,
             "adapter_id": target.adapter_id,
@@ -2836,17 +3369,38 @@ def collect_generic(
             "generic_template": "yes" if target.adapter_id == GENERIC_ADAPTER_ID else "no",
             "site_adapter_profile": (
                 "gdskin_aspnet_gridview" if target.adapter_id == GDSKIN_ADAPTER_ID else "generic"
-                if target.adapter_id != NY5Y_ADAPTER_ID
+                if target.adapter_id not in {NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID}
                 else "ny5y_strict_expert_dom"
+                if target.adapter_id == NY5Y_ADAPTER_ID
+                else "gdzy5413_strict_specialist_dom"
             ),
             "generic_max_pages": max_pages,
             "sample_entry_coverage_count": len(sample_entry_urls),
             "sample_entry_categories": sample_entry_categories,
-            "excluded_non_doctor_count": len(excluded_candidates_by_link),
+            "excluded_non_doctor_count": len(excluded_candidates_by_link) - out_of_scope_candidate_count,
+            "out_of_scope_candidate_count": out_of_scope_candidate_count,
+            "gdzy5413_trial2": gdzy5413_trial2,
+            "gdzy5413_851_unique_name_count": len(gdzy5413_names_by_mode["851"]),
+            "gdzy5413_852_unique_name_count": len(gdzy5413_names_by_mode["852"]),
+            "gdzy5413_cross_mode_name_match_count": len(gdzy5413_cross_mode_matches),
+            "gdzy5413_detail_relation_count": len(detail_items),
+            "gdzy5413_final_identity_count": len(rows),
+            "gdzy5413_trial2_sample_relation_count": len(detail_items),
+            "gdzy5413_trial2_sample_identity_count": len(rows),
+            "gdzy5413_trial2_baiyun_sample_count": sum(
+                1 for row in rows if "白云院区" in clean_text(row.get("科室_分类页"))
+            ),
+            "gdzy5413_trial2_merged_identity_count": sum(
+                1
+                for item in gdzy5413_identity_reconciliation
+                if item.get("resolution") == "同一人归并" and int(item.get("relation_count") or 0) > 1
+            ),
         },
         "categories": categories,
         "entry_reconnaissance": entry_reconnaissance,
         "cross_entry_duplicates": cross_entry_duplicates,
+        "gdzy5413_cross_mode_matches": gdzy5413_cross_mode_matches,
+        "gdzy5413_identity_reconciliation": gdzy5413_identity_reconciliation,
         "excluded_candidates": list(excluded_candidates_by_link.values()),
         "category_errors": page_errors,
         "detail_errors": detail_errors,
@@ -2913,6 +3467,119 @@ def validate_gdskin_full_append(payload: dict[str, Any]) -> None:
 
     if errors:
         raise RuntimeError("GDSKIN 全量写入前门禁失败：" + "；".join(errors))
+
+
+def validate_gdzy5413_trial2(payload: dict[str, Any], expected_identities: int = 10) -> None:
+    """Protect the owner-audited TRIAL-2 census, sample composition, and URL scope."""
+
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    errors: list[str] = []
+    entry_counts = meta.get("entry_candidate_counts", {})
+    if sorted(int(value) for value in entry_counts.values()) != [21, 346]:
+        errors.append(f"851/852 唯一详情应为 21/346，实际 {entry_counts}")
+    if int(meta.get("gdzy5413_852_unique_name_count") or 0) != 289:
+        errors.append(f"852 唯一姓名应为 289，实际 {meta.get('gdzy5413_852_unique_name_count')}")
+    if int(meta.get("gdzy5413_cross_mode_name_match_count") or 0) != 20:
+        errors.append(
+            "851/852 同名应为 20，实际 "
+            f"{meta.get('gdzy5413_cross_mode_name_match_count')}"
+        )
+    if len(rows) != expected_identities:
+        errors.append(f"最终身份应为 {expected_identities}，实际 {len(rows)}")
+    if int(meta.get("gdzy5413_trial2_baiyun_sample_count") or 0) < 1:
+        errors.append("样本缺少白云院区条目")
+    if int(meta.get("gdzy5413_trial2_merged_identity_count") or 0) < 1:
+        errors.append("样本缺少多链接同一人归并案例")
+    if int(meta.get("gdzy5413_trial2_sample_relation_count") or 0) <= len(rows):
+        errors.append("样本详情关系数未体现多链接归并")
+    if int(meta.get("department_coverage_count") or 0) < 3:
+        errors.append("样本科室覆盖不足 3 个")
+    if int(meta.get("category_error_count") or 0) or int(meta.get("detail_error_count") or 0):
+        errors.append("列表或详情存在读取失败")
+    relation_links = [
+        link
+        for item in payload.get("gdzy5413_identity_reconciliation", [])
+        for link in [item.get("primary_source_link"), *item.get("merged_source_links", [])]
+        if link
+    ]
+    if len(relation_links) != int(meta.get("gdzy5413_trial2_sample_relation_count") or 0):
+        errors.append("归并对账中的详情关系数与抽样关系数不一致")
+    if any(not gdzy5413_ksdoctor_detail_id(link) for link in relation_links):
+        errors.append("样本归并对账含非授权 ksdoctorinfo 来源")
+    if errors:
+        raise RuntimeError("GDZY5413 TRIAL-2 门禁失败：" + "；".join(errors))
+
+
+def validate_gdzy5413_full_append(payload: dict[str, Any]) -> None:
+    """Fail before master writes when the owner-audited FULL census or identity audit drifts."""
+
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    reconciliation = payload.get("gdzy5413_identity_reconciliation", [])
+    errors: list[str] = []
+    entry_counts = {
+        gdzy5413_entry_kind(str(entry_url)): int(count)
+        for entry_url, count in meta.get("entry_candidate_counts", {}).items()
+        if gdzy5413_entry_kind(str(entry_url))
+    }
+    if entry_counts != {"851": 21, "852": 346}:
+        errors.append(f"851/852 唯一详情应为 21/346，实际 {entry_counts}")
+    if int(meta.get("gdzy5413_851_unique_name_count") or 0) != 21:
+        errors.append(f"851 唯一姓名应为 21，实际 {meta.get('gdzy5413_851_unique_name_count')}")
+    if int(meta.get("gdzy5413_852_unique_name_count") or 0) != 289:
+        errors.append(f"852 唯一姓名应为 289，实际 {meta.get('gdzy5413_852_unique_name_count')}")
+    if int(meta.get("gdzy5413_cross_mode_name_match_count") or 0) != 20:
+        errors.append(
+            "851/852 同名应为 20，实际 "
+            f"{meta.get('gdzy5413_cross_mode_name_match_count')}"
+        )
+    if int(meta.get("category_error_count") or 0) or int(meta.get("detail_error_count") or 0):
+        errors.append("列表或详情存在读取失败")
+    if not 290 <= len(rows) <= 367:
+        errors.append(f"最终身份数应在姓名并集 290 与详情关系 367 之间，实际 {len(rows)}")
+    if len(reconciliation) != len(rows):
+        errors.append(f"归并对账行数应等于最终身份数，实际 {len(reconciliation)}/{len(rows)}")
+
+    relation_links = [
+        str(link)
+        for item in reconciliation
+        for link in [item.get("primary_source_link"), *item.get("merged_source_links", [])]
+        if link
+    ]
+    relation_count = sum(int(item.get("relation_count") or 0) for item in reconciliation)
+    if len(relation_links) != 367 or relation_count != 367:
+        errors.append(f"归并详情关系应为 367，实际链接 {len(relation_links)} / 对账 {relation_count}")
+    if len(set(relation_links)) != len(relation_links):
+        errors.append("归并对账存在重复详情链接")
+    specialist_links = [link for link in relation_links if gdzy5413_detail_id(link)]
+    ksdoctor_links = [link for link in relation_links if gdzy5413_ksdoctor_detail_id(link)]
+    if len(specialist_links) != 21 or len(ksdoctor_links) != 346:
+        errors.append(
+            f"归并对账授权链接应为 specialist 21 / ksdoctorinfo 346，实际 "
+            f"{len(specialist_links)} / {len(ksdoctor_links)}"
+        )
+    if len(specialist_links) + len(ksdoctor_links) != len(relation_links):
+        errors.append("归并对账含非授权详情链接")
+
+    for row in rows:
+        if clean_text(row.get("医院")) != "广东省第二中医院":
+            errors.append("存在医院字段未统一为广东省第二中医院")
+            break
+        source_link = str(row.get("来源链接") or "")
+        if not (gdzy5413_detail_id(source_link) or gdzy5413_ksdoctor_detail_id(source_link)):
+            errors.append("最终行含非授权主详情链接")
+            break
+        expected_titles = "、".join(extract_terms(clean_text(row.get("职称身份原文")), TITLE_TERMS))
+        if clean_text(row.get("职称_关键词")) != expected_titles:
+            errors.append(f"{row.get('姓名', '未命名')} 的职称关键词未严格取自主详情")
+            break
+        if re.match(r"^\s*擅长\s*[:：]", str(row.get("擅长诊疗方向摘录") or "")):
+            errors.append(f"{row.get('姓名', '未命名')} 的擅长字段仍保留前缀")
+            break
+
+    if errors:
+        raise RuntimeError("GDZY5413 FULL 写入前门禁失败：" + "；".join(errors))
 
 
 def validate_ny5y_full_append(payload: dict[str, Any]) -> None:
@@ -3007,6 +3674,10 @@ def markdown_table_cell(value: Any) -> str:
 
 def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path: Path) -> None:
     meta = payload["meta"]
+    full_append = meta.get("execution_mode") == "full_append"
+    report_label = "全量采集归并审计报告" if full_append else "自动采集试跑报告"
+    report_title = "官方医生全量采集归并审计报告" if full_append else "官方医生自动采集试跑报告"
+    run_label = "全量采集" if full_append else "试采"
     xlsx_output = f"`{xlsx_path}`" if xlsx_path.exists() else "未生成（本轮使用 --no-xlsx）"
     top_departments = render_counter_table(payload["category_counts"][:20])
     group_lines = render_counter_table(dict(sorted(payload["group_counts"].items())))
@@ -3027,11 +3698,13 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         (
             f"| {item.get('category_name', '')} | {item.get('entry_url', '')} | "
             f"{item.get('page_nature', '')} | {item.get('list_page_count', 0)} | "
-            f"{item.get('unique_detail_count', 0)} | {item.get('affiliation', '')} | "
+            f"{item.get('raw_detail_relation_count', item.get('unique_detail_count', 0))} | "
+            f"{item.get('unique_detail_count', 0)} | {item.get('out_of_scope_detail_count', 0)} | "
+            f"{item.get('affiliation', '')} | "
             f"{item.get('independent_entity_check', '')} |"
         )
         for item in payload.get("entry_reconnaissance", [])
-    ) or "| 无 | 无 | 无 | 0 | 0 | 无 | 无 |"
+    ) or "| 无 | 无 | 无 | 0 | 0 | 0 | 0 | 无 | 无 |"
     excluded_lines = "\n".join(
         (
             f"| {item.get('entry_url', '')} | {markdown_table_cell(item.get('list_title', ''))} | "
@@ -3046,9 +3719,18 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         )
         for item in payload.get("cross_entry_duplicates", [])
     ) or "| 无 | 无 | 无 |"
+    identity_reconciliation_lines = "\n".join(
+        (
+            f"| {item.get('name', '')} | {item.get('resolution', '')} | "
+            f"{item.get('relation_count', 0)} | {'、'.join(item.get('departments', []))} | "
+            f"{item.get('primary_source_link', '')} | "
+            f"{'；'.join(item.get('merged_source_links', [])) or '无'} |"
+        )
+        for item in payload.get("gdzy5413_identity_reconciliation", [])
+    ) or "| 无 | 无 | 0 | 无 | 无 | 无 |"
 
     report = f"""---
-类型: 自动采集试跑报告
+类型: {report_label}
 医院: {meta['hospital']}
 城市: {meta['city']}
 采集日期: {meta['collected_at']}
@@ -3057,13 +3739,13 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 适配器: {meta['adapter_id']}
 ---
 
-# {meta['hospital']} 官方医生自动采集试跑报告
+# {meta['hospital']} {report_title}
 
 ## 结论
 
 本次试跑只读取医院官网公开专家列表页和医生详情页。系统没有使用第三方平台、没有绕过登录或验证码、没有采集私人联系方式或患者信息。
 
-本轮生成医生自动采集试采底表，共 {meta['unique_doctor_count']} 位唯一医生；官网列表页原始卡片记录 {meta['raw_card_rows']} 条；识别到官网列表分页 {meta['category_count']} 页；覆盖 {meta.get('department_coverage_count', 0)} 个科室；详情页失败 {meta['detail_error_count']} 条。
+本轮生成医生自动采集{run_label}底表，共 {meta['unique_doctor_count']} 位唯一医生；官网列表页原始卡片记录 {meta['raw_card_rows']} 条；读取入口分类 {meta['category_count']} 个；覆盖 {meta.get('department_coverage_count', 0)} 个科室；详情页失败 {meta['detail_error_count']} 条。
 
 ## 台账来源
 
@@ -3080,8 +3762,8 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 
 ## 入口普查表
 
-| 分类 | 官方入口 | 页面性质 | 列表分页 | 唯一医生详情 URL | 归属医院/中心 | 独立实体核验 |
-|---|---|---|---:|---:|---|---|
+| 分类 | 官方入口 | 页面性质 | 列表分页 | 授权详情关系 | 唯一授权详情 | 范围外详情 | 归属医院/中心 | 独立实体核验 |
+|---|---|---|---:|---:|---:|---:|---|---|
 {entry_recon_lines}
 
 ## 跨入口去重与试采覆盖
@@ -3095,7 +3777,18 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 |---|---|---|
 {duplicate_lines}
 
-## 已排除非医生候选
+## 广东省第二中医院同名归并对账
+
+- 详情关系：{meta.get('gdzy5413_detail_relation_count', meta.get('gdzy5413_trial2_sample_relation_count', 0))}
+- 最终身份：{meta.get('gdzy5413_final_identity_count', meta.get('gdzy5413_trial2_sample_identity_count', 0))}
+- 白云院区样本：{meta.get('gdzy5413_trial2_baiyun_sample_count', 0)}
+- 多链接同一人归并样本：{meta.get('gdzy5413_trial2_merged_identity_count', 0)}
+
+| 姓名 | 裁决 | 详情关系 | 合并科室 | 主详情 | 其余详情 |
+|---|---|---:|---|---|---|
+{identity_reconciliation_lines}
+
+## 已排除或范围外候选
 
 | 入口 | 列表身份 | 来源链接 | 排除原因 |
 |---|---|---|---|
@@ -3110,7 +3803,7 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 
 | 指标 | 数量 |
 |---|---:|
-| 官网列表分页数 | {meta['category_count']} |
+| 读取列表文档数 | {meta['category_count']} |
 | 原始医生卡片记录 | {meta['raw_card_rows']} |
 | 跨入口去重前候选关系 | {meta.get('candidate_membership_count', meta['raw_card_rows'])} |
 | 跨入口去重后唯一候选 | {meta.get('unique_candidate_count', meta['unique_doctor_count'])} |
@@ -3314,6 +4007,11 @@ def parse_args() -> argparse.Namespace:
         help="仅在显式指定医院并通过追加门禁时，用本轮官网结果刷新同来源既有记录。",
     )
     parser.add_argument("--no-xlsx", action="store_true", help="只生成 JSON/CSV/报告，不生成 Excel")
+    parser.add_argument(
+        "--gdzy5413-trial2",
+        action="store_true",
+        help="Issue #17 TRIAL-2：仅从 cid=852 的 ksdoctorinfo 主目录抽样，仍普查 851 用于跨模式去重说明",
+    )
     parser.add_argument("--single-output", action="store_true", help="保留旧模式：按单家医院生成单独底表")
     parser.add_argument("--rebuild-master-only", action="store_true", help="不联网采集，仅用已有底表重建总底表")
     parser.add_argument("--list-targets", action="store_true", help="列出当前已确认A级医院；无专用适配器的医院标记为通用模板候选")
@@ -3358,6 +4056,8 @@ def main() -> None:
         return
 
     target = select_target(ledger_rows, args.hospital or None)
+    if args.gdzy5413_trial2 and (target.hospital != "广东省第二中医院" or not args.trial_only):
+        raise RuntimeError("--gdzy5413-trial2 只允许广东省第二中医院的 --trial-only 补充试采。")
     if args.entry_url:
         if not args.hospital:
             raise RuntimeError("使用 --entry-url 覆盖入口时必须同时指定 --hospital。")
@@ -3390,7 +4090,7 @@ def main() -> None:
     )
 
     if (
-        target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID}
+        target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID}
         and not args.trial_only
         and not args.single_output
         and not args.allow_generic_append
@@ -3405,8 +4105,14 @@ def main() -> None:
         payload = collect_gzzoc(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id == "nbkjyy_static_expert":
         payload = collect_nbkj(target, args.today, max_doctors=max_doctors)
-    elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID}:
-        payload = collect_generic(target, args.today, max_doctors=max_doctors, max_pages=args.max_pages)
+    elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID}:
+        payload = collect_generic(
+            target,
+            args.today,
+            max_doctors=max_doctors,
+            max_pages=args.max_pages,
+            gdzy5413_trial2=args.gdzy5413_trial2,
+        )
     else:
         raise RuntimeError(f"暂不支持的适配器：{target.adapter_id}")
 
@@ -3419,7 +4125,10 @@ def main() -> None:
         empty_entries_blocking = [
             entry_url
             for entry_url in failed_entries
-            if target.adapter_id != GDSKIN_ADAPTER_ID or gdskin_entry_id(entry_url) != "924"
+            if not (
+                (target.adapter_id == GDSKIN_ADAPTER_ID and gdskin_entry_id(entry_url) == "924")
+                or (target.adapter_id == GDZY5413_ADAPTER_ID and gdzy5413_entry_kind(entry_url) == "852")
+            )
         ]
         if payload["meta"].get("category_error_count") or empty_entries_blocking:
             raise RuntimeError(
@@ -3453,6 +4162,11 @@ def main() -> None:
             f"{'、'.join(covered_departments) or '无'}"
         )
 
+    if args.gdzy5413_trial2:
+        validate_gdzy5413_trial2(payload, expected_identities=max_doctors or 10)
+
+    if target.adapter_id == GDZY5413_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_gdzy5413_full_append(payload)
     if target.adapter_id == GDSKIN_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdskin_full_append(payload)
     if target.adapter_id == NY5Y_ADAPTER_ID and not args.trial_only and not args.single_output:
@@ -3463,6 +4177,7 @@ def main() -> None:
     preview_path = WORK_DIR / f"{safe_name}_official_doctors_preview.png"
 
     if args.trial_only:
+        payload["meta"]["execution_mode"] = "trial"
         json_path = WORK_DIR / f"{safe_name}_trial_payload.json"
         csv_path = WORK_DIR / f"{safe_name}_trial_doctors.csv"
         xlsx_path = WORK_DIR / f"{safe_name}_trial_doctors.xlsx"
@@ -3533,11 +4248,13 @@ def main() -> None:
         )
         return
 
+    payload["meta"]["execution_mode"] = "full_append"
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     master_payload = build_master_payload(
         args.today,
         incoming_payload=payload,
         refresh_incoming=args.refresh_existing_hospital,
+        replace_incoming_hospital=target.adapter_id == GDZY5413_ADAPTER_ID,
     )
     MASTER_JSON_PATH.write_text(json.dumps(master_payload, ensure_ascii=False, indent=2), encoding="utf-8")
     write_csv(MASTER_CSV_PATH, master_payload["rows"])
@@ -3546,6 +4263,8 @@ def main() -> None:
         build_workbook(MASTER_JSON_PATH, MASTER_XLSX_PATH, MASTER_PREVIEW_PATH)
 
     write_master_report(MASTER_REPORT_PATH, master_payload, MASTER_CSV_PATH, MASTER_XLSX_PATH)
+    full_report_path = WORK_DIR / f"{safe_name}_official_doctors_report.md"
+    write_report(full_report_path, payload, MASTER_CSV_PATH, MASTER_XLSX_PATH)
     print(
         json.dumps(
             {
@@ -3560,6 +4279,7 @@ def main() -> None:
                 "csv": str(MASTER_CSV_PATH),
                 "xlsx": str(MASTER_XLSX_PATH),
                 "report": str(MASTER_REPORT_PATH),
+                "hospital_audit_report": str(full_report_path),
             },
             ensure_ascii=False,
             indent=2,

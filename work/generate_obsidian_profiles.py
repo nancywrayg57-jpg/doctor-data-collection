@@ -509,7 +509,7 @@ def build_profile(row: dict[str, str], generated_at: str) -> str:
     if highlight_items:
         lines.extend(f"- {item}" for item in highlight_items)
     else:
-        lines.append("- ")
+        lines.append("-")
 
     lines.extend(["", "## 重点疾病/人群标签", ""])
     lines.extend(group_tag_lines(focus, disease_tags))
