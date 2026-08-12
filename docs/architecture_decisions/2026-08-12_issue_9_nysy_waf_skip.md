@@ -72,15 +72,33 @@ owner 在 Issue #9 评论 `issuecomment-5255218176` 明确裁决：若常规访�
 - 已采取措施：先做单次最小重试，再给临时推送器增加有限传输重试和“引用创建结果不明时先只读核验”保护；网络仍未恢复。
 - 熔断与恢复：按 Agent.md 连续失败上限停止远端命令。待 GitHub API 连通后，从 `gh api user --jq .login`、远端分支不存在性和 `origin/main` 父提交一致性重新核验；只允许非强制 Git Data API 推送当前本地提交，不得改用绕过既有门禁的强制推送。
 
+### 4. Git Data API 临时推送器二进制读取错误
+
+- 阻塞：恢复网络后，首次修正处理了中文路径转义；第二次在 XLSX blob 校验处发现远端 SHA 与本地 Git blob SHA 不一致。
+- 根因：临时推送器使用 `options.encoding ?? "utf8"`，显式传入的 `null` 被空值合并运算符回退为 UTF-8，导致 `git cat-file blob` 的 XLSX 二进制输出被文本解码后再编码，字节损坏。
+- 解决：管理员明确解除熔断后，仅将编码判定改为“存在 `encoding` 属性则原样使用”，从而保留 `null` 的 Buffer 返回语义；没有修改业务工件。
+- 防复发：Git Data API 上传必须从 Git 对象库读取 Buffer，并逐 blob 校验 GitHub 返回 SHA；二进制和文本统一以原始 Git blob 字节为准，严禁经过字符串解码。路径读取统一使用 `core.quotePath=false`。
+
+## 远端交付结果
+
+- 身份：`xtzhou247`。
+- 远端分支：`codex/mhrj/issue-9-nysy-trial`。
+- Git Data API 远端提交：`9dc1545b20b586f18c6c53768b81271f74caf629`、`8a8c9d8ccd5e692f0271a69734ff62bb2d8efd22`。
+- 最终 tree SHA：`d0365a80382061b52293418e77aab50f5d3c9b8a`，与本地 HEAD tree 完全一致。
+- Pull Request：`https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/10`。
+- PR 正文包含 `Closes #9`，GitHub `closingIssuesReferences` 已解析为 Issue #9。
+- PR 创建时 CI `governance-check` 为 `QUEUED`，必须等待成功。
+
 ## 当前结论与下一步
 
-Issue #9 已按 owner 裁决完成本地跳过记录并形成提交，但 GitHub API 网络熔断导致尚未推送。连通性恢复后的下一步仅允许：重新核验 `xtzhou247` 身份与远端状态，非强制推送原分支，创建关联 `Closes #9` 的 PR，并在 Issue 回报 WAF 证据。随后等待 owner 审计、合并 PR 并关闭 Issue；在这些门禁完成前不得领取其他 Issue。
+Issue #9 已按 owner 裁决完成 WAF 跳过记录，已推送并创建 PR #10。下一步仅允许在 Issue 回报 WAF 证据与 PR 链接，然后等待 owner 审计、CI 成功、合并 PR并关闭 Issue；在这些门禁完成前不得领取其他 Issue。
 
 <Handoff_State>
 Target: Issue #9 南方医科大学第三附属医院 WAF 跳过审计
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/9
 Branch: codex/mhrj/issue-9-nysy-trial
-Phase: REMOTE_PUSH_BLOCKED
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/10
+Phase: WAITING_OWNER_WAF_SKIP_AUDIT
 Completed:
 - 普通 GET 复核官网首页 HTTP 412、指定入口 HTTP 405，Server 均为 CT2-WAAP
 - 未绕过反爬、未运行试采、未写入统一总底表
@@ -89,9 +107,7 @@ CurrentFacts:
 - 总底表 2165 行，本院 0 行
 - 工作簿公式错误 0，五表视觉核验完成
 Next:
-- GitHub API 连通后重新核验身份、main 父提交与远端分支状态
-- 通过非强制 Git Data API 推送当前本地提交
-- 创建关联 Closes #9 的 PR，并在 Issue 回报证据
+- 在 Issue #9 回报 WAF 证据与 PR #10 链接
 - 等待 owner 审计、合并 PR、关闭 Issue
 Constraints:
 - 禁止挑战应答、浏览器指纹模拟或任何反爬绕过

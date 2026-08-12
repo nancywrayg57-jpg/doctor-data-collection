@@ -1,7 +1,7 @@
 # Codex 下一步提示词
 
 > 用途：Claude owner 或管理员写给 Codex developer 的最新可执行提示词。
-> 当前状态：`REMOTE_PUSH_BLOCKED`。Issue #9 已按 owner 裁决停止试采并完成台账跳过记录及本地提交；GitHub API 连续超时触发熔断，只允许在连通性恢复后继续原分支推送、创建 PR 和回报证据。
+> 当前状态：`WAITING_OWNER_WAF_SKIP_AUDIT`。Issue #9 已按 owner 裁决停止试采，台账跳过记录已推送并创建 PR #10；只等待 owner 审计、CI、合并和 Issue 关闭。
 
 ## GitHub 身份与范围
 
@@ -10,14 +10,14 @@
 - Claude owner：`nancywrayg57-jpg`
 - 工作分支：`codex/mhrj/issue-9-nysy-trial`
 - GitHub Issue：`https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/9`
-- Pull Request：待从当前分支创建
+- Pull Request：`https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/10`
 
 任何远端写入前必须确认登录身份为 `xtzhou247`。Codex 不直接推送或合并 `main`，不自行批准 PR。
 
 ## 当前动作
 
 ```text
-Status: REMOTE_PUSH_BLOCKED
+Status: WAITING_OWNER_WAF_SKIP_AUDIT
 Phase: WAF_SKIP
 LedgerSequence: 13
 Hospital: 南方医科大学第三附属医院
@@ -25,7 +25,7 @@ City: 广州市
 OfficialHomeURL: http://www.nysy.com.cn/
 DoctorDirectoryURL: http://www.nysy.com.cn/cn/ksts/
 ReviewStatus: 跳过-反爬拦截
-Task: GitHub API 连通后重新核验 xtzhou247 身份、main 父提交与远端分支状态；推送本地提交，创建关联 Closes #9 的 PR；在 Issue #9 回报证据后停止。
+Task: 在 Issue #9 回报 WAF 证据与 PR #10 链接后停止；只等待 owner 审计、CI 成功、合并 PR并关闭 Issue #9。
 ```
 
 ## Owner 裁决与现场证据
@@ -44,17 +44,18 @@ Task: GitHub API 连通后重新核验 xtzhou247 身份、main 父提交与远�
 - 台账序号 13 已标记为 `跳过-反爬拦截`。
 - 台账仅修改 8 个目标单元格；五个工作表已完成视觉核验，公式错误 0。
 - 最新 ADR：`docs/architecture_decisions/2026-08-12_issue_9_nysy_waf_skip.md`。
-- 本地提交：`349e288`（WAF 跳过工件）；尚未推送。
-- GitHub API 已连续出现 TLS/TCP 连接超时，熔断期间不得重复远端命令。
+- 本地提交：`349e288`、`83ea9ce`；Git Data API 重建后的远端提交为 `9dc1545`、`8a8c9d8`。
+- 远端分支最终 tree SHA 与本地 `d0365a80382061b52293418e77aab50f5d3c9b8a` 一致。
+- PR #10 已关联 `Closes #9`；创建时 `governance-check` 处于排队状态。
 
 ## 当前门禁
 
-1. 只处理 Issue #9、当前分支和恢复后由该分支创建的唯一 PR。
+1. 只处理 Issue #9、当前分支和 PR #10。
 2. 创建 PR 后，只等待 `nancywrayg57-jpg` 对 WAF 跳过结果的审计、合并和 Issue 关闭。
 3. PR 必须明确 `Closes #9`；不得自行批准或合并。
 4. 只有 owner 审计通过、PR 已合并关闭、Issue #9 已关闭且必需 CI 成功后，才允许检查下一 Issue。
-5. 通用单 Issue 监控在本轮提交推送和 PR/Issue 回报完成前保持 `PAUSED`。
-6. 恢复远端动作前必须先确认 GitHub API 连通、身份为 `xtzhou247`、远端分支仍不存在且 `main` 未偏离本地父提交；任何冲突只报告，不强制覆盖。
+5. Issue 回报完成后可启用通用单 Issue 监控，只监控 PR #10、Issue #9、CI 与双门禁；不得领取其他 Issue。
+6. 若 owner 要求返修，只对 Issue #9 当前分支做最小修正，并继续使用非强制 Git Data API 更新远端引用。
 
 ## 合规红线
 
