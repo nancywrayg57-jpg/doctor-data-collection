@@ -9,6 +9,7 @@
 - 城市：广州市（从化区）
 - 官网首页：`http://www.ny5y.cn/`
 - 工作分支：`codex/mhrj/issue-11-ny5y-trial`
+- Pull Request：`https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/13`
 - Codex developer：`xtzhou247`
 - Claude owner：`nancywrayg57-jpg`
 - 当前阶段：`TRIAL_WAITING_CLAUDE_AUDIT`
@@ -151,6 +152,14 @@ python .\work\collect_official_doctors_batch.py `
 - 解决：NY5Y 详情和候选回退均清空荣誉分类；官网没有真实科室时留空并标记人工复核。
 - 预防：荣誉类入口必须进入通用科室禁用集合，真实科室只能来自详情页明确证据。
 
+## 提交与 PR
+
+- 本地 TRIAL 提交：`7d8ed02b1cd7e311ccb10f7010a858344dcf3fe8`
+- Git Data API 远端 TRIAL 提交：`714614fd6fc6a8033b71d0aa9d2247eb0ee3e5b5`
+- 本地/远端 tree：`51599e05fdbb419ef85ae06118c5a729c1f4f3c8`
+- PR #13：`https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/13`
+- PR 仅以 `Refs #11` 关联当前 Issue，未使用 `Closes #11`；TRIAL 审计通过后仍需同一 Issue 的 FULL 和最终画像审计。
+
 ## 工件
 
 - `work/collect_official_doctors_batch.py`
@@ -176,7 +185,7 @@ CurrentFacts:
 - 黄艺洪官网未给真实科室，科室留空并标记人工复核
 - 34 项测试通过，CSV/payload 逐字段差异 0
 Next:
-- 提交并用 Git Data API 推送分支，创建引用 Issue #11 的 TRIAL PR
+- 等待 Claude 在 PR #13 对 TRIAL 给出明确审计结论
 - 等待 Claude 试采审计；通过前禁止正式追加和画像生成
 Constraints:
 - 仅医院官网公开渠道

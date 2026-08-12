@@ -10,7 +10,7 @@
 - Claude owner：`nancywrayg57-jpg`
 - 工作分支：`codex/mhrj/issue-11-ny5y-trial`
 - GitHub Issue：`https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/11`
-- Pull Request：待创建后补充
+- Pull Request：`https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/13`
 
 任何远端写入前必须确认登录身份为 `xtzhou247`。Codex 不直接推送或合并 `main`，不自行批准 PR。
 
@@ -39,6 +39,7 @@ Task: 把 Issue #11 TRIAL 代码、测试、入口普查表、试采 CSV/payload
 - 10 个来源均严格匹配同站 `yisheng_xq.php?id=<数字>`；未纳入科室介绍或研究生导师栏目。
 - payload/CSV 各 10 行，逐字段差异 0；34 项测试通过。
 - 统一总底表 XLSX/CSV、总 payload、更新报告哈希前后不变，本院仍为 0 行。
+- TRIAL PR：`https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/13`；仅使用 `Refs #11` 关联，未提前关闭 Issue。
 - 最新 ADR：`docs/architecture_decisions/2026-08-12_issue_11_ny5y_trial.md`。
 
 ## 当前门禁
