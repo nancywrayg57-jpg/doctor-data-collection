@@ -448,6 +448,8 @@ def build_profile(row: dict[str, str], generated_at: str) -> str:
         evidence_items.append(f"官网简介/擅长：{clip(specialty_text, 220)}")
     if highlight_text:
         evidence_items.append(f"官网亮眼经历线索：{clip(highlight_text, 220)}")
+    if clean(row.get("异常提示")):
+        evidence_items.append(f"异常提示：{clip(row.get('异常提示'), 160)}")
     if clean(row.get("_原异常提示")):
         evidence_items.append(f"原异常提示：{clip(row.get('_原异常提示'), 160)}")
     evidence_items.append(f"来源链接：{source}")
@@ -1105,12 +1107,16 @@ def apply_report_corrections(
 def build_missing_generation_report(
     report_path: Path,
     generated_rows: list[dict[str, str]],
+    refreshed_rows: list[dict[str, str]],
     skipped_rows: list[dict[str, str]],
     index_paths: list[Path],
     generated_at: str,
 ) -> str:
-    hospital_counter = Counter(clean(row.get("医院")) for row in generated_rows)
-    anomaly_counter = Counter(clean(row.get("医院")) for row in generated_rows if clean(row.get("异常提示")))
+    processed_rows = generated_rows + refreshed_rows
+    hospital_counter = Counter(clean(row.get("医院")) for row in processed_rows)
+    generated_counter = Counter(clean(row.get("医院")) for row in generated_rows)
+    refreshed_counter = Counter(clean(row.get("医院")) for row in refreshed_rows)
+    anomaly_counter = Counter(clean(row.get("医院")) for row in processed_rows if clean(row.get("异常提示")))
     reason_counter = Counter(clean(row.get("_skip_reason")) for row in skipped_rows)
     lines = [
         "---",
@@ -1125,17 +1131,21 @@ def build_missing_generation_report(
         "## 总览",
         "",
         f"- 新生成缺失画像：{len(generated_rows)}",
+        f"- 刷新脚本自动画像：{len(refreshed_rows)}",
         f"- 跳过记录：{len(skipped_rows)}",
         f"- 重建索引：{len(index_paths)}",
         f"- 沿用模板：`{TEMPLATE_PATH}`",
         "",
         "## 按医院统计",
         "",
-        "| 医院 | 新生成画像 | 异常提示不为空 |",
-        "|---|---:|---:|",
+        "| 医院 | 新生成画像 | 刷新自动画像 | 异常提示不为空 |",
+        "|---|---:|---:|---:|",
     ]
     for hospital in sorted(hospital_counter):
-        lines.append(f"| {md_escape(hospital)} | {hospital_counter[hospital]} | {anomaly_counter[hospital]} |")
+        lines.append(
+            f"| {md_escape(hospital)} | {generated_counter[hospital]} | "
+            f"{refreshed_counter[hospital]} | {anomaly_counter[hospital]} |"
+        )
     lines.extend(["", "## 跳过原因", "", "| 原因 | 数量 |", "|---|---:|"])
     if reason_counter:
         for reason, count in reason_counter.most_common():
@@ -1153,6 +1163,7 @@ def generate_missing_profiles(
     output_root: Path,
     skip_hospitals: set[str],
     report_path: Path,
+    refresh_auto_generated: bool = False,
 ) -> dict[str, object]:
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     rows_by_hospital: dict[str, list[dict[str, str]]] = defaultdict(list)
@@ -1161,8 +1172,10 @@ def generate_missing_profiles(
         rows_by_hospital[clean(row.get("医院"))].append(row)
 
     generated_rows: list[dict[str, str]] = []
+    refreshed_rows: list[dict[str, str]] = []
     skipped_rows: list[dict[str, str]] = []
     generated_paths: list[Path] = []
+    refreshed_paths: list[Path] = []
     affected_hospitals: set[str] = set()
 
     for hospital, hospital_rows in sorted(rows_by_hospital.items()):
@@ -1182,6 +1195,13 @@ def generate_missing_profiles(
                 continue
             source = clean(row.get("来源链接"))
             if source in existing_sources:
+                existing_path = existing_sources[source]
+                if refresh_auto_generated and is_auto_generated_profile(existing_path):
+                    row["_profile_seq"] = str(len(generated_rows) + len(refreshed_paths) + 1)
+                    existing_path.write_text(build_profile(row, generated_at), encoding="utf-8", newline="\n")
+                    refreshed_paths.append(existing_path)
+                    refreshed_rows.append(row)
+                    affected_hospitals.add(hospital)
                 continue
 
             path: Path | None = None
@@ -1218,13 +1238,16 @@ def generate_missing_profiles(
         index_paths.append(index_path)
 
     report_path.write_text(
-        build_missing_generation_report(report_path, generated_rows, skipped_rows, index_paths, generated_at),
+        build_missing_generation_report(
+            report_path, generated_rows, refreshed_rows, skipped_rows, index_paths, generated_at
+        ),
         encoding="utf-8",
         newline="\n",
     )
 
     return {
         "generated_missing_profiles": len(generated_paths),
+        "refreshed_auto_generated_profiles": len(refreshed_paths),
         "skipped": len(skipped_rows),
         "indexes_rebuilt": len(index_paths),
         "affected_hospitals": sorted(affected_hospitals),
@@ -1369,6 +1392,11 @@ def parse_args() -> argparse.Namespace:
         help="只生成当前画像仓库中尚不存在的医生画像，已有画像不改动。",
     )
     parser.add_argument(
+        "--refresh-auto-generated",
+        action="store_true",
+        help="与 --generate-missing-only 合用，只刷新带本脚本自动生成标记的既有画像；人工画像仍受保护。",
+    )
+    parser.add_argument(
         "--generate-default-skipped-hospitals",
         action="store_true",
         help="生成默认跳过医院；当前默认跳过中山大学附属第五医院。",
@@ -1414,6 +1442,7 @@ def main() -> None:
             output_root=Path(args.output_root),
             skip_hospitals=skip_hospitals,
             report_path=Path(args.missing_report),
+            refresh_auto_generated=args.refresh_auto_generated,
         )
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return

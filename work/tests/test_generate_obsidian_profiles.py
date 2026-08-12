@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -12,6 +13,7 @@ if str(WORK_DIR) not in sys.path:
 from generate_obsidian_profiles import (  # noqa: E402
     build_profile,
     extract_profile_fact_sections,
+    generate_missing_profiles,
     select_hospital_rows,
 )
 
@@ -66,6 +68,63 @@ class ProfileFactSectionTests(unittest.TestCase):
         selected = select_hospital_rows(rows, ["南方医科大学皮肤病医院"])
 
         self.assertEqual(selected, [rows[0]])
+
+    def test_generated_profile_preserves_current_anomaly_warning(self) -> None:
+        profile = build_profile(
+            {
+                "医院": "广州医科大学附属口腔医院",
+                "姓名": "方颖",
+                "科室_分类页": "越秀院区儿童口腔科",
+                "职称身份原文": "教授",
+                "来源链接": "https://www.gykqyy.com/list.html?category=55&id=307",
+                "采集日期": "2026-08-13",
+                "复核状态": "待人工复核",
+                "异常提示": "同名待甄别",
+            },
+            "2026-08-13",
+        )
+
+        self.assertIn("- 异常提示：同名待甄别", profile)
+
+    def test_refresh_auto_generated_does_not_overwrite_manual_profile(self) -> None:
+        rows = [
+            {
+                "医院": "测试医院",
+                "姓名": "自动医生",
+                "科室_分类页": "测试科",
+                "来源链接": "https://example.com/auto",
+                "异常提示": "同名待甄别",
+            },
+            {
+                "医院": "测试医院",
+                "姓名": "人工医生",
+                "科室_分类页": "测试科",
+                "来源链接": "https://example.com/manual",
+            },
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            hospital_dir = Path(directory) / "测试医院"
+            hospital_dir.mkdir()
+            auto_path = hospital_dir / "自动医生.md"
+            auto_path.write_text(
+                "<!-- AUTO-GENERATED-BY: work/generate_obsidian_profiles.py -->\n"
+                "来源链接: https://example.com/auto\n",
+                encoding="utf-8",
+            )
+            manual_path = hospital_dir / "人工医生.md"
+            manual_path.write_text("人工内容\n来源链接: https://example.com/manual\n", encoding="utf-8")
+
+            result = generate_missing_profiles(
+                rows=rows,
+                output_root=Path(directory),
+                skip_hospitals=set(),
+                report_path=Path(directory) / "report.md",
+                refresh_auto_generated=True,
+            )
+
+            self.assertEqual(result["refreshed_auto_generated_profiles"], 1)
+            self.assertIn("异常提示：同名待甄别", auto_path.read_text(encoding="utf-8"))
+            self.assertEqual(manual_path.read_text(encoding="utf-8"), "人工内容\n来源链接: https://example.com/manual\n")
 
     def test_unlabeled_specialty_does_not_fall_back_to_list_title_or_biography(self) -> None:
         profile = build_profile(
