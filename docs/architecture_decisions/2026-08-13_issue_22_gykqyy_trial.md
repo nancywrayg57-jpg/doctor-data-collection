@@ -3,6 +3,7 @@
 ## 目标与门禁
 
 - GitHub Issue：https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/22
+- GitHub PR：https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/24
 - Phase：`TRIAL`
 - 台账序号：33
 - 医院：广州医科大学附属口腔医院
@@ -96,6 +97,7 @@ python .\work\collect_official_doctors_batch.py --hospital "广州医科大学�
 - Python 编译通过：采集器与测试文件。
 - 真实 TRIAL：10 位、10 科室组合、0 详情失败、0 异常。
 - 受保护资产：统一总底表 XLSX/CSV/更新报告和 `医生画像仓库/01_试点医院` 均无 Git diff。
+- 远端分支通过非强制 Git Data API 创建，PR #24 的远端树 `ae047c829fa6e59c6da493bacf249f4ff1558a0b` 与本地 HEAD 树完全一致；`governance-check` 成功。
 
 ## 工件
 
@@ -123,13 +125,13 @@ Completed:
 - 已验证页面内联 Vue 脚本明确调用的两个同域公开接口
 - 已完成 10 位医生真实试采，覆盖 10 个科室组合，0 详情失败、0 异常
 - 已增加最小专用适配器、专项测试和治理文档迁移
+- 已创建 PR #24 并进入 owner TRIAL 审计等待状态
 CurrentFacts:
 - TRIAL 工件已生成，未写统一总底表，未生成正式 Obsidian 画像
 - 方颖与赵稚宁分别存在同名不同 ID，FULL 时不得自动合并
 - GitHub API 与官网访问正常；Git HTTPS 仍有间歇性 443 超时，发布改走非强制 Git Data API
 Next:
-- 提交并推送当前分支，创建关联 Issue #22 的 PR
-- 停止等待 nancywrayg57-jpg 对 TRIAL 给出明确通过/有条件通过/不通过
+- 停止业务执行，等待 nancywrayg57-jpg 在 PR #24 对 TRIAL 给出明确通过/有条件通过/不通过
 - 未收到 owner 明确 FULL_APPEND_AND_OBSIDIAN 指令前禁止全量追加
 Constraints:
 - 仅医院官网公开页面与页面明确调用的同域公开接口
