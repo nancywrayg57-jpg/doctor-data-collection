@@ -15,7 +15,7 @@
 2. `D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md`
 3. `D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md`
 4. `D:\workspace\信息收集整理\docs\architecture_decisions\` 下与当前任务相关的最新记录
-5. 如存在 `D:\workspace\信息收集整理\docs\agent_prompts\codex_next_prompt.md`，Codex 必须在执行前读取该文件作为 Claude 或管理员留给 Codex 的最新可执行提示词
+5. 查找唯一 open 且指派给 `xtzhou247` 的任务 Issue，并读取该 Issue 与关联 PR 的全部 owner 评论/Review。自 Issue #22 起，这是唯一指令通道；`docs\agent_prompts\codex_next_prompt.md` 仅保留机制退役的墓碑指向说明，不再构成领取或阶段切换门禁。
 
 若路线图、需求文档、架构决策记录之间存在状态冲突：
 
@@ -69,7 +69,7 @@
 | Obsidian 输出根目录 | `D:\workspace\信息收集整理\医生画像仓库\01_试点医院` |
 | 医生画像模板 | `D:\workspace\信息收集整理\医生画像仓库\模板\医生画像模板.md` |
 | GitHub 仓库 | `https://github.com/nancywrayg57-jpg/doctor-data-collection.git` |
-| Codex 最新提示词入口 | `D:\workspace\信息收集整理\docs\agent_prompts\codex_next_prompt.md` |
+| 退役提示词墓碑 | `D:\workspace\信息收集整理\docs\agent_prompts\codex_next_prompt.md`（只读指向说明，非指令入口） |
 
 禁止擅自删除：
 
@@ -126,7 +126,7 @@ GitHub 协作口径：
 1. 本任务采集结果、脚本和文档将上传到 `https://github.com/nancywrayg57-jpg/doctor-data-collection.git`。
 2. Codex 只按 developer 身份工作：创建工作分支、提交实现、推送分支、发起 PR、按 Claude 审计意见返修；不得直接推送或合并 `main`。
 3. Claude 只按 owner 身份工作：审计 Codex 结果、提出下一步指导、输出 Codex 可执行提示词、审批或合并 PR。
-4. Claude 输出给 Codex 的下一步提示词必须写入或同步到 `D:\workspace\信息收集整理\docs\agent_prompts\codex_next_prompt.md`，确保 Codex 新会话可自动读取。
+4. Claude/owner 的下一步指令必须写入唯一 open 且指派给 `xtzhou247` 的任务 Issue 或其关联 PR 评论/Review；不再同步固定提示词文件。阶段切换仅认 owner 在当前关联 PR 中的明确结论与指令块。
 5. 当前本地目录若尚未初始化为 Git 仓库，先做只读审计并记录状态；初始化、绑定远端、推送和配置 GitHub 保护规则属于外部副作用，需管理员明确授权后执行。
 6. Codex 执行任何推送、PR 或远端写入前必须核验 GitHub 登录身份是否为 `xtzhou247`；若当前身份为 `nancywrayg57-jpg`，只能执行 owner 审计或只读检查，不得冒用 owner 身份提交 Codex 实现。
 
@@ -137,14 +137,14 @@ GitHub 协作口径：
 1. 确认管理员已关闭正在编辑的总底表 Excel。
 2. 确认入口台账、总底表、采集脚本存在。
 3. 读取路线图和最新架构决策记录。
-4. 读取 `docs\agent_prompts\codex_next_prompt.md`，确认 Claude 或管理员已明确给出医院名称、医院官网首页和医生目录入口。
+4. 读取唯一 open 且指派给 `xtzhou247` 的任务 Issue 与关联 PR 全部 owner 评论/Review，确认医院名称、医院官网首页、医生目录入口与当前 Phase 均明确且唯一。
 5. 确认目标医院在入口台账中标记为 `确认可采集`、序号不大于当前管理员标注边界，且尚未正式追加到总底表。
 
 ### 6.2 选择医院
 
-目标医院由 Claude 或管理员指定。Claude 必须从入口台账 `入口台账` 工作表中选择 `人工复核结果=确认可采集`、官网首页和医生目录入口均非空且尚未追加的医院，并在固定提示词入口写明医院名称、官网首页完整 URL 和医生目录完整 URL。A级只表示采集优先级，不能替代人工确认；未确认医院直接跳过。
+目标医院由 Claude 或管理员指定。Claude 必须从入口台账 `入口台账` 工作表中选择 `人工复核结果=确认可采集`、官网首页和医生目录入口均非空且尚未追加的医院，并在唯一 open 且指派给 `xtzhou247` 的任务 Issue 中写明医院名称、官网首页完整 URL、医生目录完整 URL 和 Phase。A级只表示采集优先级，不能替代人工确认；未确认医院直接跳过。
 
-管理员当前只标注到序号 39 `广州市中医院`。不得选择序号大于 39 的医院；完成序号 39 后停止并等待管理员更新台账标注。Codex 在提示词缺失或无明确目标时必须等待，不得自行选院。
+管理员当前只标注到序号 39 `广州市中医院`。不得选择序号大于 39 的医院；完成序号 39 后停止并等待管理员更新台账标注。Codex 在任务 Issue 缺失或目标不明确时必须等待，不得自行选院。
 
 ### 6.3 小样本试采
 
@@ -168,7 +168,7 @@ python .\work\collect_official_doctors_batch.py --hospital "目标医院名称" 
 7. 异常提示。
 8. 是否发现非医生页面混入。
 
-取得 Claude `通过` / `有条件通过` 审计结论，且固定提示词入口已切换为 `FULL_APPEND_AND_OBSIDIAN` 后，才可进入正式追加；无需管理员二次确认。管理员另有明确书面指令时除外。
+取得 Claude 在关联 PR 评论/Review 中明确给出的 `通过` / `有条件通过` 审计结论，且 owner 指令块已切换为 `FULL_APPEND_AND_OBSIDIAN` 后，才可进入正式追加；无需管理员二次确认。管理员另有明确书面指令时除外。
 
 ### 6.4 正式追加
 
@@ -293,7 +293,8 @@ RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采�
 GitHubRepo: https://github.com/nancywrayg57-jpg/doctor-data-collection.git
 CodexDeveloper: xtzhou247
 ClaudeOwner: nancywrayg57-jpg
-CodexPromptInbox: D:\workspace\信息收集整理\docs\agent_prompts\codex_next_prompt.md
+InstructionChannel: 唯一 open 且指派 xtzhou247 的任务 Issue + 关联 PR owner 评论/Review
+RetiredPromptTombstone: D:\workspace\信息收集整理\docs\agent_prompts\codex_next_prompt.md
 Ledger: D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院官网入口台账.xlsx
 MasterTable: D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
 Completed:

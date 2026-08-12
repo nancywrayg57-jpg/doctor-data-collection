@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 WORK_DIR = Path(__file__).resolve().parents[1]
@@ -12,9 +12,11 @@ if str(WORK_DIR) not in sys.path:
 
 from collect_official_doctors_batch import (  # noqa: E402
     HospitalTarget,
+    build_master_payload,
     build_hospital_batches,
     classify_generic_record,
     clean_generic_department,
+    collect_gykqyy,
     collect_generic,
     dedicated_adapter_for,
     discover_gdskin_excluded_links,
@@ -23,6 +25,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     effective_entry_urls,
     expand_gdzy5413_full_detail_items,
     extract_clean_highlights,
+    fetch_json,
     find_node,
     generic_record_quality,
     generic_detail_identity,
@@ -42,6 +45,9 @@ from collect_official_doctors_batch import (  # noqa: E402
     parse_gdzy5413_ksdoctor_detail,
     parse_ny5y_detail,
     round_robin_generic_items,
+    select_gykqyy_trial_doctors,
+    sync_profile_flags,
+    validate_gykqyy_full_append,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
     validate_gdzy5413_full_append,
@@ -162,6 +168,216 @@ class GenericDetailNoiseFilteringTests(unittest.TestCase):
         )
 
         self.assertEqual(extract_clean_highlights(raw), "")
+
+
+class GykqyyPublicDoctorApiTests(unittest.TestCase):
+    ENTRY_URL = "https://www.gykqyy.com/list.html?category=55"
+
+    @staticmethod
+    def directory_payload() -> dict[str, object]:
+        departments = []
+        doctor_id = 1
+        for department_id, department_name in enumerate(
+            ["荔湾院区牙体牙髓科", "越秀院区牙周病科", "全科口腔中心", "麻醉手术中心"],
+            start=10,
+        ):
+            doctors = []
+            for _ in range(3):
+                doctors.append(
+                    {
+                        "id": doctor_id,
+                        "title": f"医生{doctor_id}",
+                        "intro": f"擅长{department_name}常见疾病。",
+                        "keshi": department_name,
+                        "zhicheng": "主任医师",
+                        "weigh": 100 - doctor_id,
+                    }
+                )
+                doctor_id += 1
+            departments.append({"id": department_id, "name": department_name, "child": doctors})
+        return {
+            "code": 1,
+            "msg": "ok",
+            "data": {
+                "banner": [item for department in departments for item in department["child"]],
+                "list": [{"id": 1, "name": "官网院区", "child": departments}],
+            },
+        }
+
+    def test_adapter_scope_is_exact(self) -> None:
+        self.assertEqual(dedicated_adapter_for(self.ENTRY_URL), "gykqyy_public_doctor_api")
+        self.assertEqual(dedicated_adapter_for(f"{self.ENTRY_URL}&id=195"), "gykqyy_public_doctor_api")
+        self.assertEqual(dedicated_adapter_for("https://www.gykqyy.com/list.html?category=56"), "")
+        self.assertEqual(dedicated_adapter_for("https://api.gykqyy.com/list.html?category=55"), "")
+
+    def test_trial_selection_spreads_across_departments(self) -> None:
+        doctors = [
+            {"id": str(index), "departments": [f"科室{(index - 1) // 4}"]}
+            for index in range(1, 13)
+        ]
+        selected = select_gykqyy_trial_doctors(doctors, 10)
+
+        self.assertEqual(len(selected), 10)
+        self.assertGreaterEqual(len({item["departments"][0] for item in selected}), 3)
+
+    def test_collect_uses_only_page_declared_public_json_apis(self) -> None:
+        target = HospitalTarget(
+            city="广州市",
+            hospital="广州医科大学附属口腔医院",
+            homepage="https://www.gykqyy.com/",
+            entry_url=self.ENTRY_URL,
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="gykqyy_public_doctor_api",
+        )
+        entry_html = """
+        <script>
+        axios.get("https://www.gykqyy.com/api/article/getZhuanjiaList");
+        axios.get("https://www.gykqyy.com/api/article/getArticleDetail");
+        </script>
+        """
+        directory_payload = self.directory_payload()
+
+        def fake_fetch_json(_session, url, params=None):
+            if url.endswith("getZhuanjiaList"):
+                return 200, directory_payload, ""
+            doctor_id = str((params or {})["article_id"])
+            return (
+                200,
+                {
+                    "code": 1,
+                    "data": {
+                        "detail": {
+                            "id": int(doctor_id),
+                            "title": f"医生{doctor_id}",
+                            "intro": f"擅长科室{doctor_id}常见疾病。",
+                            "content": f"<p>医生{doctor_id}，主任医师。擅长疑难口腔疾病。</p>",
+                        }
+                    },
+                },
+                "",
+            )
+
+        with (
+            patch("collect_official_doctors_batch.create_official_session", return_value=__import__("requests").Session()),
+            patch("collect_official_doctors_batch.fetch", return_value=(200, entry_html, "")),
+            patch("collect_official_doctors_batch.fetch_json", side_effect=fake_fetch_json),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+        ):
+            payload = collect_gykqyy(target, "2026-08-13", max_doctors=10)
+
+        self.assertEqual(len(payload["rows"]), 10)
+        self.assertEqual(payload["meta"]["census_unique_detail_count"], 12)
+        self.assertEqual(payload["meta"]["census_department_count"], 4)
+        self.assertEqual(payload["meta"]["pagination_count"], 1)
+        self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
+        self.assertTrue(all("详情接口" in row["采集方式"] for row in payload["rows"]))
+
+    def test_fetch_json_retries_transient_server_error(self) -> None:
+        class FakeResponse:
+            def __init__(self, status_code, payload=None):
+                self.status_code = status_code
+                self.headers = {"Content-Type": "application/json"}
+                self._payload = payload or {}
+
+            def json(self):
+                return self._payload
+
+        session = Mock()
+        session.get.side_effect = [
+            FakeResponse(502),
+            FakeResponse(200, {"code": 1, "data": {}}),
+        ]
+        with patch("collect_official_doctors_batch.time.sleep"):
+            status, payload, error = fetch_json(session, "https://www.gykqyy.com/api/test")
+
+        self.assertEqual(status, 200)
+        self.assertEqual(payload["code"], 1)
+        self.assertEqual(error, "")
+        self.assertEqual(session.get.call_count, 2)
+
+    def test_full_gate_keeps_four_same_name_rows_and_zero_blank_names(self) -> None:
+        names = [f"医生{index}" for index in range(1, 294)] + ["方颖", "方颖", "赵稚宁", "赵稚宁"]
+        rows = []
+        reconciliation = []
+        for index, name in enumerate(names, start=1):
+            warning = "同名待甄别" if name in {"方颖", "赵稚宁"} else ""
+            source = f"https://www.gykqyy.com/list.html?category=55&id={index}"
+            rows.append({"姓名": name, "来源链接": source, "异常提示": warning})
+            reconciliation.append({"detail_id": str(index), "name": name, "source_link": source})
+        payload = {
+            "meta": {
+                "candidate_membership_count": 317,
+                "census_unique_detail_count": 297,
+                "census_named_detail_count": 297,
+                "census_blank_name_detail_count": 0,
+                "detail_error_count": 0,
+                "gykqyy_final_row_count": 297,
+                "gykqyy_same_name_separate_row_count": 4,
+                "census_same_name_groups": {"方颖": ["128", "307"], "赵稚宁": ["29", "323"]},
+            },
+            "rows": rows,
+            "excluded_candidates": [],
+            "gykqyy_identity_reconciliation": reconciliation,
+        }
+
+        validate_gykqyy_full_append(payload)
+        payload["meta"]["detail_error_count"] = 1
+        with self.assertRaisesRegex(RuntimeError, "详情接口失败应为 0"):
+            validate_gykqyy_full_append(payload)
+
+    def test_profile_flags_are_synchronized_from_canonical_source_links(self) -> None:
+        rows = [
+            {"来源链接": "https://www.gykqyy.com/list.html?category=55&id=128", "已建画像": "否"},
+            {"来源链接": "https://www.gykqyy.com/list.html?category=55&id=307", "已建画像": "是"},
+        ]
+
+        sync_profile_flags(rows, {"https://www.gykqyy.com/list.html?category=55&id=128"})
+
+        self.assertEqual([row["已建画像"] for row in rows], ["是", "否"])
+
+    def test_master_rebuild_preserves_last_batch_metadata(self) -> None:
+        existing_rows = [
+            {
+                "医院": "广州医科大学附属口腔医院",
+                "姓名": "方颖",
+                "来源链接": "https://www.gykqyy.com/list.html?category=55&id=128",
+                "已建画像": "否",
+            }
+        ]
+        previous_meta = {
+            "hospital": "珠三角三甲医院医生画像总表",
+            "raw_card_rows": 317,
+            "category_error_count": 0,
+            "detail_error_count": 0,
+            "current_batch_hospital": "广州医科大学附属口腔医院",
+            "current_batch_rows": 297,
+            "new_rows_added": 297,
+            "duplicate_rows_skipped": 0,
+            "existing_rows_refreshed": 0,
+            "existing_duplicate_rows": 0,
+        }
+
+        with (
+            patch(
+                "collect_official_doctors_batch.load_existing_rows_for_master",
+                return_value=(existing_rows, "test.xlsx", True),
+            ),
+            patch(
+                "collect_official_doctors_batch.collect_existing_profile_links",
+                return_value={"https://www.gykqyy.com/list.html?category=55&id=128"},
+            ),
+        ):
+            payload = build_master_payload(
+                "2026-08-13",
+                batch_meta_override=previous_meta,
+            )
+
+        self.assertEqual(payload["meta"]["current_batch_hospital"], previous_meta["current_batch_hospital"])
+        self.assertEqual(payload["meta"]["raw_card_rows"], 317)
+        self.assertEqual(payload["meta"]["current_batch_rows"], 297)
+        self.assertEqual(payload["meta"]["new_rows_added"], 297)
+        self.assertEqual(payload["rows"][0]["已建画像"], "是")
 
 
 class NodeRuntimeResolutionTests(unittest.TestCase):

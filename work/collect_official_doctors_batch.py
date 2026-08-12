@@ -247,6 +247,9 @@ GENERIC_ADAPTER_ID = "generic_official_template"
 GDSKIN_ADAPTER_ID = "gdskin_aspnet_expert"
 NY5Y_ADAPTER_ID = "ny5y_official_expert"
 GDZY5413_ADAPTER_ID = "gdzy5413_official_specialist"
+GYKQYY_ADAPTER_ID = "gykqyy_public_doctor_api"
+GYKQYY_DIRECTORY_API = "https://www.gykqyy.com/api/article/getZhuanjiaList"
+GYKQYY_DETAIL_API = "https://www.gykqyy.com/api/article/getArticleDetail"
 GENERIC_MAX_PAGES_DEFAULT = 60
 GDSKIN_ENTRY_METADATA = {
     "901": {
@@ -887,11 +890,19 @@ def build_hospital_batches(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return batches
 
 
+def sync_profile_flags(rows: list[dict[str, Any]], profile_links: set[str]) -> None:
+    normalized_profile_links = {canonical_url(link) for link in profile_links if canonical_url(link)}
+    for row in rows:
+        source = canonical_url(str(row.get("来源链接") or ""))
+        row["已建画像"] = "是" if source and source in normalized_profile_links else "否"
+
+
 def build_master_payload(
     today: str,
     incoming_payload: dict[str, Any] | None = None,
     refresh_incoming: bool = False,
     replace_incoming_hospital: bool = False,
+    batch_meta_override: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     existing_rows, source_label, preserve_existing = load_existing_rows_for_master()
     incoming_rows = incoming_payload["rows"] if incoming_payload else []
@@ -910,6 +921,7 @@ def build_master_payload(
         preserve_existing=preserve_existing,
         refresh_incoming=refresh_incoming,
     )
+    sync_profile_flags(rows, collect_existing_profile_links())
 
     category_counter = Counter()
     priority_counter = Counter()
@@ -930,6 +942,7 @@ def build_master_payload(
                 warning_counter[warning] += 1
 
     incoming_meta = incoming_payload.get("meta", {}) if incoming_payload else {}
+    batch_meta = incoming_meta if incoming_payload else (batch_meta_override or {})
     hospital_batches = build_hospital_batches(rows)
     return {
         "meta": {
@@ -940,20 +953,42 @@ def build_master_payload(
             "adapter_id": "multi_hospital_official_pipeline",
             "collected_at": today,
             "category_count": len({row.get("采集入口") for row in rows if row.get("采集入口")}),
-            "raw_card_rows": incoming_meta.get("raw_card_rows", 0),
+            "raw_card_rows": batch_meta.get("raw_card_rows", 0),
             "unique_doctor_count": len(rows),
-            "category_error_count": incoming_meta.get("category_error_count", 0),
-            "detail_error_count": incoming_meta.get("detail_error_count", 0),
+            "category_error_count": batch_meta.get("category_error_count", 0),
+            "detail_error_count": batch_meta.get("detail_error_count", 0),
             "existing_profile_count": sum(1 for row in rows if clean_text(str(row.get("已建画像") or "")) == "是"),
             "ledger_review": "多院汇总，详见官网入口台账",
             "ledger_difficulty": "多院汇总",
             "source_seed": source_label,
-            "current_batch_hospital": incoming_meta.get("hospital", ""),
-            "current_batch_rows": len(incoming_rows),
-            "new_rows_added": added,
-            "duplicate_rows_skipped": skipped,
-            "existing_rows_refreshed": refreshed,
-            "existing_duplicate_rows": existing_duplicates,
+            "current_batch_hospital": (
+                batch_meta.get("hospital", "")
+                if incoming_payload
+                else batch_meta.get("current_batch_hospital", "")
+            ),
+            "current_batch_rows": (
+                len(incoming_rows)
+                if incoming_payload
+                else int(batch_meta.get("current_batch_rows") or 0)
+            ),
+            "new_rows_added": (
+                added if incoming_payload else int(batch_meta.get("new_rows_added") or 0)
+            ),
+            "duplicate_rows_skipped": (
+                skipped
+                if incoming_payload
+                else int(batch_meta.get("duplicate_rows_skipped") or 0)
+            ),
+            "existing_rows_refreshed": (
+                refreshed
+                if incoming_payload
+                else int(batch_meta.get("existing_rows_refreshed") or 0)
+            ),
+            "existing_duplicate_rows": (
+                existing_duplicates
+                if incoming_payload
+                else int(batch_meta.get("existing_duplicate_rows") or 0)
+            ),
             "hospital_count": len(hospital_batches),
         },
         "categories": [],
@@ -984,6 +1019,14 @@ def dedicated_adapter_for(entry_url: str) -> str:
         return NY5Y_ADAPTER_ID
     if gdzy5413_entry_kind(entry_url):
         return GDZY5413_ADAPTER_ID
+    if host.removeprefix("www.") == "gykqyy.com" and path == "/list.html":
+        category_ids = [
+            value
+            for name, value in parse_qsl(parsed.query, keep_blank_values=True)
+            if name.lower() == "category"
+        ]
+        if category_ids == ["55"]:
+            return GYKQYY_ADAPTER_ID
     if "gzzoc.org.cn" in host and "/expert-introduction" in path:
         return "gzzoc_drupal_doctor"
     if "nbkjyy.mil.cn" in host and "/expert" in path:
@@ -2121,6 +2164,392 @@ def extract_label_from_lines(lines: list[str], label: str, stop_labels: list[str
                         value = value[:position]
             return clean_text(value)
     return ""
+
+
+def fetch_json(
+    session: requests.Session,
+    url: str,
+    params: dict[str, Any] | None = None,
+    retries: int = 3,
+) -> tuple[int | None, dict[str, Any], str]:
+    last_status: int | None = None
+    last_error = ""
+    retryable_statuses = {429, 500, 502, 503, 504}
+    for attempt in range(1, retries + 1):
+        try:
+            response = session.get(url, params=params, timeout=35)
+        except Exception as exc:  # noqa: BLE001 - keep collection failure visible
+            last_error = str(exc)
+            if attempt < retries:
+                time.sleep(0.8 * attempt)
+                continue
+            return None, {}, last_error
+        last_status = response.status_code
+        content_type = clean_text(response.headers.get("Content-Type"))
+        if response.status_code != 200:
+            last_error = f"HTTP {response.status_code}"
+            if response.status_code in retryable_statuses and attempt < retries:
+                time.sleep(0.8 * attempt)
+                continue
+            return response.status_code, {}, last_error
+        if "json" not in content_type.lower():
+            return response.status_code, {}, f"非 JSON 响应：{content_type or '未声明 Content-Type'}"
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            return response.status_code, {}, f"JSON 解析失败：{exc}"
+        if not isinstance(payload, dict):
+            return response.status_code, {}, "JSON 顶层不是对象"
+        return response.status_code, payload, ""
+    return last_status, {}, last_error or "JSON 请求失败"
+
+
+def flatten_gykqyy_directory_groups(groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    relations: list[dict[str, Any]] = []
+    for group in groups:
+        group_name = clean_text(str(group.get("name") or ""))
+        for department in group.get("child") or []:
+            if not isinstance(department, dict):
+                continue
+            department_name = clean_text(str(department.get("name") or ""))
+            for doctor in department.get("child") or []:
+                if not isinstance(doctor, dict):
+                    continue
+                relations.append(
+                    {
+                        "group": group_name,
+                        "department": department_name,
+                        "doctor": doctor,
+                    }
+                )
+    return relations
+
+
+def select_gykqyy_trial_doctors(
+    doctors: list[dict[str, Any]],
+    max_doctors: int | None,
+) -> list[dict[str, Any]]:
+    if not max_doctors or len(doctors) <= max_doctors:
+        return doctors[:]
+    selected: list[dict[str, Any]] = []
+    selected_ids: set[str] = set()
+    covered_departments: set[str] = set()
+    for doctor in doctors:
+        departments = [
+            clean_text(str(value))
+            for value in doctor.get("departments", [])
+            if clean_text(str(value))
+        ]
+        if departments and any(value not in covered_departments for value in departments):
+            selected.append(doctor)
+            selected_ids.add(str(doctor["id"]))
+            covered_departments.update(departments)
+        if len(selected) >= max_doctors:
+            return selected
+    for doctor in doctors:
+        if str(doctor["id"]) in selected_ids:
+            continue
+        selected.append(doctor)
+        selected_ids.add(str(doctor["id"]))
+        if len(selected) >= max_doctors:
+            break
+    return selected
+
+
+def gykqyy_profile_text(detail: dict[str, Any]) -> str:
+    html = str(detail.get("content") or "")
+    if not html:
+        return ""
+    soup = BeautifulSoup(html, "html.parser")
+    return strip_profile_navigation_text(soup.get_text(" ", strip=True))
+
+
+def collect_gykqyy(target: HospitalTarget, today: str, max_doctors: int | None = None) -> dict[str, Any]:
+    session = create_official_session()
+    session.headers.update({"Referer": target.entry_url})
+    entry_status, entry_html, entry_error = fetch(session, target.entry_url)
+    if entry_status != 200:
+        raise RuntimeError(f"入口页读取失败：{entry_error}")
+    if GYKQYY_DIRECTORY_API not in entry_html or GYKQYY_DETAIL_API not in entry_html:
+        raise RuntimeError("入口页未同时公开医生目录与详情接口，拒绝调用页面外接口。")
+
+    directory_status, directory_payload, directory_error = fetch_json(session, GYKQYY_DIRECTORY_API)
+    data = directory_payload.get("data") if isinstance(directory_payload, dict) else None
+    if directory_status != 200 or not isinstance(data, dict):
+        raise RuntimeError(f"官网医生目录接口读取失败：{directory_error or '响应结构异常'}")
+    if directory_payload.get("code") != 1:
+        raise RuntimeError(f"官网医生目录接口返回失败：{directory_payload.get('msg')}")
+
+    groups = [item for item in data.get("list") or [] if isinstance(item, dict)]
+    banner = [item for item in data.get("banner") or [] if isinstance(item, dict)]
+    banner_by_id = {
+        clean_text(str(item.get("id") or "")): item
+        for item in banner
+        if clean_text(str(item.get("id") or ""))
+    }
+    relations = flatten_gykqyy_directory_groups(groups)
+    departments = [
+        {
+            "group": clean_text(str(group.get("name") or "")),
+            "id": str(department.get("id") or ""),
+            "name": clean_text(str(department.get("name") or "")),
+            "doctor_relation_count": len(department.get("child") or []),
+        }
+        for group in groups
+        for department in (group.get("child") or [])
+        if isinstance(department, dict)
+    ]
+
+    by_id: dict[str, dict[str, Any]] = {}
+    for relation in relations:
+        doctor = relation["doctor"]
+        doctor_id = clean_text(str(doctor.get("id") or ""))
+        if not doctor_id:
+            continue
+        item = by_id.setdefault(
+            doctor_id,
+            {
+                **doctor,
+                "id": doctor_id,
+                "departments": [],
+                "groups": [],
+            },
+        )
+        department = relation["department"]
+        if department and department not in item["departments"]:
+            item["departments"].append(department)
+        group_name = relation["group"]
+        if group_name and group_name not in item["groups"]:
+            item["groups"].append(group_name)
+
+    all_doctors = sorted(
+        (
+            {
+                **item,
+                **{
+                    key: value
+                    for key, value in banner_by_id.get(doctor_id, {}).items()
+                    if value not in {None, ""}
+                },
+                "id": doctor_id,
+            }
+            for doctor_id, item in by_id.items()
+        ),
+        key=lambda item: (-int(item.get("weigh") or 0), int(str(item["id"]))),
+    )
+    ids_by_name: dict[str, list[str]] = {}
+    for doctor in all_doctors:
+        doctor_name = clean_text(str(doctor.get("title") or ""))
+        if doctor_name:
+            ids_by_name.setdefault(doctor_name, []).append(str(doctor["id"]))
+    same_name_groups = {
+        name: sorted(set(ids), key=int)
+        for name, ids in ids_by_name.items()
+        if len(set(ids)) > 1
+    }
+    selected_doctors = select_gykqyy_trial_doctors(all_doctors, max_doctors)
+    existing_links = collect_existing_profile_links()
+    rows: list[dict[str, Any]] = []
+    detail_errors: list[dict[str, str]] = []
+    excluded_detail_candidates: list[dict[str, str]] = []
+    identity_reconciliation: list[dict[str, Any]] = []
+    for item in selected_doctors:
+        doctor_id = str(item["id"])
+        link = f"{target.entry_url}&id={doctor_id}"
+        detail_status, detail_payload, detail_error = fetch_json(
+            session,
+            GYKQYY_DETAIL_API,
+            params={"category_id": 55, "article_id": doctor_id},
+        )
+        detail_data = detail_payload.get("data") if isinstance(detail_payload, dict) else None
+        detail = detail_data.get("detail") if isinstance(detail_data, dict) else None
+        if detail_status != 200 or detail_payload.get("code") != 1 or not isinstance(detail, dict):
+            detail_errors.append({"source_link": link, "error": detail_error or "详情接口响应结构异常"})
+            detail = {}
+
+        name = first_nonempty(str(detail.get("title") or ""), str(item.get("title") or ""))
+        departments_for_doctor = [clean_text(str(value)) for value in item.get("departments", [])]
+        department = "、".join(value for value in departments_for_doctor if value)
+        if not name:
+            excluded_detail_candidates.append(
+                {
+                    "entry_url": target.entry_url,
+                    "list_title": "",
+                    "source_link": link,
+                    "reason": "目录与详情均无姓名，核心追溯字段缺失，排除正式行与画像",
+                }
+            )
+            continue
+        list_department = clean_text(str(item.get("keshi") or ""))
+        title_field = clean_text(str(item.get("zhicheng") or ""))
+        profile_text = gykqyy_profile_text(detail)
+        list_intro = clean_text(str(item.get("intro") or ""))
+        detail_intro = clean_text(str(detail.get("intro") or ""))
+        specialty = clip(first_nonempty(detail_intro, list_intro), 520)
+        combined_text = "\n".join(
+            [target.hospital, department, list_department, title_field, specialty, profile_text]
+        )
+        title_hits = extract_terms(title_field, TITLE_TERMS) or extract_terms(profile_text, TITLE_TERMS)
+        title_identity = first_nonempty(title_field, "、".join(title_hits))
+        groups_found, tags = group_tags(combined_text)
+        highlights = extract_clean_highlights(profile_text)
+        warnings: list[str] = []
+        if not detail:
+            warnings.append("详情接口读取失败")
+        if not looks_like_person_name(name):
+            warnings.append("非医生页面或姓名异常")
+        if not department:
+            warnings.append("科室需人工复核")
+        if not title_hits:
+            warnings.append("职称/身份需人工复核")
+        if not specialty and not profile_text:
+            warnings.append("详情正文为空或未识别")
+        if name in same_name_groups:
+            warnings.append("同名待甄别")
+        priority = "普通"
+        if any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups_found:
+            priority = "高"
+        elif any(term != "医师" for term in title_hits):
+            priority = "中"
+
+        rows.append(
+            {
+                "序号": len(rows) + 1,
+                "医院": target.hospital,
+                "姓名": name,
+                "科室_分类页": department,
+                "科室_列表卡片": list_department,
+                "职称_关键词": "、".join(title_hits),
+                "职称身份原文": clip(title_identity, 500),
+                "重点优先级": priority,
+                "重点关注范围": "、".join(groups_found),
+                "重点疾病标签": "、".join(tags),
+                "擅长诊疗方向摘录": specialty,
+                "亮眼经历线索": highlights,
+                "列表简介": clip(list_intro, 700),
+                "详情正文摘录": clip(profile_text, 1800),
+                "来源类型": "医院官网",
+                "来源链接": link,
+                "采集入口": target.entry_url,
+                "采集方式": "官网页面公开同域目录接口+官网页面公开同域详情接口",
+                "采集日期": today,
+                "详情页状态": "200" if detail else "失败",
+                "已建画像": "是" if canonical_url(link) in existing_links else "否",
+                "异常提示": "；".join(warnings),
+                "复核状态": "待人工复核",
+            }
+        )
+        identity_reconciliation.append(
+            {
+                "detail_id": doctor_id,
+                "name": name,
+                "resolution": "同名不同 ID 分行保留" if name in same_name_groups else "唯一 ID 保留",
+                "departments": departments_for_doctor,
+                "source_link": link,
+                "reason": "同名待甄别" if name in same_name_groups else "官网科室树唯一详情 ID",
+            }
+        )
+
+    category_counter = Counter(row["科室_分类页"] for row in rows if row["科室_分类页"])
+    priority_counter = Counter(row["重点优先级"] for row in rows)
+    group_counter = Counter(
+        group
+        for row in rows
+        for group in str(row["重点关注范围"]).split("、")
+        if group
+    )
+    warning_counter = Counter(
+        warning
+        for row in rows
+        for warning in str(row["异常提示"]).split("；")
+        if warning
+    )
+    directory_names = [clean_text(str(item.get("title") or "")) for item in all_doctors]
+    nonblank_names = {name for name in directory_names if name}
+    named_detail_count = sum(1 for name in directory_names if name)
+    blank_name_detail_count = len(directory_names) - named_detail_count
+    tree_ids = {str(item["id"]) for item in all_doctors}
+    banner_only = [
+        item
+        for item in banner
+        if clean_text(str(item.get("id") or "")) not in tree_ids
+    ]
+
+    return {
+        "meta": {
+            "city": target.city,
+            "hospital": target.hospital,
+            "homepage": target.homepage,
+            "entry_url": target.entry_url,
+            "entry_url_source": "GitHub Issue #22（与官网入口台账一致）",
+            "ledger_entry_url": target.ledger_entry_url or target.entry_url,
+            "adapter_id": target.adapter_id,
+            "collected_at": today,
+            "category_count": 1,
+            "raw_card_rows": len(relations),
+            "candidate_membership_count": len(relations),
+            "unique_candidate_count": len(all_doctors),
+            "sample_entry_coverage_count": 1,
+            "sample_entry_categories": ["医生团队（category=55）"],
+            "unique_doctor_count": len(rows),
+            "census_unique_detail_count": len(all_doctors),
+            "census_named_detail_count": named_detail_count,
+            "census_blank_name_detail_count": blank_name_detail_count,
+            "census_unique_nonblank_name_count": len(nonblank_names),
+            "census_same_name_group_count": len(same_name_groups),
+            "census_same_name_groups": same_name_groups,
+            "census_department_count": len(departments),
+            "census_group_count": len(groups),
+            "census_banner_count": len(banner),
+            "excluded_non_doctor_count": len(banner_only),
+            "pagination_count": 1,
+            "pagination_method": "医生专区由单次 getZhuanjiaList 请求一次性返回，无 page/pageNo 参数",
+            "directory_api": GYKQYY_DIRECTORY_API,
+            "detail_api": GYKQYY_DETAIL_API,
+            "api_source_evidence": "医生目录 HTML 内联 Vue 脚本的 axios.get 明确声明两个同域公开接口",
+            "category_error_count": 0,
+            "detail_error_count": len(detail_errors),
+            "gykqyy_final_row_count": len(rows),
+            "gykqyy_same_name_separate_row_count": sum(
+                1 for row in rows if clean_text(str(row.get("姓名") or "")) in same_name_groups
+            ),
+            "existing_profile_count": sum(1 for row in rows if row["已建画像"] == "是"),
+            "ledger_review": target.review,
+            "ledger_difficulty": target.difficulty,
+        },
+        "categories": departments,
+        "entry_reconnaissance": [
+            {
+                "category_name": "医生团队（category=55）",
+                "entry_url": target.entry_url,
+                "page_nature": "动态 Vue 医生目录；单次同域公开接口载入",
+                "list_page_count": 1,
+                "raw_detail_relation_count": len(relations),
+                "unique_detail_count": len(all_doctors),
+                "out_of_scope_detail_count": len(banner_only),
+                "affiliation": target.hospital,
+                "independent_entity_check": "官网同域、无鉴权、无内部参数",
+            }
+        ],
+        "excluded_candidates": [
+            {
+                "entry_url": target.entry_url,
+                "list_title": clean_text(str(item.get("title") or "")),
+                "source_link": f"{target.entry_url}&id={item.get('id')}",
+                "reason": "焦点推荐记录未出现在科室医生树中且姓名为空，排除",
+            }
+            for item in banner_only
+        ]
+        + excluded_detail_candidates,
+        "gykqyy_identity_reconciliation": identity_reconciliation,
+        "category_errors": [],
+        "detail_errors": detail_errors,
+        "category_counts": category_counter.most_common(),
+        "priority_counts": dict(priority_counter),
+        "group_counts": dict(group_counter),
+        "warning_counts": dict(warning_counter),
+        "rows": rows,
+    }
 
 
 def parse_gzzoc_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
@@ -3655,6 +4084,52 @@ def validate_ny5y_full_append(payload: dict[str, Any]) -> None:
         raise RuntimeError("NY5Y 全量写入前门禁失败：" + "；".join(errors))
 
 
+def validate_gykqyy_full_append(payload: dict[str, Any]) -> None:
+    meta = payload["meta"]
+    rows = payload["rows"]
+    reconciliation = payload.get("gykqyy_identity_reconciliation", [])
+    errors: list[str] = []
+    if int(meta.get("candidate_membership_count") or 0) != 317:
+        errors.append(f"医生-科室关系应为 317，实际 {meta.get('candidate_membership_count', 0)}")
+    if int(meta.get("census_unique_detail_count") or 0) != 297:
+        errors.append(f"唯一详情 ID 应为 297，实际 {meta.get('census_unique_detail_count', 0)}")
+    named_count = int(meta.get("census_named_detail_count") or 0)
+    blank_count = int(meta.get("census_blank_name_detail_count") or 0)
+    if named_count + blank_count != 297:
+        errors.append("有姓名与空姓名详情 ID 之和不等于 297")
+    if int(meta.get("detail_error_count") or 0) != 0:
+        errors.append(f"详情接口失败应为 0，实际 {meta.get('detail_error_count', 0)}")
+    if len(rows) != named_count or int(meta.get("gykqyy_final_row_count") or 0) != named_count:
+        errors.append(f"正式行应等于有姓名详情 ID 数 {named_count}，实际 {len(rows)}")
+    if len(reconciliation) != len(rows):
+        errors.append(f"逐 ID 对账行应等于正式行，实际 {len(reconciliation)}/{len(rows)}")
+    if any(not clean_text(str(row.get("姓名") or "")) for row in rows):
+        errors.append("正式行存在空姓名")
+    if len({canonical_url(str(row.get("来源链接") or "")) for row in rows}) != len(rows):
+        errors.append("正式行来源链接不唯一")
+    expected_same_name_groups = {"方颖": ["128", "307"], "赵稚宁": ["29", "323"]}
+    if meta.get("census_same_name_groups") != expected_same_name_groups:
+        errors.append(f"同名不同 ID 组不符合审计基线：{meta.get('census_same_name_groups', {})}")
+    if int(meta.get("gykqyy_same_name_separate_row_count") or 0) != 4:
+        errors.append(
+            f"方颖/赵稚宁应共保留 4 行，实际 {meta.get('gykqyy_same_name_separate_row_count', 0)}"
+        )
+    same_name_rows = [row for row in rows if clean_text(str(row.get("姓名") or "")) in expected_same_name_groups]
+    if len(same_name_rows) != 4 or any(
+        "同名待甄别" not in str(row.get("异常提示") or "") for row in same_name_rows
+    ):
+        errors.append("同名不同 ID 行未全部保留“同名待甄别”")
+    blank_excluded_count = sum(
+        1
+        for item in payload.get("excluded_candidates", [])
+        if "核心追溯字段缺失" in str(item.get("reason") or "")
+    )
+    if blank_excluded_count != blank_count:
+        errors.append(f"空姓名详情应全部进入排除对账，实际 {blank_excluded_count}/{blank_count}")
+    if errors:
+        raise RuntimeError("GYKQYY FULL 写入前门禁失败：" + "；".join(errors))
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=BASE_HEADERS)
@@ -3719,6 +4194,10 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         )
         for item in payload.get("cross_entry_duplicates", [])
     ) or "| 无 | 无 | 无 |"
+    same_name_lines = "\n".join(
+        f"| {markdown_table_cell(name)} | {','.join(ids)} |"
+        for name, ids in meta.get("census_same_name_groups", {}).items()
+    ) or "| 无 | 无 |"
     identity_reconciliation_lines = "\n".join(
         (
             f"| {item.get('name', '')} | {item.get('resolution', '')} | "
@@ -3728,6 +4207,14 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         )
         for item in payload.get("gdzy5413_identity_reconciliation", [])
     ) or "| 无 | 无 | 0 | 无 | 无 | 无 |"
+    gykqyy_reconciliation_lines = "\n".join(
+        (
+            f"| {item.get('detail_id', '')} | {markdown_table_cell(item.get('name', ''))} | "
+            f"{item.get('resolution', '')} | {'、'.join(item.get('departments', [])) or '无'} | "
+            f"{item.get('source_link', '')} | {item.get('reason', '')} |"
+        )
+        for item in payload.get("gykqyy_identity_reconciliation", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 | 无 |"
 
     report = f"""---
 类型: {report_label}
@@ -3766,6 +4253,24 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 |---|---|---|---:|---:|---:|---:|---|---|
 {entry_recon_lines}
 
+### 动态目录专项证据
+
+- 医生分页/载入方式：{meta.get('pagination_method', '按列表页分页读取')}
+- 医生目录公开接口：{meta.get('directory_api', '不适用')}
+- 医生详情公开接口：{meta.get('detail_api', '不适用')}
+- 接口出处证据：{meta.get('api_source_evidence', '不适用')}
+- 院区/分组：{meta.get('census_group_count', 0)} 个；科室分类：{meta.get('census_department_count', 0)} 个
+- 医生-科室关系：{meta.get('candidate_membership_count', meta['raw_card_rows'])} 条
+- 唯一详情 ID：{meta.get('census_unique_detail_count', meta.get('unique_candidate_count', meta['unique_doctor_count']))} 个
+- 有姓名详情 ID：{meta.get('census_named_detail_count', meta.get('census_unique_nonblank_name_count', meta['unique_doctor_count']))} 个
+- 空姓名详情 ID：{meta.get('census_blank_name_detail_count', 0)} 个
+- 去重后的非空姓名值：{meta.get('census_unique_nonblank_name_count', meta['unique_doctor_count'])} 个
+- 同名不同详情 ID：{meta.get('census_same_name_group_count', 0)} 组
+
+| 同名 | 详情 ID |
+|---|---|
+{same_name_lines}
+
 ## 跨入口去重与试采覆盖
 
 - 各入口唯一医生详情 URL 关系数：{meta.get('candidate_membership_count', meta['raw_card_rows'])}
@@ -3787,6 +4292,17 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 | 姓名 | 裁决 | 详情关系 | 合并科室 | 主详情 | 其余详情 |
 |---|---|---:|---|---|---|
 {identity_reconciliation_lines}
+
+## 广医口腔逐 ID 归并/排除对账
+
+- 目录详情 ID：{meta.get('census_unique_detail_count', meta.get('unique_candidate_count', 0))}
+- 有姓名详情 ID / 正式行：{meta.get('census_named_detail_count', 0)} / {meta.get('gykqyy_final_row_count', 0)}
+- 空姓名详情 ID：{meta.get('census_blank_name_detail_count', 0)}
+- 同名不同 ID 分行：{meta.get('gykqyy_same_name_separate_row_count', 0)}
+
+| 详情 ID | 姓名 | 处置 | 科室 | 来源链接 | 理由 |
+|---|---|---|---|---|---|
+{gykqyy_reconciliation_lines}
 
 ## 已排除或范围外候选
 
@@ -4033,7 +4549,14 @@ def main() -> None:
         raise RuntimeError("刷新既有医院记录必须同时指定 --hospital 和 --allow-generic-append。")
 
     if args.rebuild_master_only:
-        payload = build_master_payload(args.today)
+        previous_batch_meta: dict[str, Any] = {}
+        if MASTER_JSON_PATH.exists():
+            try:
+                previous_payload = json.loads(MASTER_JSON_PATH.read_text(encoding="utf-8"))
+                previous_batch_meta = previous_payload.get("meta", {})
+            except (OSError, ValueError, TypeError):
+                previous_batch_meta = {}
+        payload = build_master_payload(args.today, batch_meta_override=previous_batch_meta)
         MASTER_JSON_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         write_csv(MASTER_CSV_PATH, payload["rows"])
         if not args.no_xlsx:
@@ -4105,6 +4628,8 @@ def main() -> None:
         payload = collect_gzzoc(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id == "nbkjyy_static_expert":
         payload = collect_nbkj(target, args.today, max_doctors=max_doctors)
+    elif target.adapter_id == GYKQYY_ADAPTER_ID:
+        payload = collect_gykqyy(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID}:
         payload = collect_generic(
             target,
@@ -4167,6 +4692,8 @@ def main() -> None:
 
     if target.adapter_id == GDZY5413_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdzy5413_full_append(payload)
+    if target.adapter_id == GYKQYY_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_gykqyy_full_append(payload)
     if target.adapter_id == GDSKIN_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdskin_full_append(payload)
     if target.adapter_id == NY5Y_ADAPTER_ID and not args.trial_only and not args.single_output:
