@@ -19,12 +19,15 @@ from collect_official_doctors_batch import (  # noqa: E402
     dedicated_adapter_for,
     discover_gdskin_excluded_links,
     discover_gdskin_postback_documents,
+    discover_gdzy5413_out_of_scope_links,
     discover_generic_detail_links,
     effective_entry_urls,
     extract_clean_highlights,
     find_node,
     generic_record_quality,
     generic_detail_identity,
+    gdzy5413_detail_id,
+    gdzy5413_entry_kind,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     merge_rows_for_master,
@@ -32,6 +35,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     ny5y_entry_kind,
     parse_generic_detail,
     parse_gdskin_detail,
+    parse_gdzy5413_detail,
     parse_ny5y_detail,
     round_robin_generic_items,
     validate_gdskin_full_append,
@@ -777,6 +781,148 @@ class Ny5yOfficialExpertTests(unittest.TestCase):
         lingnan_row = next(row for row in payload["rows"] if row["采集入口"] == self.ENTRY_LINGNAN)
         self.assertNotEqual(lingnan_row["科室_分类页"], "岭南名医")
         self.assertIn("岭南名医", lingnan_row["亮眼经历线索"])
+
+
+class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
+    ENTRY_FAMOUS = "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850"
+    ENTRY_EXPERTS = "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850"
+
+    def test_entry_and_detail_scope_are_strict(self) -> None:
+        self.assertEqual(gdzy5413_entry_kind(self.ENTRY_FAMOUS), "851")
+        self.assertEqual(gdzy5413_entry_kind(self.ENTRY_EXPERTS), "852")
+        self.assertEqual(dedicated_adapter_for(self.ENTRY_FAMOUS), "gdzy5413_official_specialist")
+        self.assertEqual(
+            gdzy5413_detail_id("https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=1290"),
+            "1290",
+        )
+        self.assertEqual(
+            generic_detail_identity("https://gdzy5413.com/main/doctor/specialist.aspx?typeid=1290"),
+            "gdzy5413:1290",
+        )
+        for invalid in [
+            "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?ksid=1&id=1290",
+            "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=1290&extra=1",
+            "https://example.com/main/doctor/specialist.aspx?typeid=1290",
+        ]:
+            with self.subTest(invalid=invalid):
+                self.assertFalse(matches_generic_directory_detail_url(self.ENTRY_FAMOUS, invalid))
+
+    def test_directory_uses_card_fields_and_typeid_identity(self) -> None:
+        html = """
+        <li class="xinyutitle1">
+          <div class="doc_img"><a href="doctor/specialist.aspx?typeid=634"></a></div>
+          <div class="docnameall">吕 雄</div>
+          <div class="docjich">内分泌科主任、主任中医师、教授</div>
+          <a href="doctor/specialist.aspx?typeid=634">了解详情</a>
+        </li>
+        <a href="ks/templet2/ksdoctorinfo.aspx?ksid=1&id=634">另一模板</a>
+        """
+
+        rows = discover_generic_detail_links(html, self.ENTRY_FAMOUS, self.ENTRY_FAMOUS)
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["name"], "吕雄")
+        self.assertEqual(rows[0]["department"], "内分泌科")
+        self.assertEqual(rows[0]["list_title"], "内分泌科主任、主任中医师、教授")
+
+    def test_out_of_scope_template_is_reported_without_becoming_candidate(self) -> None:
+        html = """
+        <a href="ks/templet2/ksdoctorinfo.aspx?ksid=1&id=10">张医生</a>
+        <a href="ks/templet2/ksdoctorinfo.aspx?ksid=2&id=10">张医生重复</a>
+        <a href="ks/templet2/ksdoctorinfo.aspx?ksid=1&id=11">李医生</a>
+        """
+
+        self.assertEqual(discover_generic_detail_links(html, self.ENTRY_EXPERTS, self.ENTRY_EXPERTS), [])
+        excluded = discover_gdzy5413_out_of_scope_links(html, self.ENTRY_EXPERTS, self.ENTRY_EXPERTS)
+        self.assertEqual(len(excluded), 2)
+        self.assertTrue(all("不请求采集" in item["reason"] for item in excluded))
+
+    def test_detail_dom_ignores_generic_title_and_uses_explicit_department_evidence(self) -> None:
+        html = """
+        <html><head><title>广东省第二中医院--广东省中医药工程技术研究院</title></head><body>
+          <nav>医院首页 新闻动态 招标公告</nav>
+          <div id="news_info_plAll"><div class="news_info_s">
+            范德辉，主任中医师、二级教授，广东省第二中医院针灸康复科五区区长。
+            主持科研课题多项。擅长治疗：中风病、颈椎病及各种创伤术后康复等。
+          </div></div>
+          <footer>网站地图 采购公告</footer>
+        </body></html>
+        """
+
+        detail = parse_gdzy5413_detail(
+            html,
+            {"name": "范德辉", "list_title": "广东省名中医、主任中医师、针康五区区长"},
+        )
+
+        self.assertEqual(detail["name"], "范德辉")
+        self.assertEqual(detail["department"], "针灸康复科五区")
+        self.assertIn("中风病", detail["specialty"])
+        self.assertIn("主持科研课题多项", detail["profile_text"])
+        self.assertNotIn("招标公告", detail["profile_text"])
+
+    def test_collect_generic_records_scope_evidence_and_department_spread(self) -> None:
+        famous_ids = list(range(1, 22))
+        names = ["张三", "李四", "王五", "赵六", "陈明", "刘强", "杨敏", "黄芳", "周军", "吴静", "徐勇", "孙丽", "胡伟", "朱燕", "高峰", "林涛", "何娟", "郭鹏", "罗英", "梁杰", "宋梅"]
+        departments = ["内分泌科", "妇科", "儿科", "肿瘤科", "呼吸科", "脑病科", "心血管科"]
+
+        famous_html = "".join(
+            (
+                '<li class="xinyutitle1">'
+                f'<div class="doc_img"><a href="doctor/specialist.aspx?typeid={doctor_id}"></a></div>'
+                f'<div class="docnameall">{names[doctor_id - 1]}</div>'
+                f'<div class="docjich">{departments[(doctor_id - 1) % len(departments)]}主任、主任医师</div>'
+                "</li>"
+            )
+            for doctor_id in famous_ids
+        )
+        expert_html = "".join(
+            f'<a href="ks/templet2/ksdoctorinfo.aspx?ksid=1&id={doctor_id}">范围外医生</a>'
+            for doctor_id in range(1, 347)
+        )
+
+        def fake_fetch(_session: object, url: str, retries: int = 3) -> tuple[int, str, str]:
+            del retries
+            if url == self.ENTRY_FAMOUS:
+                return 200, famous_html, ""
+            if url == self.ENTRY_EXPERTS:
+                return 200, expert_html, ""
+            doctor_id = int(url.rsplit("=", 1)[-1])
+            department = departments[(doctor_id - 1) % len(departments)]
+            return (
+                200,
+                f'<div id="news_info_plAll"><div class="news_info_s">擅长治疗：{department}常见疾病。</div></div>',
+                "",
+            )
+
+        target = HospitalTarget(
+            city="广州市",
+            hospital="广东省第二中医院",
+            homepage="https://www.gdzy5413.com/main/main.aspx",
+            entry_url=self.ENTRY_FAMOUS,
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="gdzy5413_official_specialist",
+            entry_urls=(self.ENTRY_FAMOUS, self.ENTRY_EXPERTS),
+            ledger_entry_url=self.ENTRY_FAMOUS,
+        )
+        with (
+            patch("collect_official_doctors_batch.create_official_session", return_value=object()),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+            patch("collect_official_doctors_batch.fetch", side_effect=fake_fetch),
+            patch("collect_official_doctors_batch.time.sleep", return_value=None),
+        ):
+            payload = collect_generic(target, "2026-08-12", max_doctors=10, max_pages=5)
+
+        self.assertEqual(payload["meta"]["entry_candidate_counts"][self.ENTRY_FAMOUS], 21)
+        self.assertEqual(payload["meta"]["entry_candidate_counts"][self.ENTRY_EXPERTS], 0)
+        self.assertEqual(payload["meta"]["unique_candidate_count"], 21)
+        self.assertEqual(payload["meta"]["excluded_non_doctor_count"], 0)
+        self.assertEqual(payload["meta"]["out_of_scope_candidate_count"], 346)
+        self.assertEqual(payload["entry_reconnaissance"][1]["out_of_scope_detail_count"], 346)
+        self.assertEqual(len(payload["rows"]), 10)
+        self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
+        self.assertTrue(all(gdzy5413_detail_id(row["来源链接"]) for row in payload["rows"]))
+        self.assertTrue(all(not row["亮眼经历线索"].startswith("广东省第二中医院") for row in payload["rows"]))
 
 
 class GenericFieldCleaningTests(unittest.TestCase):

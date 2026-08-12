@@ -1,0 +1,2462 @@
+{
+  "meta": {
+    "city": "广州市",
+    "hospital": "广东省第二中医院",
+    "homepage": "https://www.gdzy5413.com/main/main.aspx",
+    "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850 https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+    "entry_url_count": 2,
+    "entry_candidate_counts": {
+      "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850": 21,
+      "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850": 0
+    },
+    "entry_raw_relation_counts": {
+      "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850": 37,
+      "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850": 0
+    },
+    "entry_url_source": "Claude owner Issue 显式多入口",
+    "ledger_entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+    "adapter_id": "gdzy5413_official_specialist",
+    "collected_at": "2026-08-12",
+    "category_count": 2,
+    "raw_card_rows": 21,
+    "candidate_membership_count": 21,
+    "unique_candidate_count": 21,
+    "cross_entry_duplicate_count": 0,
+    "unique_doctor_count": 10,
+    "category_error_count": 0,
+    "detail_error_count": 0,
+    "existing_profile_count": 0,
+    "ledger_review": "确认可采集",
+    "ledger_difficulty": "A-优先自动采集",
+    "generic_template": "no",
+    "site_adapter_profile": "gdzy5413_strict_specialist_dom",
+    "generic_max_pages": 5,
+    "sample_entry_coverage_count": 1,
+    "sample_entry_categories": [
+      "名医名家"
+    ],
+    "excluded_non_doctor_count": 0,
+    "out_of_scope_candidate_count": 346,
+    "department_coverage_count": 5,
+    "covered_departments": [
+      "乳腺科",
+      "呼吸科",
+      "妇科",
+      "心血管科",
+      "针灸康复科五区"
+    ],
+    "json_path": "D:\\workspace\\信息收集整理\\work\\广东省第二中医院_trial_payload.json",
+    "csv_path": "D:\\workspace\\信息收集整理\\work\\广东省第二中医院_trial_doctors.csv",
+    "xlsx_path": "",
+    "preview_path": ""
+  },
+  "categories": [
+    {
+      "category_id": "1-1",
+      "category_name": "通用模板入口1列表第1页",
+      "url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850"
+    },
+    {
+      "category_id": "2-1",
+      "category_name": "通用模板入口2列表第1页",
+      "url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850"
+    }
+  ],
+  "entry_reconnaissance": [
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "category_name": "名医名家",
+      "page_nature": "医院官网名医名家单页名单",
+      "raw_detail_relation_count": 37,
+      "unique_detail_count": 21,
+      "out_of_scope_detail_count": 0,
+      "list_page_count": 1,
+      "pagination_evidence": "未发现分页证据",
+      "affiliation": "广东省第二中医院（官网名医名家栏目）",
+      "independent_entity_check": "两块牌子为同一实体；未发现分院区归属"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "category_name": "各科专家",
+      "page_nature": "医院官网各科专家页（发现另一详情模板但不在本 Issue 授权范围）",
+      "raw_detail_relation_count": 0,
+      "unique_detail_count": 0,
+      "out_of_scope_detail_count": 346,
+      "list_page_count": 1,
+      "pagination_evidence": "未发现分页证据",
+      "affiliation": "广东省第二中医院（官网各科专家栏目）",
+      "independent_entity_check": "两块牌子为同一实体；未发现分院区归属"
+    }
+  ],
+  "cross_entry_duplicates": [],
+  "excluded_candidates": [
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=22&typeid=20&cid=22&ksid=20&id=47",
+      "list_title": "王清海",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=22&typeid=20&cid=22&ksid=20&id=36",
+      "list_title": "靳利利",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=22&typeid=20&cid=22&ksid=20&id=125",
+      "list_title": "黄培红",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=22&typeid=20&cid=22&ksid=20&id=308",
+      "list_title": "袁丁",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=22&typeid=20&cid=22&ksid=20&id=127",
+      "list_title": "苏 慧",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=22&typeid=20&cid=22&ksid=20&id=317",
+      "list_title": "李桂明",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=22&typeid=20&cid=22&ksid=20&id=318",
+      "list_title": "李德军",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=25&typeid=23&cid=25&ksid=23&id=404",
+      "list_title": "岳丽丽",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=25&typeid=23&cid=25&ksid=23&id=319",
+      "list_title": "高敏",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=25&typeid=23&cid=25&ksid=23&id=72",
+      "list_title": "黄年斌",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=25&typeid=23&cid=25&ksid=23&id=582",
+      "list_title": "周嘉澄",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=25&typeid=23&cid=25&ksid=23&id=583",
+      "list_title": "梁迪赛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=28&typeid=26&cid=28&ksid=26&id=100",
+      "list_title": "李 静",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=28&typeid=26&cid=28&ksid=26&id=215",
+      "list_title": "许书维",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=28&typeid=26&cid=28&ksid=26&id=399",
+      "list_title": "申昌国",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=28&typeid=26&cid=28&ksid=26&id=99",
+      "list_title": "范 明",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=28&typeid=26&cid=28&ksid=26&id=68",
+      "list_title": "戈焰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=28&typeid=26&cid=28&ksid=26&id=80",
+      "list_title": "饶梅冰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=28&typeid=26&cid=28&ksid=26&id=640",
+      "list_title": "刘蔚",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=28&typeid=26&cid=28&ksid=26&id=83",
+      "list_title": "钟 毅",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=28&typeid=26&cid=28&ksid=26&id=97",
+      "list_title": "张 伦",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=31&typeid=29&cid=31&ksid=29&id=343",
+      "list_title": "赵海方",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=31&typeid=29&cid=31&ksid=29&id=657",
+      "list_title": "宫静",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=31&typeid=29&cid=31&ksid=29&id=341",
+      "list_title": "陈宁",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=31&typeid=29&cid=31&ksid=29&id=87",
+      "list_title": "李慧",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=31&typeid=29&cid=31&ksid=29&id=342",
+      "list_title": "郝小梅",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=34&typeid=32&cid=34&ksid=32&id=346",
+      "list_title": "汪何 汪何 莫伟 吕雄 佘卫吉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=34&typeid=32&cid=34&ksid=32&id=347",
+      "list_title": "莫伟 汪何 莫伟 吕雄 佘卫吉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=34&typeid=32&cid=34&ksid=32&id=345",
+      "list_title": "吕雄 汪何 莫伟 吕雄 佘卫吉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=34&typeid=32&cid=34&ksid=32&id=348",
+      "list_title": "佘卫吉 汪何 莫伟 吕雄 佘卫吉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=281",
+      "list_title": "陈高峰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=282",
+      "list_title": "史清华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=285",
+      "list_title": "张念华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=651",
+      "list_title": "高海利",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=322",
+      "list_title": "武如通",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=450",
+      "list_title": "吴建奇",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=321",
+      "list_title": "尹建华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=323",
+      "list_title": "李寿杰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=452",
+      "list_title": "付啸峰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=696",
+      "list_title": "黎智燊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=449",
+      "list_title": "谢壁元",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=40&typeid=38&cid=40&ksid=38&id=775",
+      "list_title": "贾二涛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=40&typeid=38&cid=40&ksid=38&id=776",
+      "list_title": "杨阳",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=40&typeid=38&cid=40&ksid=38&id=400",
+      "list_title": "邱联群",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=40&typeid=38&cid=40&ksid=38&id=402",
+      "list_title": "高伟",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=40&typeid=38&cid=40&ksid=38&id=403",
+      "list_title": "饶晶",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=43&typeid=41&cid=43&ksid=41&id=255",
+      "list_title": "雷天香 雷天香 张奡 张秋林",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=43&typeid=41&cid=43&ksid=41&id=256",
+      "list_title": "张奡 雷天香 张奡 张秋林",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=43&typeid=41&cid=43&ksid=41&id=253",
+      "list_title": "张秋林 雷天香 张奡 张秋林",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1274&typeid=1272&cid=1274&ksid=1272&id=492",
+      "list_title": "刘征彦",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1274&typeid=1272&cid=1274&ksid=1272&id=493",
+      "list_title": "李继庭",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1274&typeid=1272&cid=1274&ksid=1272&id=495",
+      "list_title": "陈 垚",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1274&typeid=1272&cid=1274&ksid=1272&id=489",
+      "list_title": "李典鸿",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1274&typeid=1272&cid=1274&ksid=1272&id=490",
+      "list_title": "江儒文",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1274&typeid=1272&cid=1274&ksid=1272&id=491",
+      "list_title": "梁文坚",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1279&typeid=1277&cid=1279&ksid=1277&id=385",
+      "list_title": "方统念",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1279&typeid=1277&cid=1279&ksid=1277&id=386",
+      "list_title": "陈海生",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1279&typeid=1277&cid=1279&ksid=1277&id=387",
+      "list_title": "刘秋江",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1279&typeid=1277&cid=1279&ksid=1277&id=383",
+      "list_title": "赵丽芸",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1279&typeid=1277&cid=1279&ksid=1277&id=384",
+      "list_title": "王同汉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1518&typeid=1516&cid=1518&ksid=1516&id=658",
+      "list_title": "黄培红 黄培红 梁宏宇",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1518&typeid=1516&cid=1518&ksid=1516&id=66",
+      "list_title": "梁宏宇 黄培红 梁宏宇",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=47&typeid=45&cid=47&ksid=45&id=414",
+      "list_title": "赵冬",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=47&typeid=45&cid=47&ksid=45&id=417",
+      "list_title": "林谋清",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=47&typeid=45&cid=47&ksid=45&id=419",
+      "list_title": "黄正宇",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=47&typeid=45&cid=47&ksid=45&id=420",
+      "list_title": "翟胜",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=47&typeid=45&cid=47&ksid=45&id=774",
+      "list_title": "袁道彰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=50&typeid=48&cid=50&ksid=48&id=432",
+      "list_title": "陈晓鑫",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=50&typeid=48&cid=50&ksid=48&id=434",
+      "list_title": "姜开文",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=50&typeid=48&cid=50&ksid=48&id=654",
+      "list_title": "张隆鑫",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=50&typeid=48&cid=50&ksid=48&id=79",
+      "list_title": "于 锋",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=50&typeid=48&cid=50&ksid=48&id=257",
+      "list_title": "王炜",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=53&typeid=51&cid=53&ksid=51&id=60",
+      "list_title": "许学猛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=53&typeid=51&cid=53&ksid=51&id=118",
+      "list_title": "刘文刚",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=53&typeid=51&cid=53&ksid=51&id=223",
+      "list_title": "魏凌峰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=53&typeid=51&cid=53&ksid=51&id=224",
+      "list_title": "赵传喜",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=53&typeid=51&cid=53&ksid=51&id=309",
+      "list_title": "刘欣",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=56&typeid=54&cid=56&ksid=54&id=103",
+      "list_title": "吕朝晖",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=56&typeid=54&cid=56&ksid=54&id=105",
+      "list_title": "董 旻",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=56&typeid=54&cid=56&ksid=54&id=219",
+      "list_title": "张兵",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=56&typeid=54&cid=56&ksid=54&id=220",
+      "list_title": "郑轩",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=56&typeid=54&cid=56&ksid=54&id=225",
+      "list_title": "邱剑鸣",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=56&typeid=54&cid=56&ksid=54&id=405",
+      "list_title": "董云鹏",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=59&typeid=57&cid=59&ksid=57&id=110",
+      "list_title": "吴少鹏",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=59&typeid=57&cid=59&ksid=57&id=221",
+      "list_title": "李参天",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=59&typeid=57&cid=59&ksid=57&id=226",
+      "list_title": "邓崇礼",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=59&typeid=57&cid=59&ksid=57&id=283",
+      "list_title": "张宇",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=59&typeid=57&cid=59&ksid=57&id=284",
+      "list_title": "梁灿德",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=59&typeid=57&cid=59&ksid=57&id=398",
+      "list_title": "许学猛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=62&typeid=60&cid=62&ksid=60&id=107",
+      "list_title": "徐莉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=62&typeid=60&cid=62&ksid=60&id=134",
+      "list_title": "纪珮",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=62&typeid=60&cid=62&ksid=60&id=205",
+      "list_title": "郭涛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=62&typeid=60&cid=62&ksid=60&id=298",
+      "list_title": "王慧",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=62&typeid=60&cid=62&ksid=60&id=390",
+      "list_title": "谢波",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=62&typeid=60&cid=62&ksid=60&id=391",
+      "list_title": "刘婷",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=62&typeid=60&cid=62&ksid=60&id=135",
+      "list_title": "徐丹",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=62&typeid=60&cid=62&ksid=60&id=136",
+      "list_title": "陈靓芬",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=62&typeid=60&cid=62&ksid=60&id=112",
+      "list_title": "陈小平",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=62&typeid=60&cid=62&ksid=60&id=106",
+      "list_title": "张玉蓉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=65&typeid=63&cid=65&ksid=63&id=154",
+      "list_title": "郭智涛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=65&typeid=63&cid=65&ksid=63&id=155",
+      "list_title": "李雪真",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=65&typeid=63&cid=65&ksid=63&id=156",
+      "list_title": "黄映飞",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=65&typeid=63&cid=65&ksid=63&id=157",
+      "list_title": "梁喆盈",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=65&typeid=63&cid=65&ksid=63&id=370",
+      "list_title": "付亚斐",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=68&typeid=66&cid=68&ksid=66&id=393",
+      "list_title": "黄向阳 黄向阳 徐琛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=68&typeid=66&cid=68&ksid=66&id=394",
+      "list_title": "徐琛 黄向阳 徐琛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=72&typeid=70&cid=72&ksid=70&id=109",
+      "list_title": "周永霞",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=72&typeid=70&cid=72&ksid=70&id=119",
+      "list_title": "叶艳芬",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=72&typeid=70&cid=72&ksid=70&id=120",
+      "list_title": "宋腾菊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=72&typeid=70&cid=72&ksid=70&id=163",
+      "list_title": "林晓洁",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=72&typeid=70&cid=72&ksid=70&id=286",
+      "list_title": "余德钊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=72&typeid=70&cid=72&ksid=70&id=287",
+      "list_title": "陈可静",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=75&typeid=73&cid=75&ksid=73&id=423",
+      "list_title": "罗凛 罗凛 郑林标 朱光",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=75&typeid=73&cid=75&ksid=73&id=424",
+      "list_title": "郑林标 罗凛 郑林标 朱光",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=75&typeid=73&cid=75&ksid=73&id=425",
+      "list_title": "朱光 罗凛 郑林标 朱光",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=958&typeid=76&cid=958&ksid=76&id=138",
+      "list_title": "张庆元",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=958&typeid=76&cid=958&ksid=76&id=143",
+      "list_title": "温映萍",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=958&typeid=76&cid=958&ksid=76&id=144",
+      "list_title": "苏淑娟",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=958&typeid=76&cid=958&ksid=76&id=145",
+      "list_title": "陈倩倩",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=958&typeid=76&cid=958&ksid=76&id=146",
+      "list_title": "鲁 洁",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=958&typeid=76&cid=958&ksid=76&id=273",
+      "list_title": "张雯",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=84&typeid=82&cid=84&ksid=82&id=150",
+      "list_title": "朱铭华 朱铭华 骆伟雄 龚五洲",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=84&typeid=82&cid=84&ksid=82&id=151",
+      "list_title": "骆伟雄 朱铭华 骆伟雄 龚五洲",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=84&typeid=82&cid=84&ksid=82&id=153",
+      "list_title": "龚五洲 朱铭华 骆伟雄 龚五洲",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1284&typeid=1282&cid=1284&ksid=1282&id=580",
+      "list_title": "曹金梅 曹金梅 聂 斌 曾科学 吴文锋",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1284&typeid=1282&cid=1284&ksid=1282&id=647",
+      "list_title": "聂 斌",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1284&typeid=1282&cid=1284&ksid=1282&id=693",
+      "list_title": "曾科学 曹金梅 聂 斌 曾科学 吴文锋",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1284&typeid=1282&cid=1284&ksid=1282&id=697",
+      "list_title": "吴文锋 曹金梅 聂 斌 曾科学 吴文锋",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=596",
+      "list_title": "邱健行",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=597",
+      "list_title": "卢桂梅",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=598",
+      "list_title": "王清海",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=599",
+      "list_title": "许学猛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=600",
+      "list_title": "汪何",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=601",
+      "list_title": "杨思华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=602",
+      "list_title": "吕雄",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=603",
+      "list_title": "戈 焰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=604",
+      "list_title": "谢波",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=605",
+      "list_title": "余德钊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=606",
+      "list_title": "李爱华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=607",
+      "list_title": "黄琳",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=608",
+      "list_title": "陈可静",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=609",
+      "list_title": "陈高峰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=610",
+      "list_title": "陈宁",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=611",
+      "list_title": "高敏",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=612",
+      "list_title": "靳利利",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=613",
+      "list_title": "吕朝晖",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=614",
+      "list_title": "郭智涛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1464&typeid=1462&cid=1464&ksid=1462&id=615",
+      "list_title": "范德辉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1480&typeid=1472&cid=1480&ksid=1472&id=644",
+      "list_title": "魏东 魏东 袁琳",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1480&typeid=1472&cid=1480&ksid=1472&id=652",
+      "list_title": "袁琳 魏东 袁琳",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1490&typeid=1488&cid=1490&ksid=1488&id=641",
+      "list_title": "刘联彬 刘联彬 陈竹生 夏雄智",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1490&typeid=1488&cid=1490&ksid=1488&id=642",
+      "list_title": "陈竹生 刘联彬 陈竹生 夏雄智",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1490&typeid=1488&cid=1490&ksid=1488&id=643",
+      "list_title": "夏雄智 刘联彬 陈竹生 夏雄智",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=314",
+      "list_title": "唐敏",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=315",
+      "list_title": "王霜玲",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=653",
+      "list_title": "彭明欢",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=777",
+      "list_title": "王 燕",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=778",
+      "list_title": "李嘉愔",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=779",
+      "list_title": "胡方欣",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=780",
+      "list_title": "林彦君",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=781",
+      "list_title": "梁凤鸣",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1143&typeid=1141&cid=1143&ksid=1141&id=617",
+      "list_title": "胡丹霞 耳鼻喉门诊 胡丹霞",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=546",
+      "list_title": "丘友如",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=547",
+      "list_title": "冷建国",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=548",
+      "list_title": "陈永光",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=549",
+      "list_title": "黄琳",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=550",
+      "list_title": "谢建军",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=551",
+      "list_title": "孙玉冰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=552",
+      "list_title": "许杰红",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=553",
+      "list_title": "李桂明",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=554",
+      "list_title": "任建华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=555",
+      "list_title": "杨晓文",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=558",
+      "list_title": "袁琳",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1151&typeid=1149&cid=1151&ksid=1149&id=560",
+      "list_title": "金小洣",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=496",
+      "list_title": "刘 悦",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=497",
+      "list_title": "董 明",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=498",
+      "list_title": "黄承武",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=499",
+      "list_title": "陈海城",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=500",
+      "list_title": "马连东",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=501",
+      "list_title": "魏国辉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=502",
+      "list_title": "邱俊杰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=503",
+      "list_title": "李雪芳",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=504",
+      "list_title": "代树程",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=505",
+      "list_title": "沈 鸿",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=506",
+      "list_title": "林雪珊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=507",
+      "list_title": "邓秀珍",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=508",
+      "list_title": "林立军",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=509",
+      "list_title": "李 琎",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=957&typeid=955&cid=957&ksid=955&id=510",
+      "list_title": "王 蓉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=88&typeid=86&cid=88&ksid=86&id=304",
+      "list_title": "黄凡 黄凡 陆彦青 杨海涛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=88&typeid=86&cid=88&ksid=86&id=562",
+      "list_title": "陆彦青 黄凡 陆彦青 杨海涛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=88&typeid=86&cid=88&ksid=86&id=563",
+      "list_title": "杨海涛 黄凡 陆彦青 杨海涛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=97&typeid=95&cid=97&ksid=95&id=300",
+      "list_title": "刘 建",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=97&typeid=95&cid=97&ksid=95&id=646",
+      "list_title": "苏美意",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=97&typeid=95&cid=97&ksid=95&id=648",
+      "list_title": "陈敬伟",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=97&typeid=95&cid=97&ksid=95&id=649",
+      "list_title": "张炎明",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=97&typeid=95&cid=97&ksid=95&id=299",
+      "list_title": "范德辉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=100&typeid=98&cid=100&ksid=98&id=428",
+      "list_title": "张俊杰 张俊杰 刘星",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=100&typeid=98&cid=100&ksid=98&id=429",
+      "list_title": "刘星 张俊杰 刘星",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=482",
+      "list_title": "林晓洁",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=650",
+      "list_title": "周盛杰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=483",
+      "list_title": "郑洁莉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=488",
+      "list_title": "孙正平",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=484",
+      "list_title": "杨美芝",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=487",
+      "list_title": "钟文鑫",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=486",
+      "list_title": "梁兆凤",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=110&typeid=108&cid=110&ksid=108&id=158",
+      "list_title": "李有武 麻醉科 李有武",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=288",
+      "list_title": "谭俊青",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=768",
+      "list_title": "李慧",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=769",
+      "list_title": "邓超",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=770",
+      "list_title": "黎翠翠",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=771",
+      "list_title": "梅闯闯",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=772",
+      "list_title": "卢建伟",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=363",
+      "list_title": "刘启波",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=766",
+      "list_title": "李前宁",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=389",
+      "list_title": "李冉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=359",
+      "list_title": "李蔼文",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=365",
+      "list_title": "邓丽梅",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=361",
+      "list_title": "王康椿",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=362",
+      "list_title": "黄双旺",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=767",
+      "list_title": "何宇巍",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=929&typeid=134&cid=929&ksid=134&id=443",
+      "list_title": "冯宁娜",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=929&typeid=134&cid=929&ksid=134&id=444",
+      "list_title": "陈伟萍",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=929&typeid=134&cid=929&ksid=134&id=445",
+      "list_title": "邓敏君",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=929&typeid=134&cid=929&ksid=134&id=446",
+      "list_title": "陈乐",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=929&typeid=134&cid=929&ksid=134&id=447",
+      "list_title": "赖媛媛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=929&typeid=134&cid=929&ksid=134&id=448",
+      "list_title": "梁虹宇",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=929&typeid=134&cid=929&ksid=134&id=453",
+      "list_title": "孟睿",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1248&typeid=886&cid=1248&ksid=886&id=406",
+      "list_title": "张诚光",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1248&typeid=886&cid=1248&ksid=886&id=407",
+      "list_title": "范宋玲",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1248&typeid=886&cid=1248&ksid=886&id=408",
+      "list_title": "李文兵",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1248&typeid=886&cid=1248&ksid=886&id=409",
+      "list_title": "黄晓巧",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1248&typeid=886&cid=1248&ksid=886&id=410",
+      "list_title": "李庆勇",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1248&typeid=886&cid=1248&ksid=886&id=411",
+      "list_title": "吴星火",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1248&typeid=886&cid=1248&ksid=886&id=511",
+      "list_title": "张建军",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=970&typeid=892&cid=970&ksid=892&id=749",
+      "list_title": "陈竹生",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=970&typeid=892&cid=970&ksid=892&id=750",
+      "list_title": "夏雄智",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=970&typeid=892&cid=970&ksid=892&id=751",
+      "list_title": "李慧",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=970&typeid=892&cid=970&ksid=892&id=752",
+      "list_title": "张嘉良",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=970&typeid=892&cid=970&ksid=892&id=753",
+      "list_title": "江艺",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=970&typeid=892&cid=970&ksid=892&id=754",
+      "list_title": "张瑜",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=976&typeid=895&cid=976&ksid=895&id=755",
+      "list_title": "张玉蓉 张玉蓉 王慧 杨宇航 柯婵",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=976&typeid=895&cid=976&ksid=895&id=756",
+      "list_title": "王慧 张玉蓉 王慧 杨宇航 柯婵",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=976&typeid=895&cid=976&ksid=895&id=757",
+      "list_title": "杨宇航 张玉蓉 王慧 杨宇航 柯婵",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=976&typeid=895&cid=976&ksid=895&id=758",
+      "list_title": "柯婵 张玉蓉 王慧 杨宇航 柯婵",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=979&typeid=896&cid=979&ksid=896&id=430",
+      "list_title": "余德钊 余德钊 宋腾菊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=979&typeid=896&cid=979&ksid=896&id=760",
+      "list_title": "宋腾菊 余德钊 宋腾菊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1078&typeid=1076&cid=1078&ksid=1076&id=371",
+      "list_title": "徐云英 白云院区皮肤科 徐云英",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1082&typeid=1080&cid=1082&ksid=1080&id=773",
+      "list_title": "黄晓萍 白云院区耳鼻喉科 黄晓萍",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1086&typeid=1084&cid=1086&ksid=1084&id=375",
+      "list_title": "胡想国 白云院区口腔科 胡想国",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1090&typeid=1088&cid=1090&ksid=1088&id=718",
+      "list_title": "李桂明",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1090&typeid=1088&cid=1090&ksid=1088&id=719",
+      "list_title": "李德军",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1090&typeid=1088&cid=1090&ksid=1088&id=720",
+      "list_title": "肖根发",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1090&typeid=1088&cid=1090&ksid=1088&id=721",
+      "list_title": "李国彬",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1090&typeid=1088&cid=1090&ksid=1088&id=765",
+      "list_title": "廖坤莹",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1094&typeid=1092&cid=1094&ksid=1092&id=714",
+      "list_title": "周嘉澄 周嘉澄 彭玉 郭红 蔡艺贞",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1094&typeid=1092&cid=1094&ksid=1092&id=715",
+      "list_title": "彭玉 周嘉澄 彭玉 郭红 蔡艺贞",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1094&typeid=1092&cid=1094&ksid=1092&id=716",
+      "list_title": "郭红 周嘉澄 彭玉 郭红 蔡艺贞",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1094&typeid=1092&cid=1094&ksid=1092&id=717",
+      "list_title": "蔡艺贞 周嘉澄 彭玉 郭红 蔡艺贞",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1098&typeid=1096&cid=1098&ksid=1096&id=695",
+      "list_title": "黎智燊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1098&typeid=1096&cid=1098&ksid=1096&id=706",
+      "list_title": "陈高峰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1098&typeid=1096&cid=1098&ksid=1096&id=707",
+      "list_title": "史清华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1098&typeid=1096&cid=1098&ksid=1096&id=708",
+      "list_title": "武如通",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1098&typeid=1096&cid=1098&ksid=1096&id=709",
+      "list_title": "周伶",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1098&typeid=1096&cid=1098&ksid=1096&id=710",
+      "list_title": "吕丽琼",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1102&typeid=1100&cid=1102&ksid=1100&id=350",
+      "list_title": "徐凯",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1102&typeid=1100&cid=1102&ksid=1100&id=351",
+      "list_title": "高海燕",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1102&typeid=1100&cid=1102&ksid=1100&id=698",
+      "list_title": "叶恒",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1102&typeid=1100&cid=1102&ksid=1100&id=699",
+      "list_title": "秦小红",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1102&typeid=1100&cid=1102&ksid=1100&id=700",
+      "list_title": "杜家津",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1106&typeid=1104&cid=1106&ksid=1104&id=352",
+      "list_title": "周杰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1106&typeid=1104&cid=1106&ksid=1104&id=656",
+      "list_title": "张振宁",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1106&typeid=1104&cid=1106&ksid=1104&id=701",
+      "list_title": "袁智先",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1106&typeid=1104&cid=1106&ksid=1104&id=702",
+      "list_title": "邸富荣",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1106&typeid=1104&cid=1106&ksid=1104&id=703",
+      "list_title": "邓间开",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1110&typeid=1108&cid=1110&ksid=1108&id=704",
+      "list_title": "林妙君",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1110&typeid=1108&cid=1110&ksid=1108&id=705",
+      "list_title": "马洪举",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1110&typeid=1108&cid=1110&ksid=1108&id=722",
+      "list_title": "张晓燕",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1110&typeid=1108&cid=1110&ksid=1108&id=723",
+      "list_title": "凌翠敏",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1110&typeid=1108&cid=1110&ksid=1108&id=724",
+      "list_title": "刘文丽",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1110&typeid=1108&cid=1110&ksid=1108&id=759",
+      "list_title": "李婷",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1114&typeid=1112&cid=1114&ksid=1112&id=587",
+      "list_title": "刘悦 刘悦 何桥景 贺青涛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1114&typeid=1112&cid=1114&ksid=1112&id=588",
+      "list_title": "何桥景 刘悦 何桥景 贺青涛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1114&typeid=1112&cid=1114&ksid=1112&id=586",
+      "list_title": "贺青涛 刘悦 何桥景 贺青涛",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=733",
+      "list_title": "林湖广",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=734",
+      "list_title": "刘莉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=735",
+      "list_title": "谢秋平",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=736",
+      "list_title": "杨淑荃",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=737",
+      "list_title": "王朋莉",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=738",
+      "list_title": "陈小燕",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=739",
+      "list_title": "李翠香",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=740",
+      "list_title": "官华良",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=741",
+      "list_title": "张勤锐",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=742",
+      "list_title": "林楚钊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=743",
+      "list_title": "冯小芹",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=744",
+      "list_title": "郑钦毫",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=745",
+      "list_title": "王传鑫",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=746",
+      "list_title": "彭震峰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1118&typeid=1116&cid=1118&ksid=1116&id=747",
+      "list_title": "刘仁金",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=567",
+      "list_title": "杨栋",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=570",
+      "list_title": "陈志勇",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=571",
+      "list_title": "朱冬娇",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=573",
+      "list_title": "何国建",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=574",
+      "list_title": "吴振中",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=575",
+      "list_title": "梁韵妮",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=577",
+      "list_title": "庄婷婷",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=725",
+      "list_title": "高辰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=726",
+      "list_title": "林雪珊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=727",
+      "list_title": "杨宇愿",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=728",
+      "list_title": "陈博",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=729",
+      "list_title": "陈云生",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=730",
+      "list_title": "郑恭鹏",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=731",
+      "list_title": "王子鸣",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1122&typeid=1120&cid=1122&ksid=1120&id=732",
+      "list_title": "邱俊芸",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=985&typeid=897&cid=985&ksid=897&id=470",
+      "list_title": "冷建国",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=985&typeid=897&cid=985&ksid=897&id=471",
+      "list_title": "靳利利",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=985&typeid=897&cid=985&ksid=897&id=472",
+      "list_title": "孙玉冰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=985&typeid=897&cid=985&ksid=897&id=473",
+      "list_title": "邬淼林",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=985&typeid=897&cid=985&ksid=897&id=474",
+      "list_title": "许杰红",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=985&typeid=897&cid=985&ksid=897&id=475",
+      "list_title": "邱联群",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=988&typeid=898&cid=988&ksid=898&id=514",
+      "list_title": "周亦农 淘金门诊皮肤科 周亦农",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=991&typeid=899&cid=991&ksid=899&id=515",
+      "list_title": "孙俊 孙俊 孔庆新",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=991&typeid=899&cid=991&ksid=899&id=516",
+      "list_title": "孔庆新 孙俊 孔庆新",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=997&typeid=908&cid=997&ksid=908&id=513",
+      "list_title": "宋腾菊 淘金门诊儿科 宋腾菊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1000&typeid=909&cid=1000&ksid=909&id=512",
+      "list_title": "蔡荣华 淘金门诊按摩科 蔡荣华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=517",
+      "list_title": "周亦农",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=518",
+      "list_title": "冷建国",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=519",
+      "list_title": "靳利利",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=520",
+      "list_title": "孙玉冰",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=521",
+      "list_title": "邬淼林",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=522",
+      "list_title": "许杰红",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=523",
+      "list_title": "邱联群",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=524",
+      "list_title": "陈红林",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=525",
+      "list_title": "陈礼锦",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=526",
+      "list_title": "蔡荣华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=527",
+      "list_title": "孔庆新",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=528",
+      "list_title": "孙俊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1229&typeid=1227&cid=1229&ksid=1227&id=529",
+      "list_title": "宋腾菊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1003&typeid=901&cid=1003&ksid=901&id=436",
+      "list_title": "蔡妙珊 蔡妙珊 沈越 魏东 刘晓俊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1003&typeid=901&cid=1003&ksid=901&id=437",
+      "list_title": "沈越 蔡妙珊 沈越 魏东 刘晓俊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1003&typeid=901&cid=1003&ksid=901&id=438",
+      "list_title": "魏东 蔡妙珊 沈越 魏东 刘晓俊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1003&typeid=901&cid=1003&ksid=901&id=439",
+      "list_title": "刘晓俊 蔡妙珊 沈越 魏东 刘晓俊",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1006&typeid=902&cid=1006&ksid=902&id=435",
+      "list_title": "周亦农 五山门诊皮肤科 周亦农",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1009&typeid=903&cid=1009&ksid=903&id=441",
+      "list_title": "劳宗洪 劳宗洪 元国华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1009&typeid=903&cid=1009&ksid=903&id=442",
+      "list_title": "元国华 劳宗洪 元国华",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    },
+    {
+      "entry_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=852&pid=850",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1012&typeid=904&cid=1012&ksid=904&id=440",
+      "list_title": "李宝国 五山门诊针灸康复科 李宝国",
+      "reason": "Issue #17 仅授权 specialist.aspx?typeid=<数字>；另一详情模板只计范围证据，不请求采集"
+    }
+  ],
+  "category_errors": [],
+  "detail_errors": [],
+  "category_counts": [
+    [
+      "乳腺科",
+      1
+    ],
+    [
+      "呼吸科",
+      1
+    ],
+    [
+      "妇科",
+      1
+    ],
+    [
+      "心血管科",
+      1
+    ],
+    [
+      "针灸康复科五区",
+      1
+    ]
+  ],
+  "priority_counts": {
+    "高": 10
+  },
+  "group_counts": {
+    "疑难重症": 6,
+    "慢性病": 5,
+    "免疫/风湿/感染": 2,
+    "生殖疾病": 1,
+    "肿瘤": 2,
+    "术后恢复/康复": 1
+  },
+  "warning_counts": {
+    "科室需人工复核": 5
+  },
+  "rows": [
+    {
+      "序号": 1,
+      "医院": "广东省第二中医院",
+      "姓名": "戈焰",
+      "科室_分类页": "",
+      "科室_列表卡片": "",
+      "职称_关键词": "主任中医师、教授、硕士",
+      "职称身份原文": "广东省名中医、主任中医师、教授、硕士研究生导师",
+      "重点优先级": "高",
+      "重点关注范围": "疑难重症",
+      "重点疾病标签": "难治",
+      "擅长诊疗方向摘录": "难治性胃炎、萎缩性胃炎伴肠上皮化生、不典型增生，上消化道出血、功能性肠病、乙型肝炎、肝硬化。",
+      "亮眼经历线索": "广东省名中医、主任中医师、教授、硕士研究生导师 广东省中医药学会消化病专业分会副主任委员、广东省中西医结合学会脾胃消化病分会副主任委员、广东省中医药学会内科分会副主任委员。",
+      "列表简介": "广东省名中医、主任中医师、教授、硕士研究生导师",
+      "详情正文摘录": "广东省中医药学会消化病专业分会副主任委员、广东省中西医结合学会脾胃消化病分会副主任委员、广东省中医药学会内科分会副主任委员。擅长难治性胃炎、萎缩性胃炎伴肠上皮化生、不典型增生，上消化道出血、功能性肠病、乙型肝炎、肝硬化。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=569",
+      "采集入口": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "采集方式": "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取",
+      "采集日期": "2026-08-12",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "科室需人工复核",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 2,
+      "医院": "广东省第二中医院",
+      "姓名": "李爱华",
+      "科室_分类页": "",
+      "科室_列表卡片": "",
+      "职称_关键词": "主任中医师、教授",
+      "职称身份原文": "院名中医、主任中医师、教授",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、疑难重症",
+      "重点疾病标签": "高血压、冠心病、疑难",
+      "擅长诊疗方向摘录": "中医中药辩证诊治内科各种常见及疑难疾病，尤其擅长治疗脑血管疾病及神经内科疾病，如头痛、玄晕、神经痛、脑梗塞、失眠、抑郁、癫痫、面瘫、高血压等病，同时对冠心病、胃肠、肝胆消化道疾病；肾、输尿管等泌尿系疾病以及内分泌失调所致的各种疾病均有丰富的临床经验。",
+      "亮眼经历线索": "院名中医、主任中医师、教授 中华中医药学会脑病专业委员会常务委员。 善用中医中药辩证诊治内科各种常见及疑难疾病，尤其擅长治疗脑血管疾病及神经内科疾病，如头痛、玄晕、神经痛、脑梗塞、失眠、抑郁、癫痫、面瘫、高血压等病，同时对冠心病、胃肠、肝胆消化道疾病；",
+      "列表简介": "院名中医、主任中医师、教授",
+      "详情正文摘录": "全国第四、五批老中医药专家学术经验继承工作指导老师。中华中医药学会脑病专业委员会常务委员。善用中医中药辩证诊治内科各种常见及疑难疾病，尤其擅长治疗脑血管疾病及神经内科疾病，如头痛、玄晕、神经痛、脑梗塞、失眠、抑郁、癫痫、面瘫、高血压等病，同时对冠心病、胃肠、肝胆消化道疾病；肾、输尿管等泌尿系疾病以及内分泌失调所致的各种疾病均有丰富的临床经验。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=549",
+      "采集入口": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "采集方式": "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取",
+      "采集日期": "2026-08-12",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "科室需人工复核",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 3,
+      "医院": "广东省第二中医院",
+      "姓名": "许学猛",
+      "科室_分类页": "",
+      "科室_列表卡片": "",
+      "职称_关键词": "主任中医师、教授、博士、副院长",
+      "职称身份原文": "国务院特殊津贴专家、广东省名中医、副院长、主任中医师、教授、博士研究生导师",
+      "重点优先级": "高",
+      "重点关注范围": "免疫/风湿/感染",
+      "重点疾病标签": "风湿、类风湿",
+      "擅长诊疗方向摘录": "中医药防治退行性骨关节病的科学研究，擅长诊治颈椎病、腰腿痛、四肢骨关节病、骨质增生症、骨质疏松症以及风湿性、类风湿性、痛风性关节炎等；创立了“骨筋肉并重特色诊疗”的专科学术思想，形成了六大特色治疗方法。",
+      "亮眼经历线索": "国务院特殊津贴专家、广东省名中医、副院长、主任中医师、教授、博士研究生导师 广东省中西医结合学会骨科特色疗法专业委员会主任委员，广东省中西医结合学会脊柱医学专业委员会副主任委员，广东省中医药学会脊柱病专业委员会副主任委员，广东省中医药学会骨伤科专业委员会副主任委员。 首届百名中华中医药学会科技之星。 科研课题获省科技进步二等奖1项、省科技进步三等奖4项，拥有发明及实用新型专利7项、出版专著二部。",
+      "列表简介": "国务院特殊津贴专家、广东省名中医、副院长、主任中医师、教授、博士研究生导师",
+      "详情正文摘录": "广东省中西医结合学会骨科特色疗法专业委员会主任委员，广东省中西医结合学会脊柱医学专业委员会副主任委员，广东省中医药学会脊柱病专业委员会副主任委员，广东省中医药学会骨伤科专业委员会副主任委员。首届百名中华中医药学会科技之星。科研课题获省科技进步二等奖1项、省科技进步三等奖4项，拥有发明及实用新型专利7项、出版专著二部。主攻方向为中医药防治退行性骨关节病的科学研究，擅长诊治颈椎病、腰腿痛、四肢骨关节病、骨质增生症、骨质疏松症以及风湿性、类风湿性、痛风性关节炎等；创立了“骨筋肉并重特色诊疗”的专科学术思想，形成了六大特色治疗方法。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=669",
+      "采集入口": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "采集方式": "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取",
+      "采集日期": "2026-08-12",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "科室需人工复核",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 4,
+      "医院": "广东省第二中医院",
+      "姓名": "邱健行",
+      "科室_分类页": "",
+      "科室_列表卡片": "",
+      "职称_关键词": "主任中医师、教授、博士生导师",
+      "职称身份原文": "全国名老中医、主任中医师、教授、博士生导师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、生殖疾病、疑难重症",
+      "重点疾病标签": "慢性、月经、难治",
+      "擅长诊疗方向摘录": "脾胃病、急慢性胃炎、溃疡病、急慢性结肠炎、功能性胃肠病、肝硬化、急慢性胆囊炎、胆石症、上消化道出血（呕血、便血）、难治性血证、再生障碍性贫血、原发性血小板减少性紫癜、功能性月经过多、顽固性咳嗽、顽固性失眠、顽固性皮肤过敏、习惯性便秘。",
+      "亮眼经历线索": "全国名老中医、主任中医师、教授、博士生导师 历任中华中医学会理事、中华中医内科学会常务理事、全国血证专业委员会副主任委员、广东省中医药学会常务理事、广东省内科学会副主任委员、脾胃病学说研究组组长、广东省老中医药专家协会副会、第九届全国人大代表、主席团成员。",
+      "列表简介": "全国名老中医、主任中医师、教授、博士生导师",
+      "详情正文摘录": "历任中华中医学会理事、中华中医内科学会常务理事、全国血证专业委员会副主任委员、广东省中医药学会常务理事、广东省内科学会副主任委员、脾胃病学说研究组组长、广东省老中医药专家协会副会、第九届全国人大代表、主席团成员。中医内科专家，擅治脾胃病、急慢性胃炎、溃疡病、急慢性结肠炎、功能性胃肠病、肝硬化、急慢性胆囊炎、胆石症、上消化道出血（呕血、便血）、难治性血证、再生障碍性贫血、原发性血小板减少性紫癜、功能性月经过多、顽固性咳嗽、顽固性失眠、顽固性皮肤过敏、习惯性便秘。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=160",
+      "采集入口": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "采集方式": "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取",
+      "采集日期": "2026-08-12",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "科室需人工复核",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 5,
+      "医院": "广东省第二中医院",
+      "姓名": "黄琳",
+      "科室_分类页": "",
+      "科室_列表卡片": "",
+      "职称_关键词": "主任中医师、教授、硕士",
+      "职称身份原文": "医务科科长、主任中医师、教授、硕士研究生导师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病",
+      "重点疾病标签": "高血压、冠心病、心力衰竭、慢性",
+      "擅长诊疗方向摘录": "治疗内科及心血管专科疾病，如高血压病、冠心病、心肌炎、心力衰竭、心律失常及慢性胃炎、慢性肠炎、慢性病毒性肝炎等。用中医及中西医结合的方法治疗头晕、心悸、胸闷、气促、咳嗽、失眠、水肿、肢体麻木及胃痛、腹痛等病症。",
+      "亮眼经历线索": "广东省中医药学会内科专业委员会常务委员、广东省中西医结合学会心血管专业委员会委员、广东省女医师协会理事、广东省医院协会医院医务管理专业委员会委员。 在全国及省级杂志上发表论文30余篇。",
+      "列表简介": "医务科科长、主任中医师、教授、硕士研究生导师",
+      "详情正文摘录": "广东省中医药学会内科专业委员会常务委员、广东省中西医结合学会心血管专业委员会委员、广东省女医师协会理事、广东省医院协会医院医务管理专业委员会委员。主持广东省科技厅及广东省中医局课题4项。在全国及省级杂志上发表论文30余篇。专长治疗内科及心血管专科疾病，如高血压病、冠心病、心肌炎、心力衰竭、心律失常及慢性胃炎、慢性肠炎、慢性病毒性肝炎等。用中医及中西医结合的方法治疗头晕、心悸、胸闷、气促、咳嗽、失眠、水肿、肢体麻木及胃痛、腹痛等病症。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=659",
+      "采集入口": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "采集方式": "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取",
+      "采集日期": "2026-08-12",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "科室需人工复核",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 6,
+      "医院": "广东省第二中医院",
+      "姓名": "郭智涛",
+      "科室_分类页": "乳腺科",
+      "科室_列表卡片": "乳腺科",
+      "职称_关键词": "科主任",
+      "职称身份原文": "乳腺科主任",
+      "重点优先级": "高",
+      "重点关注范围": "肿瘤、疑难重症",
+      "重点疾病标签": "肿瘤、癌、化疗、乳腺癌、疑难、重症",
+      "擅长诊疗方向摘录": "中医外治法及心理辅导、饮食疗法等在乳腺病的运用。",
+      "亮眼经历线索": "中华医学会肿瘤学会会员，广州市抗癌协会乳腺癌专业委员会委员。 1991年起即在广东省中医院乳腺科从事乳腺疾病的医疗及研究工作16年，并在亚洲最大的乳腺病防治中心-天津医科大学肿瘤医院系统培训进修1年。 2005年作为学科带头人引进调入广东省第二中医院，并创立乳腺科。 掌握乳腺病的专业动态、具备解决本专业危急疑难重症的能力。",
+      "列表简介": "乳腺科主任",
+      "详情正文摘录": "中华医学会肿瘤学会会员，广州市抗癌协会乳腺癌专业委员会委员。1991年起即在广东省中医院乳腺科从事乳腺疾病的医疗及研究工作16年，并在亚洲最大的乳腺病防治中心-天津医科大学肿瘤医院系统培训进修1年。2005年作为学科带头人引进调入广东省第二中医院，并创立乳腺科。对乳腺病的病理、诊断、手术、放、化疗、内分泌等各种治疗手段能熟炼掌握运用；掌握乳腺病的专业动态、具备解决本专业危急疑难重症的能力。率先在省内开展乳腺癌介入治疗、电化学治疗、规范的乳腺癌根冶术、保乳术、术前新辅助化疗、新内分泌治疗、乳腺导管镜检查、乳腺癌标本规范取材等，每年主刀乳腺癌手术近一百例。临床中注重中西结合，对乳腺癌围手术期、放化疗期间的中医药参与积累了丰富的临床经验，并擅长中医外治法及心理辅导、饮食疗法等在乳腺病的运用。主持“术前中药区域动脉持续灌注治疗局部晚期乳腺癌的临床研究”等国家局、省局课题3项，发表专业论文十余篇。医疗质量过硬、服务技巧优良，医患关系良好，目前每月的专科门诊量逾一千四百人次，其中肿瘤患者近八百人次。1996年曾参加卫生部第30届全国高级肿瘤医师培训班学习。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=1290",
+      "采集入口": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "采集方式": "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取",
+      "采集日期": "2026-08-12",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 7,
+      "医院": "广东省第二中医院",
+      "姓名": "陈宁",
+      "科室_分类页": "呼吸科",
+      "科室_列表卡片": "呼吸科",
+      "职称_关键词": "主任医师、教授、硕士、科主任",
+      "职称身份原文": "呼吸科主任、主任医师、教授、中西医双学士、硕士研究生导师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、肿瘤、疑难重症",
+      "重点疾病标签": "慢性、肺癌、疑难、重症",
+      "擅长诊疗方向摘录": "中医药、中西医结合治疗呼吸系统疾病，如咳嗽，尤其久咳、咽炎、气喘、胸背痛，急、慢性支气管炎、慢性咽炎、肺气肿、肺心病、肺炎、支气管哮喘、肺癌等疑难杂证。",
+      "亮眼经历线索": "广州市药学会名方验方开发筛选评价专家委员会副主任委员，广东省中医药学会呼吸病专业委员会常务委员, 中国中西医结合学会第七届理事会理事，广东省中西医结合学会重症医学专业委员会第二届委员会常委。 从事临床、教学、科研工作二十余年，擅长中医药、中西医结合治疗呼吸系统疾病，如咳嗽，尤其久咳、咽炎、气喘、胸背痛，急、慢性支气管炎、慢性咽炎、肺气肿、肺心病、肺炎、支气管哮喘、肺癌等疑难杂证。",
+      "列表简介": "呼吸科主任、主任医师、教授、中西医双学士、硕士研究生导师",
+      "详情正文摘录": "广州市药学会名方验方开发筛选评价专家委员会副主任委员，广东省中医药学会呼吸病专业委员会常务委员, 中国中西医结合学会第七届理事会理事，广东省中西医结合学会重症医学专业委员会第二届委员会常委。从事临床、教学、科研工作二十余年，擅长中医药、中西医结合治疗呼吸系统疾病，如咳嗽，尤其久咳、咽炎、气喘、胸背痛，急、慢性支气管炎、慢性咽炎、肺气肿、肺心病、肺炎、支气管哮喘、肺癌等疑难杂证。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=564",
+      "采集入口": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "采集方式": "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取",
+      "采集日期": "2026-08-12",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 8,
+      "医院": "广东省第二中医院",
+      "姓名": "谢波",
+      "科室_分类页": "妇科",
+      "科室_列表卡片": "妇科",
+      "职称_关键词": "主任中医师、教授、硕士、科主任",
+      "职称身份原文": "妇科主任、主任中医师、教授、硕士研究生导师",
+      "重点优先级": "高",
+      "重点关注范围": "",
+      "重点疾病标签": "",
+      "擅长诊疗方向摘录": "",
+      "亮眼经历线索": "",
+      "列表简介": "妇科主任、主任中医师、教授、硕士研究生导师",
+      "详情正文摘录": "",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=554",
+      "采集入口": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "采集方式": "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取",
+      "采集日期": "2026-08-12",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 9,
+      "医院": "广东省第二中医院",
+      "姓名": "靳利利",
+      "科室_分类页": "心血管科",
+      "科室_列表卡片": "心血管科",
+      "职称_关键词": "主任中医师、教授、医学博士、硕士、科主任",
+      "职称身份原文": "心血管科主任、主任中医师、教授、医学博士、硕士研究生导师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、疑难重症",
+      "重点疾病标签": "高血压、冠心病、心力衰竭、动脉粥样硬化、疑难、危重",
+      "擅长诊疗方向摘录": "中西医结合心血管疾病的临床与实验研究,近几年专研高血压的中医辨证分型规律、中医药治疗,心力衰竭的临床与实验研究，积累了丰富的临床经验与实验基础。擅长治疗高血压病、冠心病、心力衰竭、心律失常，动脉粥样硬化的防治，对于眩晕、肢体麻木、心悸、喘促、心血管及危重症等有一定经验。",
+      "亮眼经历线索": "国家级心病学重点学科带头人,广东省中医药学会心血管专业常务委员、中华中医药学会心病分会委员，中西医结合心血管专业委员会委员，广东省中医心病学学会委员、广东省中医药学会疑难病专业委员、广东省中医药学会中医诊断学专业委员。 擅长治疗高血压病、冠心病、心力衰竭、心律失常，动脉粥样硬化的防治，对于眩晕、肢体麻木、心悸、喘促、心血管及危重症等有一定经验。",
+      "列表简介": "心血管科主任、主任中医师、教授、医学博士、硕士研究生导师",
+      "详情正文摘录": "国家级心病学重点学科带头人,广东省中医药学会心血管专业常务委员、中华中医药学会心病分会委员，中西医结合心血管专业委员会委员，广东省中医心病学学会委员、广东省中医药学会疑难病专业委员、广东省中医药学会中医诊断学专业委员。从事内科临床工作20年，主攻中西医结合心血管疾病的临床与实验研究,近几年专研高血压的中医辨证分型规律、中医药治疗,心力衰竭的临床与实验研究，积累了丰富的临床经验与实验基础。擅长治疗高血压病、冠心病、心力衰竭、心律失常，动脉粥样硬化的防治，对于眩晕、肢体麻木、心悸、喘促、心血管及危重症等有一定经验。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=699",
+      "采集入口": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "采集方式": "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取",
+      "采集日期": "2026-08-12",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 10,
+      "医院": "广东省第二中医院",
+      "姓名": "范德辉",
+      "科室_分类页": "针灸康复科五区",
+      "科室_列表卡片": "",
+      "职称_关键词": "主任中医师、教授、博士",
+      "职称身份原文": "国务院特殊津贴专家、广东省名中医、主任中医师、二级教授、博士研究生导师、针康五区区长",
+      "重点优先级": "高",
+      "重点关注范围": "免疫/风湿/感染、术后恢复/康复",
+      "重点疾病标签": "风湿、术后、康复、疼痛",
+      "擅长诊疗方向摘录": "中风病、顽固性眩晕、头痛、失眠、各种颈椎病、腰椎间盘突出症、骨质增生症、坐骨神经痛、风湿关节痛及各种创伤术后康复等。",
+      "亮眼经历线索": "国务院特殊津贴专家、广东省名中医、主任中医师、二级教授、博士研究生导师、针康五区区长 范德辉，主任中医师、二级教授、享受国务院政府特殊津贴专家、广东省名中医，广州中医药大学博士研究生导师，第十二届广东省政协委员，广东省第二中医院针灸康复科五区区长，第五批全国名老中医药学术继承人，广东省第二批名老中医药学术思想继承指导老师，广东省名中医传承工作室专家，中国民族医药学会康复分会副会长、推拿分会副会长、疼痛分会副会长，广东省中西医结合学会脊柱疾病康复专业委员会主任委员，广东省中医药学会针刀专业委员会副主任委员，长期致力于脊柱相关疾病的科研、临床与教学工作，获2018年度广东省科技进步奖二等奖1项，2020年度中国中医药促进会科技进步奖二等奖、三等奖各1项，2020年度中国民族医药学会学术著作奖三等奖1项。 发表学术论文40余篇，主编《龙氏治脊疗法》、《治腰治颈不如靠自己》、《龙氏治脊疗法（第二版）》、《范德辉脊柱相关疾病诊治学术思想与临床经验集》等著作。",
+      "列表简介": "国务院特殊津贴专家、广东省名中医、主任中医师、二级教授、博士研究生导师、针康五区区长",
+      "详情正文摘录": "范德辉，主任中医师、二级教授、享受国务院政府特殊津贴专家、广东省名中医，广州中医药大学博士研究生导师，第十二届广东省政协委员，广东省第二中医院针灸康复科五区区长，第五批全国名老中医药学术继承人，广东省第二批名老中医药学术思想继承指导老师，广东省名中医传承工作室专家，中国民族医药学会康复分会副会长、推拿分会副会长、疼痛分会副会长，广东省中西医结合学会脊柱疾病康复专业委员会主任委员，广东省中医药学会针刀专业委员会副主任委员，长期致力于脊柱相关疾病的科研、临床与教学工作，获2018年度广东省科技进步奖二等奖1项，2020年度中国中医药促进会科技进步奖二等奖、三等奖各1项，2020年度中国民族医药学会学术著作奖三等奖1项。主持国家级、省级、市级脊椎病因学相关科研课题多项；发表学术论文40余篇，主编《龙氏治脊疗法》、《治腰治颈不如靠自己》、《龙氏治脊疗法（第二版）》、《范德辉脊柱相关疾病诊治学术思想与临床经验集》等著作。出诊时间：周二上午、周四上午、周日全天 擅长治疗：中风病、顽固性眩晕、头痛、失眠、各种颈椎病、腰椎间盘突出症、骨质增生症、坐骨神经痛、风湿关节痛及各种创伤术后康复等。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=1452",
+      "采集入口": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+      "采集方式": "医院官网名医栏目：严格 specialist typeid 过滤+详情 DOM 结构化抽取",
+      "采集日期": "2026-08-12",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    }
+  ]
+}
