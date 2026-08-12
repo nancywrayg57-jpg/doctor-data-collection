@@ -16,6 +16,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     build_hospital_batches,
     classify_generic_record,
     clean_generic_department,
+    collect_gyfyyy,
     collect_gykqyy,
     collect_generic,
     dedicated_adapter_for,
@@ -33,6 +34,8 @@ from collect_official_doctors_batch import (  # noqa: E402
     gdzy5413_entry_kind,
     gdzy5413_ksdoctor_detail_id,
     gdzy5413_rows_same_identity,
+    gyfyyy_detail_id,
+    parse_gyfyyy_detail,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     merge_rows_for_master,
@@ -45,6 +48,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     parse_gdzy5413_ksdoctor_detail,
     parse_ny5y_detail,
     round_robin_generic_items,
+    select_gyfyyy_trial_doctors,
     select_gykqyy_trial_doctors,
     sync_profile_flags,
     validate_gykqyy_full_append,
@@ -378,6 +382,148 @@ class GykqyyPublicDoctorApiTests(unittest.TestCase):
         self.assertEqual(payload["meta"]["current_batch_rows"], 297)
         self.assertEqual(payload["meta"]["new_rows_added"], 297)
         self.assertEqual(payload["rows"][0]["已建画像"], "是")
+
+
+class GyfyyyStaticDepartmentTreeTests(unittest.TestCase):
+    ENTRY_URL = "https://www.gyfyyy.cn/cn/ks/"
+
+    def test_adapter_and_detail_scope_are_exact(self) -> None:
+        self.assertEqual(dedicated_adapter_for(self.ENTRY_URL), "gyfyyy_static_department_tree")
+        for invalid in [
+            "https://www.gyfyyy.cn/cn/ks",
+            "https://www.gyfyyy.cn/cn/ks/?page=1",
+            "https://api.gyfyyy.cn/cn/ks/",
+            "https://www.gyfyyy.cn/cn/ylfw/czcx/",
+        ]:
+            self.assertEqual(dedicated_adapter_for(invalid), "")
+        detail = "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_101.html"
+        self.assertEqual(gyfyyy_detail_id(detail, "https://www.gyfyyy.cn/cn/ks/nk/hxnk/"), "101")
+        self.assertEqual(gyfyyy_detail_id(detail, "https://www.gyfyyy.cn/cn/ks/nk/btfyk/"), "")
+        self.assertEqual(gyfyyy_detail_id("https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_101.html?x=1"), "")
+
+    def test_detail_parser_is_limited_to_doctor_sections(self) -> None:
+        html = """
+        <section class="doctorcard">
+          <strong>陈如冲</strong><b></b><b>变态反应科副主任 主任医师</b>
+          <p>擅长呼吸系统过敏性疾病。</p>
+        </section>
+        <section class="doctorintro"><div class="title">医生简介</div><p>从事临床工作二十年。</p></section>
+        <section class="patientcases"><p>患者评价和案例不得采集。</p></section>
+        <section class="news"><p>医院新闻不得采集。</p></section>
+        """
+
+        detail = parse_gyfyyy_detail(html, {})
+
+        self.assertEqual(detail["name"], "陈如冲")
+        self.assertIn("主任医师", detail["title"])
+        self.assertEqual(detail["specialty"], "呼吸系统过敏性疾病。")
+        self.assertEqual(detail["profile_text"], "从事临床工作二十年。")
+        self.assertNotIn("患者评价", detail["profile_text"])
+        self.assertNotIn("医院新闻", detail["profile_text"])
+
+    def test_trial_selection_spreads_across_departments(self) -> None:
+        doctors = [
+            {"id": str(index), "departments": [f"科室{(index - 1) // 4}"]}
+            for index in range(1, 13)
+        ]
+        selected = select_gyfyyy_trial_doctors(doctors, 10)
+        self.assertEqual(len(selected), 10)
+        self.assertGreaterEqual(len({item["departments"][0] for item in selected}), 3)
+
+    def test_abnormal_rows_do_not_receive_priority_or_disease_tags(self) -> None:
+        target = HospitalTarget(
+            city="广州市",
+            hospital="广州医科大学附属第一医院",
+            homepage="https://www.gyfyyy.cn/",
+            entry_url=self.ENTRY_URL,
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="gyfyyy_static_department_tree",
+        )
+        pages = {
+            self.ENTRY_URL: '<a href="/cn/ks/nk/hxnk/">呼吸与危重症医学科</a>',
+            "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctorList.html": (
+                '<section class="doctors team"><li><a href="doctor_1.html">肺癌科室介绍 主任医师</a></li></section>'
+            ),
+            "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_1.html": (
+                '<section class="doctorcard"><strong>肺癌科室介绍</strong><b>主任医师</b>'
+                '<p>擅长肺癌。</p></section><section class="doctorintro"><p>疑难肺癌诊疗。</p></section>'
+            ),
+        }
+
+        def fake_fetch(_session, url, retries=3):
+            return 200, pages[url], ""
+
+        with (
+            patch("collect_official_doctors_batch.create_official_session", return_value=object()),
+            patch("collect_official_doctors_batch.fetch", side_effect=fake_fetch),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+        ):
+            row = collect_gyfyyy(target, "2026-08-13", max_doctors=1)["rows"][0]
+
+        self.assertIn("非医生页面或姓名异常", row["异常提示"])
+        self.assertEqual(row["重点优先级"], "普通")
+        self.assertEqual(row["重点关注范围"], "")
+        self.assertEqual(row["重点疾病标签"], "")
+
+    def test_collect_censuses_tree_merges_ids_and_excludes_nursing_only(self) -> None:
+        departments = [
+            ("呼吸与危重症医学科", "/cn/ks/nk/hxnk/", [1, 2, 101]),
+            ("变态反应科", "/cn/ks/nk/btfyk/", [3, 4, 101]),
+            ("心血管内科", "/cn/ks/nk/xxgnk/", [5, 6, 7]),
+            ("内科门诊", "/cn/ks/nk/ptnk/", [8, 9, 13]),
+        ]
+        entry_html = "".join(f'<a href="{path}">{name}</a>' for name, path, _ids in departments)
+        pages = {self.ENTRY_URL: entry_html}
+        for name, path, ids in departments:
+            team_url = f"https://www.gyfyyy.cn{path}doctorList.html"
+            cards = []
+            for doctor_id in ids:
+                identity = "主管护师" if doctor_id == 13 else "主任医师"
+                cards.append(f'<li><a href="doctor_{doctor_id}.html">医生{doctor_id} {identity}</a></li>')
+                if doctor_id != 13:
+                    pages[f"https://www.gyfyyy.cn{path}doctor_{doctor_id}.html"] = f"""
+                    <section class="doctorcard"><strong>医生{doctor_id}</strong><b>{identity}</b>
+                    <p>擅长{name}常见疾病。</p></section>
+                    <section class="doctorintro"><p>长期从事{name}临床诊疗。</p></section>
+                    <section class="patientcases"><p>患者评价不得采集。</p></section>
+                    """
+            pages[team_url] = '<section class="doctors team"><ul>' + "".join(cards) + "</ul></section>"
+
+        def fake_fetch(_session, url, retries=3):
+            html = pages.get(url)
+            return (200, html, "") if html is not None else (None, "", "fixture missing")
+
+        target = HospitalTarget(
+            city="广州市",
+            hospital="广州医科大学附属第一医院",
+            homepage="https://www.gyfyyy.cn/",
+            entry_url=self.ENTRY_URL,
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="gyfyyy_static_department_tree",
+        )
+        with (
+            patch("collect_official_doctors_batch.create_official_session", return_value=object()),
+            patch("collect_official_doctors_batch.fetch", side_effect=fake_fetch),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+        ):
+            payload = collect_gyfyyy(target, "2026-08-13", max_doctors=10)
+
+        self.assertEqual(payload["meta"]["category_count"], 4)
+        self.assertEqual(payload["meta"]["candidate_membership_count"], 12)
+        self.assertEqual(payload["meta"]["census_unique_detail_count"], 11)
+        self.assertEqual(payload["meta"]["cross_entry_duplicate_count"], 1)
+        self.assertEqual(payload["meta"]["gyfyyy_cross_department_identity_count"], 1)
+        self.assertEqual(len(payload["rows"]), 10)
+        self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
+        merged = next(row for row in payload["rows"] if row["姓名"] == "医生101")
+        self.assertIn("呼吸与危重症医学科", merged["科室_分类页"])
+        self.assertIn("变态反应科", merged["科室_分类页"])
+        self.assertNotIn("患者评价", merged["详情正文摘录"])
+        self.assertEqual(len(payload["excluded_candidates"]), 1)
+        self.assertIn("护理身份", payload["excluded_candidates"][0]["reason"])
+        self.assertEqual(payload["meta"]["detail_error_count"], 0)
 
 
 class NodeRuntimeResolutionTests(unittest.TestCase):

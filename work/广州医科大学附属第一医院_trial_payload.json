@@ -1,0 +1,1525 @@
+{
+  "meta": {
+    "city": "广州市",
+    "hospital": "广州医科大学附属第一医院",
+    "homepage": "https://www.gyfyyy.cn/",
+    "entry_url": "https://www.gyfyyy.cn/cn/ks/",
+    "entry_url_source": "GitHub Issue #25（与官网入口台账人工复核裁决一致）",
+    "ledger_entry_url": "https://www.gyfyyy.cn/cn/ks/",
+    "adapter_id": "gyfyyy_static_department_tree",
+    "collected_at": "2026-08-13",
+    "category_count": 59,
+    "raw_card_rows": 650,
+    "candidate_membership_count": 650,
+    "unique_candidate_count": 646,
+    "sample_entry_coverage_count": 10,
+    "sample_entry_categories": [
+      "临床心理科",
+      "全科医学科",
+      "内分泌科",
+      "呼吸与危重症医学科",
+      "心血管内科",
+      "感染内科",
+      "消化内科",
+      "神经内科",
+      "老年病科",
+      "肾内科"
+    ],
+    "unique_doctor_count": 10,
+    "census_unique_detail_count": 646,
+    "census_department_count": 59,
+    "census_group_count": 0,
+    "census_same_name_group_count": 0,
+    "census_same_name_groups": {},
+    "excluded_non_doctor_count": 9,
+    "pagination_count": 59,
+    "pagination_method": "每个科室单个 doctorList.html 一次性列出团队，无分页参数或加载更多",
+    "category_error_count": 0,
+    "detail_error_count": 0,
+    "cross_entry_duplicate_count": 4,
+    "gyfyyy_cross_department_identity_count": 4,
+    "existing_profile_count": 0,
+    "ledger_review": "确认可采集",
+    "ledger_difficulty": "A-优先自动采集",
+    "entry_candidate_counts": {
+      "https://www.gyfyyy.cn/cn/ks/": 650
+    },
+    "department_coverage_count": 10,
+    "covered_departments": [
+      "临床心理科",
+      "全科医学科",
+      "内分泌科",
+      "呼吸与危重症医学科",
+      "心血管内科",
+      "感染内科",
+      "消化内科",
+      "神经内科",
+      "老年病科",
+      "肾内科"
+    ],
+    "execution_mode": "trial",
+    "json_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_trial_payload.json",
+    "csv_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_trial_doctors.csv",
+    "xlsx_path": "",
+    "preview_path": ""
+  },
+  "categories": [
+    {
+      "name": "呼吸与危重症医学科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctorList.html"
+    },
+    {
+      "name": "变态反应科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/btfyk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/btfyk/doctorList.html"
+    },
+    {
+      "name": "心血管内科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/xxgnk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/xxgnk/doctorList.html"
+    },
+    {
+      "name": "肾内科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/snk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/snk/doctorList.html"
+    },
+    {
+      "name": "神经内科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/sjnk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/sjnk/doctorList.html"
+    },
+    {
+      "name": "感染内科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/grnk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/grnk/doctorList.html"
+    },
+    {
+      "name": "消化内科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/xhnk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/xhnk/doctorList.html"
+    },
+    {
+      "name": "内分泌科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/nfbk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/nfbk/doctorList.html"
+    },
+    {
+      "name": "老年病科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/lnbk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/lnbk/doctorList.html"
+    },
+    {
+      "name": "风湿科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/fsk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/fsk/doctorList.html"
+    },
+    {
+      "name": "肿瘤科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/zlnk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/zlnk/doctorList.html"
+    },
+    {
+      "name": "血液内科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/xynk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/xynk/doctorList.html"
+    },
+    {
+      "name": "重症医学科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/zzyxk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/zzyxk/doctorList.html"
+    },
+    {
+      "name": "内科门诊",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/nk/ptnk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/nk/ptnk/doctorList.html"
+    },
+    {
+      "name": "胸外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/xwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/xwk/doctorList.html"
+    },
+    {
+      "name": "泌尿外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/bnwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/bnwk/doctorList.html"
+    },
+    {
+      "name": "肝胆外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/gdwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/gdwk/doctorList.html"
+    },
+    {
+      "name": "胃肠外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/wcwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/wcwk/doctorList.html"
+    },
+    {
+      "name": "神经外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/sjwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/sjwk/doctorList.html"
+    },
+    {
+      "name": "乳腺外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/rxwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/rxwk/doctorList.html"
+    },
+    {
+      "name": "整形外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/zxwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/zxwk/doctorList.html"
+    },
+    {
+      "name": "心脏外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/xzwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/xzwk/doctorList.html"
+    },
+    {
+      "name": "关节外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/gjwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/gjwk/doctorList.html"
+    },
+    {
+      "name": "脊柱外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/jzwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/jzwk/doctorList.html"
+    },
+    {
+      "name": "血管外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/xgwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/xgwk/doctorList.html"
+    },
+    {
+      "name": "麻醉科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/mzk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/mzk/doctorList.html"
+    },
+    {
+      "name": "器官移植科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/qgyz/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/qgyz/doctorList.html"
+    },
+    {
+      "name": "疼痛科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/ttk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/ttk/doctorList.html"
+    },
+    {
+      "name": "介入科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/jrk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/jrk/doctorList.html"
+    },
+    {
+      "name": "外科门诊",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/wk/ptwk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/wk/ptwk/doctorList.html"
+    },
+    {
+      "name": "妇科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/fck/fk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/fck/fk/doctorList.html"
+    },
+    {
+      "name": "产科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/fck/ck/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/fck/ck/doctorList.html"
+    },
+    {
+      "name": "女性盆底专科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/fck/nxpdzk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/fck/nxpdzk/doctorList.html"
+    },
+    {
+      "name": "儿科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/ek/ek/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/ek/ek/doctorList.html"
+    },
+    {
+      "name": "小儿呼吸专科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/ek/xehxzk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/ek/xehxzk/doctorList.html"
+    },
+    {
+      "name": "中医科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/zyk/zyk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/zyk/zyk/doctorList.html"
+    },
+    {
+      "name": "中西医结合科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/zyk/zxyjk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/zyk/zxyjk/doctorList.html"
+    },
+    {
+      "name": "针灸专业组",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/zyk/zjzyz/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/zyk/zjzyz/doctorList.html"
+    },
+    {
+      "name": "急诊科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/jzk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/jzk/doctorList.html"
+    },
+    {
+      "name": "临床心理科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/lcxlk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/lcxlk/doctorList.html"
+    },
+    {
+      "name": "放疗科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/flk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/flk/doctorList.html"
+    },
+    {
+      "name": "口腔科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/kqk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/kqk/doctorList.html"
+    },
+    {
+      "name": "眼科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/yk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/yk/doctorList.html"
+    },
+    {
+      "name": "皮肤科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/pfk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/pfk/doctorList.html"
+    },
+    {
+      "name": "激光科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/jgk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/jgk/doctorList.html"
+    },
+    {
+      "name": "康复科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/kfk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/kfk/doctorList.html"
+    },
+    {
+      "name": "耳鼻咽喉头颈外科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/ebhk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/ebhk/doctorList.html"
+    },
+    {
+      "name": "全科医学科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/qkyxk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/qkyxk/doctorList.html"
+    },
+    {
+      "name": "健康体检科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/jktjk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/jktjk/doctorList.html"
+    },
+    {
+      "name": "哮喘与呼吸免疫（过敏）",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/qtzk/xq/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/qtzk/xq/doctorList.html"
+    },
+    {
+      "name": "核医学科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/yj/hyxk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/yj/hyxk/doctorList.html"
+    },
+    {
+      "name": "放射科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/yj/fsk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/yj/fsk/doctorList.html"
+    },
+    {
+      "name": "超声医学科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/yj/csyxk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/yj/csyxk/doctorList.html"
+    },
+    {
+      "name": "输血科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/yj/sxk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/yj/sxk/doctorList.html"
+    },
+    {
+      "name": "营养科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/yj/yyk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/yj/yyk/doctorList.html"
+    },
+    {
+      "name": "病理科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/yj/blk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/yj/blk/doctorList.html"
+    },
+    {
+      "name": "检验科",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/yj/jyk/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/yj/jyk/doctorList.html"
+    },
+    {
+      "name": "药学部",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/yj/yxb/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/yj/yxb/doctorList.html"
+    },
+    {
+      "name": "护理部",
+      "department_url": "https://www.gyfyyy.cn/cn/ks/yj/hlb/",
+      "team_url": "https://www.gyfyyy.cn/cn/ks/yj/hlb/doctorList.html"
+    }
+  ],
+  "entry_reconnaissance": [
+    {
+      "category_name": "呼吸与危重症医学科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 86,
+      "unique_detail_count": 86,
+      "out_of_scope_detail_count": 2,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "变态反应科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/btfyk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "心血管内科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/xxgnk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 27,
+      "unique_detail_count": 27,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "肾内科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/snk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 10,
+      "unique_detail_count": 10,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "神经内科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/sjnk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 16,
+      "unique_detail_count": 16,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "感染内科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/grnk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 11,
+      "unique_detail_count": 11,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "消化内科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/xhnk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 16,
+      "unique_detail_count": 16,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "内分泌科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/nfbk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 10,
+      "unique_detail_count": 10,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "老年病科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/lnbk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "风湿科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/fsk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 4,
+      "unique_detail_count": 4,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "肿瘤科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/zlnk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 7,
+      "unique_detail_count": 7,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "血液内科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/xynk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 10,
+      "unique_detail_count": 10,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "重症医学科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/zzyxk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "内科门诊",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/nk/ptnk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 5,
+      "unique_detail_count": 5,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "胸外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/xwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 37,
+      "unique_detail_count": 37,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "泌尿外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/bnwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 34,
+      "unique_detail_count": 34,
+      "out_of_scope_detail_count": 2,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "肝胆外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/gdwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 22,
+      "unique_detail_count": 22,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "胃肠外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/wcwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 11,
+      "unique_detail_count": 11,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "神经外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/sjwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 9,
+      "unique_detail_count": 9,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "乳腺外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/rxwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 7,
+      "unique_detail_count": 7,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "整形外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/zxwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 4,
+      "unique_detail_count": 4,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "心脏外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/xzwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 15,
+      "unique_detail_count": 15,
+      "out_of_scope_detail_count": 1,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "关节外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/gjwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 12,
+      "unique_detail_count": 12,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "脊柱外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/jzwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 10,
+      "unique_detail_count": 10,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "血管外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/xgwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "麻醉科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/mzk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 5,
+      "unique_detail_count": 5,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "器官移植科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/qgyz/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 7,
+      "unique_detail_count": 7,
+      "out_of_scope_detail_count": 1,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "疼痛科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/ttk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 4,
+      "unique_detail_count": 4,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "介入科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/jrk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 2,
+      "unique_detail_count": 2,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "外科门诊",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/wk/ptwk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 1,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "妇科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/fck/fk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 18,
+      "unique_detail_count": 18,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "产科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/fck/ck/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 8,
+      "unique_detail_count": 8,
+      "out_of_scope_detail_count": 1,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "女性盆底专科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/fck/nxpdzk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 4,
+      "unique_detail_count": 4,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "儿科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/ek/ek/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 31,
+      "unique_detail_count": 31,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "小儿呼吸专科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/ek/xehxzk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "中医科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/zyk/zyk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 33,
+      "unique_detail_count": 33,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "中西医结合科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/zyk/zxyjk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 3,
+      "unique_detail_count": 3,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "针灸专业组",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/zyk/zjzyz/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 5,
+      "unique_detail_count": 5,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "急诊科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/jzk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 13,
+      "unique_detail_count": 13,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "临床心理科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/lcxlk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 9,
+      "unique_detail_count": 9,
+      "out_of_scope_detail_count": 1,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "放疗科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/flk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 7,
+      "unique_detail_count": 7,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "口腔科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/kqk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 20,
+      "unique_detail_count": 20,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "眼科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/yk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 15,
+      "unique_detail_count": 15,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "皮肤科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/pfk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 13,
+      "unique_detail_count": 13,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "激光科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/jgk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 2,
+      "unique_detail_count": 2,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "康复科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/kfk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "耳鼻咽喉头颈外科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/ebhk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 12,
+      "unique_detail_count": 12,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "全科医学科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/qkyxk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "健康体检科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/jktjk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 0,
+      "unique_detail_count": 0,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "哮喘与呼吸免疫（过敏）",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/qtzk/xq/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 0,
+      "unique_detail_count": 0,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "核医学科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/yj/hyxk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 4,
+      "unique_detail_count": 4,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "放射科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/yj/fsk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 4,
+      "unique_detail_count": 4,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "超声医学科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/yj/csyxk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "输血科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/yj/sxk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 0,
+      "unique_detail_count": 0,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "营养科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/yj/yyk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 5,
+      "unique_detail_count": 5,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "病理科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/yj/blk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 0,
+      "unique_detail_count": 0,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "检验科",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/yj/jyk/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 0,
+      "unique_detail_count": 0,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "药学部",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/yj/yxb/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 9,
+      "unique_detail_count": 9,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    },
+    {
+      "category_name": "护理部",
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/yj/hlb/doctorList.html",
+      "page_nature": "静态科室专家团队页",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 0,
+      "unique_detail_count": 0,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州医科大学附属第一医院",
+      "independent_entity_check": "官网同域科室路径内静态 doctor_<id>.html"
+    }
+  ],
+  "excluded_candidates": [
+    {
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/",
+      "list_title": "许妙娜 主管护师",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/fck/ck/doctor_378.html",
+      "reason": "官网团队卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/",
+      "list_title": "夏丽娟 护士",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/wk/ptwk/doctor_397.html",
+      "reason": "官网团队卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/",
+      "list_title": "廖伟霞 主管护师",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_492.html",
+      "reason": "官网团队卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/",
+      "list_title": "李桂芬 主管护师",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_493.html",
+      "reason": "官网团队卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/",
+      "list_title": "梁普莹 副主任护师",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/qtzk/lcxlk/doctor_628.html",
+      "reason": "官网团队卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/",
+      "list_title": "张玲 主管护师",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/wk/xzwk/doctor_754.html",
+      "reason": "官网团队卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/",
+      "list_title": "黄丹霞 副主任护师",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/wk/qgyz/doctor_868.html",
+      "reason": "官网团队卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/",
+      "list_title": "赵妍 副主任护师",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/wk/bnwk/doctor_888.html",
+      "reason": "官网团队卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gyfyyy.cn/cn/ks/",
+      "list_title": "马啸吟 泌尿外科护士长，副主任护师 肿瘤专科护士",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/wk/bnwk/doctor_889.html",
+      "reason": "官网团队卡片仅标注护理身份，排除医生画像采集范围"
+    }
+  ],
+  "cross_entry_duplicates": [
+    {
+      "name": "doctor_101",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_101.html",
+      "entry_urls": [
+        "https://www.gyfyyy.cn/cn/ks/nk/hxnk/",
+        "https://www.gyfyyy.cn/cn/ks/nk/btfyk/"
+      ]
+    },
+    {
+      "name": "doctor_549",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/fck/fk/doctor_549.html",
+      "entry_urls": [
+        "https://www.gyfyyy.cn/cn/ks/fck/fk/",
+        "https://www.gyfyyy.cn/cn/ks/fck/nxpdzk/"
+      ]
+    },
+    {
+      "name": "doctor_607",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/ptnk/doctor_607.html",
+      "entry_urls": [
+        "https://www.gyfyyy.cn/cn/ks/nk/ptnk/",
+        "https://www.gyfyyy.cn/cn/ks/wk/ptwk/"
+      ]
+    },
+    {
+      "name": "doctor_618",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/ptnk/doctor_618.html",
+      "entry_urls": [
+        "https://www.gyfyyy.cn/cn/ks/nk/ptnk/",
+        "https://www.gyfyyy.cn/cn/ks/wk/ptwk/"
+      ]
+    }
+  ],
+  "gyfyyy_identity_reconciliation": [
+    {
+      "detail_id": "1",
+      "name": "钟南山",
+      "resolution": "按唯一 doctor ID 合并跨科室归属",
+      "relation_count": 1,
+      "departments": [
+        "呼吸与危重症医学科"
+      ],
+      "primary_source_link": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_1.html",
+      "merged_source_links": []
+    },
+    {
+      "detail_id": "36",
+      "name": "黄铮",
+      "resolution": "按唯一 doctor ID 合并跨科室归属",
+      "relation_count": 1,
+      "departments": [
+        "心血管内科"
+      ],
+      "primary_source_link": "https://www.gyfyyy.cn/cn/ks/nk/xxgnk/doctor_36.html",
+      "merged_source_links": []
+    },
+    {
+      "detail_id": "49",
+      "name": "肖洁",
+      "resolution": "按唯一 doctor ID 合并跨科室归属",
+      "relation_count": 1,
+      "departments": [
+        "肾内科"
+      ],
+      "primary_source_link": "https://www.gyfyyy.cn/cn/ks/nk/snk/doctor_49.html",
+      "merged_source_links": []
+    },
+    {
+      "detail_id": "57",
+      "name": "徐评议",
+      "resolution": "按唯一 doctor ID 合并跨科室归属",
+      "relation_count": 1,
+      "departments": [
+        "神经内科"
+      ],
+      "primary_source_link": "https://www.gyfyyy.cn/cn/ks/nk/sjnk/doctor_57.html",
+      "merged_source_links": []
+    },
+    {
+      "detail_id": "68",
+      "name": "曾文铤",
+      "resolution": "按唯一 doctor ID 合并跨科室归属",
+      "relation_count": 1,
+      "departments": [
+        "感染内科"
+      ],
+      "primary_source_link": "https://www.gyfyyy.cn/cn/ks/nk/grnk/doctor_68.html",
+      "merged_source_links": []
+    },
+    {
+      "detail_id": "74",
+      "name": "陈学清",
+      "resolution": "按唯一 doctor ID 合并跨科室归属",
+      "relation_count": 1,
+      "departments": [
+        "消化内科"
+      ],
+      "primary_source_link": "https://www.gyfyyy.cn/cn/ks/nk/xhnk/doctor_74.html",
+      "merged_source_links": []
+    },
+    {
+      "detail_id": "81",
+      "name": "陈小燕",
+      "resolution": "按唯一 doctor ID 合并跨科室归属",
+      "relation_count": 1,
+      "departments": [
+        "内分泌科"
+      ],
+      "primary_source_link": "https://www.gyfyyy.cn/cn/ks/nk/nfbk/doctor_81.html",
+      "merged_source_links": []
+    },
+    {
+      "detail_id": "86",
+      "name": "陈广原",
+      "resolution": "按唯一 doctor ID 合并跨科室归属",
+      "relation_count": 1,
+      "departments": [
+        "老年病科"
+      ],
+      "primary_source_link": "https://www.gyfyyy.cn/cn/ks/nk/lnbk/doctor_86.html",
+      "merged_source_links": []
+    },
+    {
+      "detail_id": "87",
+      "name": "叶慧玲",
+      "resolution": "按唯一 doctor ID 合并跨科室归属",
+      "relation_count": 1,
+      "departments": [
+        "全科医学科"
+      ],
+      "primary_source_link": "https://www.gyfyyy.cn/cn/ks/qtzk/qkyxk/doctor_87.html",
+      "merged_source_links": []
+    },
+    {
+      "detail_id": "90",
+      "name": "余金龙",
+      "resolution": "按唯一 doctor ID 合并跨科室归属",
+      "relation_count": 1,
+      "departments": [
+        "临床心理科"
+      ],
+      "primary_source_link": "https://www.gyfyyy.cn/cn/ks/qtzk/lcxlk/doctor_90.html",
+      "merged_source_links": []
+    }
+  ],
+  "category_errors": [],
+  "detail_errors": [],
+  "category_counts": [
+    [
+      "呼吸与危重症医学科",
+      1
+    ],
+    [
+      "心血管内科",
+      1
+    ],
+    [
+      "肾内科",
+      1
+    ],
+    [
+      "神经内科",
+      1
+    ],
+    [
+      "感染内科",
+      1
+    ],
+    [
+      "消化内科",
+      1
+    ],
+    [
+      "内分泌科",
+      1
+    ],
+    [
+      "老年病科",
+      1
+    ],
+    [
+      "全科医学科",
+      1
+    ],
+    [
+      "临床心理科",
+      1
+    ]
+  ],
+  "priority_counts": {
+    "高": 9,
+    "中": 1
+  },
+  "group_counts": {
+    "慢性病": 5,
+    "疑难重症": 5,
+    "免疫/风湿/感染": 2,
+    "肿瘤": 1,
+    "生殖疾病": 1,
+    "术后恢复/康复": 1
+  },
+  "warning_counts": {},
+  "rows": [
+    {
+      "序号": 1,
+      "医院": "广州医科大学附属第一医院",
+      "姓名": "钟南山",
+      "科室_分类页": "呼吸与危重症医学科",
+      "科室_列表卡片": "呼吸与危重症医学科",
+      "职称_关键词": "教授、博士生导师",
+      "职称身份原文": "中国工程院院士，教授 博士生导师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、疑难重症",
+      "重点疾病标签": "慢性、疑难、危重",
+      "擅长诊疗方向摘录": "哮喘、慢性阻塞性肺病、慢性咳嗽、间质性肺炎等呼吸道疑难杂症。",
+      "亮眼经历线索": "钟南山，中国工程院医药卫生工程学部院士、中国工程院医药卫生工程学部副主任，著名呼吸内科专家、教授，首批国家级有突出贡献专家，呼吸内科博士研究生导师，吸烟与健康医学顾问，国际胸科学会特别会员、亚太地区执委会理事，广东省科协副主席，广州市科协主席，《中华医学杂志》编委、《中华内科杂志》编委会副主任委员、《中华结核和呼吸杂志》编委会主任委员，广州市侨联名誉副主席。 1992年被国家卫生部和人事部授予全国卫生系统模范工作者称号，荣获广东省政府通令嘉奖。 1999年被命名为广州市精神文明建设标兵，并被评为全国100名优秀医生，荣获“广东省优秀共产党员”标兵称号。 2003年，在抗击非典的斗争中，因其杰出的工作表现，于2003年4月被全国总工会授予“五一劳动奖章”称号、被广东省委省政府授予抗击非典特等功臣称号。",
+      "列表简介": "",
+      "详情正文摘录": "钟南山，中国工程院医药卫生工程学部院士、中国工程院医药卫生工程学部副主任，著名呼吸内科专家、教授，首批国家级有突出贡献专家，呼吸内科博士研究生导师，吸烟与健康医学顾问，国际胸科学会特别会员、亚太地区执委会理事，广东省科协副主席，广州市科协主席，《中华医学杂志》编委、《中华内科杂志》编委会副主任委员、《中华结核和呼吸杂志》编委会主任委员，广州市侨联名誉副主席。中共十五大代表，中共第七届广州市委委员，第八、九、十届全国政协委员，广州市第十二届人大代表。 多次被评为广东省、广州市优秀教师、优秀党员、劳动模范，全国卫生文明先进工作者。1990年被国家卫生部授予全国卫生系统优秀留学回国人员称号。1992年被国家卫生部和人事部授予全国卫生系统模范工作者称号，荣获广东省政府通令嘉奖。1995年被评为全国先进工作者。1996年2月当选中国工程院医药卫生工程学部院士。1997年被评为广东省白求恩式先进工作者、被中共广州市委授予模范共产党员称号。1999年被命名为广州市精神文明建设标兵，并被评为全国100名优秀医生，荣获“广东省优秀共产党员”标兵称号。2003年，在抗击非典的斗争中，因其杰出的工作表现，于2003年4月被全国总工会授予“五一劳动奖章”称号、被广东省委省政府授予抗击非典特等功臣称号。2004年荣获了中国卫生领域的最高荣誉——白求恩奖章。 孩提时代 从父亲那儿承袭的品德使我诚挚一生而不失败，从母亲那儿学会无牵无挂，这些组成一篇美丽的童话。 ——歌德 20世纪30年代的中国，军阀混战，争夺地盘和政权，社会动荡，内战频仍，经济凋敝，民不聊生。继之的南京国民政府不断加强独裁专制，官僚资本迅速膨胀，人民过着异乎寻常的悲惨生活。 钟南山，就出生在这样一个年代。 和同时代的人一样，童年在钟南山的记忆里，印象最深刻的便是回响在耳边的空袭警报声、日军战机的轰隆声、无情炮弹的爆炸声和人们在炮弹声中的呼喊声……在钟南山的记忆中，他们的家就有两次被飞机轰炸过。 1937年的冬天，在南京沦陷前夕，钟南山跟随家人西迁至贵阳。在贵州的房子被日军飞机炸掉之后，钟南山一家就跻身在医院的一间临时的小房子里。当时同住在医院里的多是些教授、医生以及他们的家属，于是这些医生们的孩子就成为一起玩耍的伙伴了，尽管钟南山是其中较小的一个，但却常常表现出独立坚强和充满自信的个性。 抗战胜利后的第二年，钟南山一家乘船来到了广州，他和博学多才的父母亲一样，与书结缘了，常常沉迷在书的世界里。书，像是一个奇妙的世界，深深地吸引着钟南山。在家庭的耳濡目染中，钟南山渐渐对医学有了兴趣。父亲在美国学成回国后，从事乙型脑炎病毒的培养和分离研究，用自己的薪水买来小白鼠在自家的书房里做起了实验，而这引起了钟南山极大的兴趣，主动担任起家里的“白鼠饲养员”，也由此开始逐步了解到一些最基本的医学、医疗知识。 新中国成立后，广州解放，钟南山的心里特别激动，他觉得，总有一天，也要像千千万万的英雄一样，为这伟大的祖国做出贡献，让大家都过上好日子！在华南师范大学附中读书时，一位老师的话让钟南山十分难忘：“人不应该单纯生活在现实中，还应生活在理想中。人如果没有理想，会将很小的事情看得很大，耿耿于怀；人如果有理想，身边即使有不愉快的事情，与自己的抱负相比也会很小。”优异的成绩，善良的品性，少年时代的钟南山开始满怀激情和憧憬，要像父母亲一样，当一名治病救人的好医生！ 风雨十六年 “我决心竭尽全力除人类之病痛，助健康之完美，维护医术的圣洁和荣誉。救死扶伤，不辞艰辛，执着追求，为祖国医药卫生事业的发展和人类身心健康奋斗终生。” ——《医学生誓词》 1955年，年仅19岁的钟南山以优异成绩考入北京医学院医疗系，实现了从医理想的第一步。 和所有优秀生一样，钟南山上课特别认真，课余时间大多待在图书馆里。然而，钟南山不仅仅是个书虫，还是个活跃分子，他总是积极参加各种文体活动，喜欢和同学们打成一片，并成了名副其实的运动健将，田径、游泳、篮球、举重都是他的至爱，他常说，没有强壮的身体，没有健康的生命，就谈不上学医，更谈不上救人治病。对体育运动的酷爱，不仅为钟南山写下了一生中辉煌的一笔，也为钟南山带来了一生中最亲密的伴侣——妻子李少芬。在一位朋友家里，钟南山认识了当时国家女子篮球队队员李少芬，他们一见如故，之后在学业上互相帮助，在球场上互相...",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_1.html",
+      "采集入口": "https://www.gyfyyy.cn/cn/ks/",
+      "采集方式": "官网静态科室树+同科室路径静态医生详情页",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 2,
+      "医院": "广州医科大学附属第一医院",
+      "姓名": "黄铮",
+      "科室_分类页": "心血管内科",
+      "科室_列表卡片": "心血管内科",
+      "职称_关键词": "主任医师、教授、硕士",
+      "职称身份原文": "教授 主任医师 硕士研究生导师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、疑难重症",
+      "重点疾病标签": "冠心病、疑难、危重",
+      "擅长诊疗方向摘录": "心血管常见及疑难危重疾病诊治，尤其擅长冠心病、外周血管疾病等介入诊治手术。",
+      "亮眼经历线索": "",
+      "列表简介": "",
+      "详情正文摘录": "全国冠心病介入培训导师",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/xxgnk/doctor_36.html",
+      "采集入口": "https://www.gyfyyy.cn/cn/ks/",
+      "采集方式": "官网静态科室树+同科室路径静态医生详情页",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 3,
+      "医院": "广州医科大学附属第一医院",
+      "姓名": "肖洁",
+      "科室_分类页": "肾内科",
+      "科室_列表卡片": "肾内科",
+      "职称_关键词": "主任医师、科主任",
+      "职称身份原文": "肾内科主任，主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、免疫/风湿/感染",
+      "重点疾病标签": "慢性、风湿、感染、红斑狼疮、类风湿",
+      "擅长诊疗方向摘录": "各种肾脏内科疾病包括肾小球疾病、尿路感染与急、慢性肾功能衰竭的诊治及各种风湿内科疾病包括系统性红斑狼疮、类风湿关节炎、脊柱关节病与痛风等的诊治。",
+      "亮眼经历线索": "",
+      "列表简介": "",
+      "详情正文摘录": "",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/snk/doctor_49.html",
+      "采集入口": "https://www.gyfyyy.cn/cn/ks/",
+      "采集方式": "官网静态科室树+同科室路径静态医生详情页",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 4,
+      "医院": "广州医科大学附属第一医院",
+      "姓名": "徐评议",
+      "科室_分类页": "神经内科",
+      "科室_列表卡片": "神经内科",
+      "职称_关键词": "主任医师、教授、博士生导师",
+      "职称身份原文": "教授 主任医师 博士生导师",
+      "重点优先级": "高",
+      "重点关注范围": "疑难重症",
+      "重点疾病标签": "疑难、罕见",
+      "擅长诊疗方向摘录": "中枢神经变性病、脑血管病、顽固性头痛、头晕及睡眠障碍、癫痫发作性疾病、神经肌肉遗传病等常见、疑难、罕见性疾病的诊断治疗。",
+      "亮眼经历线索": "",
+      "列表简介": "",
+      "详情正文摘录": "",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/sjnk/doctor_57.html",
+      "采集入口": "https://www.gyfyyy.cn/cn/ks/",
+      "采集方式": "官网静态科室树+同科室路径静态医生详情页",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 5,
+      "医院": "广州医科大学附属第一医院",
+      "姓名": "曾文铤",
+      "科室_分类页": "感染内科",
+      "科室_列表卡片": "感染内科",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "肿瘤、免疫/风湿/感染、疑难重症",
+      "重点疾病标签": "肝癌、感染、重症、MDT",
+      "擅长诊疗方向摘录": "病毒性肝炎、肝硬化、脂肪肝及中晚期肝癌等多种肝病及其并发症诊治、对乙型病毒性肝炎临床治愈、重症肝炎的抢救、不明原因发热诊治有丰富的临床经验。",
+      "亮眼经历线索": "主任医师、医学硕士、广东省肝脏病学会常务理事、广东省中西医结合肝病学会副主任委员、广州市医学会感染病学分会副主任委员、广州市医师协会肝病医师分会副主任委员、广东省医疗行业委员会感染管理学会常委、广东省肝脏病学会肝癌MDT委员会常委。",
+      "列表简介": "",
+      "详情正文摘录": "主任医师、医学硕士、广东省肝脏病学会常务理事、广东省中西医结合肝病学会副主任委员、广州市医学会感染病学分会副主任委员、广州市医师协会肝病医师分会副主任委员、广东省医疗行业委员会感染管理学会常委、广东省肝脏病学会肝癌MDT委员会常委。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/grnk/doctor_68.html",
+      "采集入口": "https://www.gyfyyy.cn/cn/ks/",
+      "采集方式": "官网静态科室树+同科室路径静态医生详情页",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 6,
+      "医院": "广州医科大学附属第一医院",
+      "姓名": "陈学清",
+      "科室_分类页": "消化内科",
+      "科室_列表卡片": "消化内科",
+      "职称_关键词": "主任医师、教授",
+      "职称身份原文": "教授 主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "",
+      "重点疾病标签": "",
+      "擅长诊疗方向摘录": "主攻消化内科、消化内镜；各种消化系疾病：胃食管反流病、胆胰疾病、肠道炎症性疾病和消化内镜诊治。",
+      "亮眼经历线索": "",
+      "列表简介": "",
+      "详情正文摘录": "",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/xhnk/doctor_74.html",
+      "采集入口": "https://www.gyfyyy.cn/cn/ks/",
+      "采集方式": "官网静态科室树+同科室路径静态医生详情页",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 7,
+      "医院": "广州医科大学附属第一医院",
+      "姓名": "陈小燕",
+      "科室_分类页": "内分泌科",
+      "科室_列表卡片": "内分泌科",
+      "职称_关键词": "主任医师、科主任",
+      "职称身份原文": "内分泌科主任，主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、生殖疾病",
+      "重点疾病标签": "高血压、糖尿病、月经",
+      "擅长诊疗方向摘录": "糖尿病、甲状腺、肾上腺及垂体疾病;高血脂、高尿酸、骨质疏松、内分泌性高血压、月经异常、发育异常等的诊治。",
+      "亮眼经历线索": "",
+      "列表简介": "",
+      "详情正文摘录": "",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/nfbk/doctor_81.html",
+      "采集入口": "https://www.gyfyyy.cn/cn/ks/",
+      "采集方式": "官网静态科室树+同科室路径静态医生详情页",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 8,
+      "医院": "广州医科大学附属第一医院",
+      "姓名": "陈广原",
+      "科室_分类页": "老年病科",
+      "科室_列表卡片": "老年病科",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病",
+      "重点疾病标签": "高血压、糖尿病、代谢",
+      "擅长诊疗方向摘录": "糖尿病及并发症，各种内分泌代谢疾病的诊治。擅长于糖尿病、甲状腺疾病【甲亢、甲减、甲状腺炎、甲状腺结节】、垂体-肾上腺疾病、继发性高血压、骨质疏松症、生长发育异常等疾病的诊治。",
+      "亮眼经历线索": "",
+      "列表简介": "",
+      "详情正文摘录": "",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/lnbk/doctor_86.html",
+      "采集入口": "https://www.gyfyyy.cn/cn/ks/",
+      "采集方式": "官网静态科室树+同科室路径静态医生详情页",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 9,
+      "医院": "广州医科大学附属第一医院",
+      "姓名": "叶慧玲",
+      "科室_分类页": "全科医学科",
+      "科室_列表卡片": "全科医学科",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "术后恢复/康复、疑难重症",
+      "重点疾病标签": "康复、疑难",
+      "擅长诊疗方向摘录": "内科常见病及疑难疾病。擅长于心、脑血管疾病、老年人骨关节病、骨质疏松等病症的诊治，对老年养生保健及康复治疗有较高的造诣。",
+      "亮眼经历线索": "主任医师 全科医学硕士研究生导师 广州医科大学附属第一医院全科医学科科主任 广州医科大学附属第一医院全科医学教研室主任 广州医科大学附属第一医院全科住院医师规范化培训基地主任 社会任职： 广东省基层卫生首席专家 广东省医学会全科医学分会副主任委员 广东省医师协会全科医师分会副主任委员 广州市医学会全科医学分会主任委员",
+      "列表简介": "",
+      "详情正文摘录": "主任医师 全科医学硕士研究生导师 广州医科大学附属第一医院全科医学科科主任 广州医科大学附属第一医院全科医学教研室主任 广州医科大学附属第一医院全科住院医师规范化培训基地主任 社会任职： 广东省基层卫生首席专家 广东省医学会全科医学分会副主任委员 广东省医师协会全科医师分会副主任委员 广州市医学会全科医学分会主任委员",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/qtzk/qkyxk/doctor_87.html",
+      "采集入口": "https://www.gyfyyy.cn/cn/ks/",
+      "采集方式": "官网静态科室树+同科室路径静态医生详情页",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 10,
+      "医院": "广州医科大学附属第一医院",
+      "姓名": "余金龙",
+      "科室_分类页": "临床心理科",
+      "科室_列表卡片": "临床心理科",
+      "职称_关键词": "副主任医师",
+      "职称身份原文": "副主任医师",
+      "重点优先级": "中",
+      "重点关注范围": "",
+      "重点疾病标签": "",
+      "擅长诊疗方向摘录": "精神分裂症、抑郁症、双相障碍、焦虑症、强迫症、失眠症，及儿童青少年精神疾病与心理问题的心理治疗、催眠治疗和药物治疗。",
+      "亮眼经历线索": "广州市精神科医师协会副主任委员。",
+      "列表简介": "",
+      "详情正文摘录": "广州市精神科医师协会副主任委员。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/qtzk/lcxlk/doctor_90.html",
+      "采集入口": "https://www.gyfyyy.cn/cn/ks/",
+      "采集方式": "官网静态科室树+同科室路径静态医生详情页",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    }
+  ]
+}
