@@ -39,7 +39,14 @@ MASTER_XLSX_PATH = SOURCE_DIR / f"{MASTER_BASENAME}.xlsx"
 MASTER_PREVIEW_PATH = WORK_DIR / f"{MASTER_BASENAME}_preview.png"
 MASTER_REPORT_PATH = SOURCE_DIR / f"{MASTER_BASENAME}_更新报告.md"
 BUNDLED_NODE = Path(
-    r"C:\Users\zhouxinting\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe"
+    Path.home()
+    / ".cache"
+    / "codex-runtimes"
+    / "codex-primary-runtime"
+    / "dependencies"
+    / "node"
+    / "bin"
+    / "node.exe"
 )
 
 BASE_HEADERS = [
@@ -234,6 +241,7 @@ HIGHLIGHT_TERMS = [
 
 GENERIC_ADAPTER_ID = "generic_official_template"
 GDSKIN_ADAPTER_ID = "gdskin_aspnet_expert"
+NY5Y_ADAPTER_ID = "ny5y_official_expert"
 GENERIC_MAX_PAGES_DEFAULT = 60
 GDSKIN_ENTRY_METADATA = {
     "901": {
@@ -301,6 +309,22 @@ GDSKIN_DOCTOR_ROLE_TERMS = [
     "医生",
     "首席专家",
 ]
+NY5Y_ENTRY_METADATA = {
+    "100": {
+        "path": "/zhuanjia_mingyi.php",
+        "category_name": "专家风采",
+        "affiliation": "南方医科大学第五附属医院（官网专家风采栏目）",
+    },
+    "162": {
+        "path": "/zhuanjia_lingnan.php",
+        "category_name": "岭南名医",
+        "affiliation": "南方医科大学第五附属医院（官网岭南名医荣誉栏目）",
+    },
+}
+NY5Y_GENERAL_CATEGORIES = {"专家风采", "岭南名医"}
+NY5Y_EXPECTED_ENTRY_COUNTS = {"100": 133, "162": 80}
+NY5Y_EXPECTED_UNIQUE_COUNT = 134
+NY5Y_EXPECTED_CROSS_ENTRY_DUPLICATES = 79
 GENERIC_DETAIL_PATH_HINTS = [
     "doctor",
     "expert",
@@ -910,6 +934,8 @@ def dedicated_adapter_for(entry_url: str) -> str:
         ]
         if entry_ids and entry_ids[0] in GDSKIN_ENTRY_METADATA:
             return GDSKIN_ADAPTER_ID
+    if ny5y_entry_kind(entry_url):
+        return NY5Y_ADAPTER_ID
     if "gzzoc.org.cn" in host and "/expert-introduction" in path:
         return "gzzoc_drupal_doctor"
     if "nbkjyy.mil.cn" in host and "/expert" in path:
@@ -1000,9 +1026,36 @@ def gdskin_detail_id(url: str | None) -> str:
     return pairs[0][1]
 
 
+def ny5y_entry_kind(url: str | None) -> str:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "ny5y.cn":
+        return ""
+    pairs = parse_qsl(parsed.query, keep_blank_values=True)
+    if len(pairs) != 1 or pairs[0][0].lower() != "id":
+        return ""
+    entry_id = pairs[0][1]
+    metadata = NY5Y_ENTRY_METADATA.get(entry_id)
+    if not metadata or parsed.path.lower() != metadata["path"]:
+        return ""
+    return entry_id
+
+
+def ny5y_detail_id(url: str | None) -> str:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "ny5y.cn" or parsed.path.lower() != "/yisheng_xq.php":
+        return ""
+    pairs = parse_qsl(parsed.query, keep_blank_values=True)
+    if len(pairs) != 1 or pairs[0][0].lower() != "id" or not pairs[0][1].isdigit():
+        return ""
+    return pairs[0][1]
+
+
 def generic_detail_identity(url: str) -> str:
     detail_id = gdskin_detail_id(url)
-    return f"gdskin:{detail_id}" if detail_id else canonical_url(url)
+    if detail_id:
+        return f"gdskin:{detail_id}"
+    detail_id = ny5y_detail_id(url)
+    return f"ny5y:{detail_id}" if detail_id else canonical_url(url)
 
 
 def is_same_official_host(base_url: str, candidate_url: str) -> bool:
@@ -1169,6 +1222,8 @@ def looks_like_person_name(value: str) -> bool:
 def matches_generic_directory_detail_url(entry_url: str, candidate_url: str) -> bool:
     if gdskin_entry_id(entry_url):
         return bool(gdskin_detail_id(candidate_url))
+    if ny5y_entry_kind(entry_url):
+        return bool(ny5y_detail_id(candidate_url))
     entry_match = re.fullmatch(r"/section/(\d+)/?", urlparse(entry_url).path)
     if comparable_host(entry_url) != "smukqyy.cn" or not entry_match:
         return True
@@ -1247,6 +1302,8 @@ def generic_link_score(href: str, context: str, entry_url: str = "") -> int:
         has_name = bool(extract_person_name(context))
         has_doctor_role = any(term in context for term in GDSKIN_DOCTOR_ROLE_TERMS)
         return 12 if has_name and has_doctor_role else -10
+    if ny5y_entry_kind(entry_url) and ny5y_detail_id(href):
+        return 12
     if any(hint in path for hint in GENERIC_PATH_BLOCK_HINTS):
         return -10
 
@@ -1286,6 +1343,7 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
     rows: list[dict[str, str]] = []
     seen: set[str] = set()
     gdskin_id = gdskin_entry_id(entry_url)
+    ny5y_id = ny5y_entry_kind(entry_url)
     strict_smukq_directory = comparable_host(entry_url) == "smukqyy.cn" and bool(
         re.fullmatch(r"/section/\d+/?", urlparse(entry_url).path)
     )
@@ -1300,13 +1358,13 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
             continue
         context = (
             strip_profile_navigation_text(compact_visible_text(anchor, 700))
-            if gdskin_id
+            if gdskin_id or ny5y_id
             else nearest_card_text(anchor)
         )
         score = generic_link_score(href, context, entry_url)
         if score < 6 and not strict_smukq_directory:
             continue
-        key = canonical_url(href)
+        key = generic_detail_identity(href)
         if key in seen:
             continue
         seen.add(key)
@@ -1319,6 +1377,8 @@ def discover_generic_detail_links(html: str, page_url: str, entry_url: str) -> l
                 "department": (
                     GDSKIN_ENTRY_METADATA[gdskin_id]["category_name"]
                     if gdskin_id
+                    else NY5Y_ENTRY_METADATA[ny5y_id]["category_name"]
+                    if ny5y_id
                     else infer_department(context)
                 ),
                 "description": clip(context, 700),
@@ -1356,6 +1416,9 @@ def discover_gdskin_excluded_links(html: str, page_url: str, entry_url: str) -> 
 
 
 def discover_generic_list_pages(entry_url: str, html: str, max_pages: int) -> list[str]:
+    if ny5y_entry_kind(entry_url):
+        # Owner 指定的两个 NY5Y 入口均为单页完整目录；其他栏目不得自行扩围。
+        return [entry_url]
     soup = BeautifulSoup(html, "html.parser")
     pages = [entry_url]
     seen = {canonical_url(entry_url)}
@@ -1630,6 +1693,43 @@ def parse_generic_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
         "highlight_navigation_polluted": "yes" if highlight_navigation_polluted else "no",
         "profile_text": clean_text(profile_text),
         "title_text": first_nonempty(h1, title),
+    }
+
+
+def parse_ny5y_detail(html: str, fallback: dict[str, str]) -> dict[str, str]:
+    soup = BeautifulSoup(html, "html.parser")
+
+    def selected_text(selector: str, max_len: int) -> str:
+        element = soup.select_one(selector)
+        return clip(element.get_text(" ", strip=True), max_len) if element else ""
+
+    name_element = soup.select_one(".yuanzhang")
+    direct_name = clean_text(
+        " ".join(str(value) for value in name_element.find_all(string=True, recursive=False))
+    ) if name_element else ""
+    name = first_nonempty(direct_name, fallback.get("name", ""))
+    department_raw = selected_text(".suoshulei", 200)
+    department = clean_generic_department(re.sub(r"^进入\s*", "", department_raw))
+    if department in NY5Y_GENERAL_CATEGORIES:
+        department = ""
+    title_field = first_nonempty(selected_text(".xq_zhicheng", 500), fallback.get("list_title", ""))
+    specialty_raw = selected_text(".xq_content", 1200)
+    specialty = clean_text(re.sub(r"^\s*擅长\s*[:：]\s*", "", specialty_raw))
+    profile_text = selected_text(".xq_xiangxi_jieshao_xq", 6000)
+    raw_highlights = extract_sentences(profile_text, HIGHLIGHT_TERMS)
+    return {
+        "name": clean_text(name),
+        "department": clean_text(department),
+        "department_raw": clean_text(department_raw),
+        # “进入”是详情页科室链接的固定 UI 前缀，不属于正文污染。
+        "department_polluted": "no",
+        "title_field": clean_text(title_field),
+        "specialty": clean_text(specialty),
+        "specialty_raw": clean_text(specialty_raw),
+        "specialty_navigation_polluted": "yes" if contains_navigation_text(specialty) else "no",
+        "highlight_navigation_polluted": "yes" if contains_navigation_text(raw_highlights) else "no",
+        "profile_text": clean_text(profile_text),
+        "title_text": clean_text(name),
     }
 
 
@@ -2312,12 +2412,23 @@ def round_robin_generic_items(
     items: list[dict[str, str]],
     entry_urls: list[str],
     max_items: int | None,
+    spread: bool = False,
 ) -> list[dict[str, str]]:
     grouped: dict[str, list[dict[str, str]]] = {canonical_url(url): [] for url in entry_urls}
     for item in items:
         grouped.setdefault(canonical_url(item.get("entry_url", "")), []).append(item)
     for values in grouped.values():
-        values.sort(key=lambda item: item["source_link"])
+        if spread and max_items and len(values) > 1:
+            sample_count = min(max_items, len(values))
+            spread_indices = {
+                round(index * (len(values) - 1) / (sample_count - 1))
+                for index in range(sample_count)
+            }
+            values[:] = [values[index] for index in sorted(spread_indices)] + [
+                item for index, item in enumerate(values) if index not in spread_indices
+            ]
+        else:
+            values.sort(key=lambda item: item["source_link"])
 
     ordered: list[dict[str, str]] = []
     offsets = {key: 0 for key in grouped}
@@ -2431,7 +2542,7 @@ def collect_generic(
 
     by_link: dict[str, dict[str, str]] = {}
     for row in raw_rows:
-        key = canonical_url(row["source_link"])
+        key = generic_detail_identity(row["source_link"])
         item = by_link.setdefault(
             key,
             {
@@ -2453,7 +2564,10 @@ def collect_generic(
         item_department = item.get("department", "")
         if row_department and (
             not item_department
-            or (item_department in GDSKIN_GENERAL_CATEGORIES and row_department not in GDSKIN_GENERAL_CATEGORIES)
+            or (
+                item_department in (GDSKIN_GENERAL_CATEGORIES | NY5Y_GENERAL_CATEGORIES)
+                and row_department not in (GDSKIN_GENERAL_CATEGORIES | NY5Y_GENERAL_CATEGORIES)
+            )
             or len(row_department) > len(item_department)
         ):
             item["department"] = row_department
@@ -2468,11 +2582,21 @@ def collect_generic(
             pages.append(row["list_page"])
             item["list_pages"] = "；".join(pages)
 
-    detail_items = round_robin_generic_items(list(by_link.values()), entry_urls, max_doctors)
+    detail_items = round_robin_generic_items(
+        list(by_link.values()),
+        entry_urls,
+        max_doctors,
+        spread=target.adapter_id == NY5Y_ADAPTER_ID,
+    )
     if target.adapter_id == GDSKIN_ADAPTER_ID:
         for item in detail_items:
             if item.get("department") in GDSKIN_GENERAL_CATEGORIES:
                 # 首席/知名专家是官网荣誉分组，不是院内科室；官网未给出真实科室时保持空白。
+                item["department"] = ""
+    elif target.adapter_id == NY5Y_ADAPTER_ID:
+        for item in detail_items:
+            if item.get("department") in NY5Y_GENERAL_CATEGORIES:
+                # 专家风采/岭南名医是官网栏目或荣誉分组，不是院内科室。
                 item["department"] = ""
 
     existing_links = collect_existing_profile_links()
@@ -2498,6 +2622,8 @@ def collect_generic(
             detail = (
                 parse_gdskin_detail(detail_html, item)
                 if gdskin_detail_id(link)
+                else parse_ny5y_detail(detail_html, item)
+                if ny5y_detail_id(link)
                 else parse_generic_detail(detail_html, item)
             )
         else:
@@ -2527,7 +2653,9 @@ def collect_generic(
         )
         priority, groups, tags = classify_generic_record(valid_doctor_record, combined_text, title_hits)
         specialty = clip(detail.get("specialty"), 520) if valid_doctor_record else ""
-        highlights = extract_clean_highlights(combined_text)
+        highlights = extract_clean_highlights(
+            detail.get("profile_text", "") if ny5y_detail_id(link) else combined_text
+        )
 
         warnings: list[str] = []
         if detail_status != 200:
@@ -2561,7 +2689,25 @@ def collect_generic(
                 "重点关注范围": "、".join(groups),
                 "重点疾病标签": "、".join(tags),
                 "擅长诊疗方向摘录": specialty,
-                "亮眼经历线索": highlights,
+                "亮眼经历线索": clip(
+                    clean_text(
+                        " ".join(
+                            part
+                            for part in [
+                                "岭南名医"
+                                if any(
+                                    ny5y_entry_kind(entry_url) == "162"
+                                    for entry_url in item.get("all_entry_urls", "").split("；")
+                                    if entry_url
+                                )
+                                else "",
+                                highlights,
+                            ]
+                            if part
+                        )
+                    ),
+                    520,
+                ),
                 "列表简介": clip(item.get("description", ""), 700),
                 "详情正文摘录": clip(detail.get("profile_text", ""), 1800),
                 "来源类型": "医院官网",
@@ -2570,6 +2716,8 @@ def collect_generic(
                 "采集方式": (
                     "医院官网 ASP.NET 专家团队：GridView 列表+详情页结构化抽取"
                     if gdskin_detail_id(link)
+                    else "医院官网专家栏目：指定入口普查+医生详情 DOM 结构化抽取"
+                    if ny5y_detail_id(link)
                     else "医院官网通用模板：列表页自动发现+详情页文本抽取"
                 ),
                 "采集日期": today,
@@ -2610,29 +2758,44 @@ def collect_generic(
             seen_sample_entries.add(entry_key)
             sample_entry_urls.append(entry_url)
     sample_entry_categories = [
-        GDSKIN_ENTRY_METADATA[entry_id]["category_name"]
+        (
+            GDSKIN_ENTRY_METADATA[entry_id]["category_name"]
+            if (entry_id := gdskin_entry_id(entry_url))
+            else NY5Y_ENTRY_METADATA[ny5y_id]["category_name"]
+        )
         for entry_url in sample_entry_urls
-        if (entry_id := gdskin_entry_id(entry_url))
+        if (entry_id := gdskin_entry_id(entry_url)) or (ny5y_id := ny5y_entry_kind(entry_url))
     ]
     entry_page_counts = Counter(category.get("entry_url", "") for category in categories)
     entry_reconnaissance: list[dict[str, Any]] = []
     for entry_url in entry_urls:
         entry_id = gdskin_entry_id(entry_url)
+        ny5y_id = ny5y_entry_kind(entry_url)
         candidate_count = entry_candidate_counts.get(entry_url, 0)
-        metadata = GDSKIN_ENTRY_METADATA.get(entry_id, {})
+        metadata = (
+            GDSKIN_ENTRY_METADATA.get(entry_id, {})
+            if entry_id
+            else NY5Y_ENTRY_METADATA.get(ny5y_id, {})
+        )
         entry_reconnaissance.append(
             {
                 "entry_url": entry_url,
                 "category_name": metadata.get("category_name", f"入口 {entry_id or entry_url}"),
                 "page_nature": (
                     "医院官网 ASP.NET GridView 专家列表"
-                    if candidate_count
+                    if entry_id and candidate_count
+                    else "医院官网单页专家名单"
+                    if ny5y_id and candidate_count
                     else "医院官网专家团队分类页（当前未列出可采医生详情）"
                 ),
                 "unique_detail_count": candidate_count,
                 "list_page_count": entry_page_counts.get(entry_url, 0),
                 "affiliation": metadata.get("affiliation", target.hospital),
-                "independent_entity_check": "未发现独立挂牌机构；页面保持在医院官网同站专家团队栏目",
+                "independent_entity_check": (
+                    "未发现独立院区归属；页面保持在本院官网同站专家栏目"
+                    if ny5y_id
+                    else "未发现独立挂牌机构；页面保持在医院官网同站专家团队栏目"
+                ),
             }
         )
 
@@ -2673,6 +2836,8 @@ def collect_generic(
             "generic_template": "yes" if target.adapter_id == GENERIC_ADAPTER_ID else "no",
             "site_adapter_profile": (
                 "gdskin_aspnet_gridview" if target.adapter_id == GDSKIN_ADAPTER_ID else "generic"
+                if target.adapter_id != NY5Y_ADAPTER_ID
+                else "ny5y_strict_expert_dom"
             ),
             "generic_max_pages": max_pages,
             "sample_entry_coverage_count": len(sample_entry_urls),
@@ -2748,6 +2913,79 @@ def validate_gdskin_full_append(payload: dict[str, Any]) -> None:
 
     if errors:
         raise RuntimeError("GDSKIN 全量写入前门禁失败：" + "；".join(errors))
+
+
+def validate_ny5y_full_append(payload: dict[str, Any]) -> None:
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    errors: list[str] = []
+
+    if int(meta.get("unique_doctor_count") or 0) != NY5Y_EXPECTED_UNIQUE_COUNT:
+        errors.append(
+            f"医生记录预期 {NY5Y_EXPECTED_UNIQUE_COUNT}，实际 {meta.get('unique_doctor_count', 0)}"
+        )
+    if len(rows) != NY5Y_EXPECTED_UNIQUE_COUNT:
+        errors.append(f"结果行数预期 {NY5Y_EXPECTED_UNIQUE_COUNT}，实际 {len(rows)}")
+    if int(meta.get("unique_candidate_count") or 0) != NY5Y_EXPECTED_UNIQUE_COUNT:
+        errors.append(
+            f"去重候选预期 {NY5Y_EXPECTED_UNIQUE_COUNT}，实际 {meta.get('unique_candidate_count', 0)}"
+        )
+    expected_memberships = sum(NY5Y_EXPECTED_ENTRY_COUNTS.values())
+    if int(meta.get("candidate_membership_count") or 0) != expected_memberships:
+        errors.append(
+            f"入口候选关系预期 {expected_memberships}，实际 {meta.get('candidate_membership_count', 0)}"
+        )
+    if int(meta.get("cross_entry_duplicate_count") or 0) != NY5Y_EXPECTED_CROSS_ENTRY_DUPLICATES:
+        errors.append(
+            "跨入口重复预期 "
+            f"{NY5Y_EXPECTED_CROSS_ENTRY_DUPLICATES}，实际 {meta.get('cross_entry_duplicate_count', 0)}"
+        )
+    if int(meta.get("category_error_count") or 0) != 0:
+        errors.append(f"列表读取失败 {meta.get('category_error_count', 0)} 条")
+    if int(meta.get("detail_error_count") or 0) != 0:
+        errors.append(f"详情读取失败 {meta.get('detail_error_count', 0)} 条")
+    if int(meta.get("excluded_non_doctor_count") or 0) != 0:
+        errors.append(f"非医生排除预期 0，实际 {meta.get('excluded_non_doctor_count', 0)}")
+
+    actual_entry_counts: dict[str, int] = {}
+    for entry_url, count in meta.get("entry_candidate_counts", {}).items():
+        if entry_id := ny5y_entry_kind(str(entry_url)):
+            actual_entry_counts[entry_id] = int(count)
+    for entry_id, expected_count in NY5Y_EXPECTED_ENTRY_COUNTS.items():
+        actual_count = actual_entry_counts.get(entry_id)
+        if actual_count != expected_count:
+            errors.append(f"入口 {entry_id} 唯一详情预期 {expected_count}，实际 {actual_count}")
+
+    source_ids = [ny5y_detail_id(str(row.get("来源链接") or "")) for row in rows]
+    if any(not source_id for source_id in source_ids):
+        errors.append("存在非授权 yisheng_xq.php?id=<数字> 来源")
+    if len({source_id for source_id in source_ids if source_id}) != len(rows):
+        errors.append("结果中存在重复来源详情 ID")
+
+    prefixed_specialties = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if re.match(r"^\s*擅长\s*[:：]", str(row.get("擅长诊疗方向摘录") or ""))
+    ]
+    if prefixed_specialties:
+        errors.append("擅长字段仍保留前缀：" + "、".join(prefixed_specialties[:10]))
+
+    huang_rows = [row for row in rows if clean_text(str(row.get("姓名") or "")) == "黄艺洪"]
+    if len(huang_rows) != 1:
+        errors.append(f"黄艺洪记录预期 1，实际 {len(huang_rows)}")
+    else:
+        huang = huang_rows[0]
+        if clean_text(str(huang.get("科室_分类页") or "")):
+            errors.append("黄艺洪真实科室应保持空白")
+        if "科室需人工复核" not in str(huang.get("异常提示") or ""):
+            errors.append("黄艺洪缺少科室需人工复核标记")
+        if "岭南名医" not in " ".join(
+            [str(huang.get("职称身份原文") or ""), str(huang.get("亮眼经历线索") or "")]
+        ):
+            errors.append("黄艺洪缺少岭南名医官方荣誉证据")
+
+    if errors:
+        raise RuntimeError("NY5Y 全量写入前门禁失败：" + "；".join(errors))
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -3152,7 +3390,7 @@ def main() -> None:
     )
 
     if (
-        target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID}
+        target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID}
         and not args.trial_only
         and not args.single_output
         and not args.allow_generic_append
@@ -3167,7 +3405,7 @@ def main() -> None:
         payload = collect_gzzoc(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id == "nbkjyy_static_expert":
         payload = collect_nbkj(target, args.today, max_doctors=max_doctors)
-    elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID}:
+    elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID}:
         payload = collect_generic(target, args.today, max_doctors=max_doctors, max_pages=args.max_pages)
     else:
         raise RuntimeError(f"暂不支持的适配器：{target.adapter_id}")
@@ -3217,6 +3455,8 @@ def main() -> None:
 
     if target.adapter_id == GDSKIN_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdskin_full_append(payload)
+    if target.adapter_id == NY5Y_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_ny5y_full_append(payload)
 
     safe_name = safe_file_part(target.hospital)
     json_path = WORK_DIR / f"{safe_name}_official_doctors_payload.json"
