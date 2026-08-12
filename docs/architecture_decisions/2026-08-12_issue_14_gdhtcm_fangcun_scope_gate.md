@@ -70,6 +70,22 @@
 
 在 owner 给出唯一裁决并同步固定提示词前，禁止试采、禁止 `--allow-generic-append`、禁止写总底表。
 
+## Owner 最终范围裁决与台账工件
+
+2026-08-12，Claude owner `nancywrayg57-jpg` 在 PR #16 明确裁决选择选项 3：**跳过本院**，并明确否决仅采 `名医荟萃` 18 位保守子集。裁决理由为该子集仅约占官网自述 200+ 专家的 9%，且精选集合不能代表芳村分院全院采集完成。
+
+Codex 已按 owner 指令只修改台账 `入口台账` 工作表序号 18（Excel 第 19 行）的三个目标单元格：
+
+| 单元格 | 字段 | 更新后内容 |
+|---|---|---|
+| `V19` | 人工复核结果 | `跳过-无全院官方目录入口` |
+| `W19` | 人工备注 | 两个指定 URL 的实际 1 人范围、院区 200+ 与精选 18 人非全院差异、未采集/未写总表和复排条件的精简证据摘要 |
+| `X19` | 更新时间 | `2026-08-12` |
+
+使用 `@oai/artifact-tool` 导入、编辑、导出并重新导入验证；全工作簿逻辑差异只有上述三格，三格公式均为空且格式未变化；五个工作表均完成渲染检查，目标备注完整可见；公式错误扫描为 0。更新后台账 SHA-256 为 `42B0942B2ADCA9F2B250BEACB8A0E8F679F49A6B62B50D6FECF8AC7FBF96E56C`。
+
+当前停止点为 `SKIP_AWAITING_OWNER_AUDIT`：等待 owner 审计台账工件、合并 PR #16 并关闭 Issue #14。三项门禁全部完成前不得领取 owner 预告的台账序号 22 或任何其他 Issue；若 owner 对本工件提出返修，仅在 Issue #14 原分支和 PR #16 范围内最小修正。
+
 ## 总底表保护证明
 
 - 总底表仍为 2,299 行，本院和别名 `广州市慈善医院` 均为 0 行。
@@ -93,25 +109,38 @@
 
 本轮只新增状态文档并更新固定提示词，没有修改采集、写表或画像逻辑，因此未运行与结果无关的 39 项业务测试。必要验证为：普通 HTTPS 可达性、页面结构和院区证据、总底表哈希与目标医院 0 行、提交范围和 `git diff --check`。
 
+owner 跳过裁决后的返修只涉及台账三格和状态文档，未修改采集器、总底表写入器或画像逻辑，因此仍不运行与结果无关的 39 项业务测试。新增必要验证为：工作簿导入/导出闭环、目标值与公式检查、全工作簿逻辑差异、目标单元格格式保持、公式错误扫描及五工作表视觉渲染。
+
+### Git Data API 本地 blob 引用失败
+
+- 阻塞：首次创建远端 tree 时 GitHub 返回 `tree.sha ... is not a valid blob (HTTP 422)`；失败发生在 tree 创建阶段，远端分支 ref 未变化。
+- 根因：推送器直接把本地 Git 对象库中的 blob SHA 写入 GitHub tree；新文件内容尚未作为 blob 上传到远端对象库，因此 GitHub 无法解析该 SHA。
+- 解决：先逐文件按原始字节读取并以 base64 调用 Git Blobs API，核验远端返回 SHA 与本地提交 blob SHA 完全一致，再创建 tree、commit，并以 `force=false` 更新 ref。
+- 防复发：Git Data API 推送任何新内容时固定执行 `create blob → verify blob SHA → create tree → verify tree SHA → create commit → recheck old ref → non-force update ref`；二进制 XLSX 与文本统一使用二进制读取和 base64，禁止文本化读取二进制文件。
+
 <Handoff_State>
 Target: Issue #14 广东省中医院芳村分院 TRIAL 院区归属裁决
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/14
-Phase: TRIAL_SCOPE_BLOCKED
+Phase: SKIP_AWAITING_OWNER_AUDIT
 Completed:
 - PR #15 已审批并由 owner 合并，Issue #14 已领取
 - 两个指定 URL 均普通 HTTPS 200，无反爬挑战
 - 已证明指定官网 URL 是芳村急诊科专科页，指定目录是集团国医大师团队且唯一医生未标注芳村
 - 已只读核验官网院区标注方式和名医荟萃 240/18 结构
+- owner 已明确裁决跳过本院并否决 18 位精选子集
+- 台账序号 18 已仅更新 V19/W19/X19，完成逻辑、公式、格式和视觉验证
 CurrentFacts:
 - 指定目录候选 1 位林毅，出诊点为二沙/研修楼/大学城，不含芳村
 - 名医荟萃 240 位中 18 位卡片明确标注芳村医院，但该精选集合不是芳村全院目录
 - 总底表 2299 行，本院 0 行；未生成任何 TRIAL 医生工件
 Next:
-- 等待 owner 下发芳村完整入口、授权保守 18 位子集或裁决跳过
+- 等待 owner 审计台账工件、合并 PR #16 并关闭 Issue #14
+- 双门禁完成后由通用监控自动检查 owner 下发的下一 Issue，无需管理员再次发送继续指令
 Constraints:
 - 不自行替换入口或扩大范围
-- 不写总底表、不生成画像、不执行其他 Issue
+- 不写总底表、不生成画像；PR #16 合并且 Issue #14 关闭前不执行其他 Issue
 Artifacts:
 - docs/architecture_decisions/2026-08-12_issue_14_gdhtcm_fangcun_scope_gate.md
 - docs/agent_prompts/codex_next_prompt.md
+- 医生画像仓库/99_资料来源/珠三角三甲医院官网入口台账.xlsx
 </Handoff_State>
