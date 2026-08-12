@@ -21,6 +21,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     discover_gdskin_postback_documents,
     discover_generic_detail_links,
     effective_entry_urls,
+    expand_gdzy5413_full_detail_items,
     extract_clean_highlights,
     find_node,
     generic_record_quality,
@@ -28,9 +29,11 @@ from collect_official_doctors_batch import (  # noqa: E402
     gdzy5413_detail_id,
     gdzy5413_entry_kind,
     gdzy5413_ksdoctor_detail_id,
+    gdzy5413_rows_same_identity,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     merge_rows_for_master,
+    merge_gdzy5413_identity_rows,
     ny5y_detail_id,
     ny5y_entry_kind,
     parse_generic_detail,
@@ -39,7 +42,9 @@ from collect_official_doctors_batch import (  # noqa: E402
     parse_gdzy5413_ksdoctor_detail,
     parse_ny5y_detail,
     round_robin_generic_items,
+    select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
+    validate_gdzy5413_trial2,
     validate_ny5y_full_append,
 )
 
@@ -893,6 +898,88 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
         self.assertIn("承担省部级科研课题", detail["profile_text"])
         self.assertNotIn("星期一", detail["profile_text"])
 
+    def test_trial2_selection_includes_duplicate_group_and_baiyun_identity(self) -> None:
+        items = [
+            {"name": "黄培红", "department": "心血管科", "source_link": "u125"},
+            {"name": "黄培红", "department": "心血管科", "source_link": "u658"},
+            {"name": "白云医生", "department": "白云院区骨科", "source_link": "u749"},
+            {"name": "妇科医生", "department": "妇科", "source_link": "u1"},
+            {"name": "儿科医生", "department": "儿科", "source_link": "u2"},
+        ]
+
+        selected = select_gdzy5413_trial2_items(items, 4)
+
+        self.assertEqual(len({item["name"] for item in selected}), 4)
+        self.assertEqual(sum(1 for item in selected if item["name"] == "黄培红"), 2)
+        self.assertTrue(any("白云院区" in item["department"] for item in selected))
+
+    def test_full_detail_expansion_keeps_all_same_name_links(self) -> None:
+        items = [
+            {"name": "王清海", "source_link": "u47"},
+            {"name": "张三", "source_link": "u1"},
+            {"name": "王清海", "source_link": "u598"},
+        ]
+
+        expanded = expand_gdzy5413_full_detail_items(items)
+
+        self.assertEqual([item["source_link"] for item in expanded], ["u47", "u598", "u1"])
+
+    def test_identity_merge_chooses_richest_link_and_combines_departments(self) -> None:
+        sparse = {
+            "姓名": "黄培红",
+            "科室_分类页": "特诊室",
+            "科室_列表卡片": "特诊室",
+            "职称身份原文": "副主任中医师、医学博士",
+            "擅长诊疗方向摘录": "心力衰竭、冠心病、高血压。",
+            "详情正文摘录": "",
+            "来源链接": "u658",
+            "异常提示": "",
+        }
+        rich = {
+            **sparse,
+            "科室_分类页": "心血管科",
+            "科室_列表卡片": "心血管科",
+            "详情正文摘录": "副主任中医师，医学博士，主要研究方向为心血管急重症的诊治，擅长心力衰竭、冠心病、高血压。",
+            "来源链接": "u125",
+        }
+
+        self.assertTrue(gdzy5413_rows_same_identity(sparse, rich))
+        merged, reconciliation = merge_gdzy5413_identity_rows([sparse, rich])
+
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0]["来源链接"], "u125")
+        self.assertEqual(merged[0]["科室_分类页"], "特诊室、心血管科")
+        self.assertEqual(reconciliation[0]["merged_source_links"], ["u658"])
+        self.assertEqual(reconciliation[0]["resolution"], "同一人归并")
+
+    def test_distinct_same_name_rows_are_retained_and_flagged(self) -> None:
+        heart = {
+            "姓名": "李桂明",
+            "科室_分类页": "心血管科",
+            "科室_列表卡片": "心血管科",
+            "职称身份原文": "主任中医师",
+            "擅长诊疗方向摘录": "高血压病、冠心病、心力衰竭。",
+            "详情正文摘录": "长期从事心血管科临床工作。",
+            "来源链接": "u317",
+            "异常提示": "",
+        }
+        kidney = {
+            **heart,
+            "科室_分类页": "内科",
+            "科室_列表卡片": "内科",
+            "职称身份原文": "主任中医师、教授、硕士研究生导师",
+            "擅长诊疗方向摘录": "慢性肾衰、急慢性肾炎、糖尿病肾病。",
+            "详情正文摘录": "长期从事肾病临床工作。",
+            "来源链接": "u553",
+        }
+
+        self.assertFalse(gdzy5413_rows_same_identity(heart, kidney))
+        merged, reconciliation = merge_gdzy5413_identity_rows([heart, kidney])
+
+        self.assertEqual(len(merged), 2)
+        self.assertTrue(all("同名待甄别" in row["异常提示"] for row in merged))
+        self.assertTrue(all(item["resolution"] == "同名待甄别" for item in reconciliation))
+
     def test_collect_generic_records_scope_evidence_and_department_spread(self) -> None:
         famous_ids = list(range(1, 22))
         names = ["张三", "李四", "王五", "赵六", "陈明", "刘强", "杨敏", "黄芳", "周军", "吴静", "徐勇", "孙丽", "胡伟", "朱燕", "高峰", "林涛", "何娟", "郭鹏", "罗英", "梁杰", "宋梅"]
@@ -909,10 +996,12 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
             for doctor_id in famous_ids
         )
         expert_names = names[:20] + [f"张{chr(0x4E00 + doctor_id)}" for doctor_id in range(21, 347)]
+        expert_names[124] = "黄培红"
+        expert_names[344] = "黄培红"
         expert_html = "".join(
             (
                 '<div class="contentinfo">'
-                f'<div class="ks_title">{departments[(doctor_id - 1) % len(departments)]}</div>'
+                f'<div class="ks_title">{"白云院区骨科" if doctor_id == 346 else departments[(doctor_id - 1) % len(departments)]}</div>'
                 '<div class="pudocname">'
                 f'<a href="ks/templet2/ksdoctorinfo.aspx?bid={doctor_id}&amp;typeid={doctor_id + 1000}&amp;cid={doctor_id}&amp;ksid={doctor_id + 1000}&amp;id={doctor_id}">'
                 f'{expert_names[doctor_id - 1]}</a></div></div>'
@@ -928,6 +1017,8 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
                 return 200, expert_html, ""
             doctor_id = int(url.rsplit("=", 1)[-1])
             department = departments[(doctor_id - 1) % len(departments)]
+            if doctor_id == 346:
+                department = "白云院区骨科"
             if "ksdoctorinfo" in url:
                 name = expert_names[doctor_id - 1]
                 return (
@@ -975,11 +1066,31 @@ class Gdzy5413OfficialSpecialistTests(unittest.TestCase):
         self.assertEqual(payload["meta"]["excluded_non_doctor_count"], 0)
         self.assertEqual(payload["meta"]["out_of_scope_candidate_count"], 0)
         self.assertEqual(payload["entry_reconnaissance"][1]["out_of_scope_detail_count"], 0)
+        self.assertIn(
+            "院区/门诊均属同一法人实体授权范围",
+            payload["entry_reconnaissance"][1]["independent_entity_check"],
+        )
         self.assertEqual(payload["meta"]["gdzy5413_cross_mode_name_match_count"], 20)
         self.assertEqual(len(payload["rows"]), 10)
         self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
         self.assertTrue(all(gdzy5413_ksdoctor_detail_id(row["来源链接"]) for row in payload["rows"]))
         self.assertTrue(all(not row["亮眼经历线索"].startswith("广东省第二中医院") for row in payload["rows"]))
+        self.assertGreaterEqual(payload["meta"]["gdzy5413_trial2_baiyun_sample_count"], 1)
+        self.assertGreaterEqual(payload["meta"]["gdzy5413_trial2_merged_identity_count"], 1)
+        self.assertGreater(payload["meta"]["gdzy5413_trial2_sample_relation_count"], 10)
+        payload["meta"]["department_coverage_count"] = len(
+            {row["科室_分类页"] for row in payload["rows"]}
+        )
+        payload["meta"]["gdzy5413_852_unique_name_count"] = 289
+        validate_gdzy5413_trial2(payload)
+        merged_item = next(
+            item
+            for item in payload["gdzy5413_identity_reconciliation"]
+            if item["merged_source_links"]
+        )
+        merged_item["merged_source_links"] = ["https://example.com/not-authorized"]
+        with self.assertRaisesRegex(RuntimeError, "非授权 ksdoctorinfo"):
+            validate_gdzy5413_trial2(payload)
 
 
 class GenericFieldCleaningTests(unittest.TestCase):
