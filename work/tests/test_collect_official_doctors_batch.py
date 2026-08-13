@@ -21,6 +21,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     collect_gy3y,
     collect_gzbrain,
     collect_gzszyy,
+    collect_gzsys,
     collect_gykqyy,
     collect_generic,
     confirmed_a_targets,
@@ -34,6 +35,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     discover_gzszyy_department_filters,
     discover_gzszyy_department_pages,
     discover_gzszyy_unfiltered_pages,
+    discover_gzsys_default_pages,
     effective_entry_urls,
     expand_gdzy5413_full_detail_items,
     extract_clean_highlights,
@@ -49,12 +51,16 @@ from collect_official_doctors_batch import (  # noqa: E402
     gy3y_detail_id,
     gzbrain_detail_id,
     gzszyy_detail_id,
+    gzsys_detail_id,
     parse_gzbrain_detail,
     parse_gzbrain_list_page,
     parse_gzszyy_department_page,
     parse_gzszyy_detail,
+    parse_gzsys_detail,
+    parse_gzsys_list_page,
     parse_gyfyyy_detail,
     strip_gyfyyy_schedule_text,
+    strip_gzsys_schedule_text,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     merge_rows_for_master,
@@ -72,6 +78,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     select_gyfyyy_trial_doctors,
     select_gzbrain_trial_doctors,
     select_gzszyy_trial_doctors,
+    select_gzsys_trial_doctors,
     select_gykqyy_trial_doctors,
     sync_profile_flags,
     validate_gykqyy_full_append,
@@ -79,6 +86,8 @@ from collect_official_doctors_batch import (  # noqa: E402
     validate_gy3y_full_append,
     validate_gzbrain_full_append,
     validate_gzszyy_full_append,
+    validate_gzsys_full_append,
+    validate_gzsys_trial,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
     validate_gdzy5413_full_append,
@@ -1010,6 +1019,286 @@ class GzbrainStaticExpertDirectoryTests(unittest.TestCase):
         self.assertEqual(payload["meta"]["schedule_field_ingested_count"], 0)
         for row in payload["rows"]:
             self.assertNotRegex(row["详情正文摘录"], r"开诊|出诊|排班")
+
+
+class GzsysDrupalDoctorCardsTests(unittest.TestCase):
+    ENTRY = "https://www.gzsys.org.cn/doctor/592/search"
+
+    def test_adapter_requires_exact_official_entry(self) -> None:
+        self.assertEqual(
+            dedicated_adapter_for(self.ENTRY),
+            "gzsys_drupal_doctor_cards",
+        )
+        self.assertEqual(dedicated_adapter_for(self.ENTRY + "?page=1"), "")
+        self.assertEqual(dedicated_adapter_for("https://www.gzsys.org.cn/node/14894"), "")
+
+    def test_node_and_doctor_aliases_share_numeric_identity(self) -> None:
+        self.assertEqual(gzsys_detail_id("https://www.gzsys.org.cn/node/14894"), "14894")
+        self.assertEqual(gzsys_detail_id("https://www.gzsys.org.cn/doctor/14894"), "14894")
+        self.assertEqual(gzsys_detail_id("https://www.gzsys.org.cn/node/not-id"), "")
+
+    def test_declared_default_all_pages_are_the_only_pages_constructed(self) -> None:
+        html = """
+        <a href="?department_target_id=All&talent_project=All&tutor_qualification=All&doctor_title=All&page=0">1</a>
+        <a href="?department_target_id=All&talent_project=All&tutor_qualification=All&doctor_title=All&page=2">3</a>
+        <a href="?department_target_id=296&talent_project=All&tutor_qualification=All&doctor_title=All&page=9">filtered</a>
+        """
+        pages = discover_gzsys_default_pages(html, self.ENTRY)
+        self.assertEqual(len(pages), 3)
+        self.assertTrue(pages[0].endswith("page=0"))
+        self.assertTrue(pages[2].endswith("page=2"))
+        self.assertNotIn("296", " ".join(pages))
+
+    def test_only_strict_card_dom_authorizes_a_doctor(self) -> None:
+        html = """
+        <a href="/node/999">unrelated department node</a>
+        <div class="card-4-0">
+          <div class="card-title"><a href="/node/14894">宋尔卫</a></div>
+          <div class="card-subtitle-content">教授, 主任医师</div>
+          <div class="card-tag"><a href="/node/15187">乳腺外科</a></div>
+        </div>
+        <div class="card-4-0">
+          <div class="card-title"><a href="/doctor/14811">李医生</a></div>
+          <div class="card-subtitle-content">副主任医师</div>
+          <div class="card-tag">心血管内科</div>
+        </div>
+        """
+        rows = parse_gzsys_list_page(html, self.ENTRY)
+        self.assertEqual([row["id"] for row in rows], ["14894", "14811"])
+        self.assertEqual(rows[0]["department"], "乳腺外科")
+
+    def test_detail_excludes_schedule_rank_patient_text_and_private_use(self) -> None:
+        html = """
+        <div class="other-2">
+          <div class="other-left-title">宋尔卫</div>
+          <div class="other-left-text"><span>职称：</span>教授, 主任医师</div>
+          <div class="other-left-text"><span>科室：</span>乳腺外科</div>
+          <div class="desc line-6">
+            <p>擅长：乳腺癌诊疗。\ue001</p>
+            <p>从事乳腺外科临床工作。</p>
+            <p>好医生榜第一名。</p>
+            <p>患者评价：非常好。</p>
+          </div>
+        </div>
+        <div class="calendar-3-1">周一上午出诊</div>
+        """
+        detail = parse_gzsys_detail(html, {})
+        self.assertEqual(detail["name"], "宋尔卫")
+        self.assertEqual(detail["department"], "乳腺外科")
+        self.assertEqual(detail["specialty"], "乳腺癌诊疗。")
+        self.assertNotIn("好医生榜", detail["profile_text"])
+        self.assertNotIn("患者评价", detail["profile_text"])
+        self.assertNotRegex(detail["profile_text"], r"[\ue000-\uf8ff]")
+        self.assertEqual(detail["schedule_exclusion_count"], 1)
+        self.assertEqual(detail["forbidden_segment_count"], 2)
+
+    def test_department_values_are_merged_with_chinese_separator(self) -> None:
+        html = """
+        <div class="other-2">
+          <div class="other-left-title">姚和瑞</div>
+          <div class="other-left-text"><span>职称：</span>主任医师</div>
+          <div class="other-left-text"><span>科室：</span>乳腺内科, 肿瘤内科</div>
+          <div class="desc line-6"><p>从事肿瘤内科临床工作。</p></div>
+        </div>
+        """
+        detail = parse_gzsys_detail(html, {})
+        self.assertEqual(detail["department"], "乳腺内科、肿瘤内科")
+
+    def test_inline_clinic_time_is_removed_but_later_specialty_is_kept(self) -> None:
+        value = (
+            "熟悉各种内分泌疾病的诊断与治疗。"
+            "出诊时间：周二下午，周四下午 特长：擅长糖尿病和甲状腺疾病。"
+        )
+        self.assertEqual(
+            strip_gzsys_schedule_text(value),
+            "熟悉各种内分泌疾病的诊断与治疗。 特长：擅长糖尿病和甲状腺疾病。",
+        )
+        html = f"""
+        <div class="other-2">
+          <div class="other-left-title">肖辉盛</div>
+          <div class="other-left-text"><span>职称：</span>副主任医师</div>
+          <div class="other-left-text"><span>科室：</span>内分泌内科</div>
+          <div class="desc line-6"><p>{value}</p></div>
+        </div>
+        """
+        detail = parse_gzsys_detail(html, {})
+        self.assertNotRegex(detail["profile_text"], r"出诊时间|周二下午|周四下午")
+        self.assertIn("糖尿病和甲状腺疾病", detail["profile_text"])
+        self.assertEqual(detail["schedule_exclusion_count"], 1)
+
+    def test_unlabeled_campus_schedule_tail_is_removed(self) -> None:
+        value = "擅长中医内科疾病。院本部周二、三上午；南院区周一下午。"
+        self.assertEqual(strip_gzsys_schedule_text(value), "擅长中医内科疾病。")
+
+    def test_trial_selection_is_deterministic_round_robin_by_department(self) -> None:
+        doctors = [
+            {"id": str(index), "department": department}
+            for index, department in enumerate(["A", "A", "B", "B", "C", "C"], start=1)
+        ]
+        selected = select_gzsys_trial_doctors(doctors, 5)
+        self.assertEqual([doctor["id"] for doctor in selected], ["1", "3", "5", "2", "4"])
+
+    def test_trial_gate_rejects_scope_drift_before_writing_artifacts(self) -> None:
+        payload = {
+            "meta": {
+                "category_count": 22,
+                "raw_card_rows": 664,
+                "candidate_membership_count": 664,
+                "unique_candidate_count": 664,
+                "census_unique_detail_count": 664,
+                "census_named_detail_count": 664,
+                "census_blank_name_detail_count": 0,
+                "census_nonempty_department_count": 664,
+                "census_empty_department_count": 0,
+                "census_same_name_group_count": 0,
+                "cross_entry_duplicate_count": 0,
+                "excluded_non_doctor_count": 6,
+                "eligible_candidate_count": 658,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "schedule_field_ingested_count": 0,
+                "private_use_character_count": 0,
+                "unique_doctor_count": 0,
+                "sample_entry_coverage_count": 0,
+            },
+            "rows": [],
+            "excluded_candidates": [],
+        }
+        with self.assertRaisesRegex(RuntimeError, "category_count 应为 23"):
+            validate_gzsys_trial(payload, expected_rows=10)
+
+    def _valid_full_payload(self) -> dict[str, object]:
+        formal_rows = []
+        identity_reconciliation = []
+        detail_reconciliation = []
+        for detail_id in range(1, 659):
+            source = f"https://www.gzsys.org.cn/node/{detail_id}"
+            row = {
+                "医院": "中山大学孙逸仙纪念医院",
+                "姓名": f"医生{detail_id}",
+                "科室_分类页": "内科",
+                "职称身份原文": "主任医师",
+                "重点优先级": "中",
+                "重点关注范围": "",
+                "重点疾病标签": "",
+                "擅长诊疗方向摘录": "疾病诊疗",
+                "亮眼经历线索": "",
+                "列表简介": "",
+                "详情正文摘录": "从事临床工作。",
+                "来源类型": "医院官网",
+                "来源链接": source,
+                "采集入口": self.ENTRY,
+                "详情页状态": "200",
+                "异常提示": "",
+            }
+            formal_rows.append(row)
+            detail_reconciliation.append(
+                {
+                    "detail_id": str(detail_id),
+                    "name": row["姓名"],
+                    "source_link": source,
+                    "resolution": "正式行",
+                    "reason": "",
+                }
+            )
+            identity_reconciliation.append(
+                {
+                    "name": row["姓名"],
+                    "resolution": "唯一身份",
+                    "detail_ids": [str(detail_id)],
+                    "primary_source_link": source,
+                }
+            )
+        excluded = []
+        for detail_id in range(659, 665):
+            source = f"https://www.gzsys.org.cn/doctor/{detail_id}"
+            excluded.append(
+                {
+                    "source_link": source,
+                    "reason": "官网医生卡片仅标注护理身份，排除医生画像采集范围",
+                }
+            )
+            detail_reconciliation.append(
+                {
+                    "detail_id": str(detail_id),
+                    "name": f"护士{detail_id}",
+                    "source_link": source,
+                    "resolution": "护理排除",
+                    "reason": excluded[-1]["reason"],
+                }
+            )
+        return {
+            "meta": {
+                "category_count": 23,
+                "pagination_count": 23,
+                "raw_card_rows": 664,
+                "candidate_membership_count": 664,
+                "unique_candidate_count": 664,
+                "unique_doctor_count": 658,
+                "census_unique_detail_count": 664,
+                "census_named_detail_count": 664,
+                "census_blank_name_detail_count": 0,
+                "census_unique_nonblank_name_count": 664,
+                "census_same_name_group_count": 0,
+                "census_department_count": 65,
+                "census_nonempty_department_count": 664,
+                "census_empty_department_count": 0,
+                "eligible_candidate_count": 658,
+                "cross_entry_duplicate_count": 0,
+                "excluded_non_doctor_count": 6,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "schedule_field_ingested_count": 0,
+                "private_use_character_count": 0,
+                "gzsys_final_identity_count": 658,
+                "gzsys_same_identity_merge_group_count": 0,
+                "gzsys_distinct_same_name_group_count": 0,
+                "filter_dictionary_counts": {
+                    "department_target_id": 96,
+                    "talent_project": 4,
+                    "tutor_qualification": 5,
+                    "doctor_title": 33,
+                },
+                "source_path_counts": {"node": 432, "doctor": 232},
+            },
+            "rows": formal_rows,
+            "excluded_candidates": excluded,
+            "gzsys_detail_reconciliation": detail_reconciliation,
+            "gzsys_identity_reconciliation": identity_reconciliation,
+        }
+
+    def test_full_gate_accepts_complete_664_id_reconciliation(self) -> None:
+        validate_gzsys_full_append(self._valid_full_payload())
+
+    def test_full_gate_allows_only_known_25208_detail_failure(self) -> None:
+        payload = self._valid_full_payload()
+        failed_row = payload["rows"][0]  # type: ignore[index]
+        failed_row["来源链接"] = "https://www.gzsys.org.cn/node/25208"
+        failed_row["详情页状态"] = "失败"
+        failed_row["异常提示"] = "详情页读取失败"
+        failed_row["重点优先级"] = "普通"
+        payload["gzsys_detail_reconciliation"][0]["detail_id"] = "25208"  # type: ignore[index]
+        payload["gzsys_detail_reconciliation"][0]["source_link"] = failed_row["来源链接"]  # type: ignore[index]
+        payload["gzsys_identity_reconciliation"][0]["detail_ids"] = ["25208"]  # type: ignore[index]
+        payload["gzsys_identity_reconciliation"][0]["primary_source_link"] = failed_row["来源链接"]  # type: ignore[index]
+        payload["rows"][251]["来源链接"] = "https://www.gzsys.org.cn/node/1"  # type: ignore[index]
+        payload["gzsys_detail_reconciliation"][251]["detail_id"] = "1"  # type: ignore[index]
+        payload["gzsys_detail_reconciliation"][251]["source_link"] = "https://www.gzsys.org.cn/node/1"  # type: ignore[index]
+        payload["gzsys_identity_reconciliation"][251]["detail_ids"] = ["1"]  # type: ignore[index]
+        payload["gzsys_identity_reconciliation"][251]["primary_source_link"] = "https://www.gzsys.org.cn/node/1"  # type: ignore[index]
+        payload["detail_errors"] = [
+            {"source_link": "https://www.gzsys.org.cn/node/25208", "error": "HTTP 404"}
+        ]
+        payload["meta"]["detail_error_count"] = 1  # type: ignore[index]
+        validate_gzsys_full_append(payload)
+
+    def test_full_gate_rejects_missing_id_and_abnormal_row_promotion(self) -> None:
+        payload = self._valid_full_payload()
+        payload["gzsys_detail_reconciliation"].pop()  # type: ignore[union-attr]
+        payload["rows"][0]["异常提示"] = "列表与详情姓名不一致"  # type: ignore[index]
+        payload["rows"][0]["重点关注范围"] = "慢性病"  # type: ignore[index]
+        with self.assertRaisesRegex(RuntimeError, "逐 ID 对账工件不完整|异常行仍被"):
+            validate_gzsys_full_append(payload)
 
 
 class GzszyyDepartmentExpertDirectoryTests(unittest.TestCase):
