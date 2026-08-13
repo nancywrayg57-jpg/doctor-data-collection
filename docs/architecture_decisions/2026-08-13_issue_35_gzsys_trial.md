@@ -267,7 +267,9 @@ python .\work\generate_obsidian_profiles.py `
 - XLSX 全工作表值、公式和视觉验收：通过。
 - Obsidian 画像数量、唯一来源映射、文件名和索引验收：通过。
 
-下一步只允许：提交本轮 FULL 工件与本 ADR，经身份复核后用非强制 Git Data API 更新原分支，等待 PR #36 CI 成功，请求 `nancywrayg57-jpg` 最终画像审计，然后恢复通用监控自动化并停止。不得自行合并 PR、关闭 Issue、领取其他 Issue 或进入下一医院。
+本轮 FULL 工件已提交并通过非强制 Git Data API 更新原分支：远端提交 `8cf115eb2e32faca28913c0066baa1a26eb73337`，本地/远端 tree 均为 `38fc20dc36192876b29ebaa7474c456767ea5dd8`，父提交为原 TRIAL HEAD `605355357ba2125d22d0946408b393faa054d9a9`，`force=false`。PR #36 新 HEAD 的 `governance-check` 已成功；最终画像审计请求已发布于 `https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/36#issuecomment-5279908604`。
+
+当前停止等待 `nancywrayg57-jpg` 对最终画像明确审计。不得自行合并 PR、关闭 Issue、领取其他 Issue 或进入下一医院。
 
 <Handoff_State>
 Target: Issue #35 中山大学孙逸仙纪念医院最终画像审计
@@ -286,7 +288,7 @@ CurrentFacts:
 - 总底表 15 家医院、5232 行；本院 658 行，81 条异常均未提权
 - 唯一详情失败为目录仍公开列出的 ID 25208 郑眉光，画像中保留异常和目录证据
 Next:
-- 提交、非强制 Git Data API 推送原分支、等待 CI、请求 owner 最终画像审计并停止
+- 等待 owner 对 PR #36 最终画像明确审计；通过并完成合并/Issue 关闭双门禁前不得领取下一 Issue
 Constraints:
 - 仅官方公开渠道；禁止第三方平台、患者评价、隐私、登录/验证码绕过
 - 不自行合并 PR、关闭 Issue、领取下一 Issue或进入下一医院
