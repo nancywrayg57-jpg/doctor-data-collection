@@ -99,6 +99,13 @@ python .\work\collect_official_doctors_batch.py `
 - 解决：先确认远端同名 ref 仍不存在；用 `Out-String` 将命令输出显式归一为标量字符串并 `TrimEnd()`，再创建 commit；只有 commit tree/parent 与本地一致后才以 `force=false` 创建 ref。
 - 防复发：所有进入 Git Data API JSON 的 CLI 多行输出必须先做标量化；API 失败后先查 ref，禁止盲目重复更新引用。孤立 blob/tree 不构成分支发布，也不得误报为推送成功。
 
+### 6. 远端 API commit 无法由展示字段精确重建
+
+- 现象：Git Data API 已成功创建远端 commit/ref，tree 和 parent 与本地一致，但 GitHub 生成的 commit SHA 与本地 SHA 不同；API 返回的 `verification.payload` 为空。使用展示出来的作者/提交者时间、时区和消息组合无法重建远端 SHA，本地引用因此没有更新。
+- 根因：GitHub 返回的 JSON 展示字段不足以还原提交对象的原始字节；没有 verified payload 时，继续猜测时区或尾换行会产生不同 OID。
+- 解决：停止对象字段猜测，使用一次只读 `git -c http.version=HTTP/1.1 fetch --no-tags origin refs/heads/<branch>:refs/remotes/origin/<branch>` 获取 GitHub 实际对象；确认 fetch OID 与 API ref OID 一致后，再用 `git update-ref` 将本地分支精确同步到该对象。
+- 防复发：Git Data API 发布后优先执行只读 fetch 同步对象；只有 API 明确返回 verified payload 时才允许按原始 payload 重建。绝不以 tree 相同为由伪称 commit OID 已同步，也不强制覆盖分支。
+
 ## 验证与零写入证据
 
 - FAHSYSU 专项测试：5 项通过。
