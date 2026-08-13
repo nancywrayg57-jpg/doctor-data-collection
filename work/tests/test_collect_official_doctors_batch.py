@@ -18,12 +18,14 @@ from collect_official_doctors_batch import (  # noqa: E402
     clean_generic_department,
     covered_department_names,
     collect_gyfyyy,
+    collect_gy3y,
     collect_gykqyy,
     collect_generic,
     dedicated_adapter_for,
     discover_gdskin_excluded_links,
     discover_gdskin_postback_documents,
     discover_generic_detail_links,
+    discover_gy3y_directory,
     effective_entry_urls,
     expand_gdzy5413_full_detail_items,
     extract_clean_highlights,
@@ -36,6 +38,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     gdzy5413_ksdoctor_detail_id,
     gdzy5413_rows_same_identity,
     gyfyyy_detail_id,
+    gy3y_detail_id,
     parse_gyfyyy_detail,
     strip_gyfyyy_schedule_text,
     looks_like_person_name,
@@ -56,11 +59,13 @@ from collect_official_doctors_batch import (  # noqa: E402
     sync_profile_flags,
     validate_gykqyy_full_append,
     validate_gyfyyy_full_append,
+    validate_gy3y_full_append,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
     validate_gdzy5413_full_append,
     validate_gdzy5413_trial2,
     validate_ny5y_full_append,
+    write_report,
 )
 
 
@@ -685,6 +690,262 @@ class GyfyyyStaticDepartmentTreeTests(unittest.TestCase):
         distinct_rows = [item for item in merged if item["姓名"] == "同名医生"]
         self.assertEqual(len(distinct_rows), 2)
         self.assertTrue(all("同名待甄别" in item["异常提示"] for item in distinct_rows))
+
+
+class Gy3yStaticTeamDirectoryTests(unittest.TestCase):
+    ENTRY_URL = "https://www.gy3y.cn/ks/team.html"
+
+    def test_adapter_and_detail_scope_are_exact(self) -> None:
+        self.assertEqual(dedicated_adapter_for(self.ENTRY_URL), "gy3y_static_team_directory")
+        for invalid in [
+            "https://www.gy3y.cn/ks/team.html?page=1",
+            "https://www.gy3y.cn/ks/team.html#huangpu",
+            "https://api.gy3y.cn/ks/team.html",
+            "https://www.gy3y.cn/kstd/zjjs.html",
+        ]:
+            self.assertEqual(dedicated_adapter_for(invalid), "")
+        liwan = "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_251.html"
+        huangpu = "https://www.gy3y.cn/ks/hp/nk/xxgnk/doctor_251.html"
+        self.assertEqual(gy3y_detail_id(liwan), "251")
+        self.assertEqual(gy3y_detail_id(huangpu), "251")
+        self.assertEqual(
+            gy3y_detail_id(huangpu, "https://www.gy3y.cn/ks/hp/nk/xxgnk/"), "251"
+        )
+        self.assertEqual(gy3y_detail_id(huangpu, "https://www.gy3y.cn/ks/nkxt/xxgnk/"), "")
+        self.assertEqual(gy3y_detail_id(f"{huangpu}?page=1"), "")
+        self.assertEqual(gy3y_detail_id("https://www.gy3y.com/ks/hp/nk/xxgnk/doctor_251.html"), "")
+
+    def test_directory_uses_formal_blocks_and_excludes_featured_carousel(self) -> None:
+        html = """
+        <section class="areatab tab">
+          <div class="tabnav"><span class="current">荔湾院区</span><span>黄埔院区</span></div>
+          <div class="tabcontent">
+            <div class="tabsingle">
+              <section class="threedslide"><a href="/ks/nkxt/xxgnk/doctor_999.html">推荐医生</a></section>
+              <div class="title">内科系统</div>
+              <section class="ksdoclist">
+                <dl><dt>心血管内科</dt><dd><a href="/ks/nkxt/xxgnk/doctor_251.html">燕翼</a></dd></dl>
+                <dl><dt>空科室</dt><dd></dd></dl>
+              </section>
+            </div>
+            <div class="tabsingle">
+              <section class="threedslide"><a href="/ks/hp/nk/xxgnk/doctor_998.html">推荐医生</a></section>
+              <div class="title">内科系统</div>
+              <section class="ksdoclist">
+                <dl><dt>心血管内科</dt><dd><a href="/ks/hp/nk/xxgnk/doctor_251.html">燕翼</a></dd></dl>
+              </section>
+            </div>
+          </div>
+        </section>
+        """
+
+        result = discover_gy3y_directory(html, self.ENTRY_URL)
+
+        self.assertEqual([item["name"] for item in result["campuses"]], ["荔湾院区", "黄埔院区"])
+        self.assertEqual(len(result["categories"]), 3)
+        self.assertEqual(len(result["relations"]), 2)
+        self.assertEqual({item["id"] for item in result["relations"]}, {"251"})
+        self.assertNotIn("999", {item["id"] for item in result["relations"]})
+        self.assertNotIn("998", {item["id"] for item in result["relations"]})
+        self.assertEqual(
+            {item["department"] for item in result["relations"]},
+            {"荔湾院区心血管内科", "黄埔院区心血管内科"},
+        )
+
+    def test_collect_merges_two_campuses_and_spreads_trial_sample(self) -> None:
+        liwan_departments = [
+            ("心血管内科", "nkxt", "xxgnk", [1, 2, 3, 4]),
+            ("神经内科", "nkxt", "sjnk", [5, 6, 7, 8]),
+        ]
+        huangpu_departments = [
+            ("心血管内科", "nk", "xxgnk", [1, 2]),
+            ("儿科", "ek", "xenk", [9, 10, 11, 12]),
+        ]
+
+        def tab(campus: str, departments: list[tuple[str, str, str, list[int]]]) -> str:
+            prefix = "/ks/hp" if campus == "黄埔院区" else "/ks"
+            blocks = []
+            for name, group, slug, ids in departments:
+                links = "".join(
+                    f'<dd><a href="{prefix}/{group}/{slug}/doctor_{doctor_id}.html">医生{doctor_id}</a></dd>'
+                    for doctor_id in ids
+                )
+                blocks.append(f"<dl><dt>{name}</dt>{links}</dl>")
+            return '<div class="tabsingle"><div class="title">系统</div><section class="ksdoclist">' + "".join(blocks) + "</section></div>"
+
+        entry_html = f"""
+        <section class="areatab tab">
+          <div class="tabnav"><span>荔湾院区</span><span>黄埔院区</span></div>
+          <div class="tabcontent">{tab("荔湾院区", liwan_departments)}{tab("黄埔院区", huangpu_departments)}</div>
+        </section>
+        """
+        pages = {self.ENTRY_URL: entry_html}
+        for campus, departments in [
+            ("荔湾院区", liwan_departments),
+            ("黄埔院区", huangpu_departments),
+        ]:
+            prefix = "/ks/hp" if campus == "黄埔院区" else "/ks"
+            for department, group, slug, ids in departments:
+                for doctor_id in ids:
+                    pages[f"https://www.gy3y.cn{prefix}/{group}/{slug}/doctor_{doctor_id}.html"] = f"""
+                    <section class="doctorcard"><strong>医生{doctor_id}</strong><b>主任医师</b>
+                    <p>擅长{department}常见疾病。</p></section>
+                    <section class="doctorintro"><p>长期从事{department}临床诊疗。</p></section>
+                    <section class="calendar"><p>每周一上午出诊</p></section>
+                    """
+
+        def fake_fetch(_session, url, retries=3):
+            html = pages.get(url)
+            return (200, html, "") if html is not None else (None, "", "fixture missing")
+
+        target = HospitalTarget(
+            city="广州市",
+            hospital="广州医科大学附属第三医院",
+            homepage="https://www.gy3y.cn/index",
+            entry_url=self.ENTRY_URL,
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="gy3y_static_team_directory",
+        )
+        with (
+            patch("collect_official_doctors_batch.create_official_session", return_value=object()),
+            patch("collect_official_doctors_batch.fetch", side_effect=fake_fetch),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+        ):
+            payload = collect_gy3y(target, "2026-08-13", max_doctors=10)
+
+        self.assertEqual(payload["meta"]["category_count"], 4)
+        self.assertEqual(payload["meta"]["candidate_membership_count"], 14)
+        self.assertEqual(payload["meta"]["census_unique_detail_count"], 12)
+        self.assertEqual(payload["meta"]["gy3y_cross_campus_identity_count"], 2)
+        self.assertEqual(payload["meta"]["campus_relation_counts"], {"荔湾院区": 8, "黄埔院区": 6})
+        self.assertEqual(len(payload["rows"]), 10)
+        self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
+        self.assertTrue(any("/ks/hp/" in row["来源链接"] for row in payload["rows"]))
+        merged = next(row for row in payload["rows"] if row["姓名"] == "医生1")
+        self.assertIn("荔湾院区心血管内科", merged["科室_分类页"])
+        self.assertIn("黄埔院区心血管内科", merged["科室_分类页"])
+        self.assertNotRegex(merged["详情正文摘录"], r"排班|出诊|每?周[一二三四五六日天]")
+        self.assertEqual(payload["meta"]["detail_error_count"], 0)
+
+    def test_report_only_renders_current_adapter_reconciliation(self) -> None:
+        from tempfile import TemporaryDirectory
+
+        payload = {
+            "meta": {
+                "execution_mode": "trial",
+                "hospital": "广州医科大学附属第三医院",
+                "city": "广州市",
+                "collected_at": "2026-08-13",
+                "entry_url": self.ENTRY_URL,
+                "homepage": "https://www.gy3y.cn/index",
+                "entry_url_source": "Issue #27",
+                "ledger_entry_url": self.ENTRY_URL,
+                "adapter_id": "gy3y_static_team_directory",
+                "ledger_review": "确认可采集",
+                "ledger_difficulty": "A-优先自动采集",
+                "unique_doctor_count": 1,
+                "raw_card_rows": 2,
+                "category_count": 2,
+                "department_coverage_count": 2,
+                "detail_error_count": 0,
+                "category_error_count": 0,
+                "existing_profile_count": 0,
+                "census_group_count": 2,
+                "census_department_count": 2,
+                "census_unique_detail_count": 1,
+                "gy3y_multi_relation_identity_count": 1,
+                "gy3y_cross_campus_identity_count": 1,
+                "census_nursing_identity_status": "TRIAL 详情样本纯护理身份排除 0 位",
+            },
+            "entry_reconnaissance": [],
+            "excluded_candidates": [],
+            "cross_entry_duplicates": [],
+            "gy3y_detail_reconciliation": [{"detail_id": "1"}],
+            "gy3y_identity_reconciliation": [],
+            "category_errors": [],
+            "detail_errors": [],
+            "category_counts": [],
+            "priority_counts": {},
+            "group_counts": {},
+            "warning_counts": {},
+            "rows": [],
+        }
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            report_path = root / "report.md"
+            write_report(report_path, payload, root / "trial.csv", root / "trial.xlsx")
+            report = report_path.read_text(encoding="utf-8")
+
+        self.assertIn("## 广医三院两院区详情身份对账", report)
+        self.assertNotIn("## 广医一院同名详情身份聚类对账", report)
+        self.assertNotIn("## 广医口腔逐 ID 归并/排除对账", report)
+        self.assertNotIn("## 广东省第二中医院同名归并对账", report)
+
+    def test_full_append_gate_reconciles_every_detail_id(self) -> None:
+        rows = []
+        detail_reconciliation = []
+        identity_reconciliation = []
+        for doctor_id in range(1, 439):
+            source = f"https://www.gy3y.cn/ks/nkxt/ks/doctor_{doctor_id}.html"
+            row = {
+                "姓名": f"医生{doctor_id}",
+                "科室_分类页": "荔湾院区内科",
+                "重点优先级": "普通",
+                "重点关注范围": "",
+                "重点疾病标签": "",
+                "擅长诊疗方向摘录": "常见疾病诊疗",
+                "亮眼经历线索": "",
+                "列表简介": "",
+                "详情正文摘录": "曾赴基层出诊并长期从事临床工作",
+                "来源链接": source,
+                "异常提示": "",
+            }
+            rows.append(row)
+            detail_reconciliation.append(
+                {
+                    "detail_id": str(doctor_id),
+                    "name": f"医生{doctor_id}",
+                    "departments": ["荔湾院区产科、妇科"],
+                }
+            )
+            identity_reconciliation.append(
+                {
+                    "detail_ids": [str(doctor_id)],
+                    "primary_source_link": source,
+                }
+            )
+        payload = {
+            "meta": {
+                "category_count": 104,
+                "candidate_membership_count": 580,
+                "census_unique_detail_count": 438,
+                "cross_entry_duplicate_count": 142,
+                "gy3y_multi_relation_identity_count": 126,
+                "gy3y_cross_campus_identity_count": 117,
+                "census_nonempty_department_count": 99,
+                "census_empty_department_count": 5,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "excluded_non_doctor_count": 0,
+                "unique_doctor_count": 438,
+                "gy3y_final_identity_count": 438,
+                "campus_relation_counts": {"荔湾院区": 390, "黄埔院区": 190},
+            },
+            "rows": rows,
+            "excluded_candidates": [],
+            "gy3y_detail_reconciliation": detail_reconciliation,
+            "gy3y_identity_reconciliation": identity_reconciliation,
+        }
+
+        validate_gy3y_full_append(payload)
+        payload["meta"]["candidate_membership_count"] = 579
+        with self.assertRaisesRegex(RuntimeError, "candidate_membership_count"):
+            validate_gy3y_full_append(payload)
+        payload["meta"]["candidate_membership_count"] = 580
+        payload["rows"][0]["详情正文摘录"] = "专家门诊时间：每周一上午"
+        with self.assertRaisesRegex(RuntimeError, "排班片段"):
+            validate_gy3y_full_append(payload)
 
 
 class NodeRuntimeResolutionTests(unittest.TestCase):
