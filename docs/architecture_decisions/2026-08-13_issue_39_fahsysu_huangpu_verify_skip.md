@@ -77,6 +77,20 @@
 - 解决：refspec 改用 `${branch}` 明确变量边界；fetch GitHub 实际对象后逐项比较 tree、唯一 parent、作者/提交者、时间戳与规范化后的 message，并用 Base64 显示确认差异只是一行额外的 CRLF。确认语义对象一致且工作区干净后，使用 `git update-ref <branch> <remote> <old-local>` 将本地分支对齐远端提交。
 - 防复发：PowerShell 字符串中变量后紧邻冒号时统一写 `${name}:`；Git Data API 创建提交后不假设 SHA 与本地 commit 相同，必须 fetch 实际对象并比较 tree、parent、身份元数据和规范化消息，再同步本地 ref。后续补充记录只能以 GitHub 实际提交为父做非强制快进。
 
+### 7. 远端 main 摘要的内联拆分发生运算符绑定误判
+
+- 现象：远端快进提交已完成实际对象同步，本地也已对齐；最终门禁把 `git ls-remote origin refs/heads/main` 与 `-split` 写在同一括号表达式中，PowerShell 得到首字符 `9` 而不是完整 SHA，因而主动报告 main drift。没有更新 `main`，也没有再次写远端分支。
+- 根因：PowerShell 中原生命令调用和 `-split` 的内联组合存在易混淆的参数/运算符绑定，紧凑表达式没有先固定命令的完整文本结果。
+- 解决：不采信首字符结果；先把 `git ls-remote` 完整输出保存为变量并检查 `$LASTEXITCODE`，再以空白正则拆分第一列，最后与预期 main SHA 比较。
+- 防复发：外部命令输出的解析一律分成“执行并检查退出码—保存原始行—独立拆列—验证格式/长度”四步，禁止在发布门禁中用一行表达式同时调用命令与拆分结果。
+
+### 8. Git smart-HTTP 在最终门禁发生连接重置
+
+- 现象：准备最后一个 ADR 快进提交时，首个只读 `git ls-remote origin refs/heads/main` 返回 `Recv failure: Connection was reset`；脚本在暂存和提交前终止，远端、本地提交和工作簿均未改变。
+- 根因：GitHub HTTPS 传输链路瞬时重置，不是 ref 冲突、权限错误或业务工件错误。
+- 解决：保持原状态，不盲目重发写操作；远端 main 与工作分支 ref 改由已认证的 `gh api repos/.../git/ref/...` 分别读取并核验 SHA，再继续本地提交和 Git Data API 非强制快进。
+- 防复发：Git smart-HTTP 出现 reset 时，先用 GitHub API 只读确认实际 ref；对象发布仍按“远端当前 SHA 必须等于本地新提交 parent”门禁执行，禁止因网络不确定性 force push 或重复创建分支。
+
 ## 停止点
 
 提交本台账单元格和 ADR，通过非强制 Git Data API 发布原分支并创建关联 PR，等待 owner 对跳过证据和台账工件审计。不得自行合并 PR、关闭 Issue、采集医生或领取下一 Issue。
