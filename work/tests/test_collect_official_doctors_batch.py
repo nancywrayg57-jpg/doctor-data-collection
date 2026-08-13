@@ -19,13 +19,16 @@ from collect_official_doctors_batch import (  # noqa: E402
     covered_department_names,
     collect_gyfyyy,
     collect_gy3y,
+    collect_gzbrain,
     collect_gykqyy,
     collect_generic,
+    confirmed_a_targets,
     dedicated_adapter_for,
     discover_gdskin_excluded_links,
     discover_gdskin_postback_documents,
     discover_generic_detail_links,
     discover_gy3y_directory,
+    discover_gzbrain_list_pages,
     effective_entry_urls,
     expand_gdzy5413_full_detail_items,
     extract_clean_highlights,
@@ -39,6 +42,9 @@ from collect_official_doctors_batch import (  # noqa: E402
     gdzy5413_rows_same_identity,
     gyfyyy_detail_id,
     gy3y_detail_id,
+    gzbrain_detail_id,
+    parse_gzbrain_detail,
+    parse_gzbrain_list_page,
     parse_gyfyyy_detail,
     strip_gyfyyy_schedule_text,
     looks_like_person_name,
@@ -55,11 +61,13 @@ from collect_official_doctors_batch import (  # noqa: E402
     parse_ny5y_detail,
     round_robin_generic_items,
     select_gyfyyy_trial_doctors,
+    select_gzbrain_trial_doctors,
     select_gykqyy_trial_doctors,
     sync_profile_flags,
     validate_gykqyy_full_append,
     validate_gyfyyy_full_append,
     validate_gy3y_full_append,
+    validate_gzbrain_full_append,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
     validate_gdzy5413_full_append,
@@ -690,6 +698,307 @@ class GyfyyyStaticDepartmentTreeTests(unittest.TestCase):
         distinct_rows = [item for item in merged if item["姓名"] == "同名医生"]
         self.assertEqual(len(distinct_rows), 2)
         self.assertTrue(all("同名待甄别" in item["异常提示"] for item in distinct_rows))
+
+
+class GzbrainStaticExpertDirectoryTests(unittest.TestCase):
+    ENTRY_URL = "https://www.gzbrain.cn/myzj/list.html"
+
+    def _valid_full_payload(self) -> dict[str, object]:
+        detail_ids = ["551", "102037", "990", "1231"] + [
+            str(value) for value in range(1, 180)
+        ]
+        names = {
+            "551": "沈峰",
+            "102037": "沈峰",
+            "990": "王丹逢",
+            "1231": "王丹逢",
+        }
+        excluded_id = detail_ids[-1]
+        rows = []
+        reconciliation = []
+        for detail_id in detail_ids:
+            name = names.get(detail_id, f"医生{detail_id}")
+            source_link = f"https://www.gzbrain.cn/myzj/info_itemid_{detail_id}.html"
+            if detail_id == excluded_id:
+                reconciliation.append(
+                    {
+                        "detail_id": detail_id,
+                        "source_link": source_link,
+                        "name": name,
+                        "resolution": "护理排除",
+                        "reason": "官网详情仅标注护理身份，排除医生画像采集范围",
+                    }
+                )
+                continue
+            warning = "同名待甄别" if name in {"沈峰", "王丹逢"} else ""
+            rows.append(
+                {
+                    "姓名": name,
+                    "重点优先级": "普通" if warning else "中",
+                    "重点关注范围": "",
+                    "重点疾病标签": "",
+                    "擅长诊疗方向摘录": "精神疾病规范诊疗。",
+                    "亮眼经历线索": "长期从事临床工作。",
+                    "列表简介": "",
+                    "详情正文摘录": "长期从事临床工作。",
+                    "来源链接": source_link,
+                    "异常提示": warning,
+                }
+            )
+            reconciliation.append(
+                {
+                    "detail_id": detail_id,
+                    "source_link": source_link,
+                    "name": name,
+                    "resolution": "正式行",
+                    "reason": "",
+                }
+            )
+        return {
+            "meta": {
+                "category_count": 31,
+                "pagination_count": 31,
+                "candidate_membership_count": 183,
+                "unique_candidate_count": 183,
+                "unique_doctor_count": len(rows),
+                "census_unique_detail_count": 183,
+                "census_named_detail_count": 183,
+                "census_blank_name_detail_count": 0,
+                "census_unique_nonblank_name_count": 181,
+                "census_same_name_group_count": 2,
+                "census_same_name_groups": {
+                    "沈峰": ["551", "102037"],
+                    "王丹逢": ["990", "1231"],
+                },
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "schedule_field_ingested_count": 0,
+                "excluded_non_doctor_count": 1,
+            },
+            "rows": rows,
+            "excluded_candidates": [
+                {
+                    "source_link": f"https://www.gzbrain.cn/myzj/info_itemid_{excluded_id}.html",
+                    "reason": "官网详情仅标注护理身份，排除医生画像采集范围",
+                }
+            ],
+            "gzbrain_detail_reconciliation": reconciliation,
+        }
+
+    def test_full_append_gate_accepts_complete_183_id_reconciliation(self) -> None:
+        validate_gzbrain_full_append(self._valid_full_payload())
+
+    def test_full_append_gate_rejects_missing_detail_id(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"].pop()
+        payload["gzbrain_detail_reconciliation"].pop(-2)
+        payload["meta"]["unique_doctor_count"] -= 1
+        with self.assertRaisesRegex(RuntimeError, "逐 ID 对账"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_duplicate_source(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"][-1]["来源链接"] = payload["rows"][0]["来源链接"]
+        with self.assertRaisesRegex(RuntimeError, "来源详情 ID 不唯一"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_schedule_pollution(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"][0]["详情正文摘录"] = "每周一上午出诊。"
+        with self.assertRaisesRegex(RuntimeError, "排班片段"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_patient_identifiable_text(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"][0]["亮眼经历线索"] = "患者案例：某某女性42岁，病情好转。"
+        with self.assertRaisesRegex(RuntimeError, "患者案例或可识别信息"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_tagged_abnormal_row(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"][0].update(
+            {"异常提示": "详情正文为空或未识别", "重点关注范围": "慢性病", "重点优先级": "高"}
+        )
+        with self.assertRaisesRegex(RuntimeError, "异常行仍被打标签"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_unmarked_same_name_row(self) -> None:
+        payload = self._valid_full_payload()
+        same_name_row = next(row for row in payload["rows"] if row["姓名"] == "沈峰")
+        same_name_row["异常提示"] = ""
+        same_name_row["重点优先级"] = "中"
+        with self.assertRaisesRegex(RuntimeError, "同名待甄别"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_nonofficial_detail_url(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"][0]["来源链接"] = "https://example.com/myzj/info_itemid_551.html"
+        with self.assertRaisesRegex(RuntimeError, "非授权"):
+            validate_gzbrain_full_append(payload)
+
+    def test_adapter_and_detail_scope_are_exact(self) -> None:
+        self.assertEqual(
+            dedicated_adapter_for(self.ENTRY_URL), "gzbrain_static_expert_directory"
+        )
+        for invalid in [
+            "https://www.gzbrain.cn/myzj/list.html?page=1",
+            "https://www.gzbrain.cn/myzj/list.html#page",
+            "https://api.gzbrain.cn/myzj/list.html",
+            "https://www.gzbrain.cn/czys/list.html",
+        ]:
+            self.assertEqual(dedicated_adapter_for(invalid), "")
+        self.assertEqual(
+            gzbrain_detail_id("https://www.gzbrain.cn/myzj/info_itemid_966.html"),
+            "966",
+        )
+        self.assertEqual(
+            gzbrain_detail_id("https://www.gzbrain.cn/myzj/info_itemid_966.html?page=1"),
+            "",
+        )
+
+    def test_human_confirmation_allows_non_a_difficulty(self) -> None:
+        targets = confirmed_a_targets(
+            [
+                {
+                    "城市": "广州市",
+                    "医院名称": "广州医科大学附属脑科医院",
+                    "官网首页_候选": "https://www.gzbrain.cn/",
+                    "医生目录入口_候选": self.ENTRY_URL,
+                    "采集难度_初判": "D-待人工补官网",
+                    "人工复核结果": "确认可采集",
+                }
+            ],
+            include_generic=True,
+        )
+        self.assertEqual(len(targets), 1)
+        self.assertEqual(targets[0].adapter_id, "gzbrain_static_expert_directory")
+
+    def test_list_page_discovery_expands_sparse_pager_window(self) -> None:
+        html = """
+        <section class="p_page">
+          <a href="/myzj/list_page_1.html">1</a>
+          <a href="/myzj/list_page_2.html">2</a>
+          <a href="/myzj/list_page_31.html">末页</a>
+        </section>
+        """
+        page_urls = discover_gzbrain_list_pages(html, self.ENTRY_URL)
+        self.assertEqual(len(page_urls), 31)
+        self.assertEqual(page_urls[0], self.ENTRY_URL)
+        self.assertEqual(
+            page_urls[1], "https://www.gzbrain.cn/myzj/list_page_2.html"
+        )
+        self.assertEqual(
+            page_urls[-1], "https://www.gzbrain.cn/myzj/list_page_31.html"
+        )
+
+    def test_list_parser_uses_only_directory_cards_and_drops_schedule(self) -> None:
+        html = """
+        <div class="content_right"><a href="/myzj/info_itemid_999.html">轮播专家</a></div>
+        <div class="expert_list"><ul class="ul clearfix">
+          <li><a href="/myzj/info_itemid_966.html"><div class="txt">
+            <h2>宁玉萍</h2><h3>主任医师 神经内科</h3>
+            <h4><span>专长：</span>记忆障碍诊疗。</h4>
+            <p>开诊时间：芳村门诊星期三上午</p>
+          </div></a></li>
+          <li><a href="/news/info_itemid_1.html"><div class="txt"><h2>新闻</h2></div></a></li>
+        </ul></div>
+        """
+        rows = parse_gzbrain_list_page(html, self.ENTRY_URL)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["id"], "966")
+        self.assertEqual(rows[0]["department"], "神经内科")
+        self.assertEqual(rows[0]["specialty"], "记忆障碍诊疗。")
+        self.assertIn("开诊时间", rows[0]["schedule"])
+
+    def test_detail_parser_excludes_schedule_and_patient_case_sentences(self) -> None:
+        html = """
+        <div class="single_con">
+          <div class="single-header"><h2>宁玉萍</h2><h3><span>主任医师</span></h3></div>
+          <div class="single_cn"><div class="single_tex">
+            <p>专长: 记忆障碍诊疗。</p><p>开诊时间: 芳村门诊星期三上午</p>
+          </div></div>
+          <div class="single-content"><span>*此排班仅作参考，以当日出诊为准</span>
+            <h3>详细介绍</h3><p>长期从事神经内科临床工作。</p>
+            <p>患者案例：某某女性42岁，病情好转。</p>
+            <p>主持国家自然科学基金项目。</p>
+          </div>
+        </div>
+        """
+        detail = parse_gzbrain_detail(html, {})
+        self.assertEqual(detail["name"], "宁玉萍")
+        self.assertEqual(detail["specialty"], "记忆障碍诊疗。")
+        self.assertNotRegex(detail["profile_text"], r"开诊|排班|患者案例|某某")
+        self.assertIn("国家自然科学基金", detail["profile_text"])
+        self.assertEqual(detail["patient_case_exclusion_count"], 1)
+
+    def test_trial_selection_spreads_across_departments(self) -> None:
+        doctors = [
+            {"id": str(index), "department": f"科室{(index - 1) // 4}"}
+            for index in range(1, 13)
+        ]
+        selected = select_gzbrain_trial_doctors(doctors, 10)
+        self.assertEqual(len(selected), 10)
+        self.assertGreaterEqual(len({item["department"] for item in selected}), 3)
+
+    def test_collect_censuses_all_pages_and_keeps_trial_fields_clean(self) -> None:
+        page_1 = """
+        <section class="p_page"><a href="/myzj/list_page_1.html">1</a>
+          <a href="/myzj/list_page_2.html">2</a></section>
+        <div class="expert_list"><ul class="ul clearfix">{cards}</ul></div>
+        """
+
+        def card(doctor_id: int, department: str) -> str:
+            return f"""<li><a href="/myzj/info_itemid_{doctor_id}.html"><div class="txt">
+              <h2>医生{doctor_id}</h2><h3>主任医师 {department}</h3>
+              <h4>专长：{department}常见疾病诊疗。</h4><p>开诊时间：芳村周一上午</p>
+            </div></a></li>"""
+
+        page_1_html = page_1.format(
+            cards="".join(card(index, f"科室{(index - 1) // 3}") for index in range(1, 7))
+        )
+        page_2_html = '<div class="expert_list"><ul class="ul clearfix">' + "".join(
+            card(index, f"科室{(index - 1) // 3}") for index in range(7, 13)
+        ) + "</ul></div>"
+        pages = {
+            self.ENTRY_URL: page_1_html,
+            "https://www.gzbrain.cn/myzj/list_page_2.html": page_2_html,
+        }
+        for index in range(1, 13):
+            pages[f"https://www.gzbrain.cn/myzj/info_itemid_{index}.html"] = f"""
+            <div class="single_con"><div class="single-header"><h2>医生{index}</h2>
+              <h3><span>主任医师</span></h3></div><div class="single_cn"><div class="single_tex">
+              <p>专长: 科室疾病诊疗。</p><p>开诊时间: 芳村周一上午</p></div></div>
+              <div class="single-content"><h3>详细介绍</h3><p>长期从事临床工作。</p></div></div>
+            """
+
+        def fake_fetch(url: str, retries: int = 3):
+            del retries
+            html = pages.get(url)
+            return (200, html, "") if html is not None else (None, "", "fixture missing")
+
+        target = HospitalTarget(
+            city="广州市",
+            hospital="广州医科大学附属脑科医院",
+            homepage="https://www.gzbrain.cn/",
+            entry_url=self.ENTRY_URL,
+            difficulty="D-待人工补官网",
+            review="确认可采集",
+            adapter_id="gzbrain_static_expert_directory",
+        )
+        with (
+            patch("collect_official_doctors_batch.fetch_standard_public_get", side_effect=fake_fetch),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+            patch("collect_official_doctors_batch.time.sleep", return_value=None),
+        ):
+            payload = collect_gzbrain(target, "2026-08-13", max_doctors=10)
+
+        self.assertEqual(payload["meta"]["pagination_count"], 2)
+        self.assertEqual(payload["meta"]["census_unique_detail_count"], 12)
+        self.assertEqual(len(payload["rows"]), 10)
+        self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
+        self.assertEqual(payload["meta"]["schedule_field_ingested_count"], 0)
+        for row in payload["rows"]:
+            self.assertNotRegex(row["详情正文摘录"], r"开诊|出诊|排班")
 
 
 class Gy3yStaticTeamDirectoryTests(unittest.TestCase):
