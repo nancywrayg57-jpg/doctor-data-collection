@@ -70,6 +70,13 @@
 - 解决：不采信该摘要并停止远端步骤；将 revision 写为 `git rev-parse 'HEAD^{tree}'`，对关键原生命令逐项检查 `$LASTEXITCODE`，再重新核验身份、Issue、分支、干净工作区、父提交、tree 和远端 ref 不存在。
 - 防复发：PowerShell 中所有含 `{}`、`^` 等元字符的 Git revision 必须作为单独的引号参数；发布门禁不得只依赖 `$ErrorActionPreference`，必须对 Git/GitHub CLI 的关键调用显式检查退出码和预期输出。
 
+### 6. Git Data API 发布后的本地同步遇到 PowerShell 插值与消息换行差异
+
+- 现象：远端 blob、tree、commit 和新 ref 均已成功创建且 tree/parent 正确，但首次 fetch refspec 中的 `$branch:` 被 PowerShell 识别为带作用域变量，造成分支值丢失；修正 fetch 后，本地提交与 GitHub API 提交的 SHA 不同，初始消息比较也因末尾换行数量不同而中止。
+- 根因：双引号字符串中的变量名后直接跟冒号会触发 PowerShell 作用域语法；Git Data API 接收的 message 在发布脚本中经过 `TrimEnd`，而本地 `git commit` 对象保留了额外终止空行，因此内容树相同但 commit SHA 不同。
+- 解决：refspec 改用 `${branch}` 明确变量边界；fetch GitHub 实际对象后逐项比较 tree、唯一 parent、作者/提交者、时间戳与规范化后的 message，并用 Base64 显示确认差异只是一行额外的 CRLF。确认语义对象一致且工作区干净后，使用 `git update-ref <branch> <remote> <old-local>` 将本地分支对齐远端提交。
+- 防复发：PowerShell 字符串中变量后紧邻冒号时统一写 `${name}:`；Git Data API 创建提交后不假设 SHA 与本地 commit 相同，必须 fetch 实际对象并比较 tree、parent、身份元数据和规范化消息，再同步本地 ref。后续补充记录只能以 GitHub 实际提交为父做非强制快进。
+
 ## 停止点
 
 提交本台账单元格和 ADR，通过非强制 Git Data API 发布原分支并创建关联 PR，等待 owner 对跳过证据和台账工件审计。不得自行合并 PR、关闭 Issue、采集医生或领取下一 Issue。
