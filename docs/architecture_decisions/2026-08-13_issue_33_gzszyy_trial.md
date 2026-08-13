@@ -244,6 +244,14 @@ python .\work\collect_official_doctors_batch.py `
 
 受保护的总底表三资产、FULL payload/报告、正式画像和索引均保留。最终 `py_compile` 通过；广州市中医院专项 9 项通过；全仓库 98 项通过；`git diff --check` 通过。
 
+## Git Data API 发布诊断
+
+首次发布脚本在执行前因 PowerShell 插值中变量后紧跟冒号而解析失败，未产生远端对象或引用变更。修正后 429 个路径已逐对象核验并构造出与本地完全相同的 tree `c9bd0201dff95b03e6e97479605e3a6b939829fc`，但提交消息被 PowerShell 枚举为数组，Commit API 以 422 拒绝，引用仍未更新。管理员解除熔断后把消息显式序列化为标量，GitHub 创建提交 `10c43d4e1ade83a286d1031aeef14c06299a1f58`。
+
+该 API commit 与本地提交的 tree、parent、作者、提交者、时间戳和消息文本完全一致，唯一字节差异是 GitHub Commit API 去掉消息末尾单个 LF；逐字节 Git 对象哈希确认，无尾 LF 时精确得到 `10c43d4e1ade83a286d1031aeef14c06299a1f58`。本地通过 compare-and-swap 迁移到该等价 OID，随后再次核验身份、远端旧 OID、tree 和 parent，最终以 `force=false` 将原分支更新至该提交。PR #34 `headRefOid` 与远端 tree 均已核对一致。
+
+防复发措施：Git Data API 发布前强制检查 PowerShell JSON 字段类型；提交消息按 GitHub API 的无尾 LF 规范在本地构造等价对象；只有 tree、parent、逐字节 commit OID、身份与预期旧 ref 全部一致时，才允许执行 `force=false` 引用更新。
+
 <Handoff_State>
 Target: Issue #33 广州市中医院最终画像审计
 AgentConstitution: D:\workspace\信息收集整理\Agent.md
@@ -261,8 +269,7 @@ CurrentFacts:
 - 同一人归并 3 组；王健同名不同身份 2 行；规范院区关系仅 4 类
 - FULL payload/报告、总底表三资产、本院 415 画像和索引均已完成本地验收
 Next:
-- 提交并通过非强制 Git Data API 更新原分支
-- 等待 CI 成功后请求 nancywrayg57-jpg 对最终画像和归并对账明确审计
+- 等待最终提交的 CI 成功后请求 nancywrayg57-jpg 对最终画像和归并对账明确审计
 - 不得自行合并 PR、关闭 Issue 或领取下一 Issue
 Constraints:
 - 仅医院官网公开来源；官网未展示字段留空，不推断院区
