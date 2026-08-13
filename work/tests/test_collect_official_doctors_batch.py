@@ -59,6 +59,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     sync_profile_flags,
     validate_gykqyy_full_append,
     validate_gyfyyy_full_append,
+    validate_gy3y_full_append,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
     validate_gdzy5413_full_append,
@@ -880,6 +881,71 @@ class Gy3yStaticTeamDirectoryTests(unittest.TestCase):
         self.assertNotIn("## 广医一院同名详情身份聚类对账", report)
         self.assertNotIn("## 广医口腔逐 ID 归并/排除对账", report)
         self.assertNotIn("## 广东省第二中医院同名归并对账", report)
+
+    def test_full_append_gate_reconciles_every_detail_id(self) -> None:
+        rows = []
+        detail_reconciliation = []
+        identity_reconciliation = []
+        for doctor_id in range(1, 439):
+            source = f"https://www.gy3y.cn/ks/nkxt/ks/doctor_{doctor_id}.html"
+            row = {
+                "姓名": f"医生{doctor_id}",
+                "科室_分类页": "荔湾院区内科",
+                "重点优先级": "普通",
+                "重点关注范围": "",
+                "重点疾病标签": "",
+                "擅长诊疗方向摘录": "常见疾病诊疗",
+                "亮眼经历线索": "",
+                "列表简介": "",
+                "详情正文摘录": "曾赴基层出诊并长期从事临床工作",
+                "来源链接": source,
+                "异常提示": "",
+            }
+            rows.append(row)
+            detail_reconciliation.append(
+                {
+                    "detail_id": str(doctor_id),
+                    "name": f"医生{doctor_id}",
+                    "departments": ["荔湾院区产科、妇科"],
+                }
+            )
+            identity_reconciliation.append(
+                {
+                    "detail_ids": [str(doctor_id)],
+                    "primary_source_link": source,
+                }
+            )
+        payload = {
+            "meta": {
+                "category_count": 104,
+                "candidate_membership_count": 580,
+                "census_unique_detail_count": 438,
+                "cross_entry_duplicate_count": 142,
+                "gy3y_multi_relation_identity_count": 126,
+                "gy3y_cross_campus_identity_count": 117,
+                "census_nonempty_department_count": 99,
+                "census_empty_department_count": 5,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "excluded_non_doctor_count": 0,
+                "unique_doctor_count": 438,
+                "gy3y_final_identity_count": 438,
+                "campus_relation_counts": {"荔湾院区": 390, "黄埔院区": 190},
+            },
+            "rows": rows,
+            "excluded_candidates": [],
+            "gy3y_detail_reconciliation": detail_reconciliation,
+            "gy3y_identity_reconciliation": identity_reconciliation,
+        }
+
+        validate_gy3y_full_append(payload)
+        payload["meta"]["candidate_membership_count"] = 579
+        with self.assertRaisesRegex(RuntimeError, "candidate_membership_count"):
+            validate_gy3y_full_append(payload)
+        payload["meta"]["candidate_membership_count"] = 580
+        payload["rows"][0]["详情正文摘录"] = "专家门诊时间：每周一上午"
+        with self.assertRaisesRegex(RuntimeError, "排班片段"):
+            validate_gy3y_full_append(payload)
 
 
 class NodeRuntimeResolutionTests(unittest.TestCase):

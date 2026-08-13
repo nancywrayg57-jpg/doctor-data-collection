@@ -91,43 +91,98 @@ python .\work\collect_official_doctors_batch.py `
 - 样本姓名 10 个唯一、来源 10 个唯一、来源范围严格通过。
 - `git diff --check`：最终提交前执行。
 
-## 工件与下一步
+## Owner 审计与 FULL 授权
 
-- `work/广州医科大学附属第三医院_trial_payload.json`
-- `work/广州医科大学附属第三医院_trial_doctors.csv`
-- `work/广州医科大学附属第三医院_trial_report.md`
-- `work/collect_official_doctors_batch.py`
-- `work/tests/test_collect_official_doctors_batch.py`
-- `docs/architecture_decisions/2026-08-13_issue_27_gy3y_trial.md`
+PR #28 中 `nancywrayg57-jpg` 于 2026-08-13 明确给出 TRIAL **通过**，并下发：
 
-提交、非强制推送并创建关联 `Closes #27` 的 PR 后停止，等待 `nancywrayg57-jpg` 对 TRIAL 明确给出“通过 / 有条件通过 / 不通过”。只有 owner 明确通过且在当前 PR 下发 `Phase: FULL_APPEND_AND_OBSIDIAN` 后，才能在同一 Issue、分支和 PR 内进行全量逐详情采集、护理排除对账、同名身份聚类、总底表验证与 Obsidian 画像生成。
+```text
+Status: READY
+Phase: FULL_APPEND_AND_OBSIDIAN
+Hospital: 广州医科大学附属第三医院
+DoctorDirectoryURL: https://www.gy3y.cn/ks/team.html
+```
+
+授权条件要求以 104 科室块、580 关系、438 唯一 ID 为对账基线，两院区全部纳入；逐详情完成护理排除、同名身份聚类和异常留痕，四个正式文本字段排班片段命中为 0，按 payload → master → XLSX/报告 → 画像顺序同步。
+
+## FULL 写入前门禁与一次安全拦截
+
+在真实全量前新增 `validate_gy3y_full_append`，只增加写入前拒绝条件，不改变入口、采集范围或字段提取：
+
+1. 固定核验 104 科室块、99 非空/5 空科室块、580 关系、438 唯一 ID、126 个多院区/多科室 ID、117 个跨院区 ID、两院区 390/190 关系。
+2. 逐 ID 对账要求“正式详情 ID + 纯护理排除 ID”完整且不重叠地覆盖 438 ID；身份聚类必须完整映射全部正式详情。
+3. 正式来源必须是唯一且合规的 `gy3y.cn doctor_<ID>.html`，院区科室保留前缀。
+4. 多重“擅长”前缀、排班片段、异常行标签与空姓名在写表前熔断。
+
+首次 FULL 运行被该门禁安全拦截，受保护的总底表 CSV/XLSX/更新报告 SHA-256 与运行前完全一致，没有发生部分写入。根因是新门禁的两个误判，而不是官网、网络或采集失败：
+
+- 官方单个科室名可包含 `、`（如 `儿科（普通儿科、新生儿科）`、`核医学科、放射治疗科`）；验证器错误按 `、` 拆成多个科室，误报后半段缺少院区前缀。
+- 验证器用宽泛的“出诊”字样命中排班，把“曾赴基层出诊”等非时段临床叙述误判为排班污染。
+
+最小修正：院区前缀改为检查逐 ID 对账中的原子 `departments` 列表，不再拆分展示字符串；排班检查复用生产清洗函数 `strip_gyfyyy_schedule_text`，只有文本会被该函数识别并移除时才判为污染。回归 fixture 同时证明带 `、` 的完整科室与“曾赴基层出诊”可通过，而“专家门诊时间：每周一上午”仍被拒绝。防复发措施是所有 FULL 门禁必须基于结构化对账字段与生产清洗器，不另造更宽的字符串启发式规则。
+
+## 最终 FULL 结果
+
+第二次、也是熔断阈值前最后一次 FULL 执行成功：
+
+```powershell
+python .\work\collect_official_doctors_batch.py `
+  --hospital "广州医科大学附属第三医院" `
+  --entry-url "https://www.gy3y.cn/ks/team.html" `
+  --allow-generic-append
+```
+
+- 官网普查基线保持：104 科室块（99 非空/5 空）、580 关系、438 唯一详情 ID、126 个多院区/多科室 ID、117 个跨院区 ID；荔湾 390 关系/370 ID，黄埔 190 关系/185 ID。
+- 438 个唯一 ID 全部读取成功，详情失败 0；422 个进入正式医生身份，16 个纯护理身份按详情职称排除并在 FULL payload/report 完整留痕。
+- 正式 422 ID 与护理排除 16 ID 不重叠且并集精确为 438；422 个身份聚类行完整映射 422 个正式 ID，主来源 ID 唯一。
+- 3 组详情同名不同身份（张文、安庚、林琳）保留 6 行并标记 `同名待甄别`；同一 doctor ID 的跨院区/跨科室关系在单行归并，FULL 没有跨详情同一身份合并。
+- 61 行保留异常提示；异常行的重点关注范围、疾病标签保持空白且优先级为普通。四个正式文本字段排班片段命中 0，多重“擅长”前缀残留 0。
+- 总底表由 3554 行增至 3976 行，新增本院 422 行、重复跳过 0。FULL payload 与总底表按来源逐字段一致，差异仅为总表全局序号重排及画像生成后 `已建画像=是` 的预期状态同步。
+- CSV 与 XLSX 的本院 422 行逐字段一致，工作簿 6 张表均完成关键范围渲染；公式错误扫描 0。`医院统计` 为本院医生 422、待复核 422、已建画像 422。
+- 生成正式画像 422 份、跳过 0；`_索引.md` 有 422 个唯一 WikiLink，全部且仅指向现有 422 份画像；画像来源链接集合与总底表本院 422 个来源完全一致。
+- 画像生成后运行 `--rebuild-master-only`（不联网）同步 `已建画像`，总行数仍为 3976、医院数仍为 12，其他业务字段未漂移。
+
+## 清理、工件与下一步
+
+已按 owner 指令清理本院 3 个 TRIAL 临时文件；`work/广州医科大学附属第一医院_trial_report.md` 在本分支始终不存在，无额外删除。保留以下 FULL 与正式工件：
+
+- `work/广州医科大学附属第三医院_official_doctors_payload.json`
+- `work/广州医科大学附属第三医院_official_doctors_report.md`
+- `医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv`
+- `医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx`
+- `医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表_更新报告.md`
+- `医生画像仓库/99_资料来源/珠三角三甲医院_Obsidian缺失画像补充生成报告.md`
+- `医生画像仓库/01_试点医院/广州医科大学附属第三医院/`（422 份画像 + `_索引.md`）
+
+提交并以非强制 Git Data API 更新原 PR #28 后停止，等待 owner 最终画像审计。不得自行合并 PR、关闭 Issue、领取下一 Issue 或选择下一家医院。
 
 <Handoff_State>
-Target: Issue #27 广州医科大学附属第三医院 TRIAL 审计
+Target: Issue #27 广州医科大学附属第三医院最终画像审计
 AgentConstitution: D:\workspace\信息收集整理\Agent.md
 RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/27
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/28
 Branch: codex/mhrj/issue-27-gy3y-trial
-InstructionChannel: Issue #27 + 关联 PR owner 评论/Review
+InstructionChannel: Issue #27 + PR #28 owner 评论/Review
 Completed:
-- 完成两院区 104 科室块、580 关系、438 唯一详情 ID 的官方静态总目录普查
-- 新增严格 gy3y_static_team_directory 适配器与专项测试
-- 完成 10 位医生真实 TRIAL，覆盖 10 个原子院区科室，0 详情失败、0 异常、0 排班污染
-- 未写统一总底表、未生成 XLSX、未生成正式画像
+- owner TRIAL 审计通过并下发 FULL_APPEND_AND_OBSIDIAN 后完成 438 ID 全量逐详情采集
+- 422 个医生身份追加总底表，16 个纯护理身份排除留痕，0 详情失败、0 排班污染
+- 生成 422 份正式画像并核验 422 个唯一 WikiLink，CSV/XLSX/画像来源集合一致
+- 新增 GY3Y FULL 写入前门禁并记录首次安全拦截、根因、最小修正和防复发措施
 CurrentFacts:
-- 荔湾 390 关系/370 唯一 ID；黄埔 190 关系/185 唯一 ID；117 个 ID 跨两院区
-- 126 个 ID 有多院区或多科室关系，按数字 ID 归并并保留院区前缀
-- 静态目录无身份字段，TRIAL 只确认 10 位详情纯护理身份排除 0 位；FULL 须逐详情完成全院对账
+- 总底表 12 家医院、3976 行；本院 422 行、待复核 422、已建画像 422
+- 本院异常提示行 61；3 组同名不同身份共 6 行均保留同名待甄别
+- 荔湾 390 关系/370 ID，黄埔 190 关系/185 ID；117 ID 跨两院区，126 ID 多院区或多科室
 Next:
-- 等待 owner 在关联 PR 明确审计 TRIAL；不得自行进入 FULL
+- 等待 nancywrayg57-jpg 在 PR #28 对最终画像明确审计通过或提出返修
+- 只有最终画像审计通过、PR 合并关闭、Issue #27 关闭且必需 CI 成功后，监控才可检查下一 Issue
 Constraints:
 - 仅医院官网公开静态页面；禁止第三方、搜索表单提交、接口探测、登录/验证码绕过、患者评价与隐私
-- FULL 必须具备 owner 审计通过和 Phase: FULL_APPEND_AND_OBSIDIAN 明确指令
-- 不自行合并 PR、关闭 Issue 或领取下一 Issue
+- 不自行合并 PR、关闭 Issue、领取下一 Issue或选择医院
 Artifacts:
-- D:\workspace\信息收集整理\work\广州医科大学附属第三医院_trial_payload.json
-- D:\workspace\信息收集整理\work\广州医科大学附属第三医院_trial_doctors.csv
-- D:\workspace\信息收集整理\work\广州医科大学附属第三医院_trial_report.md
+- D:\workspace\信息收集整理\work\广州医科大学附属第三医院_official_doctors_payload.json
+- D:\workspace\信息收集整理\work\广州医科大学附属第三医院_official_doctors_report.md
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
+- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广州医科大学附属第三医院\_索引.md
 - D:\workspace\信息收集整理\docs\architecture_decisions\2026-08-13_issue_27_gy3y_trial.md
 </Handoff_State>

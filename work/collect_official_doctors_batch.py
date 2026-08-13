@@ -3102,7 +3102,8 @@ def collect_gy3y(target: HospitalTarget, today: str, max_doctors: int | None = N
             "gy3y_final_identity_count": len(rows),
             "excluded_non_doctor_count": len(excluded_candidates),
             "census_nursing_identity_status": (
-                "静态总目录只展示姓名，不展示职称身份；TRIAL 仅核验 10 位详情，"
+                "静态总目录只展示姓名，不展示职称身份；"
+                f"{'TRIAL 仅核验样本详情' if max_doctors else f'FULL 已逐详情核验 {len(all_doctors)} 个唯一 ID'}，"
                 f"其中纯护理身份排除 {len(excluded_candidates)} 位"
             ),
             "pagination_count": 0,
@@ -5244,6 +5245,144 @@ def validate_gyfyyy_full_append(payload: dict[str, Any]) -> None:
         raise RuntimeError("GYFYYY FULL 写入前门禁失败：" + "；".join(errors))
 
 
+def validate_gy3y_full_append(payload: dict[str, Any]) -> None:
+    """Block the GY3Y master write unless the owner-audited census fully reconciles."""
+
+    meta = payload["meta"]
+    rows = payload["rows"]
+    excluded = payload.get("excluded_candidates", [])
+    detail_reconciliation = payload.get("gy3y_detail_reconciliation", [])
+    identity_reconciliation = payload.get("gy3y_identity_reconciliation", [])
+    errors: list[str] = []
+    expected = {
+        "category_count": 104,
+        "candidate_membership_count": 580,
+        "census_unique_detail_count": 438,
+        "cross_entry_duplicate_count": 142,
+        "gy3y_multi_relation_identity_count": 126,
+        "gy3y_cross_campus_identity_count": 117,
+        "census_nonempty_department_count": 99,
+        "census_empty_department_count": 5,
+        "category_error_count": 0,
+        "detail_error_count": 0,
+    }
+    for field, expected_value in expected.items():
+        actual = int(meta.get(field) or 0)
+        if actual != expected_value:
+            errors.append(f"{field} 应为 {expected_value}，实际 {actual}")
+
+    if meta.get("campus_relation_counts") != {"荔湾院区": 390, "黄埔院区": 190}:
+        errors.append(f"两院区关系数不符合审计基线：{meta.get('campus_relation_counts', {})}")
+
+    nursing_exclusions = [
+        item for item in excluded if "仅标注护理身份" in str(item.get("reason") or "")
+    ]
+    if len(nursing_exclusions) != len(excluded):
+        errors.append("存在未按纯护理身份规则留痕的排除候选")
+    if int(meta.get("excluded_non_doctor_count") or 0) != len(nursing_exclusions):
+        errors.append(
+            "护理排除计数与 meta 不一致："
+            f"{len(nursing_exclusions)}/{meta.get('excluded_non_doctor_count', 0)}"
+        )
+
+    reconciled_ids = {
+        str(item.get("detail_id") or "")
+        for item in detail_reconciliation
+        if str(item.get("detail_id") or "")
+    }
+    excluded_ids = {
+        gy3y_detail_id(str(item.get("source_link") or ""))
+        for item in nursing_exclusions
+        if gy3y_detail_id(str(item.get("source_link") or ""))
+    }
+    if len(reconciled_ids) != len(detail_reconciliation):
+        errors.append("逐 ID 对账存在空或重复详情 ID")
+    if reconciled_ids & excluded_ids:
+        errors.append("正式详情与护理排除详情 ID 重叠")
+    if len(reconciled_ids | excluded_ids) != 438:
+        errors.append(
+            f"逐 ID 对账未覆盖 438 个唯一详情：正式 {len(reconciled_ids)} / "
+            f"护理排除 {len(excluded_ids)}"
+        )
+
+    mapped_ids = {
+        str(detail_id)
+        for item in identity_reconciliation
+        for detail_id in item.get("detail_ids", [])
+        if str(detail_id)
+    }
+    if mapped_ids != reconciled_ids:
+        errors.append(
+            f"身份聚类未完整映射正式详情 ID：对账 {len(reconciled_ids)} / 映射 {len(mapped_ids)}"
+        )
+    if len(identity_reconciliation) != len(rows):
+        errors.append(
+            f"身份聚类对账应与最终正式行一致：{len(identity_reconciliation)}/{len(rows)}"
+        )
+    if (
+        int(meta.get("unique_doctor_count") or 0) != len(rows)
+        or int(meta.get("gy3y_final_identity_count") or 0) != len(rows)
+    ):
+        errors.append(f"最终身份计数与正式行不一致：{len(rows)}")
+
+    primary_ids = [gy3y_detail_id(str(row.get("来源链接") or "")) for row in rows]
+    if any(not detail_id for detail_id in primary_ids):
+        errors.append("存在非授权 gy3y.cn doctor_<数字ID>.html 来源")
+    if len(set(primary_ids)) != len(rows):
+        errors.append("最终身份主详情存在重复 doctor ID")
+    if any(not clean_text(str(row.get("姓名") or "")) for row in rows):
+        errors.append("正式行存在空姓名")
+
+    invalid_departments = [
+        str(item.get("name") or item.get("detail_id") or "未命名")
+        for item in detail_reconciliation
+        if any(
+            clean_text(str(department))
+            and not clean_text(str(department)).startswith(("荔湾院区", "黄埔院区"))
+            for department in item.get("departments", [])
+        )
+    ]
+    if invalid_departments:
+        errors.append("科室字段丢失院区前缀：" + "、".join(invalid_departments[:10]))
+
+    prefixed_specialties = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if re.match(r"^\s*擅长\s*[:：]?", str(row.get("擅长诊疗方向摘录") or ""))
+    ]
+    if prefixed_specialties:
+        errors.append("擅长字段仍保留前缀：" + "、".join(prefixed_specialties[:10]))
+
+    schedule_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录"]
+    schedule_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if any(
+            strip_gyfyyy_schedule_text(str(row.get(field) or ""))
+            != clean_text(str(row.get(field) or ""))
+            for field in schedule_fields
+        )
+    ]
+    if schedule_rows:
+        errors.append("四正式文本字段仍含排班片段：" + "、".join(schedule_rows[:10]))
+
+    tagged_abnormal = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if clean_text(str(row.get("异常提示") or ""))
+        and (
+            clean_text(str(row.get("重点关注范围") or ""))
+            or clean_text(str(row.get("重点疾病标签") or ""))
+            or clean_text(str(row.get("重点优先级") or "")) != "普通"
+        )
+    ]
+    if tagged_abnormal:
+        errors.append("异常行仍被打标签或提升优先级：" + "、".join(tagged_abnormal[:10]))
+
+    if errors:
+        raise RuntimeError("GY3Y FULL 写入前门禁失败：" + "；".join(errors))
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=BASE_HEADERS)
@@ -5884,6 +6023,8 @@ def main() -> None:
         validate_gykqyy_full_append(payload)
     if target.adapter_id == GYFYYY_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gyfyyy_full_append(payload)
+    if target.adapter_id == GY3Y_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_gy3y_full_append(payload)
     if target.adapter_id == GDSKIN_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdskin_full_append(payload)
     if target.adapter_id == NY5Y_ADAPTER_ID and not args.trial_only and not args.single_output:
