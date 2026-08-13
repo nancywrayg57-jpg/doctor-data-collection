@@ -20,6 +20,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     collect_gyfyyy,
     collect_gy3y,
     collect_gzbrain,
+    collect_gzszyy,
     collect_gykqyy,
     collect_generic,
     confirmed_a_targets,
@@ -29,6 +30,10 @@ from collect_official_doctors_batch import (  # noqa: E402
     discover_generic_detail_links,
     discover_gy3y_directory,
     discover_gzbrain_list_pages,
+    discover_gzszyy_care_sites,
+    discover_gzszyy_department_filters,
+    discover_gzszyy_department_pages,
+    discover_gzszyy_unfiltered_pages,
     effective_entry_urls,
     expand_gdzy5413_full_detail_items,
     extract_clean_highlights,
@@ -43,8 +48,11 @@ from collect_official_doctors_batch import (  # noqa: E402
     gyfyyy_detail_id,
     gy3y_detail_id,
     gzbrain_detail_id,
+    gzszyy_detail_id,
     parse_gzbrain_detail,
     parse_gzbrain_list_page,
+    parse_gzszyy_department_page,
+    parse_gzszyy_detail,
     parse_gyfyyy_detail,
     strip_gyfyyy_schedule_text,
     looks_like_person_name,
@@ -62,6 +70,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     round_robin_generic_items,
     select_gyfyyy_trial_doctors,
     select_gzbrain_trial_doctors,
+    select_gzszyy_trial_doctors,
     select_gykqyy_trial_doctors,
     sync_profile_flags,
     validate_gykqyy_full_append,
@@ -999,6 +1008,233 @@ class GzbrainStaticExpertDirectoryTests(unittest.TestCase):
         self.assertEqual(payload["meta"]["schedule_field_ingested_count"], 0)
         for row in payload["rows"]:
             self.assertNotRegex(row["详情正文摘录"], r"开诊|出诊|排班")
+
+
+class GzszyyDepartmentExpertDirectoryTests(unittest.TestCase):
+    ENTRY_URL = "https://www.gzszyy.com/expert/"
+
+    def test_adapter_and_detail_scope_are_exact(self) -> None:
+        self.assertEqual(
+            dedicated_adapter_for(self.ENTRY_URL),
+            "gzszyy_department_expert_directory",
+        )
+        for invalid in [
+            "https://www.gzszyy.com/expert/?page=1",
+            "https://api.gzszyy.com/expert/",
+            "https://www.gzszyy.com/expert/1/dp/3773/",
+        ]:
+            with self.subTest(invalid=invalid):
+                self.assertEqual(dedicated_adapter_for(invalid), "")
+        self.assertEqual(
+            gzszyy_detail_id("https://www.gzszyy.com/expert/2026/w9aADOev.html"),
+            "w9aADOev",
+        )
+        for invalid in [
+            "https://www.gzszyy.com/expert/2026/w9aADOev.html?x=1",
+            "https://www.gzszyy.com/expert/1/pr/99/",
+            "https://other.example/expert/2026/w9aADOev.html",
+        ]:
+            with self.subTest(invalid=invalid):
+                self.assertEqual(gzszyy_detail_id(invalid), "")
+
+    def test_department_filters_and_pages_ignore_professional_and_level_filters(self) -> None:
+        html = """
+        <a href="/expert/1/dp/3773/">肿瘤一区</a>
+        <a href="/expert/1/dp/3774/">肿瘤二区</a>
+        <a href="/expert/1/pr/99/">主任中医师</a>
+        <a href="/expert/1/le/3/">二级专家</a>
+        """
+        departments = discover_gzszyy_department_filters(html, self.ENTRY_URL)
+        self.assertEqual(
+            [(item["department_id"], item["department"]) for item in departments],
+            [("3773", "肿瘤一区"), ("3774", "肿瘤二区")],
+        )
+        pages = discover_gzszyy_department_pages(
+            '<div class="pager"><button data-all="2"></button></div>',
+            departments[0],
+        )
+        self.assertEqual(
+            pages,
+            [
+                "https://www.gzszyy.com/expert/1/dp/3773/",
+                "https://www.gzszyy.com/expert/2/dp/3773/",
+            ],
+        )
+        self.assertEqual(
+            discover_gzszyy_unfiltered_pages(
+                '<div class="pager"><button data-all="18"></button></div>',
+                self.ENTRY_URL,
+            ),
+            [
+                self.ENTRY_URL,
+                *[f"https://www.gzszyy.com/expert/{page}/" for page in range(2, 19)],
+            ],
+        )
+
+    def test_homepage_care_sites_are_strict_and_exclude_non_care_entities(self) -> None:
+        html = """
+        <a href="/district1_zzlyq/" title="珠玑院区">珠玑院区</a>
+        <a href="/district1_thxyq/" title="天河新院区">天河新院区</a>
+        <a href="/district1_tdfy/" title="同德院区">同德院区</a>
+        <a href="/district1_wymzb/" title="五羊门诊部">五羊门诊部</a>
+        <a href="/district1_tdmzb/" title="同德门诊部">同德门诊部</a>
+        <a href="/district1_gzykdxzxylcxy/">广州医科大学中西医临床学院</a>
+        <a href="https://other.example/district1_zzlyq/">外站</a>
+        """
+        sites = discover_gzszyy_care_sites(html, "https://www.gzszyy.com/patient/")
+        self.assertEqual(
+            [item["name"] for item in sites],
+            ["珠玑院区", "天河新院区", "同德院区", "五羊门诊部", "同德门诊部"],
+        )
+
+    def test_department_card_and_detail_parsers_keep_schedule_out(self) -> None:
+        list_html = """
+        <ul class="doctor-list"><li>
+          <h2><a href="/expert/2026/w9aADOev.html">叶穗林</a></h2>
+          <div class="info"><div class="depart-info"><a title="名医堂">名医堂</a></div>
+            <div>职称：主任中医师</div></div>
+          <p><strong>擅长：</strong>擅长冠心病诊疗。</p>
+        </li></ul>
+        """
+        department = {
+            "department_id": "3780",
+            "department": "心病科（心血管内科）",
+            "entry_url": "https://www.gzszyy.com/expert/1/dp/3780/",
+        }
+        cards = parse_gzszyy_department_page(list_html, department["entry_url"], department)
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(cards[0]["department"], "心病科（心血管内科）")
+        self.assertEqual(cards[0]["card_department"], "名医堂")
+        self.assertEqual(cards[0]["specialty"], "冠心病诊疗。")
+
+        detail_html = """
+        <div class="doctor-resume"><h1>叶穗林</h1><p>
+          <u>科室：</u><a href="/department_a0/">名医堂<i></i></a>
+          <a href="/department_b0/">心病科（心血管内科）<i></i></a><br/>
+          <u>职称：</u>主任中医师<br/><u>级别：</u>二级专家</p>
+          <p class="good-at"><u>擅长：</u>擅长冠心病诊疗。</p></div>
+        <div class="doctor-items-intro"><p>医学硕士，硕士生导师。</p>
+          <p>出诊时间：每周一上午。</p></div>
+        <div class="doctor-code"><div class="qr-img">
+          <span title="珠玑路院区">珠玑路院区</span>
+        </div><div class="qr-img">
+          <span title="同德围分院">同德围分院</span>
+        </div></div>
+        """
+        detail = parse_gzszyy_detail(detail_html, cards[0])
+        self.assertEqual(detail["name"], "叶穗林")
+        self.assertEqual(detail["title"], "主任中医师")
+        self.assertEqual(
+            detail["departments"], ["名医堂", "心病科（心血管内科）"]
+        )
+        self.assertEqual(detail["specialty"], "冠心病诊疗。")
+        self.assertEqual(detail["campuses"], ["珠玑路院区", "同德围分院"])
+        self.assertIn("医学硕士", detail["profile_text"])
+        self.assertNotRegex(detail["profile_text"], r"出诊|每周一")
+
+    def test_trial_selection_spreads_across_departments(self) -> None:
+        doctors = [
+            {"id": str(index), "departments": [f"科室{(index - 1) // 4}"]}
+            for index in range(1, 13)
+        ]
+        selected = select_gzszyy_trial_doctors(doctors, 10)
+        self.assertEqual(len(selected), 10)
+        self.assertGreaterEqual(
+            len({department for item in selected for department in item["departments"]}),
+            3,
+        )
+
+    def test_collect_censuses_department_tree_and_excludes_nursing(self) -> None:
+        entry_html = """
+        <a href="/expert/1/dp/1/">科室甲</a>
+        <a href="/expert/1/dp/2/">科室乙</a>
+        <a href="/expert/1/dp/3/">科室丙</a>
+        <a href="/expert/1/pr/95/">主任护师</a>
+        """
+
+        def list_html(department: str, start: int, count: int, nursing: bool = False) -> str:
+            cards = []
+            for index in range(start, start + count):
+                title = "主任护师" if nursing and index == start else "主任医师"
+                cards.append(
+                    f'<li><h2><a href="/expert/2026/id{index}.html">医生{index}</a></h2>'
+                    f'<div class="info"><div class="depart-info"><a title="{department}">{department}</a></div>'
+                    f'<div>职称：{title}</div></div><p>擅长：科室疾病诊疗。</p></li>'
+                )
+            return '<ul class="doctor-list">' + "".join(cards) + "</ul>"
+
+        entry_html += '<div class="pager"><button data-all="1"></button></div>'
+        entry_html += list_html("总目录", 1, 13, True)
+        entry_html += """
+          <ul class="doctor-list"><li>
+            <h2><a href="/expert/2026/id14.html">医生14</a></h2>
+            <div class="info"><div>职称：主任医师</div></div>
+            <p>擅长：科室疾病诊疗。</p>
+          </li></ul>
+        """
+        pages = {
+            self.ENTRY_URL: entry_html,
+            "https://www.gzszyy.com/patient/": """
+                <a href="/district1_zzlyq/">珠玑院区</a>
+                <a href="/district1_thxyq/">天河新院区</a>
+                <a href="/district1_tdfy/">同德院区</a>
+                <a href="/district1_wymzb/">五羊门诊部</a>
+                <a href="/district1_tdmzb/">同德门诊部</a>
+            """,
+            "https://www.gzszyy.com/expert/1/dp/1/": list_html("科室甲", 1, 5, True),
+            "https://www.gzszyy.com/expert/1/dp/2/": list_html("科室乙", 6, 4),
+            "https://www.gzszyy.com/expert/1/dp/3/": list_html("科室丙", 10, 4),
+        }
+        for index in range(2, 15):
+            pages[f"https://www.gzszyy.com/expert/2026/id{index}.html"] = f"""
+            <div class="doctor-resume"><h1>医生{index}</h1><p>
+              <u>科室：</u><a href="/department_a0/">科室{index}</a><br/>
+              <u>职称：</u>主任医师</p><p class="good-at">擅长：科室疾病诊疗。</p></div>
+            <div class="doctor-items-intro"><p>从事临床诊疗工作。</p></div>
+            <div class="doctor-code"><div class="qr-img">
+              <span title="珠玑路院区">珠玑路院区</span>
+            </div></div>
+            """
+
+        def fake_fetch(_session: object, url: str, retries: int = 3) -> tuple[int, str, str]:
+            del retries
+            return (200, pages[url], "") if url in pages else (404, "", "HTTP 404")
+
+        target = HospitalTarget(
+            city="广州市",
+            hospital="广州市中医院",
+            homepage="https://www.gzszyy.com/patient/",
+            entry_url=self.ENTRY_URL,
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="gzszyy_department_expert_directory",
+        )
+        with (
+            patch("collect_official_doctors_batch.create_official_session", return_value=object()),
+            patch("collect_official_doctors_batch.fetch", side_effect=fake_fetch),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+            patch("collect_official_doctors_batch.time.sleep", return_value=None),
+        ):
+            payload = collect_gzszyy(target, "2026-08-13", max_doctors=10)
+
+        self.assertEqual(payload["meta"]["census_department_count"], 3)
+        self.assertEqual(payload["meta"]["candidate_membership_count"], 14)
+        self.assertEqual(payload["meta"]["census_unique_detail_count"], 14)
+        self.assertEqual(payload["meta"]["excluded_non_doctor_count"], 1)
+        self.assertEqual(payload["meta"]["eligible_candidate_count"], 13)
+        self.assertEqual(payload["meta"]["filter_link_counts"], {"dp": 3, "pr": 1, "le": 0})
+        self.assertEqual(payload["meta"]["gzszyy_unfiltered_unique_detail_count"], 14)
+        self.assertEqual(payload["meta"]["gzszyy_dp_unique_detail_count"], 13)
+        self.assertEqual(payload["meta"]["gzszyy_unfiltered_only_detail_ids"], ["id14"])
+        self.assertEqual(payload["meta"]["census_empty_department_count"], 1)
+        self.assertEqual(payload["meta"]["census_group_count"], 5)
+        self.assertEqual(payload["meta"]["gzszyy_campus_tagged_sample_count"], 10)
+        self.assertTrue(
+            all("珠玑路院区" in row["科室_列表卡片"] for row in payload["rows"])
+        )
+        self.assertEqual(len(payload["rows"]), 10)
+        self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
+        self.assertEqual(payload["meta"]["detail_error_count"], 0)
 
 
 class Gy3yStaticTeamDirectoryTests(unittest.TestCase):

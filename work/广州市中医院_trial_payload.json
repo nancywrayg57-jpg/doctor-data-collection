@@ -1,0 +1,957 @@
+{
+  "meta": {
+    "city": "广州市",
+    "hospital": "广州市中医院",
+    "homepage": "https://www.gzszyy.com/patient/",
+    "entry_url": "https://www.gzszyy.com/expert/",
+    "entry_url_source": "GitHub Issue #33（与官网入口台账一致）",
+    "ledger_entry_url": "https://www.gzszyy.com/expert/",
+    "adapter_id": "gzszyy_department_expert_directory",
+    "collected_at": "2026-08-13",
+    "category_count": 37,
+    "raw_card_rows": 434,
+    "candidate_membership_count": 434,
+    "unique_candidate_count": 423,
+    "unique_doctor_count": 10,
+    "census_unique_detail_count": 423,
+    "census_named_detail_count": 423,
+    "census_blank_name_detail_count": 0,
+    "census_unique_nonblank_name_count": 419,
+    "census_same_name_group_count": 4,
+    "census_same_name_groups": {
+      "林少贞": [
+        "ELe31Mb6",
+        "JxboyNeg"
+      ],
+      "唐瑾秋": [
+        "4QbYVOdz",
+        "X7ax9byv"
+      ],
+      "王健": [
+        "3YaOggax",
+        "WZdP6yaK"
+      ],
+      "高三德": [
+        "LDdwkmd1",
+        "QBeXY8ay"
+      ]
+    },
+    "census_department_count": 35,
+    "census_group_count": 5,
+    "census_nonempty_department_count": 422,
+    "census_empty_department_count": 1,
+    "sample_entry_coverage_count": 11,
+    "sample_entry_categories": [
+      "体检科",
+      "名医堂",
+      "心病科（心血管内科）",
+      "肛肠科",
+      "肿瘤一区",
+      "肿瘤二区",
+      "脑病科（神经内科）",
+      "脾胃科（消化内科）",
+      "重症医学科",
+      "针灸科",
+      "骨伤科"
+    ],
+    "pagination_count": 37,
+    "pagination_method": "顶层全院目录 18 页校验身份覆盖；35 个 dp 科室筛选入口共 37 页提供科室关系；pr/le 仅为职称/级别筛选证据",
+    "filter_semantics": "dp=科室、pr=职称、le=专家级别；顶层目录与 dp 科室树取并集，dp 缺失的顶层医生沿用其官方卡片科室",
+    "filter_link_counts": {
+      "dp": 35,
+      "pr": 18,
+      "le": 3
+    },
+    "gzszyy_unfiltered_page_count": 18,
+    "gzszyy_unfiltered_unique_detail_count": 423,
+    "gzszyy_dp_unique_detail_count": 422,
+    "gzszyy_unfiltered_only_detail_count": 1,
+    "gzszyy_unfiltered_only_detail_ids": [
+      "lNbWW4by"
+    ],
+    "gzszyy_dp_only_detail_count": 0,
+    "gzszyy_multi_department_detail_count": 11,
+    "campus_relation_counts": {
+      "珠玑路院区": 7,
+      "同德围分院": 3,
+      "同德综合门诊部": 1
+    },
+    "cross_campus_detail_count": 3,
+    "gzszyy_official_care_site_count": 5,
+    "gzszyy_sample_detail_count": 10,
+    "gzszyy_campus_tagged_sample_count": 8,
+    "gzszyy_campus_untagged_sample_count": 2,
+    "schedule_field_ingested_count": 0,
+    "category_error_count": 0,
+    "detail_error_count": 0,
+    "cross_entry_duplicate_count": 11,
+    "excluded_non_doctor_count": 5,
+    "eligible_candidate_count": 418,
+    "existing_profile_count": 0,
+    "ledger_review": "确认可采集",
+    "ledger_difficulty": "A-优先自动采集",
+    "department_coverage_count": 11,
+    "covered_departments": [
+      "体检科",
+      "名医堂",
+      "心病科（心血管内科）",
+      "肛肠科",
+      "肿瘤一区",
+      "肿瘤二区",
+      "脑病科（神经内科）",
+      "脾胃科（消化内科）",
+      "重症医学科",
+      "针灸科",
+      "骨伤科"
+    ],
+    "execution_mode": "trial",
+    "json_path": "D:\\workspace\\信息收集整理\\work\\广州市中医院_trial_payload.json",
+    "csv_path": "D:\\workspace\\信息收集整理\\work\\广州市中医院_trial_doctors.csv",
+    "xlsx_path": "",
+    "preview_path": ""
+  },
+  "categories": [
+    {
+      "category_id": "4029:1",
+      "category_name": "名医堂",
+      "url": "https://www.gzszyy.com/expert/1/dp/4029/",
+      "doctor_relation_count": 11
+    },
+    {
+      "category_id": "3773:1",
+      "category_name": "肿瘤一区",
+      "url": "https://www.gzszyy.com/expert/1/dp/3773/",
+      "doctor_relation_count": 9
+    },
+    {
+      "category_id": "3774:1",
+      "category_name": "肿瘤二区",
+      "url": "https://www.gzszyy.com/expert/1/dp/3774/",
+      "doctor_relation_count": 6
+    },
+    {
+      "category_id": "3775:1",
+      "category_name": "针灸科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3775/",
+      "doctor_relation_count": 14
+    },
+    {
+      "category_id": "3776:1",
+      "category_name": "脑病科（神经内科）",
+      "url": "https://www.gzszyy.com/expert/1/dp/3776/",
+      "doctor_relation_count": 20
+    },
+    {
+      "category_id": "3777:1",
+      "category_name": "脾胃科（消化内科）",
+      "url": "https://www.gzszyy.com/expert/1/dp/3777/",
+      "doctor_relation_count": 23
+    },
+    {
+      "category_id": "3778:1",
+      "category_name": "血液科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3778/",
+      "doctor_relation_count": 4
+    },
+    {
+      "category_id": "2026:1",
+      "category_name": "重症医学科",
+      "url": "https://www.gzszyy.com/expert/1/dp/2026/",
+      "doctor_relation_count": 8
+    },
+    {
+      "category_id": "3779:1",
+      "category_name": "肾病科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3779/",
+      "doctor_relation_count": 21
+    },
+    {
+      "category_id": "3780:1",
+      "category_name": "心病科（心血管内科）",
+      "url": "https://www.gzszyy.com/expert/1/dp/3780/",
+      "doctor_relation_count": 23
+    },
+    {
+      "category_id": "3781:1",
+      "category_name": "内分泌科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3781/",
+      "doctor_relation_count": 11
+    },
+    {
+      "category_id": "3782:1",
+      "category_name": "肺病科（呼吸内科）",
+      "url": "https://www.gzszyy.com/expert/1/dp/3782/",
+      "doctor_relation_count": 13
+    },
+    {
+      "category_id": "3783:1",
+      "category_name": "外科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3783/",
+      "doctor_relation_count": 24
+    },
+    {
+      "category_id": "3783:2",
+      "category_name": "外科",
+      "url": "https://www.gzszyy.com/expert/2/dp/3783/",
+      "doctor_relation_count": 2
+    },
+    {
+      "category_id": "3784:1",
+      "category_name": "脉管炎科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3784/",
+      "doctor_relation_count": 9
+    },
+    {
+      "category_id": "3785:1",
+      "category_name": "肛肠科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3785/",
+      "doctor_relation_count": 9
+    },
+    {
+      "category_id": "3786:1",
+      "category_name": "妇科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3786/",
+      "doctor_relation_count": 15
+    },
+    {
+      "category_id": "3787:1",
+      "category_name": "儿科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3787/",
+      "doctor_relation_count": 19
+    },
+    {
+      "category_id": "3788:1",
+      "category_name": "骨伤科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3788/",
+      "doctor_relation_count": 24
+    },
+    {
+      "category_id": "3788:2",
+      "category_name": "骨伤科",
+      "url": "https://www.gzszyy.com/expert/2/dp/3788/",
+      "doctor_relation_count": 1
+    },
+    {
+      "category_id": "3789:1",
+      "category_name": "急诊科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3789/",
+      "doctor_relation_count": 17
+    },
+    {
+      "category_id": "4170:1",
+      "category_name": "麻醉科",
+      "url": "https://www.gzszyy.com/expert/1/dp/4170/",
+      "doctor_relation_count": 12
+    },
+    {
+      "category_id": "3790:1",
+      "category_name": "睡眠心理科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3790/",
+      "doctor_relation_count": 4
+    },
+    {
+      "category_id": "4236:1",
+      "category_name": "治未病科",
+      "url": "https://www.gzszyy.com/expert/1/dp/4236/",
+      "doctor_relation_count": 10
+    },
+    {
+      "category_id": "3791:1",
+      "category_name": "体检科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3791/",
+      "doctor_relation_count": 3
+    },
+    {
+      "category_id": "3792:1",
+      "category_name": "皮肤科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3792/",
+      "doctor_relation_count": 10
+    },
+    {
+      "category_id": "3793:1",
+      "category_name": "口腔科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3793/",
+      "doctor_relation_count": 11
+    },
+    {
+      "category_id": "3794:1",
+      "category_name": "眼科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3794/",
+      "doctor_relation_count": 10
+    },
+    {
+      "category_id": "3795:1",
+      "category_name": "耳鼻喉科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3795/",
+      "doctor_relation_count": 9
+    },
+    {
+      "category_id": "4005:1",
+      "category_name": "针灸康复科",
+      "url": "https://www.gzszyy.com/expert/1/dp/4005/",
+      "doctor_relation_count": 14
+    },
+    {
+      "category_id": "4030:1",
+      "category_name": "普通内科、杂病门诊",
+      "url": "https://www.gzszyy.com/expert/1/dp/4030/",
+      "doctor_relation_count": 5
+    },
+    {
+      "category_id": "4031:1",
+      "category_name": "同德综合门诊部",
+      "url": "https://www.gzszyy.com/expert/1/dp/4031/",
+      "doctor_relation_count": 17
+    },
+    {
+      "category_id": "4032:1",
+      "category_name": "五羊门诊部",
+      "url": "https://www.gzszyy.com/expert/1/dp/4032/",
+      "doctor_relation_count": 12
+    },
+    {
+      "category_id": "3796:1",
+      "category_name": "医学影像科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3796/",
+      "doctor_relation_count": 12
+    },
+    {
+      "category_id": "3797:1",
+      "category_name": "检验病理科",
+      "url": "https://www.gzszyy.com/expert/1/dp/3797/",
+      "doctor_relation_count": 4
+    },
+    {
+      "category_id": "3798:1",
+      "category_name": "药学部",
+      "url": "https://www.gzszyy.com/expert/1/dp/3798/",
+      "doctor_relation_count": 3
+    },
+    {
+      "category_id": "4278:1",
+      "category_name": "超声医学科",
+      "url": "https://www.gzszyy.com/expert/1/dp/4278/",
+      "doctor_relation_count": 14
+    }
+  ],
+  "entry_reconnaissance": [
+    {
+      "category_name": "官网顶层全院专家目录",
+      "entry_url": "https://www.gzszyy.com/expert/",
+      "page_nature": "医院官网名医名家未筛选目录；用于校验全院详情 ID 覆盖",
+      "list_page_count": 18,
+      "raw_detail_relation_count": 423,
+      "unique_detail_count": 423,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广州市中医院",
+      "independent_entity_check": "同域公开目录；与 dp 科室树逐 ID 对账"
+    },
+    {
+      "category_name": "官网 dp 科室专家树",
+      "entry_url": "https://www.gzszyy.com/expert/",
+      "page_nature": "医院官网名医名家目录；dp 科室筛选为全院普查入口",
+      "list_page_count": 37,
+      "raw_detail_relation_count": 433,
+      "unique_detail_count": 422,
+      "out_of_scope_detail_count": 5,
+      "affiliation": "广州市中医院",
+      "independent_entity_check": "同域单一医院；首页院区/门诊部与详情二维码标签独立留痕"
+    }
+  ],
+  "gzszyy_campus_reconnaissance": [
+    {
+      "name": "珠玑院区",
+      "source_url": "https://www.gzszyy.com/district1_zzlyq/"
+    },
+    {
+      "name": "天河新院区",
+      "source_url": "https://www.gzszyy.com/district1_thxyq/"
+    },
+    {
+      "name": "同德院区",
+      "source_url": "https://www.gzszyy.com/district1_tdfy/"
+    },
+    {
+      "name": "五羊门诊部",
+      "source_url": "https://www.gzszyy.com/district1_wymzb/"
+    },
+    {
+      "name": "同德门诊部",
+      "source_url": "https://www.gzszyy.com/district1_tdmzb/"
+    }
+  ],
+  "excluded_candidates": [
+    {
+      "entry_url": "https://www.gzszyy.com/expert/",
+      "list_title": "黄金兰 主管护师",
+      "source_link": "https://www.gzszyy.com/expert/2026/8mepzrbM.html",
+      "reason": "官网科室目录仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gzszyy.com/expert/",
+      "list_title": "王少敏 主任护师",
+      "source_link": "https://www.gzszyy.com/expert/2026/pnelpJeK.html",
+      "reason": "官网科室目录仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gzszyy.com/expert/",
+      "list_title": "曾会萍 主任护师",
+      "source_link": "https://www.gzszyy.com/expert/2026/8mep2bMy.html",
+      "reason": "官网科室目录仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gzszyy.com/expert/",
+      "list_title": "周素金 主管护师",
+      "source_link": "https://www.gzszyy.com/expert/2026/4zbq2dpr.html",
+      "reason": "官网科室目录仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gzszyy.com/expert/",
+      "list_title": "谭萍云 主管护师",
+      "source_link": "https://www.gzszyy.com/expert/2026/MvbmEAbY.html",
+      "reason": "官网科室目录仅标注护理身份，排除医生画像采集范围"
+    }
+  ],
+  "gzszyy_detail_reconciliation": [
+    {
+      "detail_id": "w9aADOev",
+      "name": "叶穗林",
+      "resolution": "正式行",
+      "relation_count": 2,
+      "departments": [
+        "名医堂",
+        "心病科（心血管内科）"
+      ],
+      "campuses": [
+        "珠玑路院区"
+      ],
+      "source_link": "https://www.gzszyy.com/expert/2026/w9aADOev.html"
+    },
+    {
+      "detail_id": "X7axvrdy",
+      "name": "蔡迎峰",
+      "resolution": "正式行",
+      "relation_count": 2,
+      "departments": [
+        "名医堂",
+        "骨伤科"
+      ],
+      "campuses": [
+        "同德围分院",
+        "同德综合门诊部"
+      ],
+      "source_link": "https://www.gzszyy.com/expert/2026/X7axvrdy.html"
+    },
+    {
+      "detail_id": "KQe1wRbJ",
+      "name": "李丽霞",
+      "resolution": "正式行",
+      "relation_count": 2,
+      "departments": [
+        "名医堂",
+        "针灸科"
+      ],
+      "campuses": [
+        "珠玑路院区",
+        "同德围分院"
+      ],
+      "source_link": "https://www.gzszyy.com/expert/2026/KQe1wRbJ.html"
+    },
+    {
+      "detail_id": "46dBgJe7",
+      "name": "赵云燕",
+      "resolution": "正式行",
+      "relation_count": 2,
+      "departments": [
+        "名医堂",
+        "重症医学科"
+      ],
+      "campuses": [
+        "珠玑路院区"
+      ],
+      "source_link": "https://www.gzszyy.com/expert/2026/46dBgJe7.html"
+    },
+    {
+      "detail_id": "9wdLwbjP",
+      "name": "叶绍伟",
+      "resolution": "正式行",
+      "relation_count": 2,
+      "departments": [
+        "名医堂",
+        "脑病科（神经内科）"
+      ],
+      "campuses": [],
+      "source_link": "https://www.gzszyy.com/expert/2026/9wdLwbjP.html"
+    },
+    {
+      "detail_id": "WPe9xdLy",
+      "name": "吕永慧",
+      "resolution": "正式行",
+      "relation_count": 2,
+      "departments": [
+        "名医堂",
+        "脾胃科（消化内科）"
+      ],
+      "campuses": [
+        "珠玑路院区"
+      ],
+      "source_link": "https://www.gzszyy.com/expert/2026/WPe9xdLy.html"
+    },
+    {
+      "detail_id": "4zbq7rep",
+      "name": "梁劲军",
+      "resolution": "正式行",
+      "relation_count": 2,
+      "departments": [
+        "名医堂",
+        "肛肠科"
+      ],
+      "campuses": [],
+      "source_link": "https://www.gzszyy.com/expert/2026/4zbq7rep.html"
+    },
+    {
+      "detail_id": "4zbqjrdp",
+      "name": "吴薏婷",
+      "resolution": "正式行",
+      "relation_count": 1,
+      "departments": [
+        "肿瘤一区"
+      ],
+      "campuses": [
+        "珠玑路院区"
+      ],
+      "source_link": "https://www.gzszyy.com/expert/2026/4zbqjrdp.html"
+    },
+    {
+      "detail_id": "olej25ej",
+      "name": "邓力",
+      "resolution": "正式行",
+      "relation_count": 1,
+      "departments": [
+        "肿瘤二区"
+      ],
+      "campuses": [
+        "珠玑路院区",
+        "同德围分院"
+      ],
+      "source_link": "https://www.gzszyy.com/expert/2026/olej25ej.html"
+    },
+    {
+      "detail_id": "WZdPwbKg",
+      "name": "许幸仪",
+      "resolution": "正式行",
+      "relation_count": 2,
+      "departments": [
+        "脑病科（神经内科）",
+        "体检科"
+      ],
+      "campuses": [
+        "珠玑路院区"
+      ],
+      "source_link": "https://www.gzszyy.com/expert/2026/WZdPwbKg.html"
+    }
+  ],
+  "cross_entry_duplicates": [
+    {
+      "name": "叶穗林",
+      "source_link": "https://www.gzszyy.com/expert/2026/w9aADOev.html",
+      "entry_urls": [
+        "名医堂",
+        "心病科（心血管内科）"
+      ]
+    },
+    {
+      "name": "蔡迎峰",
+      "source_link": "https://www.gzszyy.com/expert/2026/X7axvrdy.html",
+      "entry_urls": [
+        "名医堂",
+        "骨伤科"
+      ]
+    },
+    {
+      "name": "李丽霞",
+      "source_link": "https://www.gzszyy.com/expert/2026/KQe1wRbJ.html",
+      "entry_urls": [
+        "名医堂",
+        "针灸科"
+      ]
+    },
+    {
+      "name": "赵云燕",
+      "source_link": "https://www.gzszyy.com/expert/2026/46dBgJe7.html",
+      "entry_urls": [
+        "名医堂",
+        "重症医学科"
+      ]
+    },
+    {
+      "name": "叶绍伟",
+      "source_link": "https://www.gzszyy.com/expert/2026/9wdLwbjP.html",
+      "entry_urls": [
+        "名医堂",
+        "脑病科（神经内科）"
+      ]
+    },
+    {
+      "name": "吕永慧",
+      "source_link": "https://www.gzszyy.com/expert/2026/WPe9xdLy.html",
+      "entry_urls": [
+        "名医堂",
+        "脾胃科（消化内科）"
+      ]
+    },
+    {
+      "name": "梁劲军",
+      "source_link": "https://www.gzszyy.com/expert/2026/4zbq7rep.html",
+      "entry_urls": [
+        "名医堂",
+        "肛肠科"
+      ]
+    },
+    {
+      "name": "黄金兰",
+      "source_link": "https://www.gzszyy.com/expert/2026/8mepzrbM.html",
+      "entry_urls": [
+        "肿瘤二区",
+        "血液科"
+      ]
+    },
+    {
+      "name": "许幸仪",
+      "source_link": "https://www.gzszyy.com/expert/2026/WZdPwbKg.html",
+      "entry_urls": [
+        "脑病科（神经内科）",
+        "体检科"
+      ]
+    },
+    {
+      "name": "高三德",
+      "source_link": "https://www.gzszyy.com/expert/2026/LDdwkmd1.html",
+      "entry_urls": [
+        "治未病科",
+        "普通内科、杂病门诊"
+      ]
+    },
+    {
+      "name": "赵明昂",
+      "source_link": "https://www.gzszyy.com/expert/2026/J0dNYLbL.html",
+      "entry_urls": [
+        "针灸康复科",
+        "同德综合门诊部"
+      ]
+    }
+  ],
+  "category_errors": [],
+  "detail_errors": [],
+  "category_counts": [
+    [
+      "名医堂",
+      7
+    ],
+    [
+      "脑病科（神经内科）",
+      2
+    ],
+    [
+      "心病科（心血管内科）",
+      1
+    ],
+    [
+      "骨伤科",
+      1
+    ],
+    [
+      "针灸科",
+      1
+    ],
+    [
+      "重症医学科",
+      1
+    ],
+    [
+      "脾胃科（消化内科）",
+      1
+    ],
+    [
+      "肛肠科",
+      1
+    ],
+    [
+      "肿瘤一区",
+      1
+    ],
+    [
+      "肿瘤二区",
+      1
+    ],
+    [
+      "体检科",
+      1
+    ]
+  ],
+  "priority_counts": {
+    "高": 9,
+    "中": 1
+  },
+  "group_counts": {
+    "慢性病": 3,
+    "免疫/风湿/感染": 1,
+    "疑难重症": 7,
+    "肿瘤": 5,
+    "术后恢复/康复": 2,
+    "生殖疾病": 1
+  },
+  "warning_counts": {},
+  "rows": [
+    {
+      "序号": 1,
+      "医院": "广州市中医院",
+      "姓名": "叶穗林",
+      "科室_分类页": "名医堂、心病科（心血管内科）",
+      "科室_列表卡片": "名医堂、珠玑路院区",
+      "职称_关键词": "主任中医师",
+      "职称身份原文": "主任中医师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、免疫/风湿/感染、疑难重症",
+      "重点疾病标签": "高血压、冠心病、心衰、高脂血症、风湿、复杂",
+      "擅长诊疗方向摘录": "中西医结合方法治疗冠心病、高血压病、高脂血症、心肌病、病毒性心肌炎、风湿性心脏病、顽固性心衰、复杂顽固性心律失常等疾病。",
+      "亮眼经历线索": "广东省名中医， 广州医科大学附属中医医院心血管内科学术带头人， 二级主任中医师，医学硕士，教授，硕士生导师 应用中医药方法治疗心血管疾病有四十多年丰富临床经验，擅长中西医结合方法治疗冠心病、高血压病、高脂血症、心肌病、病毒性心肌炎、风湿性心脏病、顽固性心衰、复杂顽固性心律失常等疾病。 学术任职：广东省中西医结合学会高血压专业委员会副主任委员； 双心医学专业委员会副主任委员； 广东省中医药学会心血管专业委员会常委；",
+      "列表简介": "",
+      "详情正文摘录": "广东省名中医， 广州医科大学附属中医医院心血管内科学术带头人， 二级主任中医师，医学硕士，教授，硕士生导师 应用中医药方法治疗心血管疾病有四十多年丰富临床经验，擅长中西医结合方法治疗冠心病、高血压病、高脂血症、心肌病、病毒性心肌炎、风湿性心脏病、顽固性心衰、复杂顽固性心律失常等疾病。 学术任职：广东省中西医结合学会高血压专业委员会副主任委员； 双心医学专业委员会副主任委员； 广东省中医药学会心血管专业委员会常委； 内科专业委员会常委； 广州市中医药学会常务理事等。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gzszyy.com/expert/2026/w9aADOev.html",
+      "采集入口": "https://www.gzszyy.com/expert/",
+      "采集方式": "官网 dp 科室树静态分页+严格专家详情 DOM 结构化抽取",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 2,
+      "医院": "广州市中医院",
+      "姓名": "蔡迎峰",
+      "科室_分类页": "名医堂、骨伤科",
+      "科室_列表卡片": "名医堂、同德围分院、同德综合门诊部",
+      "职称_关键词": "主任中医师",
+      "职称身份原文": "主任中医师",
+      "重点优先级": "高",
+      "重点关注范围": "疑难重症",
+      "重点疾病标签": "疑难、复杂",
+      "擅长诊疗方向摘录": "骨伤科疑难疾病的诊治及各种复杂、精细骨科手术。精于各种脊柱外科手术、微创脊柱外科手术及髋膝关节置换手术。在运用中医药方法治疗各种骨折、脱位、颈腰椎间盘突出、骨关节疾病较有丰富经验。",
+      "亮眼经历线索": "广东省名中医，主任中医师 广东省第二批中医临床优秀人才，广州市第二批优秀中医临床人才，师从广东省名中医刘金文教授。 广东省基层医药学会中西医结合八法正骨分会副会长、世界中医药联合会 骨伤科 专业委员会常务理事。 擅长 骨伤科 疑难疾病的诊治及各种复杂、精细骨科手术。 参与编撰专业著作 1 部，拥有实用型专利技术 1 项，发表各类学术论文多篇，主持参与国家级自然基金课题 1 项，省、市级课题多项。",
+      "列表简介": "",
+      "详情正文摘录": "广东省名中医，主任中医师 广东省第二批中医临床优秀人才，广州市第二批优秀中医临床人才，师从广东省名中医刘金文教授。 广东省基层医药学会中西医结合八法正骨分会副会长、世界中医药联合会 骨伤科 专业委员会常务理事。 擅长 骨伤科 疑难疾病的诊治及各种复杂、精细骨科手术。 精于各种脊柱 外科 手术、微创脊柱 外科 手术及髋膝关节置换手术。 在运用中医药方法治疗各种骨折、脱位、颈腰椎间盘突出、骨关节疾病较有丰富经验。 参与编撰专业著作 1 部，拥有实用型专利技术 1 项，发表各类学术论文多篇，主持参与国家级自然基金课题 1 项，省、市级课题多项。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gzszyy.com/expert/2026/X7axvrdy.html",
+      "采集入口": "https://www.gzszyy.com/expert/",
+      "采集方式": "官网 dp 科室树静态分页+严格专家详情 DOM 结构化抽取",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 3,
+      "医院": "广州市中医院",
+      "姓名": "李丽霞",
+      "科室_分类页": "名医堂、针灸科",
+      "科室_列表卡片": "名医堂、珠玑路院区、同德围分院",
+      "职称_关键词": "主任中医师",
+      "职称身份原文": "主任中医师",
+      "重点优先级": "高",
+      "重点关注范围": "疑难重症",
+      "重点疾病标签": "疑难",
+      "擅长诊疗方向摘录": "应用岭南火针等各种特色针法治疗各种痛证、神经系统疾病和各种疑难杂症。",
+      "亮眼经历线索": "广东省名中医，广州医科大学附属中医医院 针灸科 学术带头人，主任中医师 广东省第二批名中医师承项目指导老师，广州市优秀中医临床人才，广州市医学重点人才，广州市针灸学会会长，广州中医药学会针灸分会主任委员， 广东省针灸学会文献和信息专业委员会名誉主委 ，擅长应用岭南火针等各种特色针法治疗各种痛证、神经系统疾病和各种疑难杂症。",
+      "列表简介": "",
+      "详情正文摘录": "广东省名中医，广州医科大学附属中医医院 针灸科 学术带头人，主任中医师 广东省第二批名中医师承项目指导老师，广州市优秀中医临床人才，广州市医学重点人才，广州市针灸学会会长，广州中医药学会针灸分会主任委员， 广东省针灸学会文献和信息专业委员会名誉主委 ，擅长应用岭南火针等各种特色针法治疗各种痛证、神经系统疾病和各种疑难杂症。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gzszyy.com/expert/2026/KQe1wRbJ.html",
+      "采集入口": "https://www.gzszyy.com/expert/",
+      "采集方式": "官网 dp 科室树静态分页+严格专家详情 DOM 结构化抽取",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 4,
+      "医院": "广州市中医院",
+      "姓名": "赵云燕",
+      "科室_分类页": "名医堂、重症医学科",
+      "科室_列表卡片": "名医堂、珠玑路院区",
+      "职称_关键词": "主任中医师",
+      "职称身份原文": "主任中医师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、肿瘤、术后恢复/康复、疑难重症",
+      "重点疾病标签": "慢性、肿瘤、术后、营养、疼痛、功能障碍、疑难、重症",
+      "擅长诊疗方向摘录": "擅治多器官功能障碍重症及顽固性咳喘、失眠、眩晕、痛症、结节性疾病、口腔溃疡等疑难杂症。尤擅长肿瘤术后消化功能障碍、肠胃溃疡性疾病、食管炎、胃炎、结肠炎、腹泻、便秘、胆囊炎、胆石症、急慢性肝和胰腺病的中西医诊治",
+      "亮眼经历线索": "广东省名中医， 二级主任医师，教授，研究生导师， 广东省/广州市优秀中医人才，国家名中医药专家学术传承人。 擅治多器官功能障碍重症及顽固性咳喘、失眠、眩晕、痛症、结节性疾病、口腔溃疡等疑难杂症。 任广东省中西医结合学会疼痛专业委员会主任委员，广东省中医药学会疑难病专业委员会副主任委员，广东省传统医学会副会长，广东省中医学会重症医学专业委员会副主任委员，广东省健康管理学会重症医学专业委员会副主任委员，广东省医学会重症医学专业委员会常委等。 发表论文30余篇。",
+      "列表简介": "",
+      "详情正文摘录": "广东省名中医， 二级主任医师，教授，研究生导师， 广东省/广州市优秀中医人才，国家名中医药专家学术传承人。 擅治多器官功能障碍重症及顽固性咳喘、失眠、眩晕、痛症、结节性疾病、口腔溃疡等疑难杂症。 尤擅长肿瘤术后消化功能障碍、肠胃溃疡性疾病、食管炎、胃炎、结肠炎、腹泻、便秘、胆囊炎、胆石症、急慢性肝和胰腺病的中西医诊治。 任广东省中西医结合学会疼痛专业委员会主任委员，广东省中医药学会疑难病专业委员会副主任委员，广东省传统医学会副会长，广东省中医学会重症医学专业委员会副主任委员，广东省健康管理学会重症医学专业委员会副主任委员，广东省医学会重症医学专业委员会常委等。 主持广东省自然科学基金等科研10余项。 主要科研领域：胃肠功能障碍性疾病和营养管理。 主编医学书籍3部，副主编5部。 发表论文30余篇。 获广东省科技进步二等奖和广州市科技成果。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gzszyy.com/expert/2026/46dBgJe7.html",
+      "采集入口": "https://www.gzszyy.com/expert/",
+      "采集方式": "官网 dp 科室树静态分页+严格专家详情 DOM 结构化抽取",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 5,
+      "医院": "广州市中医院",
+      "姓名": "叶绍伟",
+      "科室_分类页": "名医堂、脑病科（神经内科）",
+      "科室_列表卡片": "名医堂",
+      "职称_关键词": "主任中医师",
+      "职称身份原文": "主任中医师",
+      "重点优先级": "高",
+      "重点关注范围": "疑难重症",
+      "重点疾病标签": "疑难",
+      "擅长诊疗方向摘录": "在内科疑难病症及脑病内科方面有丰富的临床经验。",
+      "亮眼经历线索": "原广州市中医医院神经内科主任及学科带头人； 1994 年 9 月开始任广东省中医药学会脑病专业委员会第一、二届副主任委员及第三届委员会顾问至 2016 年； 2001 年任中华中医药学会内科脑病专业委员会常委； 2008 年 9 月受聘“中国中医药学会广州分会中医药专家人才库高层库”专家，“广东省卫生系列高级职称评审专家库”专家；",
+      "列表简介": "",
+      "详情正文摘录": "原广州市中医医院神经内科主任及学科带头人； 1994 年 9 月开始任广东省中医药学会脑病专业委员会第一、二届副主任委员及第三届委员会顾问至 2016 年； 2001 年任中华中医药学会内科脑病专业委员会常委； 2008 年 9 月受聘“中国中医药学会广州分会中医药专家人才库高层库”专家，“广东省卫生系列高级职称评审专家库”专家； 广东省首批名中医师承项目导师； 2015 年广东省中医脑病学会成立 20 周年，获学会颁发突出贡献奖。 毕业于广州中医药大学，一直从事医学、临床、教学及科研工作，虽然早过古稀之年，仍勤学不倦博览群书，探研中西医之长，学术造诣颇深，在内科疑难病症及脑病内科方面有丰富的临床治疗经验。 接诊态度和蔼，时刻为患者着想，千方百计为患者解除病痛，深受患者好评。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gzszyy.com/expert/2026/9wdLwbjP.html",
+      "采集入口": "https://www.gzszyy.com/expert/",
+      "采集方式": "官网 dp 科室树静态分页+严格专家详情 DOM 结构化抽取",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 6,
+      "医院": "广州市中医院",
+      "姓名": "吕永慧",
+      "科室_分类页": "名医堂、脾胃科（消化内科）",
+      "科室_列表卡片": "名医堂、珠玑路院区",
+      "职称_关键词": "主任中医师",
+      "职称身份原文": "主任中医师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、肿瘤、疑难重症",
+      "重点疾病标签": "高脂血症、肿瘤、肺癌、肝癌、肠癌、疑难",
+      "擅长诊疗方向摘录": "内科常见病、疑难杂病及肿瘤中医中药治疗；尤其擅长于中医治疗消化道疾病，如溃疡性结肠炎、克罗恩病等炎症性肠病、食道炎、胃食管反流病、胃炎、胃十二指肠溃疡、功能性胃肠病、腹泻、便秘、口臭、口腔溃疡、肝炎、脂肪肝、肝纤维化、肝硬化、肝癌、肺癌、肠癌、咳嗽、高脂血症、痤疮、湿疹、失眠以及亚健康调理等中医中药治疗。",
+      "亮眼经历线索": "广东省名中医，主任中医师，教授，博士研究生导师，羊城好医生，胡润-平安中国好医生。 广东省首批优秀中医临床人才，广州市优秀中医，广州市局管优秀人才。 国家中医药管理局“十一•五”溃疡性结肠炎中医重点专病负责人及学科带头人，国家中医药管理局“十二•五”脾胃病科中医重点专科负责人及学科带头人。 担任广州市“九•五”杏林重点工程、广州市“1357” 重点工程及广东省中药管理局溃疡性结肠炎重点专病负责人及学科带头人。",
+      "列表简介": "",
+      "详情正文摘录": "广东省名中医，主任中医师，教授，博士研究生导师，羊城好医生，胡润-平安中国好医生。 广东省首批优秀中医临床人才，广州市优秀中医，广州市局管优秀人才。 国家中医药管理局“十一•五”溃疡性结肠炎中医重点专病负责人及学科带头人，国家中医药管理局“十二•五”脾胃病科中医重点专科负责人及学科带头人。 担任广州市“九•五”杏林重点工程、广州市“1357” 重点工程及广东省中药管理局溃疡性结肠炎重点专病负责人及学科带头人。 担任广东省中医药学会消化内科专业委员会副主委。 曾担任脾胃科主任、肝病科主任，大内科副主任。 擅长内科常见病、疑难杂病及肿瘤中医中药治疗。 尤其擅长溃疡性结肠炎、克罗恩病等炎症性肠病、食道炎、胃食管反流病、胃炎、胃十二指肠溃疡、功能性胃肠病、腹泻、便秘、口臭、口腔溃疡、肝炎、脂肪肝、肝纤维化、肝硬化、肝癌、肺癌、肠癌、咳嗽、高脂血症、痤疮、湿疹、失眠以及亚健康调理等中医中药治疗。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gzszyy.com/expert/2026/WPe9xdLy.html",
+      "采集入口": "https://www.gzszyy.com/expert/",
+      "采集方式": "官网 dp 科室树静态分页+严格专家详情 DOM 结构化抽取",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 7,
+      "医院": "广州市中医院",
+      "姓名": "梁劲军",
+      "科室_分类页": "名医堂、肛肠科",
+      "科室_列表卡片": "名医堂",
+      "职称_关键词": "主任中医师",
+      "职称身份原文": "主任中医师",
+      "重点优先级": "高",
+      "重点关注范围": "肿瘤、疑难重症",
+      "重点疾病标签": "化疗、疑难",
+      "擅长诊疗方向摘录": "各种肛门疑难杂症的中医药治疗，在围手术期及围化疗期运用中医药治疗，放射性肠炎的中西医结合治疗。",
+      "亮眼经历线索": "二级教授，广东省名中医，主任医师 广州市中医药临床特色核心技术《络合统血疗法治疗痔出血疾病》首席专家。 在一线从事肛肠医教研工作40余年，全国第二届百名杰出青年名中医，全国中医肛肠学科名专家，中华中医药学会肛肠专业权威专家，岭南名医，羊城好医生等。 擅长各种肛门疑难杂症的中医药治疗，在围手术期及围化疗期运用中医药治疗，放射性肠炎的中西医结合治疗。 广东省基层医药学会肛肠专委会主任委员、 中华中医药学会肛肠学会常务理事、 广州市中医 外科 专业委员会主任委员等。",
+      "列表简介": "",
+      "详情正文摘录": "二级教授，广东省名中医，主任医师 广州市中医药临床特色核心技术《络合统血疗法治疗痔出血疾病》首席专家。 在一线从事肛肠医教研工作40余年，全国第二届百名杰出青年名中医，全国中医肛肠学科名专家，中华中医药学会肛肠专业权威专家，岭南名医，羊城好医生等。 擅长各种肛门疑难杂症的中医药治疗，在围手术期及围化疗期运用中医药治疗，放射性肠炎的中西医结合治疗。 广东省基层医药学会肛肠专委会主任委员、 中华中医药学会肛肠学会常务理事、 广州市中医 外科 专业委员会主任委员等。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gzszyy.com/expert/2026/4zbq7rep.html",
+      "采集入口": "https://www.gzszyy.com/expert/",
+      "采集方式": "官网 dp 科室树静态分页+严格专家详情 DOM 结构化抽取",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 8,
+      "医院": "广州市中医院",
+      "姓名": "吴薏婷",
+      "科室_分类页": "肿瘤一区",
+      "科室_列表卡片": "肿瘤一区、珠玑路院区",
+      "职称_关键词": "主任中医师",
+      "职称身份原文": "主任中医师",
+      "重点优先级": "高",
+      "重点关注范围": "肿瘤、生殖疾病",
+      "重点疾病标签": "肿瘤、癌、瘤、鼻咽癌、肺癌、肝癌、胃癌、肠癌、乳腺癌、卵巢",
+      "擅长诊疗方向摘录": "中西医结合治疗肺癌、乳腺癌、鼻咽癌、前列腺癌、甲状腺癌、肠癌、胃癌、胰腺癌、肝癌、卵巢癌等恶性肿瘤；乳腺囊肿、乳腺纤维瘤、子宫肌瘤、甲状腺结节、大肠息肉、脂肪瘤等良性肿瘤。同时擅长用经方治疗感冒、咳嗽、胃痛、腹泻等内科疾病以及颈椎病、腰椎病的内科保守治疗。",
+      "亮眼经历线索": "广州市第二批优秀中医临床研修人才； 第四批全国优秀中医临床研修人才； 第五届羊城好医生。",
+      "列表简介": "",
+      "详情正文摘录": "广州市第二批优秀中医临床研修人才； 第四批全国优秀中医临床研修人才； 第五届羊城好医生。 1994年江西中医学院本科毕业，2009年广州中医药大学硕士毕业。 从事中西医结合治疗肿瘤26年，先后跟师 陈庆强 主任、周岱翰国医大师、熊继柏国医大师、禤国维国医大师。 擅长中西医结合治疗肺癌、乳腺癌、鼻咽癌、前列腺癌、甲状腺癌、肠癌、胃癌、胰腺癌、肝癌、卵巢癌等恶性肿瘤； 乳腺囊肿、乳腺纤维瘤、子宫肌瘤、甲状腺结节、大肠息肉、脂肪瘤等良性肿瘤。 同时擅长用经方治疗感冒、咳嗽、胃痛、腹泻等内科疾病以及颈椎病、腰椎病的内科保守治疗。 主持省中管局课题2项，市卫生局课题1项； 参与省、市各项课题十余项。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gzszyy.com/expert/2026/4zbqjrdp.html",
+      "采集入口": "https://www.gzszyy.com/expert/",
+      "采集方式": "官网 dp 科室树静态分页+严格专家详情 DOM 结构化抽取",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 9,
+      "医院": "广州市中医院",
+      "姓名": "邓力",
+      "科室_分类页": "肿瘤二区",
+      "科室_列表卡片": "肿瘤二区、珠玑路院区、同德围分院",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "肿瘤、术后恢复/康复",
+      "重点疾病标签": "肿瘤、癌、化疗、鼻咽癌、肺癌、肝癌、胃癌、肠癌、乳腺癌、康复",
+      "擅长诊疗方向摘录": "中西医治疗肝癌、肺癌、结直肠癌、胃癌、鼻咽癌、甲状腺癌、胰腺癌、乳腺癌、头颈部肿瘤、妇科恶性肿瘤、甲状腺良性结节、肺结节、乳腺增生症、癌性抑郁、失眠。",
+      "亮眼经历线索": "广州市三级名中医 ，广州医科大学附属中医医院 内科副主任兼 肿瘤二区 主任 ，主任医师，硕士生导师、教授 从事肿瘤防治临床科教研工作33年，擅长中西医治疗肝癌、肺癌、结直肠癌、胃癌、鼻咽癌、甲状腺癌、胰腺癌、乳腺癌、头颈部肿瘤、 妇科 恶性肿瘤、甲状腺良性结节、肺结节、乳腺增生症、癌性抑郁、失眠。 现任中国抗癌协会中西整合鼻咽癌专委会常务委员、广东省中西医结合学会肿瘤化疗专委会副主任委员、广东省中西医结合学会肿瘤微创治疗专委会副主任委员，广东省中医药学会肿瘤治疗与康复专委会副主任委员。",
+      "列表简介": "",
+      "详情正文摘录": "广州市三级名中医 ，广州医科大学附属中医医院 内科副主任兼 肿瘤二区 主任 ，主任医师，硕士生导师、教授 从事肿瘤防治临床科教研工作33年，擅长中西医治疗肝癌、肺癌、结直肠癌、胃癌、鼻咽癌、甲状腺癌、胰腺癌、乳腺癌、头颈部肿瘤、 妇科 恶性肿瘤、甲状腺良性结节、肺结节、乳腺增生症、癌性抑郁、失眠。 现任中国抗癌协会中西整合鼻咽癌专委会常务委员、广东省中西医结合学会肿瘤化疗专委会副主任委员、广东省中西医结合学会肿瘤微创治疗专委会副主任委员，广东省中医药学会肿瘤治疗与康复专委会副主任委员。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gzszyy.com/expert/2026/olej25ej.html",
+      "采集入口": "https://www.gzszyy.com/expert/",
+      "采集方式": "官网 dp 科室树静态分页+严格专家详情 DOM 结构化抽取",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 10,
+      "医院": "广州市中医院",
+      "姓名": "许幸仪",
+      "科室_分类页": "脑病科（神经内科）、体检科",
+      "科室_列表卡片": "脑病科（神经内科）、珠玑路院区",
+      "职称_关键词": "主任中医师",
+      "职称身份原文": "主任中医师",
+      "重点优先级": "中",
+      "重点关注范围": "",
+      "重点疾病标签": "",
+      "擅长诊疗方向摘录": "脑血管病，睡眠障碍，帕金森病，周围神经病等中西医结合诊治。",
+      "亮眼经历线索": "广东省首批名医师承学员，广东省中医药学会脑病专业委员会第四届委员会会员，广东省中西医结合学会神经肌肉病及神经电生理专业委员会第一届委员会委员等。",
+      "列表简介": "",
+      "详情正文摘录": "97年毕业于广州中医药大学，在广州市中医院脑病科工作。 广东省首批名医师承学员，广东省中医药学会脑病专业委员会第四届委员会会员，广东省中西医结合学会神经肌肉病及神经电生理专业委员会第一届委员会委员等。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gzszyy.com/expert/2026/WZdPwbKg.html",
+      "采集入口": "https://www.gzszyy.com/expert/",
+      "采集方式": "官网 dp 科室树静态分页+严格专家详情 DOM 结构化抽取",
+      "采集日期": "2026-08-13",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    }
+  ]
+}
