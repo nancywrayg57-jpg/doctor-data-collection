@@ -8,6 +8,8 @@ import shutil
 import subprocess
 import sys
 import time
+import urllib.error
+import urllib.request
 from collections import Counter
 from dataclasses import dataclass, replace
 from datetime import date
@@ -250,6 +252,7 @@ GDZY5413_ADAPTER_ID = "gdzy5413_official_specialist"
 GYKQYY_ADAPTER_ID = "gykqyy_public_doctor_api"
 GYFYYY_ADAPTER_ID = "gyfyyy_static_department_tree"
 GY3Y_ADAPTER_ID = "gy3y_static_team_directory"
+GZBRAIN_ADAPTER_ID = "gzbrain_static_expert_directory"
 GYKQYY_DIRECTORY_API = "https://www.gykqyy.com/api/article/getZhuanjiaList"
 GYKQYY_DETAIL_API = "https://www.gykqyy.com/api/article/getArticleDetail"
 GENERIC_MAX_PAGES_DEFAULT = 60
@@ -580,6 +583,31 @@ def fetch(session: requests.Session, url: str, retries: int = 3) -> tuple[int | 
                 response.encoding = response.apparent_encoding or response.encoding or "utf-8"
                 return response.status_code, response.text, ""
             last_error = f"HTTP {response.status_code}"
+        except Exception as exc:  # noqa: BLE001 - keep collection failure visible
+            last_error = str(exc)
+        time.sleep(0.8 * attempt)
+    return None, "", last_error
+
+
+def fetch_standard_public_get(url: str, retries: int = 3) -> tuple[int | None, str, str]:
+    """Use a plain non-browser GET for sites that reject browser-like clients.
+
+    No cookies, browser fingerprint headers, proxy, challenge solver, or private endpoint is used.
+    """
+
+    last_error = ""
+    for attempt in range(1, retries + 1):
+        try:
+            request = urllib.request.Request(url, method="GET")
+            with urllib.request.urlopen(request, timeout=35) as response:
+                status = int(response.status)
+                body = response.read()
+                if status == 200:
+                    charset = response.headers.get_content_charset() or "utf-8"
+                    return status, body.decode(charset, errors="replace"), ""
+                last_error = f"HTTP {status}"
+        except urllib.error.HTTPError as exc:
+            last_error = f"HTTP {exc.code}"
         except Exception as exc:  # noqa: BLE001 - keep collection failure visible
             last_error = str(exc)
         time.sleep(0.8 * attempt)
@@ -1055,6 +1083,13 @@ def dedicated_adapter_for(entry_url: str) -> str:
         and not parsed.fragment
     ):
         return GY3Y_ADAPTER_ID
+    if (
+        host.removeprefix("www.") == "gzbrain.cn"
+        and path == "/myzj/list.html"
+        and not parsed.query
+        and not parsed.fragment
+    ):
+        return GZBRAIN_ADAPTER_ID
     if "gzzoc.org.cn" in host and "/expert-introduction" in path:
         return "gzzoc_drupal_doctor"
     if "nbkjyy.mil.cn" in host and "/expert" in path:
@@ -1073,6 +1108,7 @@ def adapter_for(entry_url: str, include_generic: bool = False) -> str:
 
 
 def confirmed_a_targets(rows: list[dict[str, Any]], include_generic: bool = False) -> list[HospitalTarget]:
+    """Return every human-confirmed target; A is priority metadata, not authorization."""
     targets: list[HospitalTarget] = []
     for row in rows:
         review = clean_text(str(row.get("人工复核结果") or ""))
@@ -1080,8 +1116,6 @@ def confirmed_a_targets(rows: list[dict[str, Any]], include_generic: bool = Fals
         entry_url = clean_text(str(row.get("医生目录入口_候选") or ""))
         adapter_id = adapter_for(entry_url, include_generic=include_generic)
         if review != "确认可采集":
-            continue
-        if not difficulty.startswith("A-"):
             continue
         if not adapter_id:
             continue
@@ -2767,6 +2801,416 @@ def gy3y_detail_id(url: str | None, department_url: str | None = None) -> str:
         ):
             return ""
     return match.group(2)
+
+
+def gzbrain_detail_id(url: str | None) -> str:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "gzbrain.cn" or parsed.query or parsed.fragment:
+        return ""
+    match = re.fullmatch(r"/myzj/info_itemid_(\d+)\.html", parsed.path, flags=re.IGNORECASE)
+    return match.group(1) if match else ""
+
+
+def gzbrain_list_page_number(url: str | None) -> int | None:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "gzbrain.cn" or parsed.query or parsed.fragment:
+        return None
+    if parsed.path.lower() == "/myzj/list.html":
+        return 1
+    match = re.fullmatch(r"/myzj/list_page_(\d+)\.html", parsed.path, flags=re.IGNORECASE)
+    return int(match.group(1)) if match else None
+
+
+def discover_gzbrain_list_pages(html: str, entry_url: str) -> list[str]:
+    soup = BeautifulSoup(html, "html.parser")
+    page_numbers = {1}
+    for anchor in soup.select(".p_page a[href]"):
+        page_url = urljoin(entry_url, str(anchor.get("href") or ""))
+        page_number = gzbrain_list_page_number(page_url)
+        if page_number:
+            page_numbers.add(page_number)
+    last_page = max(page_numbers)
+    return [
+        entry_url if page_number == 1 else urljoin(entry_url, f"list_page_{page_number}.html")
+        for page_number in range(1, last_page + 1)
+    ]
+
+
+def split_gzbrain_title_department(value: str | None) -> tuple[str, str]:
+    text = clean_text(value)
+    title_hits = extract_terms(text, TITLE_TERMS)
+    remainder = text
+    for term in sorted(title_hits, key=len, reverse=True):
+        remainder = remainder.replace(term, " ")
+    remainder = clean_text(re.sub(r"^[、,，;；\s]+|[、,，;；\s]+$", "", remainder))
+    departments = re.findall(
+        r"[\u4e00-\u9fff（）()]{1,20}(?:科|中心|门诊)"
+        r"(?:、[\u4e00-\u9fff（）()]{1,20}(?:科|中心|门诊))*",
+        remainder,
+    )
+    department = clean_generic_department(departments[-1] if departments else remainder)
+    return "、".join(title_hits), department
+
+
+def parse_gzbrain_list_page(html: str, page_url: str) -> list[dict[str, str]]:
+    soup = BeautifulSoup(html, "html.parser")
+    rows: list[dict[str, str]] = []
+    seen_ids: set[str] = set()
+    for anchor in soup.select("div.expert_list ul.ul > li > a[href]"):
+        source_link = urljoin(page_url, str(anchor.get("href") or ""))
+        detail_id = gzbrain_detail_id(source_link)
+        if not detail_id or detail_id in seen_ids:
+            continue
+        seen_ids.add(detail_id)
+        name_node = anchor.select_one("div.txt h2")
+        title_node = anchor.select_one("div.txt h3")
+        specialty_node = anchor.select_one("div.txt h4")
+        name = clean_text(name_node.get_text(" ", strip=True) if name_node else "")
+        title_department = clean_text(title_node.get_text(" ", strip=True) if title_node else "")
+        title, department = split_gzbrain_title_department(title_department)
+        specialty = clean_text(specialty_node.get_text(" ", strip=True) if specialty_node else "")
+        specialty = clean_text(re.sub(r"^专长\s*[:：]\s*", "", specialty))
+        schedule_node = anchor.select_one("div.txt p")
+        schedule = clean_text(schedule_node.get_text(" ", strip=True) if schedule_node else "")
+        rows.append(
+            {
+                "id": detail_id,
+                "name": name,
+                "title": title,
+                "title_department": title_department,
+                "department": department,
+                "specialty": specialty,
+                "schedule": schedule,
+                "source_link": source_link,
+                "list_page": page_url,
+            }
+        )
+    return rows
+
+
+def filter_gzbrain_profile_text(value: str | None) -> tuple[str, int]:
+    text = strip_gyfyyy_schedule_text(value)
+    if not text:
+        return "", 0
+    kept: list[str] = []
+    excluded = 0
+    for sentence in re.split(r"(?<=[。！？；;])\s*", text):
+        sentence = clean_text(sentence)
+        if not sentence:
+            continue
+        if (
+            any(term in sentence for term in ["患者案例", "病例详情", "个案"])
+            or re.search(r"患者[^。！？；;]{0,30}(?:\d{1,3}\s*岁|男性|女性|男士|女士|某某)", sentence)
+        ):
+            excluded += 1
+            continue
+        kept.append(sentence)
+    return clean_text(" ".join(kept)), excluded
+
+
+def parse_gzbrain_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
+    soup = BeautifulSoup(html, "html.parser")
+    container = soup.select_one("div.single_con")
+    if not container:
+        return {
+            "name": clean_text(fallback.get("name")),
+            "title": clean_text(fallback.get("title")),
+            "specialty": clean_text(fallback.get("specialty")),
+            "profile_text": "",
+            "patient_case_exclusion_count": 0,
+        }
+    name_node = container.select_one("div.single-header h2")
+    title_node = container.select_one("div.single-header h3")
+    specialty = ""
+    for paragraph in container.select("div.single_tex p"):
+        text = clean_text(paragraph.get_text(" ", strip=True))
+        if re.match(r"^专长\s*[:：]", text):
+            specialty = clean_text(re.sub(r"^专长\s*[:：]\s*", "", text))
+            break
+    profile_node = container.select_one("div.single-content")
+    if profile_node:
+        profile_soup = BeautifulSoup(str(profile_node), "html.parser")
+        for node in profile_soup.find_all(["h3", "span"]):
+            text = clean_text(node.get_text(" ", strip=True))
+            if text == "详细介绍" or "此排班仅作参考" in text:
+                node.decompose()
+        profile_source = clean_text(profile_soup.get_text(" ", strip=True))
+    else:
+        profile_source = ""
+    profile_text, excluded_count = filter_gzbrain_profile_text(profile_source)
+    return {
+        "name": first_nonempty(
+            clean_text(name_node.get_text(" ", strip=True) if name_node else ""),
+            fallback.get("name"),
+        ),
+        "title": first_nonempty(
+            clean_text(title_node.get_text(" ", strip=True) if title_node else ""),
+            fallback.get("title"),
+        ),
+        "specialty": first_nonempty(specialty, fallback.get("specialty")),
+        "profile_text": profile_text,
+        "patient_case_exclusion_count": excluded_count,
+    }
+
+
+def select_gzbrain_trial_doctors(
+    doctors: list[dict[str, Any]], max_doctors: int | None
+) -> list[dict[str, Any]]:
+    if not max_doctors or len(doctors) <= max_doctors:
+        return doctors[:]
+    normalized = [
+        {**doctor, "departments": [clean_text(doctor.get("department"))]}
+        for doctor in doctors
+    ]
+    return select_gykqyy_trial_doctors(normalized, max_doctors)
+
+
+def collect_gzbrain(
+    target: HospitalTarget, today: str, max_doctors: int | None = None
+) -> dict[str, Any]:
+    entry_status, entry_html, entry_error = fetch_standard_public_get(target.entry_url)
+    if entry_status != 200:
+        raise RuntimeError(f"入口页标准公开 GET 读取失败：{entry_error}")
+    page_urls = discover_gzbrain_list_pages(entry_html, target.entry_url)
+    if not page_urls:
+        raise RuntimeError("官网专家目录未发现静态分页。")
+
+    categories: list[dict[str, Any]] = []
+    page_errors: list[dict[str, str]] = []
+    relations: list[dict[str, str]] = []
+    seen_ids: set[str] = set()
+    for page_number, page_url in enumerate(page_urls, start=1):
+        if page_number == 1:
+            status, html, error = entry_status, entry_html, ""
+        else:
+            status, html, error = fetch_standard_public_get(page_url)
+        if status != 200:
+            page_errors.append(
+                {"page": str(page_number), "url": page_url, "error": error}
+            )
+            continue
+        page_rows = parse_gzbrain_list_page(html, page_url)
+        page_ids = [row["id"] for row in page_rows]
+        duplicates = sorted(set(page_ids) & seen_ids, key=int)
+        if duplicates:
+            raise RuntimeError(
+                f"官网专家目录分页出现重复详情 ID：{','.join(duplicates)}"
+            )
+        seen_ids.update(page_ids)
+        relations.extend(page_rows)
+        categories.append(
+            {
+                "category_id": str(page_number),
+                "category_name": f"专家目录第 {page_number} 页",
+                "url": page_url,
+                "doctor_relation_count": len(page_rows),
+            }
+        )
+    if page_errors:
+        raise RuntimeError(
+            "官网专家目录分页读取不完整："
+            + "；".join(error["error"] for error in page_errors)
+        )
+    if not relations:
+        raise RuntimeError("官网专家目录未发现严格 itemid 医生详情关系。")
+
+    names_to_ids: dict[str, list[str]] = {}
+    for item in relations:
+        if item["name"]:
+            names_to_ids.setdefault(item["name"], []).append(item["id"])
+    same_name_groups = {
+        name: sorted(set(ids), key=int)
+        for name, ids in names_to_ids.items()
+        if len(set(ids)) > 1
+    }
+    selected = select_gzbrain_trial_doctors(relations, max_doctors)
+    existing_links = collect_existing_profile_links()
+    rows: list[dict[str, Any]] = []
+    detail_errors: list[dict[str, str]] = []
+    excluded_candidates: list[dict[str, str]] = []
+    patient_case_exclusion_count = 0
+    for item in selected:
+        detail_status, detail_html, detail_error = fetch_standard_public_get(
+            item["source_link"]
+        )
+        if detail_status == 200:
+            detail = parse_gzbrain_detail(detail_html, item)
+        else:
+            detail_errors.append(
+                {"source_link": item["source_link"], "error": detail_error}
+            )
+            detail = {
+                "name": item["name"],
+                "title": item["title"],
+                "specialty": item["specialty"],
+                "profile_text": "",
+                "patient_case_exclusion_count": 0,
+            }
+        name = clean_text(str(detail.get("name") or item["name"]))
+        title_identity = clean_text(str(detail.get("title") or item["title"]))
+        if gyfyyy_nursing_only_identity(title_identity):
+            excluded_candidates.append(
+                {
+                    "entry_url": target.entry_url,
+                    "list_title": item["title_department"],
+                    "source_link": item["source_link"],
+                    "reason": "官网详情仅标注护理身份，排除医生画像采集范围",
+                }
+            )
+            continue
+        specialty = clean_text(str(detail.get("specialty") or item["specialty"]))
+        profile_text = clean_text(str(detail.get("profile_text") or ""))
+        patient_case_exclusion_count += int(
+            detail.get("patient_case_exclusion_count") or 0
+        )
+        combined_text = "\n".join(
+            [target.hospital, item["department"], title_identity, specialty, profile_text]
+        )
+        title_hits = extract_terms(title_identity, TITLE_TERMS)
+        groups_found, tags = group_tags(combined_text)
+        warnings: list[str] = []
+        if detail_status != 200:
+            warnings.append("详情页读取失败")
+        if not looks_like_person_name(name):
+            warnings.append("非医生页面或姓名异常")
+        if name != item["name"]:
+            warnings.append("列表与详情姓名不一致")
+        if not item["department"]:
+            warnings.append("科室需人工复核")
+        if not title_hits:
+            warnings.append("职称/身份需人工复核")
+        if not specialty and not profile_text:
+            warnings.append("详情正文为空或未识别")
+        if name in same_name_groups:
+            warnings.append("同名待甄别")
+        if warnings:
+            groups_found = []
+            tags = []
+        priority = "普通"
+        if not warnings and (
+            any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups_found
+        ):
+            priority = "高"
+        elif not warnings and any(term != "医师" for term in title_hits):
+            priority = "中"
+        rows.append(
+            {
+                "序号": len(rows) + 1,
+                "医院": target.hospital,
+                "姓名": name,
+                "科室_分类页": item["department"],
+                "科室_列表卡片": item["department"],
+                "职称_关键词": "、".join(title_hits),
+                "职称身份原文": clip(title_identity, 500),
+                "重点优先级": priority,
+                "重点关注范围": "、".join(groups_found),
+                "重点疾病标签": "、".join(tags),
+                "擅长诊疗方向摘录": clip(specialty, 520),
+                "亮眼经历线索": extract_clean_highlights(profile_text),
+                "列表简介": "",
+                "详情正文摘录": clip(profile_text, 1800),
+                "来源类型": "医院官网",
+                "来源链接": item["source_link"],
+                "采集入口": target.entry_url,
+                "采集方式": "官网静态专家目录分页+严格 itemid 详情 DOM 结构化抽取",
+                "采集日期": today,
+                "详情页状态": "200" if detail_status == 200 else "失败",
+                "已建画像": (
+                    "是" if canonical_url(item["source_link"]) in existing_links else "否"
+                ),
+                "异常提示": "；".join(dict.fromkeys(warnings)),
+                "复核状态": "待人工复核",
+            }
+        )
+        time.sleep(0.18)
+
+    covered_departments = covered_department_names(rows)
+    category_counter = Counter(
+        department
+        for row in rows
+        for department in clean_text(row["科室_分类页"]).split("、")
+        if department
+    )
+    priority_counter = Counter(row["重点优先级"] for row in rows)
+    group_counter = Counter(
+        group for row in rows for group in row["重点关注范围"].split("、") if group
+    )
+    warning_counter = Counter(
+        warning for row in rows for warning in row["异常提示"].split("；") if warning
+    )
+    campus_terms = ["芳村", "白云", "荔湾", "江村", "总部"]
+    campus_evidence = {
+        term: sum(term in item["schedule"] for item in relations) for term in campus_terms
+    }
+    return {
+        "meta": {
+            "city": target.city,
+            "hospital": target.hospital,
+            "homepage": target.homepage,
+            "entry_url": target.entry_url,
+            "entry_url_source": "GitHub Issue #31（与官网入口台账一致）",
+            "ledger_entry_url": target.ledger_entry_url or target.entry_url,
+            "adapter_id": target.adapter_id,
+            "collected_at": today,
+            "category_count": len(categories),
+            "raw_card_rows": len(relations),
+            "candidate_membership_count": len(relations),
+            "unique_candidate_count": len(relations),
+            "unique_doctor_count": len(rows),
+            "census_unique_detail_count": len(relations),
+            "census_named_detail_count": sum(bool(item["name"]) for item in relations),
+            "census_blank_name_detail_count": sum(not item["name"] for item in relations),
+            "census_unique_nonblank_name_count": len(names_to_ids),
+            "census_same_name_group_count": len(same_name_groups),
+            "census_same_name_groups": same_name_groups,
+            "census_department_count": len(
+                {item["department"] for item in relations if item["department"]}
+            ),
+            "census_group_count": len([value for value in campus_evidence.values() if value]),
+            "census_nonempty_department_count": sum(bool(item["department"]) for item in relations),
+            "census_empty_department_count": sum(not item["department"] for item in relations),
+            "sample_entry_coverage_count": len(covered_departments),
+            "sample_entry_categories": covered_departments,
+            "pagination_count": len(page_urls),
+            "pagination_method": "静态 list_page_N.html 分页，逐页普通公开 GET",
+            "standard_public_get": "urllib 默认非浏览器 GET；无 Cookie、代理、指纹模拟或挑战绕过",
+            "campus_schedule_evidence": campus_evidence,
+            "schedule_field_ingested_count": 0,
+            "patient_case_exclusion_count": patient_case_exclusion_count,
+            "category_error_count": len(page_errors),
+            "detail_error_count": len(detail_errors),
+            "cross_entry_duplicate_count": 0,
+            "excluded_non_doctor_count": len(excluded_candidates),
+            "existing_profile_count": sum(row["已建画像"] == "是" for row in rows),
+            "ledger_review": target.review,
+            "ledger_difficulty": target.difficulty,
+        },
+        "categories": categories,
+        "entry_reconnaissance": [
+            {
+                "category_name": "官网专家介绍",
+                "entry_url": target.entry_url,
+                "page_nature": "医院官网静态专家目录",
+                "list_page_count": len(page_urls),
+                "raw_detail_relation_count": len(relations),
+                "unique_detail_count": len(relations),
+                "out_of_scope_detail_count": len(excluded_candidates),
+                "affiliation": target.hospital,
+                "independent_entity_check": (
+                    "同域目录；排班文本仅用于院区存在性普查，不进入医生字段"
+                ),
+            }
+        ],
+        "excluded_candidates": excluded_candidates,
+        "cross_entry_duplicates": [],
+        "category_errors": page_errors,
+        "detail_errors": detail_errors,
+        "category_counts": category_counter.most_common(),
+        "priority_counts": dict(priority_counter),
+        "group_counts": dict(group_counter),
+        "warning_counts": dict(warning_counter),
+        "rows": rows,
+    }
 
 
 def discover_gy3y_directory(html: str, entry_url: str) -> dict[str, Any]:
@@ -5800,13 +6244,13 @@ def select_target(rows: list[dict[str, Any]], hospital: str | None) -> HospitalT
         if not hospital and generic_targets:
             supported = "、".join(target.hospital for target in generic_targets)
             raise RuntimeError(f"当前只有通用模板候选医院，请用 --hospital 指定医院后先试采。当前候选：{supported}")
-        raise RuntimeError("台账中没有找到已确认可采集的A级医院；请先补齐官网入口台账。")
+        raise RuntimeError("台账中没有找到已确认可采集且入口完整的医院；请先补齐官网入口台账。")
     if hospital:
         for target in targets:
             if target.hospital == hospital:
                 return target
         supported = "、".join(target.hospital for target in targets)
-        raise RuntimeError(f"未找到指定医院的已确认A级采集入口。当前可测试：{supported}")
+        raise RuntimeError(f"未找到指定医院的已确认采集入口。当前可测试：{supported}")
 
     dedicated_targets = [target for target in targets if target.adapter_id != GENERIC_ADAPTER_ID]
     if dedicated_targets:
@@ -5943,6 +6387,7 @@ def main() -> None:
             GDZY5413_ADAPTER_ID,
             GYFYYY_ADAPTER_ID,
             GY3Y_ADAPTER_ID,
+            GZBRAIN_ADAPTER_ID,
         }
         and not args.trial_only
         and not args.single_output
@@ -5964,6 +6409,8 @@ def main() -> None:
         payload = collect_gyfyyy(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id == GY3Y_ADAPTER_ID:
         payload = collect_gy3y(target, args.today, max_doctors=max_doctors)
+    elif target.adapter_id == GZBRAIN_ADAPTER_ID:
+        payload = collect_gzbrain(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID}:
         payload = collect_generic(
             target,
