@@ -20,6 +20,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     collect_gyfyyy,
     collect_gy3y,
     collect_gzbrain,
+    collect_gzszyy,
     collect_gykqyy,
     collect_generic,
     confirmed_a_targets,
@@ -29,6 +30,10 @@ from collect_official_doctors_batch import (  # noqa: E402
     discover_generic_detail_links,
     discover_gy3y_directory,
     discover_gzbrain_list_pages,
+    discover_gzszyy_care_sites,
+    discover_gzszyy_department_filters,
+    discover_gzszyy_department_pages,
+    discover_gzszyy_unfiltered_pages,
     effective_entry_urls,
     expand_gdzy5413_full_detail_items,
     extract_clean_highlights,
@@ -43,14 +48,18 @@ from collect_official_doctors_batch import (  # noqa: E402
     gyfyyy_detail_id,
     gy3y_detail_id,
     gzbrain_detail_id,
+    gzszyy_detail_id,
     parse_gzbrain_detail,
     parse_gzbrain_list_page,
+    parse_gzszyy_department_page,
+    parse_gzszyy_detail,
     parse_gyfyyy_detail,
     strip_gyfyyy_schedule_text,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     merge_rows_for_master,
     merge_gdzy5413_identity_rows,
+    merge_gzszyy_identity_rows,
     merge_gyfyyy_identity_rows,
     ny5y_detail_id,
     ny5y_entry_kind,
@@ -62,12 +71,14 @@ from collect_official_doctors_batch import (  # noqa: E402
     round_robin_generic_items,
     select_gyfyyy_trial_doctors,
     select_gzbrain_trial_doctors,
+    select_gzszyy_trial_doctors,
     select_gykqyy_trial_doctors,
     sync_profile_flags,
     validate_gykqyy_full_append,
     validate_gyfyyy_full_append,
     validate_gy3y_full_append,
     validate_gzbrain_full_append,
+    validate_gzszyy_full_append,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
     validate_gdzy5413_full_append,
@@ -999,6 +1010,536 @@ class GzbrainStaticExpertDirectoryTests(unittest.TestCase):
         self.assertEqual(payload["meta"]["schedule_field_ingested_count"], 0)
         for row in payload["rows"]:
             self.assertNotRegex(row["详情正文摘录"], r"开诊|出诊|排班")
+
+
+class GzszyyDepartmentExpertDirectoryTests(unittest.TestCase):
+    ENTRY_URL = "https://www.gzszyy.com/expert/"
+
+    def test_adapter_and_detail_scope_are_exact(self) -> None:
+        self.assertEqual(
+            dedicated_adapter_for(self.ENTRY_URL),
+            "gzszyy_department_expert_directory",
+        )
+        for invalid in [
+            "https://www.gzszyy.com/expert/?page=1",
+            "https://api.gzszyy.com/expert/",
+            "https://www.gzszyy.com/expert/1/dp/3773/",
+        ]:
+            with self.subTest(invalid=invalid):
+                self.assertEqual(dedicated_adapter_for(invalid), "")
+        self.assertEqual(
+            gzszyy_detail_id("https://www.gzszyy.com/expert/2026/w9aADOev.html"),
+            "w9aADOev",
+        )
+        for invalid in [
+            "https://www.gzszyy.com/expert/2026/w9aADOev.html?x=1",
+            "https://www.gzszyy.com/expert/1/pr/99/",
+            "https://other.example/expert/2026/w9aADOev.html",
+        ]:
+            with self.subTest(invalid=invalid):
+                self.assertEqual(gzszyy_detail_id(invalid), "")
+
+    def test_department_filters_and_pages_ignore_professional_and_level_filters(self) -> None:
+        html = """
+        <a href="/expert/1/dp/3773/">肿瘤一区</a>
+        <a href="/expert/1/dp/3774/">肿瘤二区</a>
+        <a href="/expert/1/pr/99/">主任中医师</a>
+        <a href="/expert/1/le/3/">二级专家</a>
+        """
+        departments = discover_gzszyy_department_filters(html, self.ENTRY_URL)
+        self.assertEqual(
+            [(item["department_id"], item["department"]) for item in departments],
+            [("3773", "肿瘤一区"), ("3774", "肿瘤二区")],
+        )
+        pages = discover_gzszyy_department_pages(
+            '<div class="pager"><button data-all="2"></button></div>',
+            departments[0],
+        )
+        self.assertEqual(
+            pages,
+            [
+                "https://www.gzszyy.com/expert/1/dp/3773/",
+                "https://www.gzszyy.com/expert/2/dp/3773/",
+            ],
+        )
+        self.assertEqual(
+            discover_gzszyy_unfiltered_pages(
+                '<div class="pager"><button data-all="18"></button></div>',
+                self.ENTRY_URL,
+            ),
+            [
+                self.ENTRY_URL,
+                *[f"https://www.gzszyy.com/expert/{page}/" for page in range(2, 19)],
+            ],
+        )
+
+    def test_homepage_care_sites_are_strict_and_exclude_non_care_entities(self) -> None:
+        html = """
+        <a href="/district1_zzlyq/" title="珠玑院区">珠玑院区</a>
+        <a href="/district1_thxyq/" title="天河新院区">天河新院区</a>
+        <a href="/district1_tdfy/" title="同德院区">同德院区</a>
+        <a href="/district1_wymzb/" title="五羊门诊部">五羊门诊部</a>
+        <a href="/district1_tdmzb/" title="同德门诊部">同德门诊部</a>
+        <a href="/district1_gzykdxzxylcxy/">广州医科大学中西医临床学院</a>
+        <a href="https://other.example/district1_zzlyq/">外站</a>
+        """
+        sites = discover_gzszyy_care_sites(html, "https://www.gzszyy.com/patient/")
+        self.assertEqual(
+            [item["name"] for item in sites],
+            ["珠玑院区", "天河新院区", "同德院区", "五羊门诊部", "同德门诊部"],
+        )
+
+    def test_department_card_and_detail_parsers_keep_schedule_out(self) -> None:
+        list_html = """
+        <ul class="doctor-list"><li>
+          <h2><a href="/expert/2026/w9aADOev.html">叶穗林</a></h2>
+          <div class="info"><div class="depart-info"><a title="名医堂">名医堂</a></div>
+            <div>职称：主任中医师</div></div>
+          <p><strong>擅长：</strong>擅长冠心病诊疗。</p>
+        </li></ul>
+        """
+        department = {
+            "department_id": "3780",
+            "department": "心病科（心血管内科）",
+            "entry_url": "https://www.gzszyy.com/expert/1/dp/3780/",
+        }
+        cards = parse_gzszyy_department_page(list_html, department["entry_url"], department)
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(cards[0]["department"], "心病科（心血管内科）")
+        self.assertEqual(cards[0]["card_department"], "名医堂")
+        self.assertEqual(cards[0]["specialty"], "冠心病诊疗。")
+
+        detail_html = """
+        <div class="doctor-resume"><h1>叶穗林</h1><p>
+          <u>科室：</u><a href="/department_a0/">名医堂<i></i></a>
+          <a href="/department_b0/">心病科（心血管内科）<i></i></a><br/>
+          <u>职称：</u>主任中医师<br/><u>级别：</u>二级专家</p>
+          <p class="good-at"><u>擅长：</u>擅长冠心病诊疗。</p></div>
+        <div class="doctor-items-intro"><p>医学硕士，硕士生导师。</p>
+          <p>出诊时间：每周一上午。</p></div>
+        <div class="doctor-code"><div class="qr-img">
+          <span title="珠玑路院区">珠玑路院区</span>
+        </div><div class="qr-img">
+          <span title="同德围分院">同德围分院</span>
+        </div></div>
+        """
+        detail = parse_gzszyy_detail(detail_html, cards[0])
+        self.assertEqual(detail["name"], "叶穗林")
+        self.assertEqual(detail["title"], "主任中医师")
+        self.assertEqual(
+            detail["departments"], ["名医堂", "心病科（心血管内科）"]
+        )
+        self.assertEqual(detail["specialty"], "冠心病诊疗。")
+        self.assertEqual(detail["campuses"], ["珠玑路院区", "同德围分院"])
+        self.assertIn("医学硕士", detail["profile_text"])
+        self.assertNotRegex(detail["profile_text"], r"出诊|每周一")
+
+    def test_qr_title_noise_is_reduced_to_explicit_campus_labels(self) -> None:
+        detail_html = """
+        <div class="doctor-resume"><h1>钟居孟</h1><p><u>职称：</u>主任医师</p></div>
+        <div class="doctor-code">
+          <div class="qr-img"><span title="广州医科大学附属中医医院同德围分院_综合门诊妇科_钟居孟T(60875)">二维码</span></div>
+          <div class="qr-img"><span title="珠玑路院区v珠玑路院区">二维码</span></div>
+        </div>
+        """
+        detail = parse_gzszyy_detail(
+            detail_html,
+            {"name": "钟居孟", "title": "主任医师", "specialty": "", "departments": []},
+        )
+        self.assertEqual(detail["campuses"], ["同德围分院", "珠玑路院区"])
+
+    def test_trial_selection_spreads_across_departments(self) -> None:
+        doctors = [
+            {"id": str(index), "departments": [f"科室{(index - 1) // 4}"]}
+            for index in range(1, 13)
+        ]
+        selected = select_gzszyy_trial_doctors(doctors, 10)
+        self.assertEqual(len(selected), 10)
+        self.assertGreaterEqual(
+            len({department for item in selected for department in item["departments"]}),
+            3,
+        )
+
+    def test_collect_censuses_department_tree_and_excludes_nursing(self) -> None:
+        entry_html = """
+        <a href="/expert/1/dp/1/">科室甲</a>
+        <a href="/expert/1/dp/2/">科室乙</a>
+        <a href="/expert/1/dp/3/">科室丙</a>
+        <a href="/expert/1/pr/95/">主任护师</a>
+        """
+
+        def list_html(department: str, start: int, count: int, nursing: bool = False) -> str:
+            cards = []
+            for index in range(start, start + count):
+                title = "主任护师" if nursing and index == start else "主任医师"
+                cards.append(
+                    f'<li><h2><a href="/expert/2026/id{index}.html">医生{index}</a></h2>'
+                    f'<div class="info"><div class="depart-info"><a title="{department}">{department}</a></div>'
+                    f'<div>职称：{title}</div></div><p>擅长：科室疾病诊疗。</p></li>'
+                )
+            return '<ul class="doctor-list">' + "".join(cards) + "</ul>"
+
+        entry_html += '<div class="pager"><button data-all="1"></button></div>'
+        entry_html += list_html("总目录", 1, 13, True)
+        entry_html += """
+          <ul class="doctor-list"><li>
+            <h2><a href="/expert/2026/id14.html">医生14</a></h2>
+            <div class="info"><div>职称：主任医师</div></div>
+            <p>擅长：科室疾病诊疗。</p>
+          </li></ul>
+        """
+        pages = {
+            self.ENTRY_URL: entry_html,
+            "https://www.gzszyy.com/patient/": """
+                <a href="/district1_zzlyq/">珠玑院区</a>
+                <a href="/district1_thxyq/">天河新院区</a>
+                <a href="/district1_tdfy/">同德院区</a>
+                <a href="/district1_wymzb/">五羊门诊部</a>
+                <a href="/district1_tdmzb/">同德门诊部</a>
+            """,
+            "https://www.gzszyy.com/expert/1/dp/1/": list_html("科室甲", 1, 5, True),
+            "https://www.gzszyy.com/expert/1/dp/2/": list_html("科室乙", 6, 4),
+            "https://www.gzszyy.com/expert/1/dp/3/": list_html("科室丙", 10, 4),
+        }
+        for index in range(2, 15):
+            pages[f"https://www.gzszyy.com/expert/2026/id{index}.html"] = f"""
+            <div class="doctor-resume"><h1>医生{index}</h1><p>
+              <u>科室：</u><a href="/department_a0/">科室{index}</a><br/>
+              <u>职称：</u>主任医师</p><p class="good-at">擅长：科室疾病诊疗。</p></div>
+            <div class="doctor-items-intro"><p>从事临床诊疗工作。</p></div>
+            <div class="doctor-code"><div class="qr-img">
+              <span title="珠玑路院区">珠玑路院区</span>
+            </div></div>
+            """
+
+        def fake_fetch(_session: object, url: str, retries: int = 3) -> tuple[int, str, str]:
+            del retries
+            return (200, pages[url], "") if url in pages else (404, "", "HTTP 404")
+
+        target = HospitalTarget(
+            city="广州市",
+            hospital="广州市中医院",
+            homepage="https://www.gzszyy.com/patient/",
+            entry_url=self.ENTRY_URL,
+            difficulty="A-优先自动采集",
+            review="确认可采集",
+            adapter_id="gzszyy_department_expert_directory",
+        )
+        with (
+            patch("collect_official_doctors_batch.create_official_session", return_value=object()),
+            patch("collect_official_doctors_batch.fetch", side_effect=fake_fetch),
+            patch("collect_official_doctors_batch.collect_existing_profile_links", return_value=set()),
+            patch("collect_official_doctors_batch.time.sleep", return_value=None),
+        ):
+            payload = collect_gzszyy(target, "2026-08-13", max_doctors=10)
+
+        self.assertEqual(payload["meta"]["census_department_count"], 3)
+        self.assertEqual(payload["meta"]["candidate_membership_count"], 14)
+        self.assertEqual(payload["meta"]["census_unique_detail_count"], 14)
+        self.assertEqual(payload["meta"]["excluded_non_doctor_count"], 1)
+        self.assertEqual(payload["meta"]["eligible_candidate_count"], 13)
+        self.assertEqual(payload["meta"]["filter_link_counts"], {"dp": 3, "pr": 1, "le": 0})
+        self.assertEqual(payload["meta"]["gzszyy_unfiltered_unique_detail_count"], 14)
+        self.assertEqual(payload["meta"]["gzszyy_dp_unique_detail_count"], 13)
+        self.assertEqual(payload["meta"]["gzszyy_unfiltered_only_detail_ids"], ["id14"])
+        self.assertEqual(payload["meta"]["census_empty_department_count"], 1)
+        self.assertEqual(payload["meta"]["census_group_count"], 5)
+        self.assertEqual(payload["meta"]["gzszyy_campus_tagged_sample_count"], 10)
+        self.assertTrue(
+            all("珠玑路院区" in row["科室_列表卡片"] for row in payload["rows"])
+        )
+        self.assertEqual(len(payload["rows"]), 10)
+        self.assertGreaterEqual(len({row["科室_分类页"] for row in payload["rows"]}), 3)
+        self.assertEqual(payload["meta"]["detail_error_count"], 0)
+
+    def test_full_identity_decisions_merge_three_groups_and_keep_wang_jian_separate(self) -> None:
+        def row(detail_id: str, name: str, department: str, title: str, specialty: str) -> dict[str, object]:
+            return {
+                "序号": 0,
+                "医院": "广州市中医院",
+                "姓名": name,
+                "科室_分类页": department,
+                "科室_列表卡片": department,
+                "职称_关键词": title,
+                "职称身份原文": title,
+                "重点优先级": "普通",
+                "重点关注范围": "",
+                "重点疾病标签": "",
+                "擅长诊疗方向摘录": specialty,
+                "亮眼经历线索": "",
+                "列表简介": "",
+                "详情正文摘录": specialty,
+                "来源类型": "医院官网",
+                "来源链接": f"https://www.gzszyy.com/expert/2026/{detail_id}.html",
+                "采集入口": self.ENTRY_URL,
+                "采集方式": "测试",
+                "采集日期": "2026-08-13",
+                "详情页状态": "200",
+                "已建画像": "否",
+                "异常提示": "同名待甄别",
+                "复核状态": "待人工复核",
+            }
+
+        source_rows = [
+            row("ELe31Mb6", "林少贞", "科室甲", "主任医师", "同一专长"),
+            row("JxboyNeg", "林少贞", "科室乙", "主任医师", "同一专长"),
+            row("4QbYVOdz", "唐瑾秋", "科室丙", "主任医师", "相同经历"),
+            row("X7ax9byv", "唐瑾秋", "科室丁", "副主任医师", "相同经历"),
+            row("LDdwkmd1", "高三德", "科室戊", "主任医师", "相同背景"),
+            row("QBeXY8ay", "高三德", "科室己", "副主任医师", "相同背景"),
+            row("3YaOggax", "王健", "检验病理科", "主管技师", "检验诊断"),
+            row("WZdP6yaK", "王健", "外科", "主任医师", "外科诊疗"),
+        ]
+        detail_reconciliation = [
+            {
+                "detail_id": gzszyy_detail_id(str(item["来源链接"])),
+                "relation_count": 1,
+                "campuses": ["珠玑路院区"],
+            }
+            for item in source_rows
+        ]
+
+        merged, reconciliation = merge_gzszyy_identity_rows(
+            source_rows, detail_reconciliation
+        )
+
+        self.assertEqual(len(merged), 5)
+        self.assertEqual(
+            {item["name"] for item in reconciliation if item["resolution"] == "同一人归并"},
+            {"林少贞", "唐瑾秋", "高三德"},
+        )
+        wang_jian = [item for item in merged if item["姓名"] == "王健"]
+        self.assertEqual(len(wang_jian), 2)
+        self.assertTrue(all("同名待甄别" in item["异常提示"] for item in wang_jian))
+        lin_shaozhen = next(item for item in merged if item["姓名"] == "林少贞")
+        self.assertNotIn("同名待甄别", lin_shaozhen["异常提示"])
+        self.assertIn("科室甲", lin_shaozhen["科室_分类页"])
+        self.assertIn("科室乙", lin_shaozhen["科室_分类页"])
+        self.assertIn(
+            "多详情职称不一致",
+            next(item for item in merged if item["姓名"] == "唐瑾秋")["异常提示"],
+        )
+
+    def test_full_gate_requires_all_423_ids_and_audited_name_decisions(self) -> None:
+        excluded_ids = {f"nurse{index}" for index in range(1, 6)}
+        merge_groups = [
+            ("林少贞", ["ELe31Mb6", "JxboyNeg"]),
+            ("唐瑾秋", ["4QbYVOdz", "X7ax9byv"]),
+            ("高三德", ["LDdwkmd1", "QBeXY8ay"]),
+        ]
+        distinct_group = ("王健", ["3YaOggax", "WZdP6yaK"])
+        special_ids = {
+            detail_id
+            for _, detail_ids in [*merge_groups, distinct_group]
+            for detail_id in detail_ids
+        }
+        ordinary_ids = [f"id{index}" for index in range(1, 411)]
+        formal_ids = [*sorted(special_ids), *ordinary_ids]
+        self.assertEqual(len(formal_ids), 418)
+
+        rows: list[dict[str, object]] = []
+        identity_reconciliation: list[dict[str, object]] = []
+        detail_reconciliation: list[dict[str, object]] = []
+        for detail_id in formal_ids:
+            name = next(
+                (
+                    group_name
+                    for group_name, group_ids in [*merge_groups, distinct_group]
+                    if detail_id in group_ids
+                ),
+                "李爱平" if detail_id == "id1" else f"医生{detail_id}",
+            )
+            detail_reconciliation.append(
+                {
+                    "detail_id": detail_id,
+                    "name": name,
+                    "resolution": "正式行",
+                    "relation_count": 1,
+                    "departments": [] if detail_id == "id1" else ["科室"],
+                    "campuses": [],
+                    "source_link": f"https://www.gzszyy.com/expert/2026/{detail_id}.html",
+                }
+            )
+
+        used_ids: set[str] = set()
+        for name, detail_ids in merge_groups:
+            used_ids.update(detail_ids)
+            primary = detail_ids[0]
+            warning = "多详情职称不一致" if name in {"唐瑾秋", "高三德"} else ""
+            rows.append(
+                {
+                    "姓名": name,
+                    "来源链接": f"https://www.gzszyy.com/expert/2026/{primary}.html",
+                    "科室_分类页": "科室甲、科室乙",
+                    "职称身份原文": "主任医师",
+                    "擅长诊疗方向摘录": "诊疗方向",
+                    "详情正文摘录": "官方简介",
+                    "亮眼经历线索": "",
+                    "列表简介": "",
+                    "重点优先级": "普通" if warning else "中",
+                    "重点关注范围": "",
+                    "重点疾病标签": "",
+                    "异常提示": warning,
+                }
+            )
+            identity_reconciliation.append(
+                {
+                    "name": name,
+                    "resolution": "同一人归并",
+                    "detail_ids": detail_ids,
+                    "primary_source_link": rows[-1]["来源链接"],
+                    "merged_source_links": [
+                        f"https://www.gzszyy.com/expert/2026/{detail_ids[1]}.html"
+                    ],
+                    "departments": ["科室甲", "科室乙"],
+                    "campuses": [],
+                    "relation_count": 2,
+                }
+            )
+        for detail_id in distinct_group[1]:
+            used_ids.add(detail_id)
+            rows.append(
+                {
+                    "姓名": "王健",
+                    "来源链接": f"https://www.gzszyy.com/expert/2026/{detail_id}.html",
+                    "科室_分类页": "检验病理科" if detail_id == "3YaOggax" else "外科",
+                    "职称身份原文": "主管技师" if detail_id == "3YaOggax" else "主任医师",
+                    "擅长诊疗方向摘录": "",
+                    "详情正文摘录": "",
+                    "亮眼经历线索": "",
+                    "列表简介": "",
+                    "重点优先级": "普通",
+                    "重点关注范围": "",
+                    "重点疾病标签": "",
+                    "异常提示": "同名待甄别",
+                }
+            )
+            identity_reconciliation.append(
+                {
+                    "name": "王健",
+                    "resolution": "同名待甄别",
+                    "detail_ids": [detail_id],
+                    "primary_source_link": rows[-1]["来源链接"],
+                    "merged_source_links": [],
+                    "departments": [rows[-1]["科室_分类页"]],
+                    "campuses": [],
+                    "relation_count": 1,
+                }
+            )
+        for detail_id in formal_ids:
+            if detail_id in used_ids:
+                continue
+            is_top_only = detail_id == "id1"
+            rows.append(
+                {
+                    "姓名": "李爱民" if is_top_only else f"医生{detail_id}",
+                    "来源链接": (
+                        "https://www.gzszyy.com/expert/2026/lNbWW4by.html"
+                        if is_top_only
+                        else f"https://www.gzszyy.com/expert/2026/{detail_id}.html"
+                    ),
+                    "科室_分类页": "" if is_top_only else "科室",
+                    "职称身份原文": "" if is_top_only else "主任医师",
+                    "擅长诊疗方向摘录": "",
+                    "详情正文摘录": "官网新增公开履历" if is_top_only else "",
+                    "亮眼经历线索": "",
+                    "列表简介": "",
+                    "重点优先级": "普通" if is_top_only else "中",
+                    "重点关注范围": "",
+                    "重点疾病标签": "",
+                    "异常提示": (
+                        "科室需人工复核；职称/身份需人工复核；详情正文为空或未识别"
+                        if is_top_only
+                        else ""
+                    ),
+                }
+            )
+            actual_id = "lNbWW4by" if is_top_only else detail_id
+            identity_reconciliation.append(
+                {
+                    "name": rows[-1]["姓名"],
+                    "resolution": "唯一身份",
+                    "detail_ids": [actual_id],
+                    "primary_source_link": rows[-1]["来源链接"],
+                    "merged_source_links": [],
+                    "departments": [],
+                    "campuses": [],
+                    "relation_count": 1,
+                }
+            )
+        # Replace the placeholder ID with the audited top-only ID in detail coverage.
+        formal_ids.remove("id1")
+        formal_ids.append("lNbWW4by")
+        detail_reconciliation = [
+            item for item in detail_reconciliation if item["detail_id"] != "id1"
+        ] + [
+            {
+                "detail_id": "lNbWW4by",
+                "name": "李爱民",
+                "resolution": "正式行",
+                "relation_count": 1,
+                "departments": [],
+                "campuses": [],
+                "source_link": "https://www.gzszyy.com/expert/2026/lNbWW4by.html",
+            }
+        ]
+        excluded = [
+            {
+                "source_link": f"https://www.gzszyy.com/expert/2026/{detail_id}.html",
+                "reason": "官网科室目录仅标注护理身份，排除医生画像采集范围",
+            }
+            for detail_id in excluded_ids
+        ]
+        meta = {
+            "candidate_membership_count": 434,
+            "unique_candidate_count": 423,
+            "unique_doctor_count": 415,
+            "census_unique_detail_count": 423,
+            "census_named_detail_count": 423,
+            "census_blank_name_detail_count": 0,
+            "census_unique_nonblank_name_count": 419,
+            "census_same_name_group_count": 4,
+            "census_same_name_groups": {
+                "林少贞": ["ELe31Mb6", "JxboyNeg"],
+                "唐瑾秋": ["4QbYVOdz", "X7ax9byv"],
+                "王健": ["3YaOggax", "WZdP6yaK"],
+                "高三德": ["LDdwkmd1", "QBeXY8ay"],
+            },
+            "census_department_count": 35,
+            "census_nonempty_department_count": 422,
+            "census_empty_department_count": 1,
+            "gzszyy_unfiltered_page_count": 18,
+            "gzszyy_unfiltered_unique_detail_count": 423,
+            "gzszyy_dp_unique_detail_count": 422,
+            "gzszyy_unfiltered_only_detail_count": 1,
+            "gzszyy_unfiltered_only_detail_ids": ["lNbWW4by"],
+            "gzszyy_dp_only_detail_count": 0,
+            "gzszyy_official_care_site_count": 5,
+            "excluded_non_doctor_count": 5,
+            "eligible_candidate_count": 418,
+            "category_error_count": 0,
+            "detail_error_count": 0,
+            "schedule_field_ingested_count": 0,
+            "gzszyy_final_identity_count": 415,
+            "gzszyy_same_identity_merge_group_count": 3,
+            "gzszyy_distinct_same_name_group_count": 1,
+            "gzszyy_distinct_same_name_row_count": 2,
+            "campus_relation_counts": {"珠玑路院区": 418},
+        }
+        payload = {
+            "meta": meta,
+            "rows": rows,
+            "excluded_candidates": excluded,
+            "gzszyy_detail_reconciliation": detail_reconciliation,
+            "gzszyy_identity_reconciliation": identity_reconciliation,
+        }
+        for item in payload["gzszyy_detail_reconciliation"]:
+            item["campuses"] = ["珠玑路院区"]
+
+        validate_gzszyy_full_append(payload)
+        payload["meta"]["candidate_membership_count"] = 433
+        with self.assertRaisesRegex(RuntimeError, "candidate_membership_count 应为 434"):
+            validate_gzszyy_full_append(payload)
 
 
 class Gy3yStaticTeamDirectoryTests(unittest.TestCase):
