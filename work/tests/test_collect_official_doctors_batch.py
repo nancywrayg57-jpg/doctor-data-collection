@@ -92,6 +92,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     validate_gzszyy_full_append,
     validate_gzsys_full_append,
     validate_gzsys_trial,
+    validate_fahsysu_full_append,
     validate_fahsysu_trial,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
@@ -1385,6 +1386,25 @@ class FahsysuDrupalExpertDirectoryTests(unittest.TestCase):
         self.assertEqual(detail["schedule_exclusion_count"], 2)
         self.assertEqual(detail["forbidden_segment_count"], 2)
 
+    def test_specialty_excludes_biography_rank_and_patient_case_tail(self) -> None:
+        html = """
+        <article class="node--type-doctor">
+          <div class="other-2">
+            <div class="other-left-title">测试医生</div>
+            <div class="other-left-text"><span>职称：</span>主任医师</div>
+            <div class="other-left-text"><span>科室：</span>外科</div>
+            <div class="other-left-text"><span>简介：</span>从事临床工作。</div>
+          </div>
+          <div class="showcase-text-content">
+            医疗特长：肝胆疾病诊疗。曾获羊城好医生称号。曾为100岁患者开展手术。
+          </div>
+        </article>
+        """
+        detail = parse_fahsysu_detail(html, {})
+        self.assertEqual(detail["specialty"], "肝胆疾病诊疗。")
+        self.assertNotIn("好医生", detail["specialty"])
+        self.assertNotIn("100岁", detail["specialty"])
+
     def test_trial_gate_rejects_census_drift(self) -> None:
         payload = {
             "meta": {
@@ -1478,6 +1498,128 @@ class FahsysuDrupalExpertDirectoryTests(unittest.TestCase):
         }
         self.assertEqual(by_id["1"]["科室_分类页"], "心血管内科、高血压科")
         self.assertEqual(len([row for row in payload["rows"] if row["姓名"] == "同名"]), 2)
+
+    def test_full_append_gate_reconciles_all_860_directory_ids(self) -> None:
+        same_name_groups = {
+            "庄锦涛": ["29148", "31480"],
+            "涂响安": ["735", "31481"],
+            "匡铭": ["650", "5582"],
+            "梁力建": ["653", "21325"],
+            "王伟": ["5592", "25409"],
+            "刘敏": ["5684", "25838"],
+            "陈宇": ["5708", "5784"],
+            "何潇芳": ["38113", "38613"],
+        }
+        name_by_id = {
+            detail_id: name
+            for name, ids in same_name_groups.items()
+            for detail_id in ids
+        }
+        detail_ids = list(name_by_id)
+        candidate = 100000
+        while len(detail_ids) < 860:
+            detail_ids.append(str(candidate))
+            candidate += 1
+
+        rows: list[dict[str, object]] = []
+        detail_reconciliation: list[dict[str, object]] = []
+        identity_reconciliation: list[dict[str, object]] = []
+        for index, detail_id in enumerate(detail_ids):
+            name = name_by_id.get(detail_id, f"医生{index}")
+            same_name = detail_id in name_by_id
+            source = f"https://www.fahsysu.org.cn/node/{detail_id}"
+            warning = "同名待甄别" if same_name else ""
+            resolution = "同名待甄别" if same_name else "正式行"
+            relation_count = 2 if index < 21 else 1
+            rows.append(
+                {
+                    "医院": "中山大学附属第一医院",
+                    "姓名": name,
+                    "科室_分类页": "内科",
+                    "科室_列表卡片": "内科",
+                    "职称_关键词": "主任医师",
+                    "职称身份原文": "主任医师",
+                    "重点优先级": "普通",
+                    "重点关注范围": "",
+                    "重点疾病标签": "",
+                    "擅长诊疗方向摘录": "疾病诊疗",
+                    "亮眼经历线索": "",
+                    "列表简介": "",
+                    "详情正文摘录": "从事临床工作。",
+                    "来源类型": "医院官网",
+                    "来源链接": source,
+                    "采集入口": self.ENTRY,
+                    "详情页状态": "200",
+                    "异常提示": warning,
+                }
+            )
+            detail_reconciliation.append(
+                {
+                    "detail_id": detail_id,
+                    "name": name,
+                    "resolution": resolution,
+                    "departments": ["内科"],
+                    "groups": ["内科"],
+                    "title_hints": ["正高"],
+                    "relation_count": relation_count,
+                    "source_link": source,
+                }
+            )
+            identity_reconciliation.append(
+                {
+                    "name": name,
+                    "detail_ids": [detail_id],
+                    "resolution": "同名待甄别" if same_name else "唯一身份",
+                    "relation_count": relation_count,
+                    "departments": ["内科"],
+                    "primary_source_link": source,
+                    "merged_source_links": [],
+                }
+            )
+
+        payload = {
+            "meta": {
+                "census_group_count": 42,
+                "census_relationship_group_count": 32,
+                "census_empty_group_count": 10,
+                "category_count": 90,
+                "census_department_count": 90,
+                "raw_card_rows": 881,
+                "candidate_membership_count": 881,
+                "unique_candidate_count": 860,
+                "census_unique_detail_count": 860,
+                "census_named_detail_count": 860,
+                "census_blank_name_detail_count": 0,
+                "census_nonempty_department_count": 860,
+                "census_empty_department_count": 0,
+                "census_same_name_group_count": 8,
+                "census_same_name_groups": same_name_groups,
+                "cross_entry_duplicate_count": 21,
+                "pagination_count": 1,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "schedule_field_ingested_count": 0,
+                "private_use_character_count": 0,
+                "title_hint_counts": {"正高": 447, "副高": 434},
+                "excluded_non_doctor_count": 0,
+                "eligible_candidate_count": 860,
+                "unique_doctor_count": 860,
+                "fahsysu_final_identity_count": 860,
+                "fahsysu_same_identity_merge_group_count": 0,
+                "fahsysu_distinct_same_name_group_count": 8,
+                "fahsysu_distinct_same_name_row_count": 16,
+            },
+            "rows": rows,
+            "excluded_candidates": [],
+            "detail_errors": [],
+            "fahsysu_detail_reconciliation": detail_reconciliation,
+            "fahsysu_identity_reconciliation": identity_reconciliation,
+        }
+
+        validate_fahsysu_full_append(payload)
+        payload["fahsysu_detail_reconciliation"].pop()
+        with self.assertRaisesRegex(RuntimeError, "逐 ID 对账工件不完整"):
+            validate_fahsysu_full_append(payload)
 
 
 class GzszyyDepartmentExpertDirectoryTests(unittest.TestCase):

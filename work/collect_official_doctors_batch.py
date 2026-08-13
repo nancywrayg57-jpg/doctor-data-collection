@@ -2979,6 +2979,7 @@ def contains_gzbrain_patient_case_text(value: str | None) -> bool:
             r"患者[^。！？；;]{0,30}(?:\d{1,3}\s*岁|男性|女性|男士|女士|某某|[\u4e00-\u9fff]某)",
             text,
         )
+        or re.search(r"\d{1,3}\s*岁[^。！？；;]{0,30}患者", text)
     )
 
 
@@ -3702,6 +3703,17 @@ def parse_fahsysu_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
         if not any(term in sentence for term in forbidden_markers)
         and not contains_gzbrain_patient_case_text(sentence)
     ]
+    specialty_sentences = [
+        clean_text(sentence)
+        for sentence in re.split(r"(?<=[。！？；;])\s*", specialty)
+        if clean_text(sentence)
+    ]
+    clean_specialty = " ".join(
+        sentence
+        for sentence in specialty_sentences
+        if not any(term in sentence for term in forbidden_markers)
+        and not contains_gzbrain_patient_case_text(sentence)
+    )
     return {
         "name": first_nonempty(
             strip_gzsys_forbidden_text(
@@ -3715,7 +3727,7 @@ def parse_fahsysu_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
             re.sub(
                 r"^(?:(?:医疗特长|专业擅长|擅长|专长|特长)\s*[:：]?\s*)+",
                 "",
-                specialty,
+                clean_specialty,
             )
         ),
         "profile_text": clip(strip_profile_navigation_text(" ".join(kept)), 1800),
@@ -3754,6 +3766,7 @@ def collect_fahsysu(
     excluded_candidates: list[dict[str, str]] = []
     detail_errors: list[dict[str, str]] = []
     detail_reconciliation: list[dict[str, Any]] = []
+    identity_reconciliation: list[dict[str, Any]] = []
     schedule_exclusion_count = 0
     forbidden_segment_count = 0
     detail_campus_marker_counts: Counter[str] = Counter()
@@ -3895,6 +3908,19 @@ def collect_fahsysu(
                 "reason": "同名不同数字 ID 分行保留" if name in same_name_groups else "",
             }
         )
+        identity_reconciliation.append(
+            {
+                "name": name,
+                "detail_ids": [doctor["id"]],
+                "resolution": "同名待甄别" if name in same_name_groups else "唯一身份",
+                "relation_count": int(doctor["relation_count"]),
+                "departments": doctor["departments"],
+                "groups": doctor["groups"],
+                "primary_source_link": doctor["source_link"],
+                "merged_source_links": [],
+                "reason": "同名不同数字 ID 分行保留" if name in same_name_groups else "",
+            }
+        )
         time.sleep(0.12)
 
     covered_departments = covered_department_names(rows)
@@ -3929,6 +3955,14 @@ def collect_fahsysu(
         if (top := group.select_one(":scope > .action-item-top"))
         and not group.select(":scope > .action-item-content")
     ]
+    formal_ids_by_name: dict[str, list[str]] = {}
+    for item in identity_reconciliation:
+        formal_ids_by_name.setdefault(str(item["name"]), []).extend(
+            str(value) for value in item["detail_ids"]
+        )
+    formal_same_name_groups = {
+        name: ids for name, ids in formal_ids_by_name.items() if len(ids) > 1
+    }
     return {
         "meta": {
             "city": target.city,
@@ -3960,7 +3994,7 @@ def collect_fahsysu(
             "census_same_name_groups": same_name_groups,
             "census_nonempty_department_count": sum(bool(item["department"]) for item in doctors),
             "census_empty_department_count": sum(not item["department"] for item in doctors),
-            "eligible_candidate_count": len(doctors),
+            "eligible_candidate_count": len(rows),
             "sample_entry_coverage_count": len(covered_departments),
             "sample_entry_categories": covered_departments,
             "pagination_count": 1,
@@ -3991,6 +4025,12 @@ def collect_fahsysu(
             "detail_error_count": len(detail_errors),
             "cross_entry_duplicate_count": len(relations) - len(doctors),
             "excluded_non_doctor_count": len(excluded_candidates),
+            "fahsysu_final_identity_count": len(identity_reconciliation),
+            "fahsysu_same_identity_merge_group_count": 0,
+            "fahsysu_distinct_same_name_group_count": len(formal_same_name_groups),
+            "fahsysu_distinct_same_name_row_count": sum(
+                len(ids) for ids in formal_same_name_groups.values()
+            ),
             "existing_profile_count": sum(row["已建画像"] == "是" for row in rows),
             "ledger_review": target.review,
             "ledger_difficulty": target.difficulty,
@@ -4021,6 +4061,7 @@ def collect_fahsysu(
         ],
         "excluded_candidates": excluded_candidates,
         "fahsysu_detail_reconciliation": detail_reconciliation,
+        "fahsysu_identity_reconciliation": identity_reconciliation,
         "fahsysu_campus_evidence": detail_campus_evidence,
         "cross_entry_duplicates": [],
         "category_errors": [],
@@ -8382,6 +8423,280 @@ def validate_fahsysu_trial(payload: dict[str, Any], expected_rows: int) -> None:
         raise RuntimeError("FAHSYSU TRIAL 写出前门禁失败：" + "；".join(errors))
 
 
+def validate_fahsysu_full_append(payload: dict[str, Any]) -> None:
+    """Block the FAHSYSU master write unless all 860 directory IDs reconcile."""
+
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    excluded = payload.get("excluded_candidates", [])
+    detail_reconciliation = payload.get("fahsysu_detail_reconciliation", [])
+    identity_reconciliation = payload.get("fahsysu_identity_reconciliation", [])
+    errors: list[str] = []
+    expected_counts = {
+        "census_group_count": 42,
+        "census_relationship_group_count": 32,
+        "census_empty_group_count": 10,
+        "category_count": 90,
+        "census_department_count": 90,
+        "raw_card_rows": 881,
+        "candidate_membership_count": 881,
+        "unique_candidate_count": 860,
+        "census_unique_detail_count": 860,
+        "census_named_detail_count": 860,
+        "census_blank_name_detail_count": 0,
+        "census_nonempty_department_count": 860,
+        "census_empty_department_count": 0,
+        "census_same_name_group_count": 8,
+        "cross_entry_duplicate_count": 21,
+        "pagination_count": 1,
+        "category_error_count": 0,
+        "schedule_field_ingested_count": 0,
+        "private_use_character_count": 0,
+    }
+    for field, expected in expected_counts.items():
+        actual = int(meta.get(field) or 0)
+        if actual != expected:
+            errors.append(f"{field} 应为 {expected}，实际 {actual}")
+    if meta.get("title_hint_counts") != {"正高": 447, "副高": 434}:
+        errors.append(f"正高/副高关系基线漂移：{meta.get('title_hint_counts', {})}")
+    if meta.get("census_same_name_groups") != FAHSYSU_EXPECTED_SAME_NAME_GROUPS:
+        errors.append(
+            f"同名不同数字 ID 组不符合审计基线：{meta.get('census_same_name_groups', {})}"
+        )
+    if int(meta.get("detail_error_count") or 0) != len(payload.get("detail_errors", [])):
+        errors.append("详情读取失败计数与失败清单不一致")
+
+    nursing_exclusions = [
+        item for item in excluded if "护理身份" in str(item.get("reason") or "")
+    ]
+    if len(nursing_exclusions) != len(excluded):
+        errors.append("存在未按明确护理身份规则留痕的排除候选")
+    if int(meta.get("excluded_non_doctor_count") or 0) != len(nursing_exclusions):
+        errors.append(
+            "护理排除计数与 meta 不一致："
+            f"{len(nursing_exclusions)}/{meta.get('excluded_non_doctor_count', 0)}"
+        )
+
+    formal_ids = [fahsysu_detail_id(str(row.get("来源链接") or "")) for row in rows]
+    excluded_ids = [
+        fahsysu_detail_id(str(item.get("source_link") or ""))
+        for item in nursing_exclusions
+    ]
+    failed_ids = {
+        fahsysu_detail_id(str(item.get("source_link") or ""))
+        for item in payload.get("detail_errors", [])
+    }
+    if any(not detail_id for detail_id in formal_ids):
+        errors.append("正式行存在非授权 fahsysu.org.cn /node/<数字ID> 来源")
+    if any(not detail_id for detail_id in excluded_ids):
+        errors.append("护理排除含非授权详情来源")
+    if "" in failed_ids:
+        errors.append("详情失败清单含非授权详情来源")
+    formal_id_set = {detail_id for detail_id in formal_ids if detail_id}
+    excluded_id_set = {detail_id for detail_id in excluded_ids if detail_id}
+    if len(formal_id_set) != len(rows):
+        errors.append("正式行来源数字 ID 为空或重复")
+    if len(excluded_id_set) != len(excluded_ids):
+        errors.append("护理排除来源数字 ID 为空或重复")
+    if formal_id_set & excluded_id_set:
+        errors.append("正式行与护理排除数字 ID 重叠")
+    if len(formal_id_set | excluded_id_set) != 860:
+        errors.append(
+            f"逐 ID 对账未覆盖 860 个唯一详情：正式 {len(formal_id_set)} / "
+            f"护理排除 {len(excluded_id_set)}"
+        )
+    if not failed_ids <= formal_id_set:
+        errors.append("详情失败 ID 未按列表证据保守保留为正式行")
+
+    reconciliation_ids = [
+        str(item.get("detail_id") or "") for item in detail_reconciliation
+    ]
+    if (
+        len(reconciliation_ids) != 860
+        or any(not detail_id for detail_id in reconciliation_ids)
+        or len(set(reconciliation_ids)) != 860
+        or set(reconciliation_ids) != formal_id_set | excluded_id_set
+    ):
+        errors.append(
+            f"逐 ID 对账工件不完整或重复：{len(reconciliation_ids)} 行 / "
+            f"{len(set(reconciliation_ids) - {''})} 个非空唯一 ID"
+        )
+    if sum(int(item.get("relation_count") or 0) for item in detail_reconciliation) != 881:
+        errors.append("逐 ID 对账关系总数未覆盖 881 条医生—专科关系")
+    resolutions = {
+        str(item.get("detail_id") or ""): str(item.get("resolution") or "")
+        for item in detail_reconciliation
+    }
+    if any(
+        resolutions.get(detail_id) not in {"正式行", "同名待甄别"}
+        for detail_id in formal_id_set
+    ):
+        errors.append("逐 ID 对账中的正式行裁决与输出不一致")
+    if any(resolutions.get(detail_id) != "护理排除" for detail_id in excluded_id_set):
+        errors.append("逐 ID 对账中的护理排除裁决与排除清单不一致")
+
+    mapped_ids = [
+        str(detail_id)
+        for item in identity_reconciliation
+        for detail_id in item.get("detail_ids", [])
+        if str(detail_id)
+    ]
+    if set(mapped_ids) != formal_id_set or len(mapped_ids) != len(formal_ids):
+        errors.append(
+            f"身份归并未完整且唯一映射正式详情 ID：正式 {len(formal_id_set)} / "
+            f"映射 {len(set(mapped_ids))}"
+        )
+    if len(identity_reconciliation) != len(rows):
+        errors.append(
+            f"身份归并对账应与最终正式行一致：{len(identity_reconciliation)}/{len(rows)}"
+        )
+    if (
+        int(meta.get("unique_doctor_count") or 0) != len(rows)
+        or int(meta.get("eligible_candidate_count") or 0) != len(rows)
+        or int(meta.get("fahsysu_final_identity_count") or 0) != len(rows)
+    ):
+        errors.append(f"最终身份计数与正式行不一致：{len(rows)}")
+    if int(meta.get("fahsysu_same_identity_merge_group_count") or 0) != 0:
+        errors.append("不得按姓名启发式归并不同数字 ID")
+    rows_by_id = {
+        fahsysu_detail_id(str(row.get("来源链接") or "")): row for row in rows
+    }
+    formal_same_name_groups = {
+        name: [detail_id for detail_id in ids if detail_id in formal_id_set]
+        for name, ids in FAHSYSU_EXPECTED_SAME_NAME_GROUPS.items()
+    }
+    formal_same_name_groups = {
+        name: ids for name, ids in formal_same_name_groups.items() if len(ids) > 1
+    }
+    if int(meta.get("fahsysu_distinct_same_name_group_count") or 0) != len(
+        formal_same_name_groups
+    ):
+        errors.append("实质不同同名组计数与护理排除后的正式行不一致")
+    if int(meta.get("fahsysu_distinct_same_name_row_count") or 0) != sum(
+        len(ids) for ids in formal_same_name_groups.values()
+    ):
+        errors.append("实质不同同名行计数与护理排除后的正式行不一致")
+    if any(
+        clean_text(str(rows_by_id[detail_id].get("姓名") or "")) != name
+        or "同名待甄别" not in str(rows_by_id[detail_id].get("异常提示") or "")
+        for name, ids in formal_same_name_groups.items()
+        for detail_id in ids
+    ):
+        errors.append("护理排除后的同名不同 ID 未完整分行保留并标记")
+
+    invalid_core_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if row.get("医院") != "中山大学附属第一医院"
+        or row.get("来源类型") != "医院官网"
+        or row.get("采集入口") != "https://www.fahsysu.org.cn/page/6945"
+        or (
+            row.get("详情页状态") != "200"
+            and not (
+                fahsysu_detail_id(str(row.get("来源链接") or "")) in failed_ids
+                and row.get("详情页状态") == "失败"
+                and "详情页读取失败" in str(row.get("异常提示") or "")
+            )
+        )
+    ]
+    if invalid_core_rows:
+        errors.append("正式行核心来源字段或详情状态异常：" + "、".join(invalid_core_rows[:10]))
+    if any(not clean_text(str(row.get("姓名") or "")) for row in rows):
+        errors.append("正式行存在空姓名")
+    if any(not clean_text(str(row.get("科室_分类页") or "")) for row in rows):
+        errors.append("正式行存在空目录科室")
+    if any(
+        fahsysu_detail_id(str(row.get("来源链接") or "")) not in failed_ids
+        and clean_text(str(row.get("职称身份原文") or "")) in {"正高", "副高"}
+        for row in rows
+    ):
+        errors.append("详情成功行误用了目录正高/副高线索")
+    if any(
+        fahsysu_detail_id(str(row.get("来源链接") or "")) not in failed_ids
+        and not clean_text(str(row.get("职称身份原文") or ""))
+        and "职称/身份需人工复核" not in str(row.get("异常提示") or "")
+        for row in rows
+    ):
+        errors.append("官网未展示职称的详情成功行未保守留空并标记复核")
+
+    formal_text_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录"]
+    forbidden_terms = [
+        "好医生",
+        "名医录",
+        "排行榜",
+        "排名",
+        "患者评价",
+        "患者留言",
+        "患者案例",
+        "病例详情",
+    ]
+    forbidden_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if any(
+            term in str(row.get(field) or "")
+            for field in formal_text_fields
+            for term in forbidden_terms
+        )
+        or any(
+            contains_gzbrain_patient_case_text(str(row.get(field) or ""))
+            for field in formal_text_fields
+        )
+    ]
+    if forbidden_rows:
+        errors.append("四正式文本字段仍含排名、患者或病例信息：" + "、".join(forbidden_rows[:10]))
+    schedule_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if any(
+            strip_gzsys_schedule_text(str(row.get(field) or ""))
+            != clean_text(str(row.get(field) or ""))
+            for field in formal_text_fields
+        )
+    ]
+    if schedule_rows:
+        errors.append("四正式文本字段仍含排班片段：" + "、".join(schedule_rows[:10]))
+    navigation_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if any(contains_navigation_text(str(row.get(field) or "")) for field in formal_text_fields)
+    ]
+    if navigation_rows:
+        errors.append("四正式文本字段仍含导航片段：" + "、".join(navigation_rows[:10]))
+    private_use_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if any(re.search(r"[\ue000-\uf8ff]", str(row.get(field) or "")) for field in BASE_HEADERS)
+    ]
+    if private_use_rows:
+        errors.append("正式字段仍含 iconfont 私用区字符：" + "、".join(private_use_rows[:10]))
+    prefixed_specialties = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if re.match(
+            r"^\s*(?:(?:医疗特长|专业擅长|擅长|专长|特长)\s*[:：]?\s*)+",
+            str(row.get("擅长诊疗方向摘录") or ""),
+        )
+    ]
+    if prefixed_specialties:
+        errors.append("擅长字段仍保留多重前缀：" + "、".join(prefixed_specialties[:10]))
+    tagged_abnormal = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if clean_text(str(row.get("异常提示") or ""))
+        and (
+            clean_text(str(row.get("重点关注范围") or ""))
+            or clean_text(str(row.get("重点疾病标签") or ""))
+            or clean_text(str(row.get("重点优先级") or "")) != "普通"
+        )
+    ]
+    if tagged_abnormal:
+        errors.append("异常行仍被打标签或提升优先级：" + "、".join(tagged_abnormal[:10]))
+
+    if errors:
+        raise RuntimeError("FAHSYSU FULL 写入前门禁失败：" + "；".join(errors))
+
+
 def validate_gzsys_full_append(payload: dict[str, Any]) -> None:
     """Block the GZSYS master write unless all 664 audited IDs reconcile."""
 
@@ -8778,6 +9093,17 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         )
         for item in payload.get("fahsysu_detail_reconciliation", [])
     ) or "| 无 | 无 | 无 | 无 | 无 | 无 | 0 | 无 | 无 |"
+    fahsysu_identity_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('name', ''))} | "
+            f"{','.join(str(value) for value in item.get('detail_ids', []))} | "
+            f"{item.get('resolution', '')} | {item.get('relation_count', 0)} | "
+            f"{'、'.join(item.get('departments', [])) or '无'} | "
+            f"{item.get('primary_source_link', '')} | "
+            f"{markdown_table_cell(item.get('reason', '')) or '无'} |"
+        )
+        for item in payload.get("fahsysu_identity_reconciliation", [])
+    ) or "| 无 | 无 | 无 | 0 | 无 | 无 | 无 |"
     campus_relation_summary = "；".join(
         f"{name} {count} 条"
         for name, count in meta.get("campus_relation_counts", {}).items()
@@ -8904,15 +9230,24 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 - 同名不同 ID：{meta.get('census_same_name_group_count', 0)} 组，全部按数字 ID 保持独立；样本命中时标记“同名待甄别”。
 - 目录职级线索：正高 {meta.get('title_hint_counts', {}).get('正高', 0)}、副高 {meta.get('title_hint_counts', {}).get('副高', 0)}；正式职称只取详情页显式字段，不拼接正高/副高。
 - 分页/交互：{meta.get('pagination_method', '未记录')}。
-- 院区词扫描：目录页 {directory_campus_counts}；10 位详情 {detail_campus_counts}，涉及 {meta.get('campus_evidence_detail_count', 0)} 位。{meta.get('campus_scope_status', '')}
+- 院区词扫描：目录页 {directory_campus_counts}；本轮详情 {detail_campus_counts}，涉及 {meta.get('campus_evidence_detail_count', 0)} 位。{meta.get('campus_scope_status', '')}
 - 黄埔边界：{meta.get('huangpu_scope_status', '')}
+- 黄埔去重预案：执行台账序号 8 时，必须以其目录数字 node ID 与本轮 860-ID 对账；命中本轮 ID 的医生不得重复入库。
 - 详情清洗：排班 DOM 排除 {meta.get('schedule_exclusion_count', 0)} 个；排名/患者片段排除 {meta.get('forbidden_segment_exclusion_count', 0)} 个；正式字段排班写入 {meta.get('schedule_field_ingested_count', 0)}、私用区字符 {meta.get('private_use_character_count', 0)}。
 
-### 试采逐 ID 对账
+### 逐 ID 对账
 
 | 详情 ID | 姓名 | 裁决 | 顶层分组 | 科室 | 目录职级线索 | 原关系数 | 来源链接 | 理由 |
 |---|---|---|---|---|---|---:|---|---|
 {fahsysu_reconciliation_lines}
+
+### 身份归并对账
+
+- 正式身份：{meta.get('fahsysu_final_identity_count', len(payload.get('rows', [])))} 行；同一人归并 {meta.get('fahsysu_same_identity_merge_group_count', 0)} 组；实质不同同名 {meta.get('fahsysu_distinct_same_name_group_count', 0)} 组 / {meta.get('fahsysu_distinct_same_name_row_count', 0)} 行。
+
+| 姓名 | 详情 ID | 裁决 | 原关系数 | 合并科室 | 主详情 | 理由 |
+|---|---|---|---:|---|---|---|
+{fahsysu_identity_lines}
 """
         )
     adapter_specific_text = "\n\n".join(adapter_specific_sections)
@@ -9396,8 +9731,8 @@ def main() -> None:
     if target.adapter_id == FAHSYSU_ADAPTER_ID and args.trial_only:
         validate_fahsysu_trial(payload, expected_rows=max_doctors or 10)
 
-    if target.adapter_id == FAHSYSU_ADAPTER_ID and not args.trial_only:
-        raise RuntimeError("FAHSYSU 适配器当前仅获 Issue #37 TRIAL 授权，禁止进入 FULL。")
+    if target.adapter_id == FAHSYSU_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_fahsysu_full_append(payload)
 
     if target.adapter_id == GZSYS_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gzsys_full_append(payload)
