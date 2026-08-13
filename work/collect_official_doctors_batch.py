@@ -3393,6 +3393,34 @@ def normalize_gzsys_department(value: str | None) -> str:
     return "、".join(dict.fromkeys(parts))
 
 
+GZSYS_SCHEDULE_LABEL_PATTERN = re.compile(
+    r"(?:"
+    r"(?:院本部|南院区|深汕院区|花都院区)?(?:开诊|出诊|门诊|特诊)时间(?:为)?"
+    r"|博济特诊时间"
+    r"|减重管理团队教授门诊"
+    r")\s*[:：]?\s*.*?"
+    r"(?=(?:特长|擅长|专长|简介)\s*[:：]|$)",
+    flags=re.IGNORECASE,
+)
+GZSYS_CAMPUS_SCHEDULE_TAIL_PATTERN = re.compile(
+    r"(?:院本部|南院区|南院)\s*(?=(?:逢|每)?周[一二三四五六日天])"
+    r"[^。]*(?:。|$)",
+    flags=re.IGNORECASE,
+)
+
+
+def strip_gzsys_schedule_text(value: str | None) -> str:
+    """Remove only explicit GZSYS clinic-time tails from free-form profiles."""
+
+    text = clean_text(value)
+    previous = None
+    while text != previous:
+        previous = text
+        text = GZSYS_SCHEDULE_LABEL_PATTERN.sub(" ", text)
+    text = GZSYS_CAMPUS_SCHEDULE_TAIL_PATTERN.sub(" ", text)
+    return clean_text(text)
+
+
 def parse_gzsys_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
     soup = BeautifulSoup(html, "html.parser")
     container = soup.select_one(".other-2")
@@ -3416,10 +3444,14 @@ def parse_gzsys_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
     leaf_paragraphs = [node for node in desc.select("p") if not node.select("p")] if desc else []
     source_nodes = leaf_paragraphs or ([desc] if desc else [])
     segments: list[str] = []
+    inline_schedule_exclusion_count = 0
     for node in source_nodes:
         value = strip_gzsys_forbidden_text(node.get_text(" ", strip=True))
-        if value and value not in segments:
-            segments.append(value)
+        cleaned_value = strip_gzsys_schedule_text(value)
+        if cleaned_value != value:
+            inline_schedule_exclusion_count += 1
+        if cleaned_value and cleaned_value not in segments:
+            segments.append(cleaned_value)
     forbidden_markers = ("好医生榜", "医生排行榜", "患者评价", "患者留言", "问诊记录", "问诊内容")
     sentences = [
         clean_text(sentence)
@@ -3451,7 +3483,7 @@ def parse_gzsys_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
         "department": first_nonempty(labeled.get("department"), fallback.get("department")),
         "specialty": specialty,
         "profile_text": clip(strip_profile_navigation_text(" ".join(kept)), 1800),
-        "schedule_exclusion_count": schedule_count,
+        "schedule_exclusion_count": schedule_count + inline_schedule_exclusion_count,
         "forbidden_segment_count": len(sentences) - len(kept),
     }
 
@@ -3677,6 +3709,23 @@ def collect_gzsys(
         for department in clean_text(row["科室_分类页"]).split("、")
         if department
     )
+    identity_reconciliation = [
+        {
+            "name": clean_text(str(row.get("姓名") or "")),
+            "identity_index": 1,
+            "resolution": "唯一身份",
+            "detail_ids": [gzsys_detail_id(str(row.get("来源链接") or ""))],
+            "primary_source_link": clean_text(str(row.get("来源链接") or "")),
+            "merged_source_links": [],
+            "departments": [
+                department
+                for department in clean_text(str(row.get("科室_分类页") or "")).split("、")
+                if department
+            ],
+            "relation_count": 1,
+        }
+        for row in rows
+    ]
     priority_counter = Counter(row["重点优先级"] for row in rows)
     group_counter = Counter(group for row in rows for group in row["重点关注范围"].split("、") if group)
     warning_counter = Counter(warning for row in rows for warning in row["异常提示"].split("；") if warning)
@@ -3728,6 +3777,9 @@ def collect_gzsys(
             "cross_entry_duplicate_count": len(relations) - len(doctors),
             "excluded_non_doctor_count": len(excluded_candidates),
             "existing_profile_count": sum(row["已建画像"] == "是" for row in rows),
+            "gzsys_final_identity_count": len(rows),
+            "gzsys_same_identity_merge_group_count": 0,
+            "gzsys_distinct_same_name_group_count": 0,
             "ledger_review": target.review,
             "ledger_difficulty": target.difficulty,
         },
@@ -3747,6 +3799,7 @@ def collect_gzsys(
         ],
         "excluded_candidates": excluded_candidates,
         "gzsys_detail_reconciliation": detail_reconciliation,
+        "gzsys_identity_reconciliation": identity_reconciliation,
         "cross_entry_duplicates": [],
         "category_errors": page_errors,
         "detail_errors": detail_errors,
@@ -7202,7 +7255,6 @@ def validate_gzbrain_full_append(payload: dict[str, Any]) -> None:
         "census_unique_nonblank_name_count": 181,
         "census_same_name_group_count": 2,
         "category_error_count": 0,
-        "detail_error_count": 0,
         "schedule_field_ingested_count": 0,
     }
     for field, expected_value in expected.items():
@@ -7695,6 +7747,245 @@ def validate_gzsys_trial(payload: dict[str, Any], expected_rows: int) -> None:
         raise RuntimeError("GZSYS TRIAL 写出前门禁失败：" + "；".join(errors))
 
 
+def validate_gzsys_full_append(payload: dict[str, Any]) -> None:
+    """Block the GZSYS master write unless all 664 audited IDs reconcile."""
+
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    excluded = payload.get("excluded_candidates", [])
+    detail_reconciliation = payload.get("gzsys_detail_reconciliation", [])
+    identity_reconciliation = payload.get("gzsys_identity_reconciliation", [])
+    errors: list[str] = []
+    expected_counts = {
+        "category_count": 23,
+        "pagination_count": 23,
+        "raw_card_rows": 664,
+        "candidate_membership_count": 664,
+        "unique_candidate_count": 664,
+        "census_unique_detail_count": 664,
+        "census_named_detail_count": 664,
+        "census_blank_name_detail_count": 0,
+        "census_unique_nonblank_name_count": 664,
+        "census_same_name_group_count": 0,
+        "census_department_count": 65,
+        "census_nonempty_department_count": 664,
+        "census_empty_department_count": 0,
+        "eligible_candidate_count": 658,
+        "cross_entry_duplicate_count": 0,
+        "category_error_count": 0,
+        "schedule_field_ingested_count": 0,
+        "private_use_character_count": 0,
+    }
+    for field, expected in expected_counts.items():
+        actual = int(meta.get(field) or 0)
+        if actual != expected:
+            errors.append(f"{field} 应为 {expected}，实际 {actual}")
+
+    allowed_failed_detail_ids = {"25208"}
+    actual_failed_detail_ids = {
+        gzsys_detail_id(str(item.get("source_link") or ""))
+        for item in payload.get("detail_errors", [])
+    }
+    if "" in actual_failed_detail_ids or not actual_failed_detail_ids <= allowed_failed_detail_ids:
+        errors.append(
+            "存在未授权放行的详情读取失败 ID："
+            + "、".join(sorted(actual_failed_detail_ids - allowed_failed_detail_ids) or ["无效来源"])
+        )
+    if int(meta.get("detail_error_count") or 0) != len(payload.get("detail_errors", [])):
+        errors.append("详情读取失败计数与失败清单不一致")
+
+    if meta.get("filter_dictionary_counts") != {
+        "department_target_id": 96,
+        "talent_project": 4,
+        "tutor_qualification": 5,
+        "doctor_title": 33,
+    }:
+        errors.append(f"筛选字典计数偏离审计基线：{meta.get('filter_dictionary_counts', {})}")
+    if meta.get("source_path_counts") != {"node": 432, "doctor": 232}:
+        errors.append(f"node/doctor 来源关系计数偏离审计基线：{meta.get('source_path_counts', {})}")
+
+    nursing_exclusions = [
+        item for item in excluded if "护理身份" in str(item.get("reason") or "")
+    ]
+    if len(nursing_exclusions) != len(excluded):
+        errors.append("存在未按明确护理身份规则留痕的排除候选")
+    if len(nursing_exclusions) < 6:
+        errors.append(f"官网列表基线的纯护理排除至少应为 6，实际 {len(nursing_exclusions)}")
+    if int(meta.get("excluded_non_doctor_count") or 0) != len(excluded):
+        errors.append(
+            "排除计数与 meta 不一致："
+            f"{len(excluded)}/{meta.get('excluded_non_doctor_count', 0)}"
+        )
+
+    formal_ids = [gzsys_detail_id(str(row.get("来源链接") or "")) for row in rows]
+    excluded_ids = [
+        gzsys_detail_id(str(item.get("source_link") or "")) for item in nursing_exclusions
+    ]
+    if any(not detail_id for detail_id in formal_ids):
+        errors.append("正式行存在非授权 /node/<ID> 或 /doctor/<ID> 来源")
+    if any(not detail_id for detail_id in excluded_ids):
+        errors.append("护理排除含非授权详情来源")
+    formal_id_set = {detail_id for detail_id in formal_ids if detail_id}
+    excluded_id_set = {detail_id for detail_id in excluded_ids if detail_id}
+    if len(formal_id_set) != len(rows):
+        errors.append("正式行来源数字 ID 为空或重复")
+    if len(excluded_id_set) != len(excluded_ids):
+        errors.append("护理排除来源数字 ID 为空或重复")
+    if formal_id_set & excluded_id_set:
+        errors.append("正式行与护理排除数字 ID 重叠")
+    if len(formal_id_set | excluded_id_set) != 664:
+        errors.append(
+            f"逐 ID 对账未覆盖 664 个唯一详情：正式 {len(formal_id_set)} / "
+            f"护理排除 {len(excluded_id_set)}"
+        )
+
+    reconciliation_ids = [
+        str(item.get("detail_id") or "") for item in detail_reconciliation
+    ]
+    if (
+        len(reconciliation_ids) != 664
+        or any(not detail_id for detail_id in reconciliation_ids)
+        or len(set(reconciliation_ids)) != 664
+        or set(reconciliation_ids) != formal_id_set | excluded_id_set
+    ):
+        errors.append(
+            f"逐 ID 对账工件不完整或重复：{len(reconciliation_ids)} 行 / "
+            f"{len(set(reconciliation_ids) - {''})} 个非空唯一 ID"
+        )
+    resolutions = {
+        str(item.get("detail_id") or ""): str(item.get("resolution") or "")
+        for item in detail_reconciliation
+    }
+    if any(resolutions.get(detail_id) != "正式行" for detail_id in formal_id_set):
+        errors.append("逐 ID 对账中的正式行裁决与输出不一致")
+    if any(resolutions.get(detail_id) != "护理排除" for detail_id in excluded_id_set):
+        errors.append("逐 ID 对账中的护理排除裁决与排除清单不一致")
+
+    mapped_ids = [
+        str(detail_id)
+        for item in identity_reconciliation
+        for detail_id in item.get("detail_ids", [])
+        if str(detail_id)
+    ]
+    if set(mapped_ids) != formal_id_set or len(mapped_ids) != len(formal_ids):
+        errors.append(
+            f"身份归并未完整且唯一映射正式详情 ID：正式 {len(formal_id_set)} / "
+            f"映射 {len(set(mapped_ids))}"
+        )
+    if len(identity_reconciliation) != len(rows):
+        errors.append(
+            f"身份归并对账应与最终正式行一致：{len(identity_reconciliation)}/{len(rows)}"
+        )
+    if (
+        int(meta.get("unique_doctor_count") or 0) != len(rows)
+        or int(meta.get("gzsys_final_identity_count") or 0) != len(rows)
+    ):
+        errors.append(f"最终身份计数与正式行不一致：{len(rows)}")
+    if int(meta.get("gzsys_same_identity_merge_group_count") or 0) != 0:
+        errors.append("无同名基线下不应出现启发式身份归并")
+    if int(meta.get("gzsys_distinct_same_name_group_count") or 0) != 0:
+        errors.append("无同名基线下不应出现同名分行裁决")
+
+    if any(not clean_text(str(row.get("姓名") or "")) for row in rows):
+        errors.append("正式行存在空姓名")
+    if len({clean_text(str(row.get("姓名") or "")) for row in rows}) != len(rows):
+        errors.append("正式行出现未裁决的同名身份")
+    invalid_core_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if row.get("医院") != "中山大学孙逸仙纪念医院"
+        or row.get("来源类型") != "医院官网"
+        or row.get("采集入口") != "https://www.gzsys.org.cn/doctor/592/search"
+        or (
+            row.get("详情页状态") != "200"
+            and not (
+                gzsys_detail_id(str(row.get("来源链接") or "")) in actual_failed_detail_ids
+                and row.get("详情页状态") == "失败"
+                and "详情页读取失败" in str(row.get("异常提示") or "")
+            )
+        )
+    ]
+    if invalid_core_rows:
+        errors.append("正式行核心来源字段或详情状态异常：" + "、".join(invalid_core_rows[:10]))
+
+    prefixed_specialties = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if re.match(
+            r"^\s*(?:(?:专业擅长|擅长|专长|特长)\s*[:：]?\s*)+",
+            str(row.get("擅长诊疗方向摘录") or ""),
+        )
+    ]
+    if prefixed_specialties:
+        errors.append("擅长字段仍保留前缀：" + "、".join(prefixed_specialties[:10]))
+
+    formal_text_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录"]
+    forbidden_terms = [
+        "好医生",
+        "名医录",
+        "排行榜",
+        "排名",
+        "患者评价",
+        "患者留言",
+        "患者案例",
+        "病例详情",
+    ]
+    forbidden_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if any(
+            term in str(row.get(field) or "")
+            for field in formal_text_fields
+            for term in forbidden_terms
+        )
+    ]
+    if forbidden_rows:
+        errors.append("四正式文本字段仍含排名或患者信息：" + "、".join(forbidden_rows[:10]))
+    schedule_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if any(
+            strip_gyfyyy_schedule_text(str(row.get(field) or ""))
+            != clean_text(str(row.get(field) or ""))
+            for field in formal_text_fields
+        )
+    ]
+    if schedule_rows:
+        errors.append("四正式文本字段仍含排班片段：" + "、".join(schedule_rows[:10]))
+    patient_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if any(
+            contains_gzbrain_patient_case_text(str(row.get(field) or ""))
+            for field in formal_text_fields
+        )
+    ]
+    if patient_rows:
+        errors.append("四正式文本字段仍含患者案例或可识别信息：" + "、".join(patient_rows[:10]))
+    private_use_rows = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if any(re.search(r"[\ue000-\uf8ff]", str(row.get(field) or "")) for field in BASE_HEADERS)
+    ]
+    if private_use_rows:
+        errors.append("正式字段仍含 iconfont 私用区字符：" + "、".join(private_use_rows[:10]))
+    tagged_abnormal = [
+        str(row.get("姓名") or "未命名")
+        for row in rows
+        if clean_text(str(row.get("异常提示") or ""))
+        and (
+            clean_text(str(row.get("重点关注范围") or ""))
+            or clean_text(str(row.get("重点疾病标签") or ""))
+            or clean_text(str(row.get("重点优先级") or "")) != "普通"
+        )
+    ]
+    if tagged_abnormal:
+        errors.append("异常行仍被打标签或提升优先级：" + "、".join(tagged_abnormal[:10]))
+
+    if errors:
+        raise RuntimeError("GZSYS FULL 写入前门禁失败：" + "；".join(errors))
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=BASE_HEADERS)
@@ -7833,6 +8124,14 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         f"| {item.get('name', '')} | {item.get('source_url', '')} |"
         for item in payload.get("gzszyy_campus_reconnaissance", [])
     ) or "| 无 | 无 |"
+    gzsys_reconciliation_lines = "\n".join(
+        (
+            f"| {item.get('detail_id', '')} | {markdown_table_cell(item.get('name', ''))} | "
+            f"{item.get('resolution', '')} | {item.get('source_link', '')} | "
+            f"{markdown_table_cell(item.get('reason', '')) or '无'} |"
+        )
+        for item in payload.get("gzsys_detail_reconciliation", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 |"
     campus_relation_summary = "；".join(
         f"{name} {count} 条"
         for name, count in meta.get("campus_relation_counts", {}).items()
@@ -7930,6 +8229,15 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 - 纯护理排除：{meta.get('excluded_non_doctor_count', 0)} 个；排除后合规候选 {meta.get('eligible_candidate_count', 0)} 个。
 - 详情清洗：排班 DOM 排除 {meta.get('schedule_exclusion_count', 0)} 个；排名/患者片段排除 {meta.get('forbidden_segment_exclusion_count', 0)} 个；正式字段排班写入 {meta.get('schedule_field_ingested_count', 0)}、私用区字符 {meta.get('private_use_character_count', 0)}。
 - 普通公开会话：{meta.get('standard_public_session', '未记录')}；本轮最终 Cookie 名称仅留痕为 `{'、'.join(meta.get('session_cookie_names', [])) or '无'}`。
+
+### 逐 ID / 身份归并对账表
+
+- 对账范围：664 个唯一数字 ID；正式身份 {meta.get('gzsys_final_identity_count', len(payload.get('rows', [])))} 行；护理排除 {meta.get('excluded_non_doctor_count', 0)} 行。
+- 同一人归并：{meta.get('gzsys_same_identity_merge_group_count', 0)} 组；实质不同同名：{meta.get('gzsys_distinct_same_name_group_count', 0)} 组。
+
+| 详情 ID | 姓名 | 裁决 | 来源链接 | 理由 |
+|---|---|---|---|---|
+{gzsys_reconciliation_lines}
 """
         )
     adapter_specific_text = "\n\n".join(adapter_specific_sections)
@@ -8407,6 +8715,9 @@ def main() -> None:
         validate_gdzy5413_trial2(payload, expected_identities=max_doctors or 10)
     if target.adapter_id == GZSYS_ADAPTER_ID and args.trial_only:
         validate_gzsys_trial(payload, expected_rows=max_doctors or 10)
+
+    if target.adapter_id == GZSYS_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_gzsys_full_append(payload)
 
     if target.adapter_id == GDZY5413_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdzy5413_full_append(payload)
