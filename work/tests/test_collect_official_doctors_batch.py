@@ -67,6 +67,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     validate_gykqyy_full_append,
     validate_gyfyyy_full_append,
     validate_gy3y_full_append,
+    validate_gzbrain_full_append,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
     validate_gdzy5413_full_append,
@@ -701,6 +702,139 @@ class GyfyyyStaticDepartmentTreeTests(unittest.TestCase):
 
 class GzbrainStaticExpertDirectoryTests(unittest.TestCase):
     ENTRY_URL = "https://www.gzbrain.cn/myzj/list.html"
+
+    def _valid_full_payload(self) -> dict[str, object]:
+        detail_ids = ["551", "102037", "990", "1231"] + [
+            str(value) for value in range(1, 180)
+        ]
+        names = {
+            "551": "沈峰",
+            "102037": "沈峰",
+            "990": "王丹逢",
+            "1231": "王丹逢",
+        }
+        excluded_id = detail_ids[-1]
+        rows = []
+        reconciliation = []
+        for detail_id in detail_ids:
+            name = names.get(detail_id, f"医生{detail_id}")
+            source_link = f"https://www.gzbrain.cn/myzj/info_itemid_{detail_id}.html"
+            if detail_id == excluded_id:
+                reconciliation.append(
+                    {
+                        "detail_id": detail_id,
+                        "source_link": source_link,
+                        "name": name,
+                        "resolution": "护理排除",
+                        "reason": "官网详情仅标注护理身份，排除医生画像采集范围",
+                    }
+                )
+                continue
+            warning = "同名待甄别" if name in {"沈峰", "王丹逢"} else ""
+            rows.append(
+                {
+                    "姓名": name,
+                    "重点优先级": "普通" if warning else "中",
+                    "重点关注范围": "",
+                    "重点疾病标签": "",
+                    "擅长诊疗方向摘录": "精神疾病规范诊疗。",
+                    "亮眼经历线索": "长期从事临床工作。",
+                    "列表简介": "",
+                    "详情正文摘录": "长期从事临床工作。",
+                    "来源链接": source_link,
+                    "异常提示": warning,
+                }
+            )
+            reconciliation.append(
+                {
+                    "detail_id": detail_id,
+                    "source_link": source_link,
+                    "name": name,
+                    "resolution": "正式行",
+                    "reason": "",
+                }
+            )
+        return {
+            "meta": {
+                "category_count": 31,
+                "pagination_count": 31,
+                "candidate_membership_count": 183,
+                "unique_candidate_count": 183,
+                "unique_doctor_count": len(rows),
+                "census_unique_detail_count": 183,
+                "census_named_detail_count": 183,
+                "census_blank_name_detail_count": 0,
+                "census_unique_nonblank_name_count": 181,
+                "census_same_name_group_count": 2,
+                "census_same_name_groups": {
+                    "沈峰": ["551", "102037"],
+                    "王丹逢": ["990", "1231"],
+                },
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "schedule_field_ingested_count": 0,
+                "excluded_non_doctor_count": 1,
+            },
+            "rows": rows,
+            "excluded_candidates": [
+                {
+                    "source_link": f"https://www.gzbrain.cn/myzj/info_itemid_{excluded_id}.html",
+                    "reason": "官网详情仅标注护理身份，排除医生画像采集范围",
+                }
+            ],
+            "gzbrain_detail_reconciliation": reconciliation,
+        }
+
+    def test_full_append_gate_accepts_complete_183_id_reconciliation(self) -> None:
+        validate_gzbrain_full_append(self._valid_full_payload())
+
+    def test_full_append_gate_rejects_missing_detail_id(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"].pop()
+        payload["gzbrain_detail_reconciliation"].pop(-2)
+        payload["meta"]["unique_doctor_count"] -= 1
+        with self.assertRaisesRegex(RuntimeError, "逐 ID 对账"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_duplicate_source(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"][-1]["来源链接"] = payload["rows"][0]["来源链接"]
+        with self.assertRaisesRegex(RuntimeError, "来源详情 ID 不唯一"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_schedule_pollution(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"][0]["详情正文摘录"] = "每周一上午出诊。"
+        with self.assertRaisesRegex(RuntimeError, "排班片段"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_patient_identifiable_text(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"][0]["亮眼经历线索"] = "患者案例：某某女性42岁，病情好转。"
+        with self.assertRaisesRegex(RuntimeError, "患者案例或可识别信息"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_tagged_abnormal_row(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"][0].update(
+            {"异常提示": "详情正文为空或未识别", "重点关注范围": "慢性病", "重点优先级": "高"}
+        )
+        with self.assertRaisesRegex(RuntimeError, "异常行仍被打标签"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_unmarked_same_name_row(self) -> None:
+        payload = self._valid_full_payload()
+        same_name_row = next(row for row in payload["rows"] if row["姓名"] == "沈峰")
+        same_name_row["异常提示"] = ""
+        same_name_row["重点优先级"] = "中"
+        with self.assertRaisesRegex(RuntimeError, "同名待甄别"):
+            validate_gzbrain_full_append(payload)
+
+    def test_full_append_gate_rejects_nonofficial_detail_url(self) -> None:
+        payload = self._valid_full_payload()
+        payload["rows"][0]["来源链接"] = "https://example.com/myzj/info_itemid_551.html"
+        with self.assertRaisesRegex(RuntimeError, "非授权"):
+            validate_gzbrain_full_append(payload)
 
     def test_adapter_and_detail_scope_are_exact(self) -> None:
         self.assertEqual(

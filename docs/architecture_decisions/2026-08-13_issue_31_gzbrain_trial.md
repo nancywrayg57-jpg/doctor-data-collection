@@ -133,3 +133,107 @@ Artifacts:
 - D:\workspace\信息收集整理\work\广州医科大学附属脑科医院_trial_report.md
 - D:\workspace\信息收集整理\docs\architecture_decisions\2026-08-13_issue_31_gzbrain_trial.md
 </Handoff_State>
+
+## Owner TRIAL 审计通过与 FULL 授权
+
+PR #32 补齐三份 TRIAL 原始工件后，owner `nancywrayg57-jpg` 独立核验并于 2026-08-13 明确给出 `通过`，同时将唯一有效阶段切换为 `FULL_APPEND_AND_OBSIDIAN`。FULL 对账基线和条件为：31 个列表页、183 条目录关系、183 个唯一详情 ID；最终正式行数须以逐 ID 对账、身份聚类和纯护理排除确定；四个正式文本字段中的排班、患者案例或可识别信息命中必须为 0；同名不同 ID、异常行、擅长前缀和院区证据口径继续沿用。
+
+## GZBRAIN FULL 写表前门禁
+
+正式追加前新增 `validate_gzbrain_full_append(payload)`，并在 `main()` 中仅对 GZBRAIN 非试采、非单院输出流程调用，位置早于 FULL payload、总底表 CSV/XLSX 和报告的任何写入。门禁同时验证：
+
+1. 31 个静态列表页、183 条关系、183 个唯一详情 ID、183 个有姓名详情、181 个唯一非空姓名和 2 组同名详情均与 owner 审计基线一致；列表页和详情页读取失败均为 0。
+2. 正式行来源严格为 `https://www.gzbrain.cn/myzj/info_itemid_<数字>.html`，ID 唯一、姓名非空；正式行 ID 与明确纯护理排除 ID 不重叠且并集必须精确覆盖 183 个详情 ID。
+3. 新增 `gzbrain_detail_reconciliation` 逐 ID 工件，每一详情 ID 必须唯一裁决为 `正式行` 或 `护理排除`，且与正式输出和排除清单双向一致。
+4. 沈峰（551、102037）和王丹逢（990、1231）四行全部保留 `同名待甄别`；异常行不得保留重点范围、疾病标签或非普通优先级。
+5. 四个正式文本字段逐行检查排班片段和患者案例/可识别信息；擅长字段不得残留一个或多个 `专长/擅长` 前缀。
+
+新增 8 类门禁回归：完整 183 ID payload 通过；缺失 ID、重复来源、排班污染、患者可识别文本、异常行仍打标签、同名行漏标记和非官方详情 URL 均拒绝。采集测试由 75 项增至 83 项并全部通过。
+
+## FULL 正式追加与逐 ID 对账结果
+
+正式命令：
+
+```powershell
+python .\work\collect_official_doctors_batch.py `
+  --hospital "广州医科大学附属脑科医院" `
+  --allow-generic-append
+```
+
+结果和独立复核：
+
+- 31 个静态列表页、183 条关系、183 个唯一详情 ID；列表错误 0、详情错误 0。
+- 183 个详情全部裁决为正式行，纯护理排除 0；FULL payload、逐 ID 对账和总底表本院来源 ID 集合完全一致。
+- 正式追加 183 行，重复跳过 0、刷新既有行 0；总底表由 3976 行增至 4159 行、医院数由 12 家增至 13 家。
+- 183 个来源均严格匹配官方详情路径且唯一；同名 2 组共 4 行均保留 `同名待甄别`。
+- 本院异常提示 9 行：科室需人工复核 1、同名待甄别 4、职称/身份需人工复核 4；9 行均为普通优先级且重点范围、疾病标签为空。
+- 四正式文本字段排班命中 0、患者案例/可识别信息命中 0；列表排班仅作为芳村、荔湾、江村、白云和总部存在性证据，不进入正式字段。
+
+正式采集 payload SHA-256 为 `cf1b6e0967a29e412ac70a41ca34b9d0a53eb8f7a18ec602928d294afdb5d4e9`，本院 FULL 报告 SHA-256 为 `828399a8cfdd9bc28e0b0b3dc4d3bb606cd85f9bb25e6dcdab7c54143437ef93`。
+
+## Obsidian 画像与索引
+
+使用指定医院和缺失画像模式生成：
+
+```powershell
+python .\work\generate_obsidian_profiles.py `
+  --hospital "广州医科大学附属脑科医院" `
+  --generate-missing-only
+```
+
+- 新生成 183 份画像，刷新 0、跳过 0；生成本院 `_索引.md`。
+- 画像文件 183、唯一文件名 183；索引 WikiLink 183、唯一 183、断链 0。
+- 总底表本院来源集合与画像 front matter 来源集合双向一致，均为 183 个官方详情 URL。
+- 画像业务内容中的排班文本命中 0，患者案例/可识别信息命中 0。
+- 仅用现有底表执行 `--rebuild-master-only` 后，本院 183 行 `已建画像` 全部同步为 `是`；没有联网重采。
+
+本院索引 SHA-256 为 `2cdb847f8c67a1e175e0d05eed1cc10fff9ef1159ebe6436778f70216fce935a`。
+
+## Excel 重建阻塞、根因与防复发
+
+画像标志同步后的首次 `--rebuild-master-only` 已重建 CSV 和报告，但 Node Excel 生成器在 `build_doctor_workbook.mjs:75` 对约 10 MB JSON 输入执行冗余原地写回时返回 Windows `UNKNOWN`；XLSX 尚未重建，旧文件仍存在。诊断确认 payload 可正常读取、非只读、ACL 可写、无 Excel 锁文件、无残留 Node 进程；失败发生在工作簿创建之前。
+
+最小修正是把 JSON payload 视为只读输入：继续在内存规范序号，但删除 `fs.writeFile(args.json, ...)` 的无必要原地覆盖。第二次完整重建成功生成 4159 行 XLSX，因此未达到连续两次修复失败熔断条件。防复发原则：工作簿生成器不得回写其输入 payload；Python 是总表 JSON 的唯一写入方，Node 只读取输入并导出 XLSX/预览。
+
+表格独立验收使用 bundled `@oai/artifact-tool`：导入 XLSX 后确认 6 个工作表、6 个表格；公式错误扫描 0；本院 183 行、183 个唯一官方来源、183 个 `已建画像=是`；CSV 关键范围可独立导入。全部 6 个工作表均已渲染并完成视觉检查，表头、统计值、交替行和内容布局可读。
+
+## 临时工件清理与当前停止点
+
+FULL、总底表、画像和索引全部核验后，精确删除三份已纳入 PR 的 TRIAL 工件：
+
+- `work/广州医科大学附属脑科医院_trial_payload.json`
+- `work/广州医科大学附属脑科医院_trial_doctors.csv`
+- `work/广州医科大学附属脑科医院_trial_report.md`
+
+受保护的总底表 CSV/XLSX、总底表报告、正式 FULL payload/报告、183 份正式画像和索引均未删除。后续只允许把本轮 FULL 工件提交并以非强制 Git Data API 更新原分支，等待 CI 成功后请求 owner 最终画像审计；不得自行合并 PR、关闭 Issue 或领取其他 Issue。
+
+<Handoff_State>
+Target: Issue #31 广州医科大学附属脑科医院最终画像审计
+AgentConstitution: D:\workspace\信息收集整理\Agent.md
+RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
+RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/31
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/32
+Branch: codex/mhrj/issue-31-gzbrain-trial
+Phase: WAITING_OWNER_FINAL_PROFILE_AUDIT
+Completed:
+- owner TRIAL 审计通过后完成 31 页/183 ID 全量追加和逐 ID 写表前门禁
+- 总底表新增 183 行至 4159 行，本院 183 个来源唯一且排班/患者信息零命中
+- 生成 183 份本院画像和 183 链接索引，来源集合一致、断链 0
+- CSV/XLSX/报告和全部工作表完成程序化与视觉验收，TRIAL 临时工件已精确清理
+CurrentFacts:
+- 总底表 13 家医院、4159 位医生；广州医科大学附属脑科医院 183 行、已建画像 183
+- 本院异常 9 行，全部不打重点标签且普通优先级
+Next:
+- 提交并非强制更新 PR #32 原分支，等待 governance-check 成功
+- 在 PR #32 请求 nancywrayg57-jpg 最终画像审计后停止
+Constraints:
+- 不自行合并 PR、关闭 Issue 或领取其他 Issue
+- 仅官方公开来源；四正式字段和画像业务内容的排班、患者案例/可识别信息必须保持 0
+Artifacts:
+- D:\workspace\信息收集整理\work\广州医科大学附属脑科医院_official_doctors_payload.json
+- D:\workspace\信息收集整理\work\广州医科大学附属脑科医院_official_doctors_report.md
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.csv
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
+- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广州医科大学附属脑科医院\_索引.md
+</Handoff_State>

@@ -72,7 +72,6 @@ const payload = JSON.parse(await fs.readFile(args.json, "utf8"));
 payload.rows.forEach((row, index) => {
   row["序号"] = index + 1;
 });
-await fs.writeFile(args.json, JSON.stringify(payload, null, 2), "utf8");
 
 const workbook = Workbook.create();
 const baseHeaders = [
