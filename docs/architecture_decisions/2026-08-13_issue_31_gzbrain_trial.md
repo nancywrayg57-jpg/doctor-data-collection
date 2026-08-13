@@ -97,13 +97,13 @@ python .\work\collect_official_doctors_batch.py `
 
 ## 工件与下一步
 
-TRIAL 临时工件按仓库规则保留在本地并被 `.gitignore` 排除；owner 可从同一工作区审计：
+PR #32 创建后，owner `nancywrayg57-jpg` 明确指出仅提交 ADR、采集器和测试无法独立核验 TRIAL 结论，要求将三份试采原始工件补充到同一 PR。该评论是当前阶段唯一明确返修要求；因此精确强制暂存以下被 `.gitignore` 排除的文件，不放宽全局忽略规则：
 
 - `work/广州医科大学附属脑科医院_trial_payload.json`
 - `work/广州医科大学附属脑科医院_trial_doctors.csv`
 - `work/广州医科大学附属脑科医院_trial_report.md`
 
-提交专用适配器、测试和本 ADR，通过非强制 Git Data API 发布原分支并创建 `Closes #31` 审计 PR 后停止。只有 owner 在关联 PR 中明确给出 `通过` / `有条件通过` 并切换为 `FULL_APPEND_AND_OBSIDIAN`，才可在同一 Issue 和分支继续全量追加；不得自行合并 PR、关闭 Issue、生成正式画像或领取下一 Issue。
+三份工件按仓库 `.gitattributes` 规范为 LF 后，提交对象 SHA-256 分别为：payload `169a831bac8dcbb1fe0ff141fbab9e9f4f5e0a627a51e4ff8e7828038d86e9d0`、CSV `766e0b00f9f236c17699470621735e8e4d922e3082f8506c4237a59c1d25e841`、报告 `59d4b9a6766f08c64fea91a94d18380a363109e2bd7946a3c272d8786626f6b0`。补交后再次请求 owner 审计。只有 owner 在关联 PR 中明确给出 `通过` / `有条件通过` 并切换为 `FULL_APPEND_AND_OBSIDIAN`，才可在同一 Issue 和分支继续全量追加；不得自行合并 PR、关闭 Issue、生成正式画像或领取下一 Issue。
 
 <Handoff_State>
 Target: Issue #31 广州医科大学附属脑科医院 TRIAL 审计
@@ -119,9 +119,9 @@ Completed:
 - 普查 31 页、183 个唯一详情 ID；试采 10 位覆盖 10 科室，0 详情失败、0 排班/患者信息污染
 CurrentFacts:
 - 统一总底表未写入，CSV/XLSX/更新报告哈希与基线一致
-- TRIAL 临时工件只在本地工作区，未纳入 Git
+- 三份 TRIAL 原始工件按 owner 在 PR #32 的明确返修要求纳入同一分支
 Next:
-- 等待 nancywrayg57-jpg 在关联 PR 对 TRIAL 明确审计
+- 补交三份 TRIAL 工件后等待 nancywrayg57-jpg 在 PR #32 重新审计
 - 只有明确通过并下发 FULL_APPEND_AND_OBSIDIAN 后才继续同一 Issue
 Constraints:
 - 仅医院官网公开静态页面；禁止 Cookie、代理、浏览器指纹模拟、挑战/验证码绕过、第三方来源
