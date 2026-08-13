@@ -249,6 +249,7 @@ NY5Y_ADAPTER_ID = "ny5y_official_expert"
 GDZY5413_ADAPTER_ID = "gdzy5413_official_specialist"
 GYKQYY_ADAPTER_ID = "gykqyy_public_doctor_api"
 GYFYYY_ADAPTER_ID = "gyfyyy_static_department_tree"
+GY3Y_ADAPTER_ID = "gy3y_static_team_directory"
 GYKQYY_DIRECTORY_API = "https://www.gykqyy.com/api/article/getZhuanjiaList"
 GYKQYY_DETAIL_API = "https://www.gykqyy.com/api/article/getArticleDetail"
 GENERIC_MAX_PAGES_DEFAULT = 60
@@ -1047,6 +1048,13 @@ def dedicated_adapter_for(entry_url: str) -> str:
         and not parsed.fragment
     ):
         return GYFYYY_ADAPTER_ID
+    if (
+        host.removeprefix("www.") == "gy3y.cn"
+        and path == "/ks/team.html"
+        and not parsed.query
+        and not parsed.fragment
+    ):
+        return GY3Y_ADAPTER_ID
     if "gzzoc.org.cn" in host and "/expert-introduction" in path:
         return "gzzoc_drupal_doctor"
     if "nbkjyy.mil.cn" in host and "/expert" in path:
@@ -2738,6 +2746,406 @@ def parse_gyfyyy_detail(html: str, fallback: dict[str, Any]) -> dict[str, str]:
     }
 
 
+def gy3y_detail_id(url: str | None, department_url: str | None = None) -> str:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "gy3y.cn" or parsed.query or parsed.fragment:
+        return ""
+    match = re.fullmatch(
+        r"(/ks/(?:hp/)?[^/]+/[^/]+/)doctor_(\d+)\.html",
+        parsed.path,
+        flags=re.IGNORECASE,
+    )
+    if not match:
+        return ""
+    if department_url:
+        expected = urlparse(clean_text(department_url))
+        if (
+            comparable_host(expected.geturl()) != "gy3y.cn"
+            or expected.query
+            or expected.fragment
+            or expected.path.lower() != match.group(1).lower()
+        ):
+            return ""
+    return match.group(2)
+
+
+def discover_gy3y_directory(html: str, entry_url: str) -> dict[str, Any]:
+    soup = BeautifulSoup(html, "html.parser")
+    area = soup.select_one("section.areatab.tab")
+    if not area:
+        return {"campuses": [], "categories": [], "relations": []}
+    campus_labels = [
+        clean_text(node.get_text(" ", strip=True))
+        for node in area.select(":scope > div.tabnav > span")
+    ]
+    campus_tabs = area.select(":scope > div.tabcontent > div.tabsingle")
+    if campus_labels != ["荔湾院区", "黄埔院区"] or len(campus_tabs) != 2:
+        return {"campuses": [], "categories": [], "relations": []}
+
+    categories: list[dict[str, Any]] = []
+    relations: list[dict[str, str]] = []
+    campuses: list[dict[str, Any]] = []
+    for campus, campus_tab in zip(campus_labels, campus_tabs, strict=True):
+        campus_relation_start = len(relations)
+        campus_category_start = len(categories)
+        for section in campus_tab.select("section.ksdoclist"):
+            title_node = section.find_previous_sibling("div", class_="title")
+            system_name = clean_text(title_node.get_text(" ", strip=True)) if title_node else ""
+            for block in section.find_all("dl", recursive=False):
+                department_node = block.select_one(":scope > dt")
+                department_name = (
+                    clean_text(department_node.get_text(" ", strip=True)) if department_node else ""
+                )
+                if not department_name:
+                    continue
+                scoped_department = f"{campus}{department_name}"
+                relation_start = len(relations)
+                seen_ids: set[str] = set()
+                for anchor in block.select(":scope > dd > a[href]"):
+                    source_link = urljoin(entry_url, str(anchor.get("href") or ""))
+                    doctor_id = gy3y_detail_id(source_link)
+                    if not doctor_id or doctor_id in seen_ids:
+                        continue
+                    seen_ids.add(doctor_id)
+                    department_url = urljoin(source_link, "./")
+                    relations.append(
+                        {
+                            "id": doctor_id,
+                            "name": clean_text(anchor.get_text(" ", strip=True)),
+                            "campus": campus,
+                            "system": system_name,
+                            "department": scoped_department,
+                            "department_url": department_url,
+                            "source_link": source_link,
+                            "list_title": clean_text(anchor.get_text(" ", strip=True)),
+                        }
+                    )
+                categories.append(
+                    {
+                        "name": scoped_department,
+                        "campus": campus,
+                        "system": system_name,
+                        "department": department_name,
+                        "entry_url": entry_url,
+                        "doctor_relation_count": len(relations) - relation_start,
+                    }
+                )
+        campus_relations = relations[campus_relation_start:]
+        campuses.append(
+            {
+                "name": campus,
+                "department_count": len(categories) - campus_category_start,
+                "doctor_relation_count": len(campus_relations),
+                "unique_detail_count": len({item["id"] for item in campus_relations}),
+            }
+        )
+    return {"campuses": campuses, "categories": categories, "relations": relations}
+
+
+def select_gy3y_trial_doctors(
+    doctors: list[dict[str, Any]],
+    max_doctors: int | None,
+) -> list[dict[str, Any]]:
+    if not max_doctors:
+        return doctors[:]
+    huangpu_only = next(
+        (
+            item
+            for item in doctors
+            if item.get("campuses") == ["黄埔院区"]
+            or (
+                not item.get("campuses")
+                and any("/ks/hp/" in str(link) for link in item.get("source_links", []))
+            )
+        ),
+        None,
+    )
+    selected: list[dict[str, Any]] = [huangpu_only] if huangpu_only else []
+    remaining = [item for item in doctors if item is not huangpu_only]
+    selected.extend(
+        select_gyfyyy_trial_doctors(
+            remaining,
+            min(max_doctors - len(selected), len(remaining)),
+        )
+    )
+    selected_ids = {str(item["id"]) for item in selected}
+    return selected + [item for item in doctors if str(item["id"]) not in selected_ids]
+
+
+def collect_gy3y(target: HospitalTarget, today: str, max_doctors: int | None = None) -> dict[str, Any]:
+    session = create_official_session()
+    entry_status, entry_html, entry_error = fetch(session, target.entry_url)
+    if entry_status != 200:
+        raise RuntimeError(f"入口页读取失败：{entry_error}")
+    directory = discover_gy3y_directory(entry_html, target.entry_url)
+    campuses = directory["campuses"]
+    categories = directory["categories"]
+    relations = directory["relations"]
+    if len(campuses) != 2 or not categories or not relations:
+        raise RuntimeError("官网静态总目录未发现完整的荔湾院区与黄埔院区科室关系。")
+
+    by_id: dict[str, dict[str, Any]] = {}
+    for relation in relations:
+        item = by_id.setdefault(
+            relation["id"],
+            {
+                "id": relation["id"],
+                "name": relation["name"],
+                "departments": [],
+                "campuses": [],
+                "department_urls": [],
+                "source_links": [],
+                "list_titles": [],
+            },
+        )
+        for field, value in (
+            ("departments", relation["department"]),
+            ("campuses", relation["campus"]),
+            ("department_urls", relation["department_url"]),
+            ("source_links", relation["source_link"]),
+            ("list_titles", relation["list_title"]),
+        ):
+            if value and value not in item[field]:
+                item[field].append(value)
+
+    all_doctors = sorted(by_id.values(), key=lambda item: int(str(item["id"])))
+    names_to_ids: dict[str, list[str]] = {}
+    for item in all_doctors:
+        name = clean_text(str(item.get("name") or ""))
+        if name:
+            names_to_ids.setdefault(name, []).append(str(item["id"]))
+    same_name_groups = {
+        name: sorted(set(ids), key=int)
+        for name, ids in names_to_ids.items()
+        if len(set(ids)) > 1
+    }
+
+    trial_candidates = all_doctors
+    if max_doctors:
+        trial_candidates = []
+        seen_names: set[str] = set()
+        for item in all_doctors:
+            name = clean_text(str(item.get("name") or ""))
+            if name and name in seen_names:
+                continue
+            if name:
+                seen_names.add(name)
+            trial_candidates.append(item)
+    selected_doctors = select_gy3y_trial_doctors(trial_candidates, max_doctors)
+
+    existing_links = collect_existing_profile_links()
+    rows: list[dict[str, Any]] = []
+    excluded_candidates: list[dict[str, str]] = []
+    detail_errors: list[dict[str, str]] = []
+    detail_reconciliation: list[dict[str, Any]] = []
+    for item in selected_doctors:
+        if max_doctors and len(rows) >= max_doctors:
+            break
+        source_link = item["source_links"][0]
+        detail_status, detail_html, detail_error = fetch(session, source_link)
+        if detail_status != 200:
+            detail_errors.append({"source_link": source_link, "error": detail_error})
+            detail: dict[str, str] = {}
+        else:
+            detail = parse_gyfyyy_detail(
+                detail_html,
+                {
+                    "name": item.get("name", ""),
+                    "list_title": item["list_titles"][0] if item["list_titles"] else "",
+                },
+            )
+        name = clean_text(str(detail.get("name") or item.get("name") or ""))
+        title_identity = clean_text(str(detail.get("title") or ""))
+        if gyfyyy_nursing_only_identity(title_identity):
+            excluded_candidates.append(
+                {
+                    "entry_url": target.entry_url,
+                    "list_title": title_identity,
+                    "source_link": source_link,
+                    "reason": "官网详情仅标注护理身份，排除医生画像采集范围",
+                }
+            )
+            continue
+        department = "、".join(item["departments"])
+        specialty = clean_text(str(detail.get("specialty") or ""))
+        profile_text = clean_text(str(detail.get("profile_text") or ""))
+        combined_text = "\n".join([target.hospital, department, title_identity, specialty, profile_text])
+        title_hits = extract_terms(title_identity, TITLE_TERMS)
+        groups_found, tags = group_tags(combined_text)
+        warnings: list[str] = []
+        if detail_status != 200:
+            warnings.append("详情页读取失败")
+        if not name or not looks_like_person_name(name):
+            warnings.append("非医生页面或姓名异常")
+        if not department:
+            warnings.append("科室需人工复核")
+        if not title_hits:
+            warnings.append("职称/身份需人工复核")
+        if not specialty and not profile_text:
+            warnings.append("详情正文为空或未识别")
+        if warnings:
+            groups_found = []
+            tags = []
+        priority = "普通"
+        if not warnings and (any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups_found):
+            priority = "高"
+        elif not warnings and any(term != "医师" for term in title_hits):
+            priority = "中"
+        rows.append(
+            {
+                "序号": len(rows) + 1,
+                "医院": target.hospital,
+                "姓名": name,
+                "科室_分类页": department,
+                "科室_列表卡片": department,
+                "职称_关键词": "、".join(title_hits),
+                "职称身份原文": clip(title_identity, 500),
+                "重点优先级": priority,
+                "重点关注范围": "、".join(groups_found),
+                "重点疾病标签": "、".join(tags),
+                "擅长诊疗方向摘录": specialty,
+                "亮眼经历线索": extract_clean_highlights(profile_text),
+                "列表简介": "",
+                "详情正文摘录": profile_text,
+                "来源类型": "医院官网",
+                "来源链接": source_link,
+                "采集入口": target.entry_url,
+                "采集方式": "官网静态两院区总目录+同院区科室路径静态医生详情页",
+                "采集日期": today,
+                "详情页状态": "200" if detail_status == 200 else "失败",
+                "已建画像": "是" if canonical_url(source_link) in existing_links else "否",
+                "异常提示": "；".join(warnings),
+                "复核状态": "待人工复核",
+            }
+        )
+        detail_reconciliation.append(
+            {
+                "detail_id": item["id"],
+                "name": name,
+                "resolution": "按唯一 doctor ID 合并跨院区/跨科室归属",
+                "relation_count": len(item["source_links"]),
+                "campuses": item["campuses"],
+                "departments": item["departments"],
+                "primary_source_link": source_link,
+                "merged_source_links": item["source_links"][1:],
+            }
+        )
+
+    rows, identity_reconciliation = merge_gyfyyy_identity_rows(rows)
+    for new_index, row in enumerate(rows, start=1):
+        row["序号"] = new_index
+    category_counter = Counter(
+        department
+        for row in rows
+        for department in clean_text(str(row["科室_分类页"])).split("、")
+        if department
+    )
+    priority_counter = Counter(row["重点优先级"] for row in rows)
+    group_counter = Counter(
+        group for row in rows for group in str(row["重点关注范围"]).split("、") if group
+    )
+    warning_counter = Counter(
+        warning for row in rows for warning in str(row["异常提示"]).split("；") if warning
+    )
+    sampled_departments = sorted(
+        {
+            department
+            for row in rows
+            for department in clean_text(str(row["科室_分类页"])).split("、")
+            if department
+        }
+    )
+    multi_relation = [item for item in all_doctors if len(item["source_links"]) > 1]
+    cross_campus = [item for item in multi_relation if len(item["campuses"]) > 1]
+    entry_reconnaissance = [
+        {
+            "category_name": campus["name"],
+            "entry_url": target.entry_url,
+            "page_nature": "静态全院区医生总目录",
+            "list_page_count": 1,
+            "raw_detail_relation_count": campus["doctor_relation_count"],
+            "unique_detail_count": campus["unique_detail_count"],
+            "out_of_scope_detail_count": "需逐详情核验",
+            "affiliation": target.hospital,
+            "independent_entity_check": "owner 已裁决两院区均属同一法人；官网同域静态目录",
+        }
+        for campus in campuses
+    ]
+    return {
+        "meta": {
+            "city": target.city,
+            "hospital": target.hospital,
+            "homepage": target.homepage,
+            "entry_url": target.entry_url,
+            "entry_url_source": "GitHub Issue #27（入口台账主表与 owner 人工复核裁决一致）",
+            "ledger_entry_url": target.ledger_entry_url or target.entry_url,
+            "adapter_id": target.adapter_id,
+            "collected_at": today,
+            "category_count": len(categories),
+            "raw_card_rows": len(relations),
+            "candidate_membership_count": len(relations),
+            "unique_candidate_count": len(all_doctors),
+            "sample_entry_coverage_count": len(sampled_departments),
+            "sample_entry_categories": sampled_departments,
+            "unique_doctor_count": len(rows),
+            "census_unique_detail_count": len(all_doctors),
+            "census_department_count": len(categories),
+            "census_nonempty_department_count": sum(
+                1 for item in categories if int(item["doctor_relation_count"]) > 0
+            ),
+            "census_empty_department_count": sum(
+                1 for item in categories if int(item["doctor_relation_count"]) == 0
+            ),
+            "census_group_count": len(campuses),
+            "census_same_name_group_count": len(same_name_groups),
+            "census_same_name_groups": same_name_groups,
+            "gy3y_final_identity_count": len(rows),
+            "excluded_non_doctor_count": len(excluded_candidates),
+            "census_nursing_identity_status": (
+                "静态总目录只展示姓名，不展示职称身份；TRIAL 仅核验 10 位详情，"
+                f"其中纯护理身份排除 {len(excluded_candidates)} 位"
+            ),
+            "pagination_count": 0,
+            "pagination_method": "单个 team.html 一次性列出两院区全部科室关系，无下一页或加载更多",
+            "category_error_count": 0,
+            "detail_error_count": len(detail_errors),
+            "cross_entry_duplicate_count": len(relations) - len(all_doctors),
+            "gy3y_multi_relation_identity_count": len(multi_relation),
+            "gy3y_cross_campus_identity_count": len(cross_campus),
+            "campus_relation_counts": {
+                campus["name"]: campus["doctor_relation_count"] for campus in campuses
+            },
+            "campus_unique_detail_counts": {
+                campus["name"]: campus["unique_detail_count"] for campus in campuses
+            },
+            "existing_profile_count": sum(1 for row in rows if row["已建画像"] == "是"),
+            "ledger_review": target.review,
+            "ledger_difficulty": target.difficulty,
+            "entry_candidate_counts": {target.entry_url: len(relations)},
+        },
+        "categories": categories,
+        "entry_reconnaissance": entry_reconnaissance,
+        "excluded_candidates": excluded_candidates,
+        "cross_entry_duplicates": [
+            {
+                "name": clean_text(str(item.get("name") or f"doctor_{item['id']}")),
+                "source_link": item["source_links"][0],
+                "entry_urls": item["departments"],
+            }
+            for item in multi_relation
+        ],
+        "gy3y_detail_reconciliation": detail_reconciliation,
+        "gy3y_identity_reconciliation": identity_reconciliation,
+        "category_errors": [],
+        "detail_errors": detail_errors,
+        "category_counts": category_counter.most_common(),
+        "priority_counts": dict(priority_counter),
+        "group_counts": dict(group_counter),
+        "warning_counts": dict(warning_counter),
+        "rows": rows,
+    }
+
+
 def collect_gyfyyy(target: HospitalTarget, today: str, max_doctors: int | None = None) -> dict[str, Any]:
     session = create_official_session()
     entry_status, entry_html, entry_error = fetch(session, target.entry_url)
@@ -3886,7 +4294,10 @@ def merge_gyfyyy_identity_rows(
                         if len(cluster) > 1
                         else "唯一身份"
                     ),
-                    "detail_ids": [gyfyyy_detail_id(source) for source in source_links],
+                    "detail_ids": [
+                        gyfyyy_detail_id(source) or gy3y_detail_id(source)
+                        for source in source_links
+                    ],
                     "primary_source_link": primary_source,
                     "merged_source_links": [
                         source for source in source_links if source != primary_source
@@ -4931,6 +5342,78 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         if int(item.get("relation_count") or 0) > 1
         or item.get("resolution") == "同名待甄别"
     ) or "| 无 | 无 | 无 | 0 | 无 | 无 | 无 |"
+    gy3y_reconciliation_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('name', ''))} | "
+            f"{','.join(str(value) for value in item.get('detail_ids', []))} | "
+            f"{item.get('resolution', '')} | {item.get('relation_count', 0)} | "
+            f"{'、'.join(item.get('departments', [])) or '无'} | "
+            f"{item.get('primary_source_link', '')} | "
+            f"{'；'.join(item.get('merged_source_links', [])) or '无'} |"
+        )
+        for item in payload.get("gy3y_identity_reconciliation", [])
+        if int(item.get("relation_count") or 0) > 1
+        or item.get("resolution") == "同名待甄别"
+    ) or "| 无 | 无 | 无 | 0 | 无 | 无 | 无 |"
+    campus_relation_summary = "；".join(
+        f"{name} {count} 条"
+        for name, count in meta.get("campus_relation_counts", {}).items()
+    ) or "无"
+    adapter_specific_sections: list[str] = []
+    if payload.get("gdzy5413_identity_reconciliation"):
+        adapter_specific_sections.append(
+            f"""## 广东省第二中医院同名归并对账
+
+- 详情关系：{meta.get('gdzy5413_detail_relation_count', meta.get('gdzy5413_trial2_sample_relation_count', 0))}
+- 最终身份：{meta.get('gdzy5413_final_identity_count', meta.get('gdzy5413_trial2_sample_identity_count', 0))}
+- 白云院区样本：{meta.get('gdzy5413_trial2_baiyun_sample_count', 0)}
+- 多链接同一人归并样本：{meta.get('gdzy5413_trial2_merged_identity_count', 0)}
+
+| 姓名 | 裁决 | 详情关系 | 合并科室 | 主详情 | 其余详情 |
+|---|---|---:|---|---|---|
+{identity_reconciliation_lines}"""
+        )
+    if payload.get("gykqyy_identity_reconciliation"):
+        adapter_specific_sections.append(
+            f"""## 广医口腔逐 ID 归并/排除对账
+
+- 目录详情 ID：{meta.get('census_unique_detail_count', meta.get('unique_candidate_count', 0))}
+- 有姓名详情 ID / 正式行：{meta.get('census_named_detail_count', 0)} / {meta.get('gykqyy_final_row_count', 0)}
+- 空姓名详情 ID：{meta.get('census_blank_name_detail_count', 0)}
+- 同名不同 ID 分行：{meta.get('gykqyy_same_name_separate_row_count', 0)}
+
+| 详情 ID | 姓名 | 处置 | 科室 | 来源链接 | 理由 |
+|---|---|---|---|---|---|
+{gykqyy_reconciliation_lines}"""
+        )
+    if payload.get("gyfyyy_identity_reconciliation"):
+        adapter_specific_sections.append(
+            f"""## 广医一院同名详情身份聚类对账
+
+- 合规详情 ID：{len(payload.get('gyfyyy_detail_reconciliation', []))}
+- 最终身份：{meta.get('gyfyyy_final_identity_count', 0)}
+- 同一人归并组：{meta.get('gyfyyy_same_identity_merge_group_count', 0)}
+- 实质不同同名身份：{meta.get('gyfyyy_distinct_same_name_group_count', 0)} 组 / {meta.get('gyfyyy_distinct_same_name_row_count', 0)} 行
+
+| 姓名 | 详情 ID | 裁决 | 详情关系 | 合并科室 | 主详情 | 其余详情 |
+|---|---|---|---:|---|---|---|
+{gyfyyy_reconciliation_lines}"""
+        )
+    if payload.get("gy3y_detail_reconciliation"):
+        adapter_specific_sections.append(
+            f"""## 广医三院两院区详情身份对账
+
+- 静态目录详情 ID：{meta.get('census_unique_detail_count', 0)}
+- 本轮已读取详情 ID：{len(payload.get('gy3y_detail_reconciliation', []))}
+- 多院区/多科室详情 ID：{meta.get('gy3y_multi_relation_identity_count', 0)}
+- 跨院区详情 ID：{meta.get('gy3y_cross_campus_identity_count', 0)}
+- 护理身份核验：{meta.get('census_nursing_identity_status', '未单独记录')}
+
+| 姓名 | 详情 ID | 裁决 | 详情关系 | 合并院区科室 | 主详情 | 其余详情 |
+|---|---|---|---:|---|---|---|
+{gy3y_reconciliation_lines}"""
+        )
+    adapter_specific_text = "\n\n".join(adapter_specific_sections)
 
     report = f"""---
 类型: {report_label}
@@ -4982,6 +5465,9 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 - 空姓名详情 ID：{meta.get('census_blank_name_detail_count', 0)} 个
 - 去重后的非空姓名值：{meta.get('census_unique_nonblank_name_count', meta['unique_doctor_count'])} 个
 - 同名不同详情 ID：{meta.get('census_same_name_group_count', 0)} 组
+- 非空/空科室块：{meta.get('census_nonempty_department_count', meta.get('census_department_count', 0))} / {meta.get('census_empty_department_count', 0)}
+- 两院区关系：{campus_relation_summary}
+- 跨院区详情 ID：{meta.get('gy3y_cross_campus_identity_count', 0)} 个
 
 | 同名 | 详情 ID |
 |---|---|
@@ -4998,38 +5484,7 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 |---|---|---|
 {duplicate_lines}
 
-## 广东省第二中医院同名归并对账
-
-- 详情关系：{meta.get('gdzy5413_detail_relation_count', meta.get('gdzy5413_trial2_sample_relation_count', 0))}
-- 最终身份：{meta.get('gdzy5413_final_identity_count', meta.get('gdzy5413_trial2_sample_identity_count', 0))}
-- 白云院区样本：{meta.get('gdzy5413_trial2_baiyun_sample_count', 0)}
-- 多链接同一人归并样本：{meta.get('gdzy5413_trial2_merged_identity_count', 0)}
-
-| 姓名 | 裁决 | 详情关系 | 合并科室 | 主详情 | 其余详情 |
-|---|---|---:|---|---|---|
-{identity_reconciliation_lines}
-
-## 广医口腔逐 ID 归并/排除对账
-
-- 目录详情 ID：{meta.get('census_unique_detail_count', meta.get('unique_candidate_count', 0))}
-- 有姓名详情 ID / 正式行：{meta.get('census_named_detail_count', 0)} / {meta.get('gykqyy_final_row_count', 0)}
-- 空姓名详情 ID：{meta.get('census_blank_name_detail_count', 0)}
-- 同名不同 ID 分行：{meta.get('gykqyy_same_name_separate_row_count', 0)}
-
-| 详情 ID | 姓名 | 处置 | 科室 | 来源链接 | 理由 |
-|---|---|---|---|---|---|
-{gykqyy_reconciliation_lines}
-
-## 广医一院同名详情身份聚类对账
-
-- 合规详情 ID：{len(payload.get('gyfyyy_detail_reconciliation', []))}
-- 最终身份：{meta.get('gyfyyy_final_identity_count', 0)}
-- 同一人归并组：{meta.get('gyfyyy_same_identity_merge_group_count', 0)}
-- 实质不同同名身份：{meta.get('gyfyyy_distinct_same_name_group_count', 0)} 组 / {meta.get('gyfyyy_distinct_same_name_row_count', 0)} 行
-
-| 姓名 | 详情 ID | 裁决 | 详情关系 | 合并科室 | 主详情 | 其余详情 |
-|---|---|---|---:|---|---|---|
-{gyfyyy_reconciliation_lines}
+{adapter_specific_text}
 
 ## 已排除或范围外候选
 
@@ -5342,7 +5797,14 @@ def main() -> None:
 
     if (
         target.adapter_id
-        in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID, GYFYYY_ADAPTER_ID}
+        in {
+            GENERIC_ADAPTER_ID,
+            GDSKIN_ADAPTER_ID,
+            NY5Y_ADAPTER_ID,
+            GDZY5413_ADAPTER_ID,
+            GYFYYY_ADAPTER_ID,
+            GY3Y_ADAPTER_ID,
+        }
         and not args.trial_only
         and not args.single_output
         and not args.allow_generic_append
@@ -5361,6 +5823,8 @@ def main() -> None:
         payload = collect_gykqyy(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id == GYFYYY_ADAPTER_ID:
         payload = collect_gyfyyy(target, args.today, max_doctors=max_doctors)
+    elif target.adapter_id == GY3Y_ADAPTER_ID:
+        payload = collect_gy3y(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID}:
         payload = collect_generic(
             target,
