@@ -21,6 +21,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     collect_gy3y,
     collect_gzbrain,
     collect_gzszyy,
+    collect_gzsys,
     collect_gykqyy,
     collect_generic,
     confirmed_a_targets,
@@ -34,6 +35,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     discover_gzszyy_department_filters,
     discover_gzszyy_department_pages,
     discover_gzszyy_unfiltered_pages,
+    discover_gzsys_default_pages,
     effective_entry_urls,
     expand_gdzy5413_full_detail_items,
     extract_clean_highlights,
@@ -49,10 +51,13 @@ from collect_official_doctors_batch import (  # noqa: E402
     gy3y_detail_id,
     gzbrain_detail_id,
     gzszyy_detail_id,
+    gzsys_detail_id,
     parse_gzbrain_detail,
     parse_gzbrain_list_page,
     parse_gzszyy_department_page,
     parse_gzszyy_detail,
+    parse_gzsys_detail,
+    parse_gzsys_list_page,
     parse_gyfyyy_detail,
     strip_gyfyyy_schedule_text,
     looks_like_person_name,
@@ -72,6 +77,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     select_gyfyyy_trial_doctors,
     select_gzbrain_trial_doctors,
     select_gzszyy_trial_doctors,
+    select_gzsys_trial_doctors,
     select_gykqyy_trial_doctors,
     sync_profile_flags,
     validate_gykqyy_full_append,
@@ -79,6 +85,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     validate_gy3y_full_append,
     validate_gzbrain_full_append,
     validate_gzszyy_full_append,
+    validate_gzsys_trial,
     select_gdzy5413_trial2_items,
     validate_gdskin_full_append,
     validate_gdzy5413_full_append,
@@ -1010,6 +1017,127 @@ class GzbrainStaticExpertDirectoryTests(unittest.TestCase):
         self.assertEqual(payload["meta"]["schedule_field_ingested_count"], 0)
         for row in payload["rows"]:
             self.assertNotRegex(row["详情正文摘录"], r"开诊|出诊|排班")
+
+
+class GzsysDrupalDoctorCardsTests(unittest.TestCase):
+    ENTRY = "https://www.gzsys.org.cn/doctor/592/search"
+
+    def test_adapter_requires_exact_official_entry(self) -> None:
+        self.assertEqual(
+            dedicated_adapter_for(self.ENTRY),
+            "gzsys_drupal_doctor_cards",
+        )
+        self.assertEqual(dedicated_adapter_for(self.ENTRY + "?page=1"), "")
+        self.assertEqual(dedicated_adapter_for("https://www.gzsys.org.cn/node/14894"), "")
+
+    def test_node_and_doctor_aliases_share_numeric_identity(self) -> None:
+        self.assertEqual(gzsys_detail_id("https://www.gzsys.org.cn/node/14894"), "14894")
+        self.assertEqual(gzsys_detail_id("https://www.gzsys.org.cn/doctor/14894"), "14894")
+        self.assertEqual(gzsys_detail_id("https://www.gzsys.org.cn/node/not-id"), "")
+
+    def test_declared_default_all_pages_are_the_only_pages_constructed(self) -> None:
+        html = """
+        <a href="?department_target_id=All&talent_project=All&tutor_qualification=All&doctor_title=All&page=0">1</a>
+        <a href="?department_target_id=All&talent_project=All&tutor_qualification=All&doctor_title=All&page=2">3</a>
+        <a href="?department_target_id=296&talent_project=All&tutor_qualification=All&doctor_title=All&page=9">filtered</a>
+        """
+        pages = discover_gzsys_default_pages(html, self.ENTRY)
+        self.assertEqual(len(pages), 3)
+        self.assertTrue(pages[0].endswith("page=0"))
+        self.assertTrue(pages[2].endswith("page=2"))
+        self.assertNotIn("296", " ".join(pages))
+
+    def test_only_strict_card_dom_authorizes_a_doctor(self) -> None:
+        html = """
+        <a href="/node/999">unrelated department node</a>
+        <div class="card-4-0">
+          <div class="card-title"><a href="/node/14894">宋尔卫</a></div>
+          <div class="card-subtitle-content">教授, 主任医师</div>
+          <div class="card-tag"><a href="/node/15187">乳腺外科</a></div>
+        </div>
+        <div class="card-4-0">
+          <div class="card-title"><a href="/doctor/14811">李医生</a></div>
+          <div class="card-subtitle-content">副主任医师</div>
+          <div class="card-tag">心血管内科</div>
+        </div>
+        """
+        rows = parse_gzsys_list_page(html, self.ENTRY)
+        self.assertEqual([row["id"] for row in rows], ["14894", "14811"])
+        self.assertEqual(rows[0]["department"], "乳腺外科")
+
+    def test_detail_excludes_schedule_rank_patient_text_and_private_use(self) -> None:
+        html = """
+        <div class="other-2">
+          <div class="other-left-title">宋尔卫</div>
+          <div class="other-left-text"><span>职称：</span>教授, 主任医师</div>
+          <div class="other-left-text"><span>科室：</span>乳腺外科</div>
+          <div class="desc line-6">
+            <p>擅长：乳腺癌诊疗。\ue001</p>
+            <p>从事乳腺外科临床工作。</p>
+            <p>好医生榜第一名。</p>
+            <p>患者评价：非常好。</p>
+          </div>
+        </div>
+        <div class="calendar-3-1">周一上午出诊</div>
+        """
+        detail = parse_gzsys_detail(html, {})
+        self.assertEqual(detail["name"], "宋尔卫")
+        self.assertEqual(detail["department"], "乳腺外科")
+        self.assertEqual(detail["specialty"], "乳腺癌诊疗。")
+        self.assertNotIn("好医生榜", detail["profile_text"])
+        self.assertNotIn("患者评价", detail["profile_text"])
+        self.assertNotRegex(detail["profile_text"], r"[\ue000-\uf8ff]")
+        self.assertEqual(detail["schedule_exclusion_count"], 1)
+        self.assertEqual(detail["forbidden_segment_count"], 2)
+
+    def test_department_values_are_merged_with_chinese_separator(self) -> None:
+        html = """
+        <div class="other-2">
+          <div class="other-left-title">姚和瑞</div>
+          <div class="other-left-text"><span>职称：</span>主任医师</div>
+          <div class="other-left-text"><span>科室：</span>乳腺内科, 肿瘤内科</div>
+          <div class="desc line-6"><p>从事肿瘤内科临床工作。</p></div>
+        </div>
+        """
+        detail = parse_gzsys_detail(html, {})
+        self.assertEqual(detail["department"], "乳腺内科、肿瘤内科")
+
+    def test_trial_selection_is_deterministic_round_robin_by_department(self) -> None:
+        doctors = [
+            {"id": str(index), "department": department}
+            for index, department in enumerate(["A", "A", "B", "B", "C", "C"], start=1)
+        ]
+        selected = select_gzsys_trial_doctors(doctors, 5)
+        self.assertEqual([doctor["id"] for doctor in selected], ["1", "3", "5", "2", "4"])
+
+    def test_trial_gate_rejects_scope_drift_before_writing_artifacts(self) -> None:
+        payload = {
+            "meta": {
+                "category_count": 22,
+                "raw_card_rows": 664,
+                "candidate_membership_count": 664,
+                "unique_candidate_count": 664,
+                "census_unique_detail_count": 664,
+                "census_named_detail_count": 664,
+                "census_blank_name_detail_count": 0,
+                "census_nonempty_department_count": 664,
+                "census_empty_department_count": 0,
+                "census_same_name_group_count": 0,
+                "cross_entry_duplicate_count": 0,
+                "excluded_non_doctor_count": 6,
+                "eligible_candidate_count": 658,
+                "category_error_count": 0,
+                "detail_error_count": 0,
+                "schedule_field_ingested_count": 0,
+                "private_use_character_count": 0,
+                "unique_doctor_count": 0,
+                "sample_entry_coverage_count": 0,
+            },
+            "rows": [],
+            "excluded_candidates": [],
+        }
+        with self.assertRaisesRegex(RuntimeError, "category_count 应为 23"):
+            validate_gzsys_trial(payload, expected_rows=10)
 
 
 class GzszyyDepartmentExpertDirectoryTests(unittest.TestCase):

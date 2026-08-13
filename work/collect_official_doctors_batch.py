@@ -254,6 +254,7 @@ GYFYYY_ADAPTER_ID = "gyfyyy_static_department_tree"
 GY3Y_ADAPTER_ID = "gy3y_static_team_directory"
 GZBRAIN_ADAPTER_ID = "gzbrain_static_expert_directory"
 GZSZYY_ADAPTER_ID = "gzszyy_department_expert_directory"
+GZSYS_ADAPTER_ID = "gzsys_drupal_doctor_cards"
 GZSZYY_CARE_SITE_PATHS = {
     "/district1_zzlyq/": "珠玑院区",
     "/district1_thxyq/": "天河新院区",
@@ -1119,6 +1120,13 @@ def dedicated_adapter_for(entry_url: str) -> str:
         and not parsed.fragment
     ):
         return GZSZYY_ADAPTER_ID
+    if (
+        host.removeprefix("www.") == "gzsys.org.cn"
+        and path.rstrip("/") == "/doctor/592/search"
+        and not parsed.query
+        and not parsed.fragment
+    ):
+        return GZSYS_ADAPTER_ID
     if "gzzoc.org.cn" in host and "/expert-introduction" in path:
         return "gzzoc_drupal_doctor"
     if "nbkjyy.mil.cn" in host and "/expert" in path:
@@ -3261,6 +3269,484 @@ def collect_gzbrain(
         ],
         "excluded_candidates": excluded_candidates,
         "gzbrain_detail_reconciliation": detail_reconciliation,
+        "cross_entry_duplicates": [],
+        "category_errors": page_errors,
+        "detail_errors": detail_errors,
+        "category_counts": category_counter.most_common(),
+        "priority_counts": dict(priority_counter),
+        "group_counts": dict(group_counter),
+        "warning_counts": dict(warning_counter),
+        "rows": rows,
+    }
+
+
+def gzsys_detail_id(url: str | None) -> str:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "gzsys.org.cn" or parsed.query or parsed.fragment:
+        return ""
+    match = re.fullmatch(r"/(?:node|doctor)/(\d+)/?", parsed.path, flags=re.IGNORECASE)
+    return match.group(1) if match else ""
+
+
+def discover_gzsys_default_pages(html: str, entry_url: str) -> list[str]:
+    soup = BeautifulSoup(html, "html.parser")
+    declared_pages: set[int] = {0}
+    expected = {
+        "department_target_id": "All",
+        "talent_project": "All",
+        "tutor_qualification": "All",
+        "doctor_title": "All",
+    }
+    for anchor in soup.select('a[href*="page="]'):
+        absolute = urljoin(entry_url, str(anchor.get("href") or ""))
+        parsed = urlparse(absolute)
+        query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+        if (
+            comparable_host(absolute) == "gzsys.org.cn"
+            and parsed.path.rstrip("/") == "/doctor/592/search"
+            and all(query.get(name) == value for name, value in expected.items())
+            and query.get("page", "").isdigit()
+        ):
+            declared_pages.add(int(query["page"]))
+    if len(declared_pages) < 2:
+        return []
+    return [
+        f"{entry_url}?{urlencode({**expected, 'page': page})}"
+        for page in range(max(declared_pages) + 1)
+    ]
+
+
+def parse_gzsys_filter_dictionary(html: str) -> dict[str, list[dict[str, str]]]:
+    soup = BeautifulSoup(html, "html.parser")
+    result: dict[str, list[dict[str, str]]] = {}
+    for name in (
+        "department_target_id",
+        "talent_project",
+        "tutor_qualification",
+        "doctor_title",
+    ):
+        select = soup.select_one(f'select[name="{name}"]')
+        result[name] = [
+            {
+                "value": clean_text(str(option.get("value") or "")),
+                "label": clean_text(option.get_text(" ", strip=True)),
+            }
+            for option in (select.select("option") if select else [])
+            if clean_text(str(option.get("value") or "")) not in {"", "All"}
+        ]
+    return result
+
+
+def parse_gzsys_list_page(html: str, page_url: str) -> list[dict[str, str]]:
+    soup = BeautifulSoup(html, "html.parser")
+    rows: list[dict[str, str]] = []
+    for card in soup.select(".card-4-0"):
+        name_link = card.select_one(".card-title a[href]")
+        source_link = urljoin(page_url, str(name_link.get("href") or "")) if name_link else ""
+        detail_id = gzsys_detail_id(source_link)
+        if not detail_id:
+            continue
+        title_node = card.select_one(".card-subtitle-content")
+        departments = [
+            clean_text(node.get_text(" ", strip=True))
+            for node in card.select(".card-tag")
+            if clean_text(node.get_text(" ", strip=True))
+        ]
+        rows.append(
+            {
+                "id": detail_id,
+                "name": clean_text(name_link.get_text(" ", strip=True)),
+                "title": clean_text(title_node.get_text(" ", strip=True) if title_node else ""),
+                "department": normalize_gzsys_department("、".join(dict.fromkeys(departments))),
+                "source_link": source_link,
+                "page_url": page_url,
+            }
+        )
+    return rows
+
+
+def merge_gzsys_card_relations(relations: list[dict[str, str]]) -> list[dict[str, str]]:
+    merged: dict[str, dict[str, str]] = {}
+    for relation in relations:
+        detail_id = relation["id"]
+        if detail_id not in merged:
+            merged[detail_id] = {**relation, "relation_count": "1"}
+            continue
+        current = merged[detail_id]
+        current["relation_count"] = str(int(current["relation_count"]) + 1)
+        for field in ("name", "title", "department"):
+            if not current[field] and relation[field]:
+                current[field] = relation[field]
+    return list(merged.values())
+
+
+def strip_gzsys_forbidden_text(value: str | None) -> str:
+    return clean_text(re.sub(r"[\ue000-\uf8ff]", " ", value or ""))
+
+
+def normalize_gzsys_department(value: str | None) -> str:
+    parts = [
+        clean_text(part)
+        for part in re.split(r"\s*[,，;/；、]+\s*", strip_gzsys_forbidden_text(value))
+        if clean_text(part)
+    ]
+    return "、".join(dict.fromkeys(parts))
+
+
+def parse_gzsys_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
+    soup = BeautifulSoup(html, "html.parser")
+    container = soup.select_one(".other-2")
+    schedule_count = len(soup.select(".calendar-3-1"))
+    if not container:
+        return {**fallback, "specialty": "", "profile_text": "", "schedule_exclusion_count": schedule_count, "forbidden_segment_count": 0}
+    name_node = container.select_one(".other-left-title")
+    labeled: dict[str, str] = {}
+    for node in container.select(".other-left-text"):
+        label_node = node.select_one("span")
+        label = clean_text(label_node.get_text(" ", strip=True) if label_node else "")
+        clone = BeautifulSoup(str(node), "html.parser")
+        for child in clone.select("span"):
+            child.decompose()
+        value = strip_gzsys_forbidden_text(clone.get_text(" ", strip=True))
+        if label.startswith("职称"):
+            labeled["title"] = value
+        elif label.startswith("科室"):
+            labeled["department"] = normalize_gzsys_department(value)
+    desc = container.select_one(".desc.line-6")
+    leaf_paragraphs = [node for node in desc.select("p") if not node.select("p")] if desc else []
+    source_nodes = leaf_paragraphs or ([desc] if desc else [])
+    segments: list[str] = []
+    for node in source_nodes:
+        value = strip_gzsys_forbidden_text(node.get_text(" ", strip=True))
+        if value and value not in segments:
+            segments.append(value)
+    forbidden_markers = ("好医生榜", "医生排行榜", "患者评价", "患者留言", "问诊记录", "问诊内容")
+    sentences = [
+        clean_text(sentence)
+        for segment in segments
+        for sentence in re.split(r"(?<=[。！？；;])\s*", segment)
+        if clean_text(sentence)
+    ]
+    forbidden_markers = (
+        *forbidden_markers,
+        "好医生",
+        "名医录",
+        "排行榜",
+        "排名",
+    )
+    kept = [
+        sentence
+        for sentence in sentences
+        if not any(term in sentence for term in forbidden_markers)
+        and not contains_gzbrain_patient_case_text(sentence)
+    ]
+    specialty = ""
+    for segment in kept:
+        if re.match(r"^(?:专业擅长|擅长|专长|特长)\s*[:：]", segment):
+            specialty = clean_text(re.sub(r"^(?:(?:专业擅长|擅长|专长|特长)\s*[:：]?\s*)+", "", segment))
+            break
+    return {
+        "name": first_nonempty(strip_gzsys_forbidden_text(name_node.get_text(" ", strip=True) if name_node else ""), fallback.get("name")),
+        "title": first_nonempty(labeled.get("title"), fallback.get("title")),
+        "department": first_nonempty(labeled.get("department"), fallback.get("department")),
+        "specialty": specialty,
+        "profile_text": clip(strip_profile_navigation_text(" ".join(kept)), 1800),
+        "schedule_exclusion_count": schedule_count,
+        "forbidden_segment_count": len(sentences) - len(kept),
+    }
+
+
+def select_gzsys_trial_doctors(doctors: list[dict[str, str]], max_doctors: int | None) -> list[dict[str, str]]:
+    if not max_doctors or len(doctors) <= max_doctors:
+        return doctors[:]
+    buckets: dict[str, list[dict[str, str]]] = {}
+    for doctor in doctors:
+        buckets.setdefault(clean_text(doctor.get("department")) or "（科室空白）", []).append(doctor)
+    selected: list[dict[str, str]] = []
+    offset = 0
+    while len(selected) < max_doctors:
+        added = False
+        for values in buckets.values():
+            if offset < len(values):
+                selected.append(values[offset])
+                added = True
+                if len(selected) >= max_doctors:
+                    return selected
+        if not added:
+            break
+        offset += 1
+    return selected
+
+
+def collect_gzsys(
+    target: HospitalTarget, today: str, max_doctors: int | None = None
+) -> dict[str, Any]:
+    session = create_official_session()
+    entry_status, entry_html, entry_error = fetch(session, target.entry_url)
+    if entry_status != 200:
+        raise RuntimeError(f"入口页普通公开 GET 读取失败：{entry_error}")
+    page_urls = discover_gzsys_default_pages(entry_html, target.entry_url)
+    if not page_urls:
+        raise RuntimeError("官网默认 All 医生目录未声明完整分页范围。")
+    filter_dictionary = parse_gzsys_filter_dictionary(entry_html)
+    categories: list[dict[str, Any]] = []
+    page_errors: list[dict[str, str]] = []
+    relations: list[dict[str, str]] = []
+    for page_number, page_url in enumerate(page_urls):
+        status, html, error = (
+            (entry_status, entry_html, "")
+            if page_number == 0
+            else fetch(session, page_url)
+        )
+        if status != 200:
+            page_errors.append({"page": str(page_number), "url": page_url, "error": error})
+            continue
+        page_rows = parse_gzsys_list_page(html, page_url)
+        if not page_rows:
+            page_errors.append(
+                {"page": str(page_number), "url": page_url, "error": "严格 .card-4-0 医生卡片为 0"}
+            )
+            continue
+        relations.extend(page_rows)
+        categories.append(
+            {
+                "category_id": str(page_number),
+                "category_name": f"默认医生目录第 {page_number + 1} 页",
+                "url": page_url,
+                "doctor_relation_count": len(page_rows),
+            }
+        )
+    if page_errors:
+        raise RuntimeError(
+            "官网默认医生目录读取不完整："
+            + "；".join(f"page={item['page']} {item['error']}" for item in page_errors)
+        )
+    doctors = merge_gzsys_card_relations(relations)
+    if not doctors:
+        raise RuntimeError("官网默认目录未发现严格医生卡片关系。")
+    names_to_ids: dict[str, list[str]] = {}
+    for doctor in doctors:
+        if doctor["name"]:
+            names_to_ids.setdefault(doctor["name"], []).append(doctor["id"])
+    same_name_groups = {
+        name: sorted(set(ids), key=int)
+        for name, ids in names_to_ids.items()
+        if len(set(ids)) > 1
+    }
+    raw_source_path_counts = Counter(
+        "node" if urlparse(doctor["source_link"]).path.startswith("/node/") else "doctor"
+        for doctor in doctors
+    )
+    nursing_doctors = [doctor for doctor in doctors if gyfyyy_nursing_only_identity(doctor["title"])]
+    eligible_doctors = [doctor for doctor in doctors if doctor not in nursing_doctors]
+    selected = select_gzsys_trial_doctors(eligible_doctors, max_doctors)
+    if max_doctors:
+        selected_ids = {doctor["id"] for doctor in selected}
+        selected.extend(doctor for doctor in eligible_doctors if doctor["id"] not in selected_ids)
+    existing_links = collect_existing_profile_links()
+    exclusion_reason = "官网医生卡片仅标注护理身份，排除医生画像采集范围"
+    excluded_candidates = [
+        {
+            "entry_url": target.entry_url,
+            "list_title": f"{doctor['name']} {doctor['title']}",
+            "source_link": doctor["source_link"],
+            "reason": exclusion_reason,
+        }
+        for doctor in nursing_doctors
+    ]
+    detail_reconciliation: list[dict[str, str]] = [
+        {
+            "detail_id": doctor["id"],
+            "source_link": doctor["source_link"],
+            "name": doctor["name"],
+            "resolution": "护理排除",
+            "reason": exclusion_reason,
+        }
+        for doctor in nursing_doctors
+    ]
+    rows: list[dict[str, Any]] = []
+    detail_errors: list[dict[str, str]] = []
+    schedule_exclusion_count = 0
+    forbidden_segment_count = 0
+    for doctor in selected:
+        if max_doctors and len(rows) >= max_doctors:
+            break
+        detail_status, detail_html, detail_error = fetch(session, doctor["source_link"])
+        if detail_status == 200:
+            detail = parse_gzsys_detail(detail_html, doctor)
+        else:
+            detail_errors.append({"source_link": doctor["source_link"], "error": detail_error})
+            detail = {
+                **doctor,
+                "specialty": "",
+                "profile_text": "",
+                "schedule_exclusion_count": 0,
+                "forbidden_segment_count": 0,
+            }
+        name = strip_gzsys_forbidden_text(str(detail.get("name") or doctor["name"]))
+        title_identity = strip_gzsys_forbidden_text(str(detail.get("title") or doctor["title"]))
+        department = normalize_gzsys_department(str(detail.get("department") or doctor["department"]))
+        specialty = strip_gzsys_forbidden_text(str(detail.get("specialty") or ""))
+        profile_text = strip_gzsys_forbidden_text(str(detail.get("profile_text") or ""))
+        schedule_exclusion_count += int(detail.get("schedule_exclusion_count") or 0)
+        forbidden_segment_count += int(detail.get("forbidden_segment_count") or 0)
+        if gyfyyy_nursing_only_identity(title_identity):
+            exclusion = {
+                "entry_url": target.entry_url,
+                "list_title": f"{name} {title_identity}",
+                "source_link": doctor["source_link"],
+                "reason": "官网详情仅标注护理身份，排除医生画像采集范围",
+            }
+            excluded_candidates.append(exclusion)
+            detail_reconciliation.append(
+                {
+                    "detail_id": doctor["id"],
+                    "source_link": doctor["source_link"],
+                    "name": name,
+                    "resolution": "护理排除",
+                    "reason": exclusion["reason"],
+                }
+            )
+            continue
+        combined_text = "\n".join([target.hospital, department, title_identity, specialty, profile_text])
+        title_hits = extract_terms(title_identity, TITLE_TERMS)
+        groups_found, tags = group_tags(combined_text)
+        warnings: list[str] = []
+        if detail_status != 200:
+            warnings.append("详情页读取失败")
+        if not looks_like_person_name(name):
+            warnings.append("非医生页面或姓名异常")
+        if doctor["name"] and name != doctor["name"]:
+            warnings.append("列表与详情姓名不一致")
+        if not department:
+            warnings.append("科室需人工复核")
+        if not title_hits:
+            warnings.append("职称/身份需人工复核")
+        if not specialty and not profile_text:
+            warnings.append("详情正文为空或未识别")
+        if name in same_name_groups:
+            warnings.append("同名待甄别")
+        if warnings:
+            groups_found, tags = [], []
+        priority = "普通"
+        if not warnings and (any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups_found):
+            priority = "高"
+        elif not warnings and any(term != "医师" for term in title_hits):
+            priority = "中"
+        rows.append(
+            {
+                "序号": len(rows) + 1,
+                "医院": target.hospital,
+                "姓名": name,
+                "科室_分类页": department,
+                "科室_列表卡片": doctor["department"],
+                "职称_关键词": "、".join(title_hits),
+                "职称身份原文": clip(title_identity, 500),
+                "重点优先级": priority,
+                "重点关注范围": "、".join(groups_found),
+                "重点疾病标签": "、".join(tags),
+                "擅长诊疗方向摘录": clip(specialty, 520),
+                "亮眼经历线索": extract_clean_highlights(profile_text),
+                "列表简介": "",
+                "详情正文摘录": clip(profile_text, 1800),
+                "来源类型": "医院官网",
+                "来源链接": doctor["source_link"],
+                "采集入口": target.entry_url,
+                "采集方式": "官网默认 All 静态分页+.card-4-0 医生卡片+严格详情 DOM 抽取",
+                "采集日期": today,
+                "详情页状态": "200" if detail_status == 200 else "失败",
+                "已建画像": "是" if canonical_url(doctor["source_link"]) in existing_links else "否",
+                "异常提示": "；".join(dict.fromkeys(warnings)),
+                "复核状态": "待人工复核",
+            }
+        )
+        detail_reconciliation.append(
+            {
+                "detail_id": doctor["id"],
+                "source_link": doctor["source_link"],
+                "name": name,
+                "resolution": "正式行",
+                "reason": "",
+            }
+        )
+        time.sleep(0.12)
+    covered_departments = covered_department_names(rows)
+    category_counter = Counter(
+        department
+        for row in rows
+        for department in clean_text(row["科室_分类页"]).split("、")
+        if department
+    )
+    priority_counter = Counter(row["重点优先级"] for row in rows)
+    group_counter = Counter(group for row in rows for group in row["重点关注范围"].split("、") if group)
+    warning_counter = Counter(warning for row in rows for warning in row["异常提示"].split("；") if warning)
+    return {
+        "meta": {
+            "city": target.city,
+            "hospital": target.hospital,
+            "homepage": target.homepage,
+            "entry_url": target.entry_url,
+            "entry_url_source": "GitHub Issue #35（与官网入口台账一致）",
+            "ledger_entry_url": target.ledger_entry_url or target.entry_url,
+            "adapter_id": target.adapter_id,
+            "collected_at": today,
+            "category_count": len(categories),
+            "raw_card_rows": len(relations),
+            "candidate_membership_count": len(relations),
+            "unique_candidate_count": len(doctors),
+            "unique_doctor_count": len(rows),
+            "census_unique_detail_count": len(doctors),
+            "census_named_detail_count": sum(bool(item["name"]) for item in doctors),
+            "census_blank_name_detail_count": sum(not item["name"] for item in doctors),
+            "census_unique_nonblank_name_count": len(names_to_ids),
+            "census_same_name_group_count": len(same_name_groups),
+            "census_same_name_groups": same_name_groups,
+            "census_department_count": len({item["department"] for item in doctors if item["department"]}),
+            "census_group_count": 0,
+            "census_nonempty_department_count": sum(bool(item["department"]) for item in doctors),
+            "census_empty_department_count": sum(not item["department"] for item in doctors),
+            "eligible_candidate_count": len(eligible_doctors),
+            "sample_entry_coverage_count": len(covered_departments),
+            "sample_entry_categories": covered_departments,
+            "pagination_count": len(page_urls),
+            "pagination_method": "页面声明的默认 All 查询 page=0..末页；不遍历搜索词或筛选组合",
+            "filter_dictionary_counts": {name: len(values) for name, values in filter_dictionary.items()},
+            "filter_dictionary": filter_dictionary,
+            "source_path_counts": dict(raw_source_path_counts),
+            "standard_public_session": "requests 常规重定向与站点自设 Cookie；无挑战求解、指纹模拟或绕过",
+            "session_cookie_names": sorted(session.cookies.keys()),
+            "schedule_exclusion_count": schedule_exclusion_count,
+            "schedule_field_ingested_count": 0,
+            "forbidden_segment_exclusion_count": forbidden_segment_count,
+            "private_use_character_count": sum(
+                len(re.findall(r"[\ue000-\uf8ff]", str(row.get(field) or "")))
+                for row in rows
+                for field in ("擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录")
+            ),
+            "category_error_count": len(page_errors),
+            "detail_error_count": len(detail_errors),
+            "cross_entry_duplicate_count": len(relations) - len(doctors),
+            "excluded_non_doctor_count": len(excluded_candidates),
+            "existing_profile_count": sum(row["已建画像"] == "是" for row in rows),
+            "ledger_review": target.review,
+            "ledger_difficulty": target.difficulty,
+        },
+        "categories": categories,
+        "entry_reconnaissance": [
+            {
+                "category_name": "官网名医名师默认目录",
+                "entry_url": target.entry_url,
+                "page_nature": "医院官网 Drupal 公开医生目录",
+                "list_page_count": len(page_urls),
+                "raw_detail_relation_count": len(relations),
+                "unique_detail_count": len(doctors),
+                "out_of_scope_detail_count": len(excluded_candidates),
+                "affiliation": target.hospital,
+                "independent_entity_check": "仅 .card-4-0 卡片授权；/node/<ID> 与 /doctor/<ID> 按数字 ID 去重",
+            }
+        ],
+        "excluded_candidates": excluded_candidates,
+        "gzsys_detail_reconciliation": detail_reconciliation,
         "cross_entry_duplicates": [],
         "category_errors": page_errors,
         "detail_errors": detail_errors,
@@ -7113,6 +7599,102 @@ def validate_gzszyy_full_append(payload: dict[str, Any]) -> None:
         raise RuntimeError("GZSZYY FULL 写入前门禁失败：" + "；".join(errors))
 
 
+def validate_gzsys_trial(payload: dict[str, Any], expected_rows: int) -> None:
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    errors: list[str] = []
+    expected_counts = {
+        "category_count": 23,
+        "raw_card_rows": 664,
+        "candidate_membership_count": 664,
+        "unique_candidate_count": 664,
+        "census_unique_detail_count": 664,
+        "census_named_detail_count": 664,
+        "census_blank_name_detail_count": 0,
+        "census_nonempty_department_count": 664,
+        "census_empty_department_count": 0,
+        "excluded_non_doctor_count": 6,
+        "eligible_candidate_count": 658,
+        "category_error_count": 0,
+        "detail_error_count": 0,
+        "schedule_field_ingested_count": 0,
+        "private_use_character_count": 0,
+    }
+    for field, expected in expected_counts.items():
+        if int(meta.get(field) or 0) != expected:
+            errors.append(f"{field} 应为 {expected}，实际 {meta.get(field, 0)}")
+    if int(meta.get("census_same_name_group_count") or 0) != 0:
+        errors.append("全目录出现未裁决的同名不同 ID")
+    if int(meta.get("cross_entry_duplicate_count") or 0) != 0:
+        errors.append("默认分页出现重复数字 ID")
+    if len(rows) != expected_rows or int(meta.get("unique_doctor_count") or 0) != expected_rows:
+        errors.append(f"TRIAL 正式行应为 {expected_rows}，实际 {len(rows)}")
+    source_ids = [gzsys_detail_id(str(row.get("来源链接") or "")) for row in rows]
+    if any(not detail_id for detail_id in source_ids):
+        errors.append("TRIAL 存在非授权 /node/<ID> 或 /doctor/<ID> 来源")
+    if len(set(source_ids)) != len(source_ids):
+        errors.append("TRIAL 来源数字 ID 不唯一")
+    if len({clean_text(str(row.get("姓名") or "")) for row in rows}) != len(rows):
+        errors.append("TRIAL 姓名为空或不唯一")
+    if any(not clean_text(str(row.get("科室_分类页") or "")) for row in rows):
+        errors.append("TRIAL 存在空科室")
+    if int(meta.get("sample_entry_coverage_count") or 0) < 3:
+        errors.append("TRIAL 科室覆盖少于 3")
+    excluded = payload.get("excluded_candidates", [])
+    if len(excluded) != 6 or any("护理身份" not in str(item.get("reason") or "") for item in excluded):
+        errors.append("6 个纯护理排除未完整留痕")
+    excluded_ids = [gzsys_detail_id(str(item.get("source_link") or "")) for item in excluded]
+    if len(set(excluded_ids)) != 6 or set(excluded_ids) & set(source_ids):
+        errors.append("护理排除 ID 无效、重复或与正式行重叠")
+    formal_text_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录"]
+    forbidden_terms = [
+        "好医生",
+        "名医录",
+        "排行榜",
+        "排名",
+        "患者评价",
+        "患者留言",
+        "患者案例",
+        "病例详情",
+    ]
+    if any(
+        any(term in str(row.get(field) or "") for term in forbidden_terms)
+        for row in rows
+        for field in formal_text_fields
+    ):
+        errors.append("四正式文本字段仍含排名或患者信息")
+    if any(
+        strip_gyfyyy_schedule_text(str(row.get(field) or ""))
+        != clean_text(str(row.get(field) or ""))
+        for row in rows
+        for field in formal_text_fields
+    ):
+        errors.append("四正式文本字段仍含排班片段")
+    if any(
+        re.search(r"[\ue000-\uf8ff]", str(row.get(field) or ""))
+        for row in rows
+        for field in BASE_HEADERS
+    ):
+        errors.append("正式字段仍含私用区字符")
+    if any(
+        re.match(r"^\s*(?:(?:专业擅长|擅长|专长|特长)\s*[:：]?\s*)+", str(row.get("擅长诊疗方向摘录") or ""))
+        for row in rows
+    ):
+        errors.append("擅长字段仍保留前缀")
+    if any(
+        clean_text(str(row.get("异常提示") or ""))
+        and (
+            clean_text(str(row.get("重点关注范围") or ""))
+            or clean_text(str(row.get("重点疾病标签") or ""))
+            or clean_text(str(row.get("重点优先级") or "")) != "普通"
+        )
+        for row in rows
+    ):
+        errors.append("异常行仍被打标签或提升优先级")
+    if errors:
+        raise RuntimeError("GZSYS TRIAL 写出前门禁失败：" + "；".join(errors))
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=BASE_HEADERS)
@@ -7337,6 +7919,18 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 | 姓名 | 详情 ID | 裁决 | 原详情关系 | 合并科室 | 院区/出诊点 | 主详情 | 其余详情 |
 |---|---|---|---:|---|---|---|---|
 {gzszyy_identity_lines}"""
+        )
+    if payload.get("gzsys_detail_reconciliation"):
+        adapter_specific_sections.append(
+            f"""## 中山大学孙逸仙纪念医院默认目录范围门禁
+
+- 默认 All 目录：{meta.get('pagination_count', 0)} 页、{meta.get('candidate_membership_count', 0)} 张严格 `.card-4-0` 卡片、{meta.get('census_unique_detail_count', 0)} 个唯一数字 ID。
+- 身份别名：`/node/<ID>` 与 `/doctor/<ID>` 只按同一数字 ID 去重；非卡片链接不构成授权详情。
+- 页面筛选字典：科室 {meta.get('filter_dictionary_counts', {}).get('department_target_id', 0)}、人才项目 {meta.get('filter_dictionary_counts', {}).get('talent_project', 0)}、导师资格 {meta.get('filter_dictionary_counts', {}).get('tutor_qualification', 0)}、职称 {meta.get('filter_dictionary_counts', {}).get('doctor_title', 0)}；仅解析留痕，不遍历组合或构造关键词。
+- 纯护理排除：{meta.get('excluded_non_doctor_count', 0)} 个；排除后合规候选 {meta.get('eligible_candidate_count', 0)} 个。
+- 详情清洗：排班 DOM 排除 {meta.get('schedule_exclusion_count', 0)} 个；排名/患者片段排除 {meta.get('forbidden_segment_exclusion_count', 0)} 个；正式字段排班写入 {meta.get('schedule_field_ingested_count', 0)}、私用区字符 {meta.get('private_use_character_count', 0)}。
+- 普通公开会话：{meta.get('standard_public_session', '未记录')}；本轮最终 Cookie 名称仅留痕为 `{'、'.join(meta.get('session_cookie_names', [])) or '无'}`。
+"""
         )
     adapter_specific_text = "\n\n".join(adapter_specific_sections)
 
@@ -7731,6 +8325,7 @@ def main() -> None:
             GY3Y_ADAPTER_ID,
             GZBRAIN_ADAPTER_ID,
             GZSZYY_ADAPTER_ID,
+            GZSYS_ADAPTER_ID,
         }
         and not args.trial_only
         and not args.single_output
@@ -7756,6 +8351,8 @@ def main() -> None:
         payload = collect_gzbrain(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id == GZSZYY_ADAPTER_ID:
         payload = collect_gzszyy(target, args.today, max_doctors=max_doctors)
+    elif target.adapter_id == GZSYS_ADAPTER_ID:
+        payload = collect_gzsys(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID}:
         payload = collect_generic(
             target,
@@ -7808,6 +8405,8 @@ def main() -> None:
 
     if args.gdzy5413_trial2:
         validate_gdzy5413_trial2(payload, expected_identities=max_doctors or 10)
+    if target.adapter_id == GZSYS_ADAPTER_ID and args.trial_only:
+        validate_gzsys_trial(payload, expected_rows=max_doctors or 10)
 
     if target.adapter_id == GDZY5413_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdzy5413_full_append(payload)
