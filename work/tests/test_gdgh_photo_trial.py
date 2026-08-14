@@ -16,16 +16,21 @@ from collect_official_doctors_batch import (  # noqa: E402
     GDGH_EXPECTED_GROUP_COUNT,
     GDGH_EXPECTED_NURSING_COUNT,
     GDGH_EXPECTED_RELATION_COUNT,
+    gdgh_clean_text,
     gdgh_detail_id,
     gdgh_photo_extension,
     gdgh_photo_url,
     merge_gdgh_identity_rows,
     select_gdgh_trial_doctors,
+    validate_gdgh_full_append,
     validate_gdgh_trial,
 )
 
 
 class GdghPhotoTrialTests(unittest.TestCase):
+    def test_gdgh_clean_text_removes_zero_width_format_characters(self) -> None:
+        self.assertEqual(gdgh_clean_text("\u200b 赵\u200c晓\u200d苗\ufeff "), "赵晓苗")
+
     def test_strict_urls_and_magic_bytes(self) -> None:
         detail = (
             "https://www.gdghospital.org.cn/Expertlistt/"
@@ -181,6 +186,100 @@ class GdghPhotoTrialTests(unittest.TestCase):
             }
 
             validate_gdgh_trial(payload, expected_rows=10)
+
+    def test_full_validator_accepts_owner_policy_and_photo_four_count_reconciliation(self) -> None:
+        eligible = GDGH_EXPECTED_RELATION_COUNT - GDGH_EXPECTED_NURSING_COUNT
+        names = [f"测试{chr(0x4E00 + index)}" for index in range(eligible)]
+        rows = []
+        details = []
+        identities = []
+        for index, name in enumerate(names, start=1):
+            source = (
+                "https://www.gdghospital.org.cn/Expertlistt/"
+                f"info_itemid_{index}_subjectid_1.html"
+            )
+            rows.append(
+                {
+                    "医院": "广东省人民医院",
+                    "姓名": name,
+                    "科室_分类页": "测试科",
+                    "科室_列表卡片": "测试科",
+                    "职称身份原文": "主任医师",
+                    "重点优先级": "普通",
+                    "重点关注范围": "",
+                    "重点疾病标签": "",
+                    "擅长诊疗方向摘录": "",
+                    "亮眼经历线索": "",
+                    "列表简介": "",
+                    "详情正文摘录": "",
+                    "来源链接": source,
+                    "照片链接": "",
+                    "照片文件": "",
+                    "异常提示": "",
+                }
+            )
+            details.append({"detail_id": str(index)})
+            identities.append({"detail_ids": [str(index)]})
+        payload = {
+            "meta": {
+                "census_group_count": GDGH_EXPECTED_GROUP_COUNT,
+                "census_department_count": GDGH_EXPECTED_DEPARTMENT_COUNT,
+                "candidate_membership_count": GDGH_EXPECTED_RELATION_COUNT,
+                "census_unique_detail_count": GDGH_EXPECTED_RELATION_COUNT,
+                "unique_candidate_count": GDGH_EXPECTED_RELATION_COUNT,
+                "excluded_non_doctor_count": GDGH_EXPECTED_NURSING_COUNT,
+                "eligible_candidate_count": eligible,
+                "unique_doctor_count": eligible,
+                "photo_census_available_count": eligible,
+                "category_error_count": 0,
+                "independent_entity_count": 0,
+                "schedule_field_ingested_count": 0,
+                "private_use_character_count": 0,
+                "photo_policy_status": "OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT",
+                "photo_expected_count": 2,
+                "photo_downloaded_count": 1,
+                "photo_failed_count": 1,
+                "photo_no_source_count": eligible - 2,
+                "photo_sample_count": 1,
+            },
+            "rows": rows,
+            "excluded_candidates": [
+                {"reason": "官网专家卡片仅标注护理身份，排除医生画像采集范围"}
+                for _ in range(GDGH_EXPECTED_NURSING_COUNT)
+            ],
+            "gdgh_detail_reconciliation": details,
+            "gdgh_identity_reconciliation": identities,
+            "photo_samples": [],
+            "photo_errors": [
+                {
+                    "source_link": rows[1]["来源链接"],
+                    "photo_url": "https://www.gdghospital.org.cn/uploadfiles/doctor/2.jpg",
+                }
+            ],
+        }
+        rows[1]["异常提示"] = "照片获取失败"
+        with tempfile.TemporaryDirectory() as directory:
+            content = b"\xff\xd8\xff" + b"full-photo"
+            filename = "测试一-测试科-主任医师-广东省人民医院.jpg"
+            disk_path = Path(directory) / filename
+            disk_path.write_bytes(content)
+            photo_url = "https://www.gdghospital.org.cn/uploadfiles/doctor/1.jpg"
+            photo_file = f"01_试点医院/广东省人民医院/照片/{filename}"
+            rows[0]["照片链接"] = photo_url
+            rows[0]["照片文件"] = photo_file
+            payload["photo_samples"] = [
+                {
+                    "source_link": rows[0]["来源链接"],
+                    "photo_url": photo_url,
+                    "photo_file": photo_file,
+                    "filename": filename,
+                    "bytes": len(content),
+                    "sha256": hashlib.sha256(content).hexdigest(),
+                    "disk_path": str(disk_path),
+                }
+            ]
+
+            validate_gdgh_full_append(payload)
 
 
 if __name__ == "__main__":

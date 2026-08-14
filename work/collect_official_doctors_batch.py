@@ -3635,6 +3635,10 @@ def gdgh_photo_url(value: str | None, base_url: str) -> str:
     return absolute
 
 
+def gdgh_clean_text(value: str | None) -> str:
+    return clean_text(re.sub(r"[\u200b-\u200d\ufeff]", "", value or ""))
+
+
 def parse_gdgh_department_page(
     html: str,
     department: dict[str, str],
@@ -3652,8 +3656,8 @@ def parse_gdgh_department_page(
         name_node = anchor.find(["h1", "h2", "h3", "h4", "h5"])
         title_node = anchor.find("p")
         image_node = anchor.find("img")
-        name = clean_text(name_node.get_text(" ", strip=True) if name_node else "")
-        title = clean_text(title_node.get_text(" ", strip=True) if title_node else "")
+        name = gdgh_clean_text(name_node.get_text(" ", strip=True) if name_node else "")
+        title = gdgh_clean_text(title_node.get_text(" ", strip=True) if title_node else "")
         image_url = gdgh_photo_url(
             str(
                 (image_node.get("src") or image_node.get("data-src") or image_node.get("data-original") or "")
@@ -3702,8 +3706,8 @@ def parse_gdgh_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
     container = soup.select_one(".sub_ex_Info")
     if not container:
         return {
-            "name": clean_text(fallback.get("name")),
-            "title": clean_text(fallback.get("list_title")),
+            "name": gdgh_clean_text(fallback.get("name")),
+            "title": gdgh_clean_text(fallback.get("list_title")),
             "specialty": "",
             "profile_text": "",
             "photo_url": clean_text(fallback.get("image_url")),
@@ -3720,10 +3724,12 @@ def parse_gdgh_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
     title = ""
     heading_match = re.match(r"^(.{1,30}?)\s*[—－-]{2,}\s*(.+)$", heading_text)
     if heading_match:
-        name, title = clean_text(heading_match.group(1)), clean_text(heading_match.group(2))
+        name, title = gdgh_clean_text(heading_match.group(1)), gdgh_clean_text(
+            heading_match.group(2)
+        )
     else:
-        name = clean_text(fallback.get("name"))
-        title = clean_text(fallback.get("list_title"))
+        name = gdgh_clean_text(fallback.get("name"))
+        title = gdgh_clean_text(fallback.get("list_title"))
 
     body = container.select_one(".divmore") or container.select_one(".divtxtbox")
     raw_profile = strip_gzsys_forbidden_text(
@@ -3777,7 +3783,7 @@ def parse_gdgh_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
 
 
 def gdgh_primary_title(value: str | None) -> str:
-    text = clean_text(value)
+    text = gdgh_clean_text(value)
     for term in (
         "一级主任医师",
         "主任中医师",
@@ -3812,7 +3818,7 @@ def gdgh_primary_title(value: str | None) -> str:
 
 
 def gdgh_photo_part(value: str | None) -> str:
-    text = clean_text(value)
+    text = gdgh_clean_text(value)
     text = re.sub(r'[\\/:*?"<>|]', "_", text).strip(" .")
     return text or "未标注"
 
@@ -4029,6 +4035,7 @@ def collect_gdgh(
     today: str,
     max_doctors: int | None = None,
     photo_root: Path | None = None,
+    full_mode: bool = False,
 ) -> dict[str, Any]:
     session = create_official_session()
     entry_status, entry_html, entry_error = fetch(session, target.entry_url)
@@ -4162,8 +4169,8 @@ def collect_gdgh(
                 "forbidden_segment_count": 0,
                 "patient_case_exclusion_count": 0,
             }
-        name = clean_text(str(detail.get("name") or item["name"]))
-        title_identity = clean_text(str(detail.get("title") or ""))
+        name = gdgh_clean_text(str(detail.get("name") or item["name"]))
+        title_identity = gdgh_clean_text(str(detail.get("title") or ""))
         if gyfyyy_nursing_only_identity(title_identity):
             excluded_candidates.append(
                 {
@@ -4175,8 +4182,8 @@ def collect_gdgh(
             )
             continue
         department = "、".join(item["departments"])
-        specialty = clean_text(str(detail.get("specialty") or ""))
-        profile_text = clean_text(str(detail.get("profile_text") or ""))
+        specialty = gdgh_clean_text(str(detail.get("specialty") or ""))
+        profile_text = gdgh_clean_text(str(detail.get("profile_text") or ""))
         schedule_exclusion_count += int(detail.get("schedule_exclusion_count") or 0)
         forbidden_segment_count += int(detail.get("forbidden_segment_count") or 0)
         patient_case_exclusion_count += int(detail.get("patient_case_exclusion_count") or 0)
@@ -4255,12 +4262,16 @@ def collect_gdgh(
     used_filenames: set[str] = set()
     photo_samples: list[dict[str, Any]] = []
     photo_errors: list[dict[str, str]] = []
+    photo_expected_count = 0
+    photo_no_source_count = 0
     for index, row in enumerate(rows, start=1):
         row["序号"] = index
         detail_id = clean_text(str(row.pop("_gdgh_item_id", "")))
         photo_url = clean_text(str(row.pop("_gdgh_photo_url", "")))
         if not photo_url:
+            photo_no_source_count += 1
             continue
+        photo_expected_count += 1
         stem = "-".join(
             [
                 gdgh_photo_part(row.get("姓名")),
@@ -4278,10 +4289,22 @@ def collect_gdgh(
                 {
                     "name": clean_text(str(row.get("姓名") or "")),
                     "detail_id": detail_id,
+                    "source_link": clean_text(str(row.get("来源链接") or "")),
                     "photo_url": photo_url,
                     "error": str(exc),
                 }
             )
+            row["异常提示"] = "；".join(
+                dict.fromkeys(
+                    [
+                        *clean_text(str(row.get("异常提示") or "")).split("；"),
+                        "照片获取失败",
+                    ]
+                )
+            ).strip("；")
+            row["重点优先级"] = "普通"
+            row["重点关注范围"] = ""
+            row["重点疾病标签"] = ""
             continue
         relative_path = (
             Path("01_试点医院") / target.hospital / "照片" / photo["filename"]
@@ -4411,11 +4434,19 @@ def collect_gdgh(
             ),
             "photo_sample_count": len(photo_samples),
             "photo_error_count": len(photo_errors),
+            "photo_expected_count": photo_expected_count,
+            "photo_downloaded_count": len(photo_samples),
+            "photo_failed_count": len(photo_errors),
+            "photo_no_source_count": photo_no_source_count,
             "photo_average_bytes": average_photo_bytes,
             "photo_estimated_full_count": len(eligible_doctors),
             "photo_estimated_full_bytes": average_photo_bytes * len(eligible_doctors),
             "photo_census_available_count": sum(bool(item["image_urls"]) for item in eligible_doctors),
-            "photo_policy_status": "WAITING_OWNER_SIZE_POLICY",
+            "photo_policy_status": (
+                "OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT"
+                if full_mode
+                else "WAITING_OWNER_SIZE_POLICY"
+            ),
             "affiliate_count": len(affiliate_evidence),
             "independent_entity_count": 0,
         },
@@ -9464,6 +9495,164 @@ def validate_gdgh_trial(payload: dict[str, Any], expected_rows: int) -> None:
         raise RuntimeError("GDGH TRIAL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
 
 
+def validate_gdgh_full_append(payload: dict[str, Any]) -> None:
+    """Block the GDGH master write unless census, identities and photos reconcile."""
+
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    detail_reconciliation = payload.get("gdgh_detail_reconciliation", [])
+    identity_reconciliation = payload.get("gdgh_identity_reconciliation", [])
+    photo_samples = payload.get("photo_samples", [])
+    photo_errors = payload.get("photo_errors", [])
+    errors: list[str] = []
+    expected_counts = {
+        "census_group_count": GDGH_EXPECTED_GROUP_COUNT,
+        "census_department_count": GDGH_EXPECTED_DEPARTMENT_COUNT,
+        "candidate_membership_count": GDGH_EXPECTED_RELATION_COUNT,
+        "census_unique_detail_count": GDGH_EXPECTED_RELATION_COUNT,
+        "unique_candidate_count": GDGH_EXPECTED_RELATION_COUNT,
+        "excluded_non_doctor_count": GDGH_EXPECTED_NURSING_COUNT,
+        "eligible_candidate_count": GDGH_EXPECTED_RELATION_COUNT - GDGH_EXPECTED_NURSING_COUNT,
+        "photo_census_available_count": GDGH_EXPECTED_RELATION_COUNT - GDGH_EXPECTED_NURSING_COUNT,
+        "category_error_count": 0,
+        "independent_entity_count": 0,
+        "schedule_field_ingested_count": 0,
+        "private_use_character_count": 0,
+    }
+    for field, expected in expected_counts.items():
+        actual = int(meta.get(field) or 0)
+        if actual != expected:
+            errors.append(f"{field}={actual}，预期 {expected}")
+
+    excluded = payload.get("excluded_candidates", [])
+    if len(excluded) != GDGH_EXPECTED_NURSING_COUNT or any(
+        "护理身份" not in str(item.get("reason") or "") for item in excluded
+    ):
+        errors.append("9 个纯护理身份排除清单不完整或混入其他排除理由")
+
+    detail_ids = [clean_text(str(item.get("detail_id") or "")) for item in detail_reconciliation]
+    if (
+        len(detail_ids) != GDGH_EXPECTED_RELATION_COUNT - GDGH_EXPECTED_NURSING_COUNT
+        or any(not detail_id for detail_id in detail_ids)
+        or len(set(detail_ids)) != len(detail_ids)
+    ):
+        errors.append(
+            f"逐 ID 对账应覆盖 1,334 个唯一合规详情，实际 {len(detail_ids)} 行/"
+            f"{len(set(detail_ids) - {''})} 个非空唯一 ID"
+        )
+    mapped_ids = [
+        clean_text(str(detail_id))
+        for item in identity_reconciliation
+        for detail_id in item.get("detail_ids", [])
+        if clean_text(str(detail_id))
+    ]
+    if len(mapped_ids) != len(detail_ids) or set(mapped_ids) != set(detail_ids):
+        errors.append("身份聚类未完整且唯一映射 1,334 个合规详情 ID")
+    if len(identity_reconciliation) != len(rows):
+        errors.append(f"身份归并对账与最终正式行不一致：{len(identity_reconciliation)}/{len(rows)}")
+    if int(meta.get("unique_doctor_count") or 0) != len(rows):
+        errors.append("最终身份计数与正式行不一致")
+
+    if meta.get("photo_policy_status") != "OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT":
+        errors.append("照片政策未记录 owner 已批准的不压缩、不限宽裁决")
+    expected_photos = int(meta.get("photo_expected_count") or 0)
+    downloaded_photos = int(meta.get("photo_downloaded_count") or 0)
+    failed_photos = int(meta.get("photo_failed_count") or 0)
+    no_source_photos = int(meta.get("photo_no_source_count") or 0)
+    if expected_photos + no_source_photos != len(rows):
+        errors.append("照片应采与无照片四数未覆盖全部最终身份")
+    if downloaded_photos + failed_photos != expected_photos:
+        errors.append("照片实采与失败四数不等于应采数")
+    if downloaded_photos != len(photo_samples) or failed_photos != len(photo_errors):
+        errors.append("照片实采/失败 meta 与对账清单不一致")
+    if int(meta.get("photo_sample_count") or 0) != downloaded_photos:
+        errors.append("照片样本计数与全量实采数不一致")
+
+    sample_by_source = {
+        clean_text(str(item.get("source_link") or "")): item for item in photo_samples
+    }
+    failed_sources = {
+        clean_text(str(item.get("source_link") or "")) for item in photo_errors
+    }
+    if "" in failed_sources:
+        errors.append("照片失败清单存在空来源链接")
+    for row in rows:
+        name = clean_text(str(row.get("姓名") or ""))
+        source = clean_text(str(row.get("来源链接") or ""))
+        photo_url = clean_text(str(row.get("照片链接") or ""))
+        photo_file = clean_text(str(row.get("照片文件") or ""))
+        warning = clean_text(str(row.get("异常提示") or ""))
+        if not looks_like_person_name(name) or not gdgh_detail_id(source):
+            errors.append(f"正式行姓名或官网详情来源异常：{name or source}")
+        if source in failed_sources:
+            if photo_url or photo_file or "照片获取失败" not in warning:
+                errors.append(f"照片失败行未按要求留空并标记：{name}")
+        elif photo_file:
+            sample = sample_by_source.get(source)
+            if not sample or not gdgh_photo_url(photo_url, photo_url):
+                errors.append(f"照片成功行缺少官网 URL 或对账项：{name}")
+                continue
+            disk_path = Path(str(sample.get("disk_path") or ""))
+            expected_prefix = "01_试点医院/广东省人民医院/照片/"
+            if not photo_file.startswith(expected_prefix) or not disk_path.is_file():
+                errors.append(f"照片文件路径不存在或越界：{name}")
+                continue
+            content = disk_path.read_bytes()
+            detected = gdgh_photo_extension(
+                content,
+                {
+                    ".jpg": "image/jpeg",
+                    ".png": "image/png",
+                    ".gif": "image/gif",
+                    ".webp": "image/webp",
+                }.get(disk_path.suffix.lower(), ""),
+            )
+            if detected != disk_path.suffix.lower().lstrip("."):
+                errors.append(f"照片扩展名与魔数不一致：{name}")
+            if int(sample.get("bytes") or 0) != len(content):
+                errors.append(f"照片字节数对账失败：{name}")
+            if clean_text(str(sample.get("sha256") or "")) != hashlib.sha256(content).hexdigest():
+                errors.append(f"照片 SHA-256 对账失败：{name}")
+        elif source not in failed_sources and photo_url:
+            errors.append(f"照片列未成对写入：{name}")
+
+    formal_text_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录"]
+    if any(
+        contains_navigation_text(str(row.get(field) or ""))
+        or contains_gzbrain_patient_case_text(str(row.get(field) or ""))
+        or strip_gzsys_schedule_text(str(row.get(field) or ""))
+        != clean_text(str(row.get(field) or ""))
+        for row in rows
+        for field in formal_text_fields
+    ):
+        errors.append("四正式文本字段仍含导航、排班或患者案例片段")
+    if any(
+        re.search(r"[\ue000-\uf8ff]", str(row.get(field) or ""))
+        for row in rows
+        for field in BASE_HEADERS
+    ):
+        errors.append("正式字段仍含私用区字符")
+    if any(
+        re.search(r"[\u200b-\u200d\ufeff]", str(row.get(field) or ""))
+        for row in rows
+        for field in BASE_HEADERS
+    ):
+        errors.append("正式字段仍含零宽格式字符")
+    if any(
+        clean_text(str(row.get("异常提示") or ""))
+        and (
+            clean_text(str(row.get("重点关注范围") or ""))
+            or clean_text(str(row.get("重点疾病标签") or ""))
+            or clean_text(str(row.get("重点优先级") or "")) != "普通"
+        )
+        for row in rows
+    ):
+        errors.append("异常行仍被打标签或提升优先级")
+
+    if errors:
+        raise RuntimeError("GDGH FULL 写入前门禁失败：" + "；".join(dict.fromkeys(errors)))
+
+
 def validate_fahsysu_full_append(payload: dict[str, Any]) -> None:
     """Block the FAHSYSU master write unless all 860 directory IDs reconcile."""
 
@@ -10323,7 +10512,7 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         )
     if payload.get("gdgh_detail_reconciliation"):
         adapter_specific_sections.append(
-            f"""## 广东省人民医院官网目录、归属与照片 TRIAL 对账
+            f"""## 广东省人民医院官网目录、归属与照片{run_label}对账
 
 - 顶层分组 / 科室：{meta.get('census_group_count', 0)} / {meta.get('census_department_count', 0)}。
 - 医生—科室关系 / 唯一数字详情 ID：{meta.get('candidate_membership_count', 0)} / {meta.get('census_unique_detail_count', 0)}；跨科室复用 ID：{meta.get('gdgh_cross_department_identity_count', 0)}。
@@ -10331,8 +10520,9 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 - 分页结论：{meta.get('pagination_method', '未记录')}。
 - 普通公开会话：{meta.get('standard_public_session', '未记录')}。
 - 详情清洗：排班片段排除 {meta.get('schedule_exclusion_count', 0)}，排名/患者片段排除 {meta.get('forbidden_segment_exclusion_count', 0)}，患者案例排除 {meta.get('patient_case_exclusion_count', 0)}；正式字段排班写入 {meta.get('schedule_field_ingested_count', 0)}、私用区字符 {meta.get('private_use_character_count', 0)}。
-- 10 张样本平均大小：{meta.get('photo_average_bytes', 0)} bytes；按护理排除后 {meta.get('photo_estimated_full_count', 0)} 人估算全院照片容量：{meta.get('photo_estimated_full_bytes', 0)} bytes。
-- 照片方案状态：`{meta.get('photo_policy_status', '未记录')}`；owner 未裁决压缩和宽度方案前，FULL 保持阻断。
+- 照片四数：应采 {meta.get('photo_expected_count', meta.get('photo_sample_count', 0))} / 实采 {meta.get('photo_downloaded_count', meta.get('photo_sample_count', 0))} / 失败 {meta.get('photo_failed_count', meta.get('photo_error_count', 0))} / 无照片 {meta.get('photo_no_source_count', 0)}。
+- 平均照片大小：{meta.get('photo_average_bytes', 0)} bytes；按护理排除后 {meta.get('photo_estimated_full_count', 0)} 人估算全院照片容量：{meta.get('photo_estimated_full_bytes', 0)} bytes。
+- 照片方案状态：`{meta.get('photo_policy_status', '未记录')}`；owner 已裁决原图不压缩、标准 Markdown 直接嵌入且不限宽，大图站点阈值为单张 >200KB 或宽 >800px 时另行回报。
 
 ### 分院/研究所归属证据
 
@@ -10340,7 +10530,7 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 |---|---|---|
 {gdgh_affiliate_lines}
 
-### 试采照片命名与校验对照
+### {run_label}照片命名与校验对照
 
 | 姓名 | 首个原子科室 | 主职称 | 文件名 | 字节数 | SHA-256 | 官网照片 |
 |---|---|---|---|---:|---|---|
@@ -10761,12 +10951,6 @@ def main() -> None:
             "确认质量可接受后，再增加 --allow-generic-append 全量追加统一总底表。"
         )
 
-    if target.adapter_id == GDGH_ADAPTER_ID and not args.trial_only:
-        raise RuntimeError(
-            "GDGH FULL 发布熔断：Issue #41 仅授权 10 人照片 TRIAL；"
-            "必须等待 owner 审计并明确裁决照片压缩和画像宽度方案后，才能开放 FULL_APPEND_AND_OBSIDIAN。"
-        )
-
     max_doctors = args.max_doctors or (10 if args.trial_only else None)
     if target.adapter_id == "gzzoc_drupal_doctor":
         payload = collect_gzzoc(target, args.today, max_doctors=max_doctors)
@@ -10787,7 +10971,12 @@ def main() -> None:
     elif target.adapter_id == FAHSYSU_ADAPTER_ID:
         payload = collect_fahsysu(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id == GDGH_ADAPTER_ID:
-        payload = collect_gdgh(target, args.today, max_doctors=max_doctors)
+        payload = collect_gdgh(
+            target,
+            args.today,
+            max_doctors=max_doctors,
+            full_mode=not args.trial_only,
+        )
     elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID}:
         payload = collect_generic(
             target,
@@ -10846,6 +11035,8 @@ def main() -> None:
         validate_fahsysu_trial(payload, expected_rows=max_doctors or 10)
     if target.adapter_id == GDGH_ADAPTER_ID and args.trial_only:
         validate_gdgh_trial(payload, expected_rows=max_doctors or 10)
+    if target.adapter_id == GDGH_ADAPTER_ID and not args.trial_only and not args.single_output:
+        validate_gdgh_full_append(payload)
 
     if target.adapter_id == FAHSYSU_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_fahsysu_full_append(payload)

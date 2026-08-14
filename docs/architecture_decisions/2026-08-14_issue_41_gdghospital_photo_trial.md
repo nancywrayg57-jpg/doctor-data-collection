@@ -143,35 +143,101 @@ TRIAL 前后以下文件的长度、UTC 修改时间和 SHA-256 完全一致：
 - 解决：将夹具改为 10 个合法中文测试姓名后重跑；123 项全部通过。
 - 防复发：门禁测试夹具必须满足与官网样本一致的核心字段口径，不能通过弱化生产校验让无效夹具通过。
 
-## 9. 当前停止点
+### 8.7 第一次 FULL 的零宽字符阻塞与部分照片清理
 
-提交代码、10 人 CSV/XLSX/JSON/报告/预览、10 张照片和本 ADR，通过非强制方式发布原分支并创建 `Closes #41` PR。CI 成功后恢复自动化并等待 owner 对 TRIAL、照片压缩和画像宽度方案审计；不得自行执行 FULL、生成正式画像、合并 PR、关闭 Issue 或领取下一 Issue。
+- 阻塞：owner 在 PR #42 明确 TRIAL `通过` 并下发 `FULL_APPEND_AND_OBSIDIAN` 后，第一次 FULL 在总底表写入前被姓名格式门禁拦截；11 个官网姓名含 `U+200B` 零宽字符。该次运行已下载 1,299 张未跟踪的部分照片，但 XLSX、CSV 和更新报告的基线 SHA-256 均未变化。
+- 根因：全局 `clean_text` 没有移除 `U+200B/U+200C/U+200D/U+FEFF`，官网不可见格式字符因此进入 GDGH 姓名校验；采集写表门禁正常阻止了不合规数据落盘。
+- 解决：只新增 GDGH 专用 `gdgh_clean_text`，不改变其他医院既有清洗口径；先用精确目录 dry-run 核验，再仅清理 `医生画像仓库/01_试点医院/广东省人民医院/照片/` 中 1,299 张未跟踪部分照片，保留已跟踪的 10 张 TRIAL 照片。第二次 FULL 为熔断前最后一次授权尝试，成功完成写入。
+- 防复发：专用适配器在姓名、科室、职称和正文进入门禁前统一做不可见格式字符探针；任何 FULL 失败先比较受保护总底表 SHA，再按精确目录区分已跟踪样本与未跟踪部分下载，禁止宽泛清理或第三次盲目重跑。
+
+### 8.8 工作簿表名与 Markdown 图片引用的验证误报
+
+- 阻塞：临时 artifact-tool 核验脚本首次沿用旧交接中的 5 表名称，现场工作簿实际为 6 表；画像生成后，简化正则又把 18 条文件名含成对半角括号的图片引用误判为路径提前闭合。
+- 根因：验证器假设落后于现场工件；CommonMark 允许链接目标中出现平衡括号，正则不能替代 Markdown 解析器。
+- 解决：先通过 workbook inspect 动态确认 6 张表，再修正核验范围；图片引用改用 bundled `marked` 的 Markdown AST 全量解析，1,309 条引用全部解析到正确相对路径，未修改任何图片文件名或画像正文。
+- 防复发：工作簿验证先枚举真实 sheet，再按现有名称建立范围；Markdown 链接和图片必须用语法解析器核验，正则只用于快速定位，不作为最终门禁。
+
+### 8.9 大批量 Git Data API Create Tree 超时
+
+- 阻塞：2,614 个唯一变更 blob 均已上传并逐 SHA 校验，但把 2,624 条长路径变更一次性平铺提交到 `POST /git/trees` 时，GitHub 连续返回 502，最终返回 504；目标 tree 查询为 404，远端分支仍停在父提交 `7ece6f5765e3fdb93834eca34d3b109ddc77d9cf`，没有产生半发布状态。
+- 根因：单次 Create Tree 请求同时包含 1,299 个新增照片路径和 1,310 个画像路径，长中文路径形成的大型平铺 JSON 在 GitHub 边缘/服务端超时；blob、身份、权限和本地 Git tree 均已独立验证，不是数据对象错误。
+- 第一次恢复尝试：保留 blob SHA 检查点并改为分层 tree。1,309 项照片子树创建成功，SHA 为 `7578865e12250356d064f27197a294d7a8ea4e34`；但包含 1,311 项的广东省人民医院画像目录子树仍连续出现网络错误、502/504，最终返回 422 `input was too large to process`。目标 root tree 和远端 ref 均未生成或更新。
+- 解决：上述平铺与分层方案构成连续两次发布修复失败，按熔断规则停止 Git Data API 写入。管理员于 2026-08-14 明确授权改用 SSH；本轮仅在再次确认身份为 `xtzhou247`、远端 ref 仍为 `7ece6f5765e3fdb93834eca34d3b109ddc77d9cf`、新提交 parent 等于该 ref 后，执行一次不带 force 的 SSH fast-forward push。
+- 防复发：超过 1,000 个长路径文件时，不再把 Git Data API Create Tree 作为默认发布通道；优先使用管理员已授权且能由服务端原子校验 fast-forward 的 SSH 非强制 push。任何传输失败先查询远端 ref 和 PR head，确认是否已落地后再决定是否重试；禁止 force push，保留 `.codex_tmp/issue41-publish/` 检查点直到远端 tree 与本地 tree 一致。
+
+## 9. FULL 追加结果
+
+owner 审计与授权：`https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/42#issuecomment-5289100722`。当前院照片政策为 `OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT`：保留官网原图、不压缩、画像使用标准 Markdown 直接嵌入且不限宽。
+
+### 9.1 逐 ID 与身份归并闭环
+
+| 指标 | 结果 |
+|---|---:|
+| 顶层分组 | 26 |
+| 科室 | 83 |
+| 官网关系/唯一详情 ID | 1,343 |
+| 纯护理排除 | 9 |
+| 合规详情 ID | 1,334 |
+| 最终医生身份 | 1,309 |
+| 身份归并减少 | 25 |
+| 详情失败 | 0 |
+
+机器闭环结果：1,334 个合规详情 ID 在身份归并表中出现 1,334 次且唯一；再与 9 个护理排除 ID 合并后得到 1,343 个唯一 ID，交集为 0。最终 1,309 行中唯一来源链接 1,309 个、唯一姓名 1,274 个；同名实质不同身份继续分行并保留 `同名待甄别`。
+
+### 9.2 总底表结果
+
+- 总记录从 6,092 增至 7,401，新增 1,309、重复跳过 0、既有刷新 0；当前 17 家医院、25 列。
+- 广东省人民医院 1,309 行；异常提示不为空 168 行。提示汇总：`同名待甄别` 69、`职称/身份需人工复核` 102、`多详情职称不一致` 2、`详情正文为空或未识别` 3；同一行可含多个提示。
+- 更新后 SHA-256：XLSX `F7F574988CEED831ACBE08E86A7B4DF9FCC998020F984880C9F8E4A98973309F`；CSV `149E4F14446204C65F54B5A85F5A31917DB14A03DAC1C9D14470C7AEA4AFDB0D`；更新报告 `ED26448B9A6C6F76FE09E75D96A452126073C8635F49789D39895B3D814497AB`。
+
+### 9.3 照片四数与大图实况
+
+| 照片应采 | 实采 | 失败 | 无照片 |
+|---:|---:|---:|---:|
+| 1,309 | 1,309 | 0 | 0 |
+
+- 文件总字节数 18,942,264，平均 14,471 bytes；1,309 个文件与 payload 的字节数、SHA-256、扩展名魔数全部一致。
+- 格式分布：JPEG 1,296、GIF 12、PNG 1。
+- 最大文件为 `袁凯旋-检验科-主管技师-广东省人民医院.png`，1,340,291 bytes、896×1,152；另有 `梁盛华-心外科-医师-广东省人民医院.jpg` 为 1,279×1,700、93,215 bytes。两张均已视觉确认是官网单人职业照；本院按 owner 已明确的原图不压缩、不限宽政策保留，后续医院仍执行“大于 200KB 或宽度大于 800px 先回报”的新院门禁。
+
+## 10. Obsidian 与工作簿终检
+
+- 使用 `--hospital 广东省人民医院 --generate-missing-only` 新生成 1,309 份医生画像，刷新 0、跳过 0，并生成 `_索引.md`。
+- Markdown AST 核验：1,309 个唯一来源、1,309 条标准相对图片引用、1,309 个真实照片文件；不安全路径 0、缺图 0、错配 0。
+- 索引核验：1,309 条唯一画像链接，缺失目标 0、未入索引画像 0；索引记录异常提示不为空 168。
+- artifact-tool 终检：6 张工作表、6 个表对象；`自动采集底表` 7,402 行含表头、25 列；`复核清单` 691 行含表头、25 列；公式错误扫描 0。6 张表均完成渲染检查，未发现截断关键表头、破损区域或不可读布局。
+
+## 11. 当前停止点
+
+FULL 代码、1,309 行总底表增量、全量 payload/报告、1,309 张照片、1,309 份画像、索引、补充生成报告和本 ADR 已精确暂存并提交。按管理员本轮明确授权，改用 SSH 对原分支执行一次非强制 fast-forward push；推送后必须核验 GitHub branch ref、PR #42 `headRefOid` 和远端 tree 均与本地一致。仅在推送成功后清理 `.codex_tmp/issue41-publish/` 检查点；CI 成功后在 PR #42 请求 owner 最终画像审计并恢复自动化。不得自行合并 PR、关闭 Issue 或领取下一 Issue。
 
 <Handoff_State>
-Target: Issue #41 广东省人民医院照片采集首发 TRIAL
+Target: Issue #41 广东省人民医院 FULL_APPEND_AND_OBSIDIAN
 AgentConstitution: D:\workspace\信息收集整理\Agent.md
 RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/41
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/42
 Branch: codex/mhrj/issue-41-gdghospital-photo-trial
-Phase: TRIAL_AWAITING_OWNER_AUDIT
+Phase: FULL_READY_TO_SSH_PUSH
 Completed:
-- 官网完整普查：26 分组、83 科室、1,343 关系/唯一 ID、9 纯护理排除、1,334 合规候选
-- 10 人/10 科室 TRIAL，10 张官网本人职业照，详情和照片失败均为 0
-- 新增照片 Schema、GDGH 专用适配器、工作簿照片列、Obsidian 相对图片引用能力和 FULL 硬熔断
-- 总底表 XLSX/CSV/更新报告长度、时间戳和 SHA-256 前后完全一致
-- 123 项单测、5 表视觉核验、10 图视觉核验和 FULL 负向门禁通过
+- 1,343 唯一详情 ID 闭环：9 护理排除、1,334 合规详情、1,309 最终身份、详情失败 0
+- 总底表新增 1,309，达到 17 家医院、7,401 位医生、25 列
+- 照片四数 1,309/1,309/0/0，字节、SHA-256、魔数全量一致
+- 新生成 1,309 份画像；1,309 个索引链接和 1,309 个安全图片引用闭环
+- 更新后 6 张工作表结构、公式错误和视觉终检通过
 Next:
-- owner 审计 TRIAL 字段、分院归属、照片样本、容量估算和压缩/宽度方案
-- 只有 owner 明确通过并下发 FULL_APPEND_AND_OBSIDIAN 后才解除 FULL 熔断
+- 将本 ADR amend 进既有 FULL 提交；复核身份、远端 ref 与提交 parent 后执行一次 SSH 非强制 fast-forward push
+- 推送后核验 branch ref、PR head 和 tree；成功后精确清理发布检查点
+- CI 成功后请求 owner 最终画像审计并等待，不得自行合并或关闭
 Constraints:
 - 仅官网公开页面和本人职业照；禁第三方、患者影像/案例/评价、隐私、登录/验证码规避
-- 不写总底表、不生成正式画像、不自行合并 PR 或关闭 Issue
+- 本院照片原图不压缩、画像不限宽；后续医院大图阈值重新回报
+- 不自行合并 PR、关闭 Issue 或领取下一 Issue
 Artifacts:
-- D:\workspace\信息收集整理\work\广东省人民医院_trial_payload.json
-- D:\workspace\信息收集整理\work\广东省人民医院_trial_doctors.csv
-- D:\workspace\信息收集整理\work\广东省人民医院_trial_doctors.xlsx
-- D:\workspace\信息收集整理\work\广东省人民医院_trial_report.md
-- D:\workspace\信息收集整理\work\广东省人民医院_official_doctors_preview.png
-- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广东省人民医院\照片
+- D:\workspace\信息收集整理\work\广东省人民医院_official_doctors_payload.json
+- D:\workspace\信息收集整理\work\广东省人民医院_official_doctors_report.md
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.csv
+- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广东省人民医院
 </Handoff_State>
