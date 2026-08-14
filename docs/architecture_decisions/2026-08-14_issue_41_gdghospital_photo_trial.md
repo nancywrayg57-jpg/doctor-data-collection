@@ -119,7 +119,8 @@ TRIAL 前后以下文件的长度、UTC 修改时间和 SHA-256 完全一致：
 - 阻塞：系统 `python.exe` 指向 Windows Store 占位符，默认解释器不能稳定加载本项目依赖。
 - 根因：PATH 中的占位符不是实际运行时；依赖位于 Codex bundled runtime 和已验证的临时 Python 包目录。
 - 解决：固定使用 `C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe`，并仅为本轮命令设置已验证 `PYTHONPATH`。
-- 防复发：每次先核验解释器绝对路径和依赖导入；不安装全局包、不修改系统 PATH、不把临时路径写入仓库配置。
+- 本轮复发快速恢复：bundled Python 可执行文件存在，但直接运行测试仍因缺少 `requests` 中止；现场确认 `C:\Users\Administrator\AppData\Local\Temp\codex-doctor-trial2-6e103c2f32134fb28cb233887b5034b1` 同时包含 `requests`、`bs4`、`openpyxl` 后，仅对测试进程设置该目录为 `PYTHONPATH`，先执行三模块导入探针，再重跑得到 123 项通过。
+- 防复发：先调用 workspace dependency loader 定位解释器；若导入探针失败，只读查找任务临时依赖目录并用 `Test-Path` 同时核验 `requests`、`bs4`、`openpyxl`，仅设置进程级 `PYTHONPATH`。临时目录不存在时停止并重新建立任务级依赖环境，不安装全局包、不修改系统 PATH、不把临时路径写入仓库配置。
 
 ### 8.4 artifact-tool 模块解析
 
