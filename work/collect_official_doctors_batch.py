@@ -264,6 +264,12 @@ GDGH_EXPECTED_GROUP_COUNT = 26
 GDGH_EXPECTED_DEPARTMENT_COUNT = 83
 GDGH_EXPECTED_RELATION_COUNT = 1343
 GDGH_EXPECTED_NURSING_COUNT = 9
+GDMCH_ADAPTER_ID = "gdmch_paginated_expert_photo"
+GDMCH_EXPECTED_PAGE_COUNT = 111
+GDMCH_EXPECTED_RELATION_COUNT = 884
+GDMCH_EXPECTED_NON_DOCTOR_COUNT = 49
+GDMCH_EXPECTED_PHOTO_AVAILABLE_COUNT = 658
+GDMCH_EXPECTED_DEFAULT_PHOTO_COUNT = 225
 FAHSYSU_EXPECTED_SAME_NAME_GROUPS = {
     "庄锦涛": ["29148", "31480"],
     "涂响安": ["735", "31481"],
@@ -1170,6 +1176,13 @@ def dedicated_adapter_for(entry_url: str) -> str:
         and not parsed.fragment
     ):
         return GDGH_ADAPTER_ID
+    if (
+        host.removeprefix("www.") == "e3861.com"
+        and path.rstrip("/") == "/keshizhuanjia/zhuanjiajieshao"
+        and not parsed.query
+        and not parsed.fragment
+    ):
+        return GDMCH_ADAPTER_ID
     if "gzzoc.org.cn" in host and "/expert-introduction" in path:
         return "gzzoc_drupal_doctor"
     if "nbkjyy.mil.cn" in host and "/expert" in path:
@@ -4464,6 +4477,787 @@ def collect_gdgh(
         ],
         "gdgh_detail_reconciliation": detail_reconciliation,
         "gdgh_identity_reconciliation": identity_reconciliation,
+        "photo_samples": photo_samples,
+        "photo_errors": photo_errors,
+        "category_errors": category_errors,
+        "detail_errors": detail_errors,
+        "category_counts": category_counter.most_common(),
+        "priority_counts": dict(priority_counter),
+        "group_counts": dict(group_counter),
+        "warning_counts": dict(warning_counter),
+        "rows": rows,
+    }
+
+
+def gdmch_detail_id(url: str | None) -> str:
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "e3861.com" or parsed.query or parsed.fragment:
+        return ""
+    match = re.fullmatch(
+        r"/keshizhuanjia/zhuanjiajieshao/(\d+)\.html",
+        parsed.path,
+        flags=re.IGNORECASE,
+    )
+    return match.group(1) if match else ""
+
+
+def gdmch_photo_url(value: str | None, base_url: str) -> str:
+    absolute = urljoin(base_url, clean_text(value))
+    parsed = urlparse(absolute)
+    if (
+        parsed.scheme != "https"
+        or parsed.netloc.lower() != "wx.e3861.com"
+        or not parsed.path.lower().startswith("/sfyadmin/images/doctor/")
+        or parsed.query
+        or parsed.fragment
+    ):
+        return ""
+    return absolute
+
+
+def gdmch_list_page_url(entry_url: str, page_number: int) -> str:
+    if page_number <= 1:
+        return entry_url
+    parsed = urlparse(entry_url)
+    return urlunparse(
+        parsed._replace(
+            query=urlencode(
+                {
+                    "searchDoctor": "",
+                    "searchDepartment": "",
+                    "page": page_number,
+                }
+            )
+        )
+    )
+
+
+def discover_gdmch_page_count(html: str, entry_url: str) -> int:
+    soup = BeautifulSoup(html, "html.parser")
+    pages = {1}
+    for anchor in soup.select(".paged a[href]"):
+        candidate = urljoin(entry_url, str(anchor.get("href") or ""))
+        parsed = urlparse(candidate)
+        if comparable_host(candidate) != "e3861.com":
+            continue
+        if parsed.path.rstrip("/").lower() != "/keshizhuanjia/zhuanjiajieshao":
+            continue
+        query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+        value = clean_text(query.get("page"))
+        if value.isdigit():
+            pages.add(int(value))
+    return max(pages)
+
+
+def parse_gdmch_list_page(html: str, page_url: str, page_number: int) -> list[dict[str, str]]:
+    soup = BeautifulSoup(html, "html.parser")
+    rows: list[dict[str, str]] = []
+    seen_ids: set[str] = set()
+    for anchor in soup.select(".expert ul.list a.item[href]"):
+        source_link = urljoin(page_url, str(anchor.get("href") or ""))
+        detail_id = gdmch_detail_id(source_link)
+        if not detail_id or detail_id in seen_ids:
+            continue
+        name_node = anchor.select_one(".right .title")
+        title_node = anchor.select_one(".right .desc")
+        photo_node = anchor.select_one(".img-box img")
+        name = gdgh_clean_text(name_node.get_text(" ", strip=True) if name_node else "")
+        title = gdgh_clean_text(title_node.get_text(" ", strip=True) if title_node else "")
+        photo_url = gdmch_photo_url(
+            str(photo_node.get("src") or "") if photo_node else "",
+            page_url,
+        )
+        if not name:
+            continue
+        seen_ids.add(detail_id)
+        rows.append(
+            {
+                "id": detail_id,
+                "name": name,
+                "list_title": title,
+                "source_link": source_link,
+                "photo_url": photo_url,
+                "list_page": str(page_number),
+                "list_page_url": page_url,
+            }
+        )
+    return rows
+
+
+GDMCH_NON_DOCTOR_NAME_MARKERS = (
+    "号",
+    "门诊",
+    "筛查",
+    "管理员",
+    "test",
+    "咨询医生",
+    "手术评估",
+    "随访",
+)
+
+
+def gdmch_non_doctor_card(name: str | None, title: str | None) -> bool:
+    candidate = gdgh_clean_text(name)
+    if not looks_like_person_name(candidate):
+        return True
+    if any(marker.casefold() in candidate.casefold() for marker in GDMCH_NON_DOCTOR_NAME_MARKERS):
+        return True
+    return gyfyyy_nursing_only_identity(title)
+
+
+GDMCH_SCHEDULE_HEADING_PATTERN = re.compile(
+    r"(?:出诊时间|出诊安排|门诊时间|开诊时间)\s*[:：]?"
+)
+
+
+def strip_gdmch_schedule_tail(value: str | None) -> tuple[str, bool]:
+    text = gdgh_clean_text(value)
+    match = GDMCH_SCHEDULE_HEADING_PATTERN.search(text)
+    if not match:
+        return text, False
+    return gdgh_clean_text(text[: match.start()]), True
+
+
+def parse_gdmch_detail(html: str, fallback: dict[str, str]) -> dict[str, Any]:
+    soup = BeautifulSoup(html, "html.parser")
+    container = soup.select_one(".expert-detail")
+    if not container:
+        return {
+            "name": fallback.get("name", ""),
+            "title": fallback.get("list_title", ""),
+            "departments": [],
+            "campuses": [],
+            "specialty": "",
+            "profile_text": "",
+            "photo_url": fallback.get("photo_url", ""),
+            "schedule_exclusion_count": 0,
+            "forbidden_segment_count": 0,
+            "patient_case_exclusion_count": 0,
+        }
+
+    labeled: dict[str, str] = {}
+    for info in container.select(".detail-head .info"):
+        spans = info.find_all("span")
+        if len(spans) < 2:
+            continue
+        label = gdgh_clean_text(spans[0].get_text(" ", strip=True)).rstrip("：:")
+        value = gdgh_clean_text(" ".join(span.get_text(" ", strip=True) for span in spans[1:]))
+        if label:
+            labeled[label] = value
+
+    schedule = labeled.get("出诊安排", "")
+    normalized_schedule = schedule.replace("(", "（").replace(")", "）")
+    department_campus_pairs = re.findall(
+        r"（([^（）]+?)（(番禺|越秀|天河|清远)））",
+        normalized_schedule,
+    )
+    departments: list[str] = []
+    campuses: list[str] = []
+    for clinic, campus in department_campus_pairs:
+        department = gdgh_clean_text(
+            re.sub(r"(?:专家门诊|专科门诊|普通门诊|门诊)$", "", clinic)
+        )
+        campus_name = f"{campus}院区"
+        if department and department not in departments:
+            departments.append(department)
+        if campus_name not in campuses:
+            campuses.append(campus_name)
+
+    content_node = container.select_one(".content-box .content")
+    raw_segments = (
+        [
+            gdgh_clean_text(segment)
+            for segment in content_node.get_text("\n", strip=True).splitlines()
+            if gdgh_clean_text(segment)
+        ]
+        if content_node
+        else []
+    )
+    kept_segments: list[str] = []
+    forbidden_segment_count = 0
+    patient_case_exclusion_count = 0
+    schedule_content_exclusion_count = 0
+    for segment in raw_segments:
+        segment, schedule_removed = strip_gdmch_schedule_tail(segment)
+        schedule_content_exclusion_count += int(schedule_removed)
+        if not segment:
+            if schedule_removed:
+                break
+            continue
+        if any(marker in segment for marker in GDGH_FORBIDDEN_SENTENCE_MARKERS):
+            forbidden_segment_count += 1
+            continue
+        if contains_gzbrain_patient_case_text(segment):
+            patient_case_exclusion_count += 1
+            continue
+        cleaned = strip_profile_navigation_text(segment)
+        if cleaned:
+            kept_segments.append(cleaned)
+        if schedule_removed:
+            break
+
+    specialty = ""
+    for segment in kept_segments:
+        match = re.search(
+            r"(?:专业专长|专业特长|擅长|专长)\s*[:：]\s*(.+)",
+            segment,
+        )
+        if match:
+            specialty = gdgh_clean_text(match.group(1))
+            break
+    profile_text = clip(" ".join(kept_segments), 1800)
+    image_node = container.select_one(".detail-head .img-box img")
+    detail_photo = gdmch_photo_url(
+        str(image_node.get("src") or "") if image_node else "",
+        fallback.get("source_link", ""),
+    )
+    return {
+        "name": first_nonempty(labeled.get("姓名"), fallback.get("name")),
+        "title": first_nonempty(labeled.get("职称"), fallback.get("list_title")),
+        "departments": departments,
+        "campuses": campuses,
+        "specialty": specialty,
+        "profile_text": profile_text,
+        "photo_url": first_nonempty(detail_photo, fallback.get("photo_url")),
+        "schedule_exclusion_count": int(bool(schedule)) + schedule_content_exclusion_count,
+        "forbidden_segment_count": forbidden_segment_count,
+        "patient_case_exclusion_count": patient_case_exclusion_count,
+    }
+
+
+def select_gdmch_trial_doctors(
+    doctors: list[dict[str, str]], max_doctors: int | None
+) -> list[dict[str, str]]:
+    if not max_doctors or len(doctors) <= max_doctors:
+        return doctors[:]
+    if max_doctors == 1:
+        return doctors[:1]
+    target_pages = [
+        round(1 + index * (GDMCH_EXPECTED_PAGE_COUNT - 1) / (max_doctors - 1))
+        for index in range(max_doctors)
+    ]
+    selected: list[dict[str, str]] = []
+    selected_ids: set[str] = set()
+    for target_page in target_pages:
+        candidates = sorted(
+            doctors,
+            key=lambda item: (
+                abs(int(item["list_page"]) - target_page),
+                int(item["list_page"]),
+                int(item["id"]),
+            ),
+        )
+        for item in candidates:
+            if item["id"] not in selected_ids:
+                selected.append(item)
+                selected_ids.add(item["id"])
+                break
+    return selected[:max_doctors]
+
+
+GDMCH_CAMPUS_SUFFIX_PATTERN = re.compile(
+    r"（(?:番禺|越秀|天河|清远)院区"
+    r"(?:、(?:番禺|越秀|天河|清远)院区)*）$"
+)
+
+
+def gdmch_covered_department_names(rows: list[dict[str, Any]]) -> list[str]:
+    departments: set[str] = set()
+    for row in rows:
+        value = clean_text(str(row.get("科室_分类页") or ""))
+        value = GDMCH_CAMPUS_SUFFIX_PATTERN.sub("", value)
+        for department in re.split(r"[、,，;/；|]+", value):
+            department = clean_text(department)
+            if department:
+                departments.add(department)
+    return sorted(departments)
+
+
+def gdmch_photo_dimensions(content: bytes, extension: str) -> tuple[int, int]:
+    if extension == "png" and len(content) >= 24:
+        return int.from_bytes(content[16:20], "big"), int.from_bytes(content[20:24], "big")
+    if extension == "gif" and len(content) >= 10:
+        return int.from_bytes(content[6:8], "little"), int.from_bytes(content[8:10], "little")
+    if extension == "jpg" and content.startswith(b"\xff\xd8"):
+        offset = 2
+        sof_markers = {0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF}
+        while offset + 8 < len(content):
+            if content[offset] != 0xFF:
+                offset += 1
+                continue
+            marker = content[offset + 1]
+            if marker in sof_markers:
+                height = int.from_bytes(content[offset + 5 : offset + 7], "big")
+                width = int.from_bytes(content[offset + 7 : offset + 9], "big")
+                return width, height
+            if marker in {0xD8, 0xD9}:
+                offset += 2
+                continue
+            segment_length = int.from_bytes(content[offset + 2 : offset + 4], "big")
+            if segment_length < 2:
+                break
+            offset += 2 + segment_length
+    if extension == "webp" and len(content) >= 30 and content[:4] == b"RIFF":
+        chunk = content[12:16]
+        if chunk == b"VP8X":
+            return (
+                1 + int.from_bytes(content[24:27], "little"),
+                1 + int.from_bytes(content[27:30], "little"),
+            )
+        if chunk == b"VP8 " and content[23:26] == b"\x9d\x01\x2a":
+            return (
+                int.from_bytes(content[26:28], "little") & 0x3FFF,
+                int.from_bytes(content[28:30], "little") & 0x3FFF,
+            )
+    return 0, 0
+
+
+def download_gdmch_photo(
+    session: requests.Session,
+    photo_url: str,
+    photo_dir: Path,
+    filename_stem: str,
+    detail_id: str,
+    used_filenames: set[str],
+) -> dict[str, Any]:
+    official_url = gdmch_photo_url(photo_url, photo_url)
+    if not official_url:
+        raise RuntimeError(f"照片 URL 不属于医院官方 wx.e3861.com 医生图片路径：{photo_url}")
+    response = session.get(official_url, timeout=30)
+    if response.status_code != 200:
+        raise RuntimeError(f"照片下载 HTTP {response.status_code}：{official_url}")
+    extension = gdgh_photo_extension(response.content, response.headers.get("Content-Type"))
+    if not extension:
+        raise RuntimeError(f"照片响应格式不受支持：{official_url}")
+    filename = f"{filename_stem}.{extension}"
+    if filename.casefold() in used_filenames:
+        filename = f"{filename_stem}-{gdgh_photo_part(detail_id)}.{extension}"
+    used_filenames.add(filename.casefold())
+    photo_dir.mkdir(parents=True, exist_ok=True)
+    path = photo_dir / filename
+    if path.exists() and path.read_bytes() != response.content:
+        raise RuntimeError(f"照片目标已存在且内容不同，拒绝覆盖：{path}")
+    path.write_bytes(response.content)
+    width, height = gdmch_photo_dimensions(response.content, extension)
+    if width <= 0 or height <= 0:
+        raise RuntimeError(f"照片尺寸无法从原图解析：{official_url}")
+    return {
+        "photo_url": official_url,
+        "filename": filename,
+        "bytes": len(response.content),
+        "sha256": hashlib.sha256(response.content).hexdigest(),
+        "width": width,
+        "height": height,
+        "disk_path": str(path),
+    }
+
+
+def parse_gdmch_campuses(html: str, base_url: str) -> list[dict[str, str]]:
+    soup = BeautifulSoup(html, "html.parser")
+    campuses: list[dict[str, str]] = []
+    for anchor in soup.select("a[href]"):
+        name = gdgh_clean_text(anchor.get_text(" ", strip=True))
+        if name not in {"番禺院区", "越秀院区", "天河院区", "清远院区"}:
+            continue
+        url = urljoin(base_url, str(anchor.get("href") or ""))
+        if comparable_host(url) != "e3861.com":
+            continue
+        if name not in {item["name"] for item in campuses}:
+            campuses.append({"name": name, "url": url})
+    return campuses
+
+
+def collect_gdmch(
+    target: HospitalTarget,
+    today: str,
+    max_doctors: int | None = None,
+    photo_root: Path | None = None,
+) -> dict[str, Any]:
+    session = create_official_session()
+    entry_status, entry_html, entry_error = fetch(session, target.entry_url)
+    if entry_status != 200:
+        raise RuntimeError(f"入口页普通公开 GET 读取失败：{entry_error}")
+    page_count = discover_gdmch_page_count(entry_html, target.entry_url)
+    relations: list[dict[str, str]] = []
+    categories: list[dict[str, str]] = []
+    category_errors: list[dict[str, str]] = []
+    for page_number in range(1, page_count + 1):
+        page_url = gdmch_list_page_url(target.entry_url, page_number)
+        if page_number == 1:
+            status, html, error = entry_status, entry_html, ""
+        else:
+            status, html, error = fetch(session, page_url)
+        if status != 200:
+            category_errors.append(
+                {"page": str(page_number), "url": page_url, "error": error}
+            )
+            continue
+        page_rows = parse_gdmch_list_page(html, page_url, page_number)
+        relations.extend(page_rows)
+        categories.append(
+            {
+                "category_id": str(page_number),
+                "category_name": f"专家目录第{page_number}页",
+                "url": page_url,
+                "row_count": str(len(page_rows)),
+            }
+        )
+        if page_number % 20 == 0:
+            print(f"GDMCH pages: {page_number}/{page_count}")
+        time.sleep(0.08)
+    if category_errors:
+        raise RuntimeError(f"官网 111 页普查不完整：{len(category_errors)} 页读取失败")
+
+    by_id: dict[str, dict[str, str]] = {}
+    for relation in relations:
+        by_id.setdefault(relation["id"], relation)
+    all_doctors = list(by_id.values())
+    excluded_candidates: list[dict[str, str]] = []
+    eligible_doctors: list[dict[str, str]] = []
+    for item in all_doctors:
+        if gdmch_non_doctor_card(item["name"], item["list_title"]):
+            excluded_candidates.append(
+                {
+                    "detail_id": item["id"],
+                    "name": item["name"],
+                    "list_title": item["list_title"],
+                    "entry_url": item["list_page_url"],
+                    "source_link": item["source_link"],
+                    "reason": "官网目录卡片为号源/系统账号/非姓名或护理身份，排除医生画像范围",
+                }
+            )
+        else:
+            eligible_doctors.append(item)
+
+    photo_eligible_doctors = [item for item in eligible_doctors if item["photo_url"]]
+    selected_doctors = select_gdmch_trial_doctors(photo_eligible_doctors, max_doctors)
+    existing_links = collect_existing_profile_links()
+    rows: list[dict[str, Any]] = []
+    detail_errors: list[dict[str, str]] = []
+    detail_reconciliation: list[dict[str, Any]] = []
+    schedule_exclusion_count = 0
+    forbidden_segment_count = 0
+    patient_case_exclusion_count = 0
+    for item in selected_doctors:
+        status, html, error = fetch(session, item["source_link"])
+        if status == 200:
+            detail = parse_gdmch_detail(html, item)
+        else:
+            detail_errors.append({"source_link": item["source_link"], "error": error})
+            detail = {
+                "name": item["name"],
+                "title": item["list_title"],
+                "departments": [],
+                "campuses": [],
+                "specialty": "",
+                "profile_text": "",
+                "photo_url": item["photo_url"],
+                "schedule_exclusion_count": 0,
+                "forbidden_segment_count": 0,
+                "patient_case_exclusion_count": 0,
+            }
+        name = gdgh_clean_text(str(detail.get("name") or item["name"]))
+        title_identity = gdgh_clean_text(str(detail.get("title") or item["list_title"]))
+        departments = list(detail.get("departments") or [])
+        campuses = list(detail.get("campuses") or [])
+        department = "、".join(departments)
+        department_with_campus = department
+        if campuses:
+            department_with_campus += f"（{'、'.join(campuses)}）"
+        specialty = gdgh_clean_text(str(detail.get("specialty") or ""))
+        profile_text = gdgh_clean_text(str(detail.get("profile_text") or ""))
+        schedule_exclusion_count += int(detail.get("schedule_exclusion_count") or 0)
+        forbidden_segment_count += int(detail.get("forbidden_segment_count") or 0)
+        patient_case_exclusion_count += int(detail.get("patient_case_exclusion_count") or 0)
+        combined_text = "\n".join(
+            [target.hospital, department, title_identity, specialty, profile_text]
+        )
+        title_hits = extract_terms(title_identity, TITLE_TERMS)
+        groups_found, tags = group_tags(combined_text)
+        warnings: list[str] = []
+        if status != 200:
+            warnings.append("详情页读取失败")
+        if not looks_like_person_name(name):
+            warnings.append("非医生页面或姓名异常")
+        if name != item["name"]:
+            warnings.append("列表与详情姓名不一致")
+        if not department:
+            warnings.append("科室需人工复核")
+        if not title_hits:
+            warnings.append("职称/身份需人工复核")
+        if not specialty and not profile_text:
+            warnings.append("详情正文为空或未识别")
+        if warnings:
+            groups_found, tags = [], []
+        priority = "普通"
+        if not warnings and (
+            any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups_found
+        ):
+            priority = "高"
+        elif not warnings and any(term != "医师" for term in title_hits):
+            priority = "中"
+        rows.append(
+            {
+                "序号": len(rows) + 1,
+                "医院": target.hospital,
+                "姓名": name,
+                "科室_分类页": department_with_campus,
+                "科室_列表卡片": "",
+                "职称_关键词": "、".join(title_hits),
+                "职称身份原文": clip(title_identity, 500),
+                "重点优先级": priority,
+                "重点关注范围": "、".join(groups_found),
+                "重点疾病标签": "、".join(tags),
+                "擅长诊疗方向摘录": specialty,
+                "亮眼经历线索": extract_clean_highlights(profile_text),
+                "列表简介": "",
+                "详情正文摘录": profile_text,
+                "来源类型": "医院官网",
+                "来源链接": item["source_link"],
+                "照片链接": "",
+                "照片文件": "",
+                "采集入口": target.entry_url,
+                "采集方式": "官网 111 页服务端目录+严格数字 ID 详情 DOM+官方子域本人职业照",
+                "采集日期": today,
+                "详情页状态": "200" if status == 200 else "失败",
+                "已建画像": "是" if canonical_url(item["source_link"]) in existing_links else "否",
+                "异常提示": "；".join(dict.fromkeys(warnings)),
+                "复核状态": "待人工复核",
+                "_gdmch_detail_id": item["id"],
+                "_gdmch_photo_url": gdgh_clean_text(str(detail.get("photo_url") or "")),
+                "_gdmch_first_department": departments[0] if departments else "",
+            }
+        )
+        detail_reconciliation.append(
+            {
+                "detail_id": item["id"],
+                "name": name,
+                "departments": departments,
+                "campuses": campuses,
+                "source_link": item["source_link"],
+                "photo_url": gdgh_clean_text(str(detail.get("photo_url") or "")),
+                "resolution": "详情已读取" if status == 200 else "详情读取失败",
+            }
+        )
+        time.sleep(0.1)
+
+    photo_dir = photo_root or (VAULT / "01_试点医院" / target.hospital / "照片")
+    used_filenames: set[str] = set()
+    photo_samples: list[dict[str, Any]] = []
+    photo_errors: list[dict[str, str]] = []
+    photo_no_source_count = 0
+    for index, row in enumerate(rows, start=1):
+        row["序号"] = index
+        detail_id = clean_text(str(row.pop("_gdmch_detail_id", "")))
+        photo_url = clean_text(str(row.pop("_gdmch_photo_url", "")))
+        first_department = clean_text(str(row.pop("_gdmch_first_department", "")))
+        if not photo_url:
+            photo_no_source_count += 1
+            continue
+        stem = "-".join(
+            [
+                gdgh_photo_part(row.get("姓名")),
+                gdgh_photo_part(first_department),
+                gdgh_photo_part(gdgh_primary_title(row.get("职称身份原文"))),
+                gdgh_photo_part(target.hospital),
+            ]
+        )
+        try:
+            photo = download_gdmch_photo(
+                session, photo_url, photo_dir, stem, detail_id, used_filenames
+            )
+        except Exception as exc:  # noqa: BLE001 - retain per-photo failure evidence
+            photo_errors.append(
+                {
+                    "name": row["姓名"],
+                    "detail_id": detail_id,
+                    "source_link": row["来源链接"],
+                    "photo_url": photo_url,
+                    "error": str(exc),
+                }
+            )
+            row["异常提示"] = "；".join(
+                dict.fromkeys(
+                    [
+                        *clean_text(str(row.get("异常提示") or "")).split("；"),
+                        "照片获取失败",
+                    ]
+                )
+            ).strip("；")
+            row["重点优先级"] = "普通"
+            row["重点关注范围"] = ""
+            row["重点疾病标签"] = ""
+            continue
+        relative_path = (
+            Path("01_试点医院") / target.hospital / "照片" / photo["filename"]
+        ).as_posix()
+        row["照片链接"] = photo["photo_url"]
+        row["照片文件"] = relative_path
+        photo_samples.append(
+            {
+                "name": row["姓名"],
+                "department": first_department or "未标注",
+                "title": gdgh_primary_title(row["职称身份原文"]) or "未标注",
+                "detail_id": detail_id,
+                "source_link": row["来源链接"],
+                "photo_url": photo["photo_url"],
+                "photo_file": relative_path,
+                "filename": photo["filename"],
+                "bytes": photo["bytes"],
+                "sha256": photo["sha256"],
+                "width": photo["width"],
+                "height": photo["height"],
+                "disk_path": photo["disk_path"],
+            }
+        )
+
+    intro_url = "https://www.e3861.com/guanyuwomen/yiyuanjieshao"
+    intro_status, intro_html, intro_error = fetch(session, intro_url)
+    if intro_status != 200:
+        raise RuntimeError(f"医院/院区归属页读取失败：{intro_error}")
+    scope_text = gdgh_clean_text(
+        BeautifulSoup(f"{entry_html}\n{intro_html}", "html.parser").get_text(" ", strip=True)
+    )
+    independent_markers = [
+        marker
+        for marker in ("独立法人", "法人单位", "统一社会信用代码")
+        if marker in scope_text
+    ]
+    if independent_markers:
+        raise RuntimeError(
+            "[FATAL - HUMAN_INTERVENTION_REQUIRED] 四院区范围出现独立法人证据："
+            + "、".join(independent_markers)
+        )
+    campuses = parse_gdmch_campuses(entry_html, target.entry_url)
+    affiliate_evidence = [
+        {
+            "name": item["name"],
+            "url": item["url"],
+            "relation": "官网同一专家目录与统一页脚列示的广东省妇幼保健院院区；未发现独立法人标识",
+        }
+        for item in campuses
+    ]
+
+    names_to_ids: dict[str, list[str]] = {}
+    for item in eligible_doctors:
+        names_to_ids.setdefault(item["name"], []).append(item["id"])
+    same_name_groups = {
+        name: sorted(ids, key=int)
+        for name, ids in names_to_ids.items()
+        if len(ids) > 1
+    }
+    sample_departments = gdmch_covered_department_names(rows)
+    campus_counts = Counter(
+        campus
+        for item in detail_reconciliation
+        for campus in item.get("campuses", [])
+    )
+    category_counter = Counter(
+        department
+        for item in detail_reconciliation
+        for department in item.get("departments", [])
+    )
+    priority_counter = Counter(row["重点优先级"] for row in rows)
+    group_counter = Counter(
+        group for row in rows for group in row["重点关注范围"].split("、") if group
+    )
+    warning_counter = Counter(
+        warning for row in rows for warning in row["异常提示"].split("；") if warning
+    )
+    average_photo_bytes = (
+        round(sum(item["bytes"] for item in photo_samples) / len(photo_samples))
+        if photo_samples
+        else 0
+    )
+    large_photos = [
+        item
+        for item in photo_samples
+        if int(item["bytes"]) > 200 * 1024 or int(item["width"]) > 800
+    ]
+    return {
+        "meta": {
+            "city": target.city,
+            "hospital": target.hospital,
+            "homepage": target.homepage,
+            "entry_url": target.entry_url,
+            "entry_url_source": "GitHub Issue #43（与官网入口台账序号 21 一致）",
+            "ledger_entry_url": target.ledger_entry_url or target.entry_url,
+            "adapter_id": target.adapter_id,
+            "collected_at": today,
+            "category_count": page_count,
+            "pagination_count": page_count,
+            "pagination_method": "111 个服务端公开 GET 分页；仅空白 searchDoctor/searchDepartment，不构造检索词",
+            "department_structure": "目录只提供自由文本检索框，无服务端科室分类树；样本科室仅从详情出诊安排括号标签保守提取，日期时段不入库",
+            "raw_card_rows": len(relations),
+            "candidate_membership_count": len(relations),
+            "unique_candidate_count": len(all_doctors),
+            "census_unique_detail_count": len(all_doctors),
+            "eligible_candidate_count": len(eligible_doctors),
+            "excluded_non_doctor_count": len(excluded_candidates),
+            "census_same_name_group_count": len(same_name_groups),
+            "census_same_name_groups": same_name_groups,
+            "unique_doctor_count": len(rows),
+            "sample_entry_coverage_count": len(sample_departments),
+            "sample_entry_categories": sample_departments,
+            "sample_campus_coverage_count": len(campus_counts),
+            "campus_relation_counts": dict(campus_counts),
+            "category_error_count": len(category_errors),
+            "detail_error_count": len(detail_errors),
+            "cross_entry_duplicate_count": len(relations) - len(all_doctors),
+            "existing_profile_count": sum(row["已建画像"] == "是" for row in rows),
+            "ledger_review": target.review,
+            "ledger_difficulty": target.difficulty,
+            "entry_candidate_counts": {target.entry_url: len(relations)},
+            "standard_public_session": "requests 常规公开 GET；无登录、Cookie 注入、验证码/挑战求解或非公开接口",
+            "schedule_exclusion_count": schedule_exclusion_count,
+            "schedule_field_ingested_count": 0,
+            "forbidden_segment_exclusion_count": forbidden_segment_count,
+            "patient_case_exclusion_count": patient_case_exclusion_count,
+            "private_use_character_count": sum(
+                len(re.findall(r"[\ue000-\uf8ff]", str(row.get(field) or "")))
+                for row in rows
+                for field in BASE_HEADERS
+            ),
+            "photo_sample_count": len(photo_samples),
+            "photo_error_count": len(photo_errors),
+            "photo_expected_count": len(rows) - photo_no_source_count,
+            "photo_downloaded_count": len(photo_samples),
+            "photo_failed_count": len(photo_errors),
+            "photo_no_source_count": photo_no_source_count,
+            "photo_average_bytes": average_photo_bytes,
+            "photo_estimated_full_count": len(photo_eligible_doctors),
+            "photo_estimated_full_bytes": average_photo_bytes * len(photo_eligible_doctors),
+            "photo_census_available_count": len(photo_eligible_doctors),
+            "photo_census_placeholder_count": len(eligible_doctors) - len(photo_eligible_doctors),
+            "photo_default_placeholder_count": sum(
+                not bool(item["photo_url"]) for item in all_doctors
+            ),
+            "large_photo_count": len(large_photos),
+            "large_photo_threshold": "单张 >200KB 或宽 >800px",
+            "photo_policy_status": (
+                "WAITING_OWNER_LARGE_IMAGE_POLICY"
+                if large_photos
+                else "OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT"
+            ),
+            "affiliate_count": len(affiliate_evidence),
+            "independent_entity_count": 0,
+        },
+        "categories": categories,
+        "entry_reconnaissance": [
+            {
+                "entry_url": target.entry_url,
+                "page_nature": "官网服务端专家目录分页；卡片含姓名、职称和官方子域职业照",
+                "list_page_count": page_count,
+                "raw_detail_relation_count": len(relations),
+                "unique_detail_count": len(all_doctors),
+                "out_of_scope_detail_count": len(excluded_candidates),
+                "affiliation": target.hospital,
+                "independent_entity_check": "四院区共用官网专家目录和统一页脚；未发现独立法人标识",
+            }
+        ],
+        "affiliate_reconnaissance": affiliate_evidence,
+        "excluded_candidates": excluded_candidates,
+        "gdmch_detail_reconciliation": detail_reconciliation,
         "photo_samples": photo_samples,
         "photo_errors": photo_errors,
         "category_errors": category_errors,
@@ -9495,6 +10289,227 @@ def validate_gdgh_trial(payload: dict[str, Any], expected_rows: int) -> None:
         raise RuntimeError("GDGH TRIAL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
 
 
+def validate_gdmch_trial(payload: dict[str, Any], expected_rows: int) -> None:
+    """Validate the fixed Issue #43 census and ten auditable photo rows."""
+
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    excluded = payload.get("excluded_candidates", [])
+    details = payload.get("gdmch_detail_reconciliation", [])
+    photos = payload.get("photo_samples", [])
+    errors: list[str] = []
+    expected_counts = {
+        "category_count": GDMCH_EXPECTED_PAGE_COUNT,
+        "pagination_count": GDMCH_EXPECTED_PAGE_COUNT,
+        "raw_card_rows": GDMCH_EXPECTED_RELATION_COUNT,
+        "candidate_membership_count": GDMCH_EXPECTED_RELATION_COUNT,
+        "unique_candidate_count": GDMCH_EXPECTED_RELATION_COUNT,
+        "census_unique_detail_count": GDMCH_EXPECTED_RELATION_COUNT,
+        "excluded_non_doctor_count": GDMCH_EXPECTED_NON_DOCTOR_COUNT,
+        "eligible_candidate_count": GDMCH_EXPECTED_RELATION_COUNT
+        - GDMCH_EXPECTED_NON_DOCTOR_COUNT,
+        "photo_census_available_count": GDMCH_EXPECTED_PHOTO_AVAILABLE_COUNT,
+        "photo_census_placeholder_count": GDMCH_EXPECTED_RELATION_COUNT
+        - GDMCH_EXPECTED_NON_DOCTOR_COUNT
+        - GDMCH_EXPECTED_PHOTO_AVAILABLE_COUNT,
+        "photo_default_placeholder_count": GDMCH_EXPECTED_DEFAULT_PHOTO_COUNT,
+        "cross_entry_duplicate_count": 0,
+        "category_error_count": 0,
+        "detail_error_count": 0,
+        "photo_error_count": 0,
+        "photo_failed_count": 0,
+        "photo_no_source_count": 0,
+        "schedule_field_ingested_count": 0,
+        "private_use_character_count": 0,
+        "independent_entity_count": 0,
+        "affiliate_count": 4,
+    }
+    for field, expected in expected_counts.items():
+        actual = int(meta.get(field) or 0)
+        if actual != expected:
+            errors.append(f"{field}={actual}，预期 {expected}")
+
+    if expected_rows != 10 or len(rows) != expected_rows:
+        errors.append(f"试采结果 {len(rows)} 行，必须固定为 10 行")
+    if int(meta.get("department_coverage_count") or 0) < 3:
+        errors.append("试采未覆盖至少 3 个科室")
+    if (
+        len(photos) != expected_rows
+        or int(meta.get("photo_sample_count") or 0) != expected_rows
+        or int(meta.get("photo_expected_count") or 0) != expected_rows
+        or int(meta.get("photo_downloaded_count") or 0) != expected_rows
+    ):
+        errors.append("试采未形成 10 张可逐项对账的本人职业照样本")
+
+    excluded_ids = [clean_text(str(item.get("detail_id") or "")) for item in excluded]
+    if (
+        len(excluded) != GDMCH_EXPECTED_NON_DOCTOR_COUNT
+        or any(not value for value in excluded_ids)
+        or len(set(excluded_ids)) != len(excluded_ids)
+        or any(
+            not gdmch_non_doctor_card(item.get("name"), item.get("list_title"))
+            for item in excluded
+        )
+    ):
+        errors.append(
+            f"{GDMCH_EXPECTED_NON_DOCTOR_COUNT} 个号源/系统账号/非医生候选的逐 ID 排除表不完整"
+        )
+
+    detail_ids = [clean_text(str(item.get("detail_id") or "")) for item in details]
+    if (
+        len(details) != expected_rows
+        or any(not value for value in detail_ids)
+        or len(set(detail_ids)) != len(detail_ids)
+        or any(item.get("resolution") != "详情已读取" for item in details)
+    ):
+        errors.append("10 个样本详情 ID 未完整、唯一且成功读取")
+
+    expected_campuses = {
+        "番禺院区": "/keshizhuanjia/panyuyuanqu",
+        "越秀院区": "/keshizhuanjia/yuexiuyuanqu",
+        "天河院区": "/keshizhuanjia/tianheyuanqu",
+        "清远院区": "/keshizhuanjia/qingyuanyuanqu",
+    }
+    affiliates = payload.get("affiliate_reconnaissance", [])
+    affiliate_map = {
+        clean_text(str(item.get("name") or "")): clean_text(str(item.get("url") or ""))
+        for item in affiliates
+    }
+    for campus, expected_path in expected_campuses.items():
+        url = affiliate_map.get(campus, "")
+        parsed = urlparse(url)
+        if (
+            comparable_host(url) != "e3861.com"
+            or parsed.path.rstrip("/").lower() != expected_path
+        ):
+            errors.append(f"{campus}官方归属链接缺失或不准确")
+    if any(not clean_text(str(item.get("relation") or "")) for item in affiliates):
+        errors.append("四院区归属结论存在空白")
+
+    formal_text_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录"]
+    schedule_pattern = re.compile(
+        r"(?:出诊安排|门诊时间|出诊时间|开诊时间|周[一二三四五六日天]|星期[一二三四五六日天]|上午|下午)"
+    )
+    photo_by_source = {
+        clean_text(str(item.get("source_link") or "")): item for item in photos
+    }
+    filenames: set[str] = set()
+    byte_sizes: list[int] = []
+    large_photo_count = 0
+    for row in rows:
+        name = clean_text(str(row.get("姓名") or ""))
+        source = clean_text(str(row.get("来源链接") or ""))
+        photo_url = clean_text(str(row.get("照片链接") or ""))
+        photo_file = clean_text(str(row.get("照片文件") or ""))
+        if not looks_like_person_name(name) or gdmch_non_doctor_card(
+            name, row.get("职称身份原文")
+        ):
+            errors.append(f"样本不是明确医生身份：{name or source}")
+        if not gdmch_detail_id(source):
+            errors.append(f"非严格官网数字 ID 详情链接：{source or '空'}")
+        if not gdmch_photo_url(photo_url, photo_url):
+            errors.append(f"非 wx.e3861.com 官方医生照片路径：{photo_url or '空'}")
+
+        sample = photo_by_source.get(source)
+        if not sample:
+            errors.append(f"缺少照片命名与校验对照：{name or source}")
+            continue
+        filename = clean_text(str(sample.get("filename") or ""))
+        expected_relative = (
+            Path("01_试点医院") / "广东省妇幼保健院" / "照片" / filename
+        ).as_posix()
+        if photo_file != expected_relative or sample.get("photo_file") != expected_relative:
+            errors.append(f"照片相对路径不符合约定：{name}")
+        if not filename or re.search(r'[\\/:*?"<>|]', filename):
+            errors.append(f"照片文件名为空或含非法字符：{name}")
+        if filename.casefold() in filenames:
+            errors.append(f"照片文件名发生覆盖冲突：{filename}")
+        filenames.add(filename.casefold())
+
+        disk_path = Path(str(sample.get("disk_path") or ""))
+        if not disk_path.is_file():
+            errors.append(f"照片文件不存在：{disk_path}")
+            continue
+        content = disk_path.read_bytes()
+        extension = disk_path.suffix.lower().lstrip(".")
+        media_type = {
+            "jpg": "image/jpeg",
+            "png": "image/png",
+            "gif": "image/gif",
+            "webp": "image/webp",
+        }.get(extension, "")
+        if gdgh_photo_extension(content, media_type) != extension:
+            errors.append(f"照片扩展名与魔数不一致：{filename}")
+        if int(sample.get("bytes") or 0) != len(content):
+            errors.append(f"照片字节数对账失败：{filename}")
+        if clean_text(str(sample.get("sha256") or "")) != hashlib.sha256(content).hexdigest():
+            errors.append(f"照片 SHA-256 对账失败：{filename}")
+        width, height = gdmch_photo_dimensions(content, extension)
+        if (
+            width <= 0
+            or height <= 0
+            or int(sample.get("width") or 0) != width
+            or int(sample.get("height") or 0) != height
+        ):
+            errors.append(f"照片宽高对账失败：{filename}")
+        byte_sizes.append(len(content))
+        if len(content) > 200 * 1024 or width > 800:
+            large_photo_count += 1
+
+        formal_text = "\n".join(
+            clean_text(str(row.get(field) or "")) for field in formal_text_fields
+        )
+        if schedule_pattern.search(formal_text):
+            errors.append(f"正式字段仍含排班日期/时段：{name}")
+        if any(marker in formal_text for marker in GDGH_FORBIDDEN_SENTENCE_MARKERS):
+            errors.append(f"正式字段仍含排名/患者片段：{name}")
+        if contains_gzbrain_patient_case_text(formal_text):
+            errors.append(f"正式字段仍含患者案例或可识别信息：{name}")
+        if contains_navigation_text(formal_text):
+            errors.append(f"正式字段仍含导航片段：{name}")
+        if re.search(
+            r"[\ue000-\uf8ff]",
+            "\n".join(str(row.get(field) or "") for field in BASE_HEADERS),
+        ):
+            errors.append(f"正式字段仍含私用区字符：{name}")
+        if clean_text(str(row.get("异常提示") or "")) and (
+            clean_text(str(row.get("重点关注范围") or ""))
+            or clean_text(str(row.get("重点疾病标签") or ""))
+            or clean_text(str(row.get("重点优先级") or "")) != "普通"
+        ):
+            errors.append(f"异常行仍被打标签或提升优先级：{name}")
+
+    if byte_sizes:
+        average_bytes = round(sum(byte_sizes) / len(byte_sizes))
+        photo_count = GDMCH_EXPECTED_PHOTO_AVAILABLE_COUNT
+        if int(meta.get("photo_average_bytes") or 0) != average_bytes:
+            errors.append("平均单张照片大小对账失败")
+        if int(meta.get("photo_estimated_full_count") or 0) != photo_count:
+            errors.append("全院本人职业照候选估算数量不是 658")
+        if int(meta.get("photo_estimated_full_bytes") or 0) != average_bytes * photo_count:
+            errors.append("全院照片容量估算对账失败")
+    if int(meta.get("large_photo_count") or 0) != large_photo_count:
+        errors.append("大图阈值计数对账失败")
+    expected_policy = (
+        "WAITING_OWNER_LARGE_IMAGE_POLICY"
+        if large_photo_count
+        else "OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT"
+    )
+    if meta.get("photo_policy_status") != expected_policy:
+        errors.append("照片政策状态与 >200KB 或宽 >800px 的现场结果不一致")
+
+    if errors:
+        raise RuntimeError("GDMCH TRIAL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
+
+
+def validate_gdmch_full_append(payload: dict[str, Any] | None = None) -> None:
+    del payload
+    raise RuntimeError(
+        "GDMCH FULL 发布熔断：Issue #43 当前仅授权 TRIAL；"
+        "在 owner 明确审计通过并切换 FULL_APPEND_AND_OBSIDIAN 前禁止联网、写总底表或发布全量照片。"
+    )
+
+
 def validate_gdgh_full_append(payload: dict[str, Any]) -> None:
     """Block the GDGH master write unless census, identities and photos reconcile."""
 
@@ -10364,6 +11379,41 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         )
         for item in payload.get("photo_samples", [])
     ) or "| 无 | 无 | 无 | 无 | 0 | 无 | 无 |"
+    gdmch_excluded_lines = "\n".join(
+        (
+            f"| {item.get('detail_id', '')} | {markdown_table_cell(item.get('name', ''))} | "
+            f"{markdown_table_cell(item.get('list_title', ''))} | {item.get('source_link', '')} | "
+            f"{markdown_table_cell(item.get('reason', ''))} |"
+        )
+        for item in payload.get("excluded_candidates", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 |"
+    gdmch_detail_lines = "\n".join(
+        (
+            f"| {item.get('detail_id', '')} | {markdown_table_cell(item.get('name', ''))} | "
+            f"{'、'.join(item.get('departments', [])) or '官网详情未标注'} | "
+            f"{'、'.join(item.get('campuses', [])) or '官网详情未标注'} | "
+            f"{item.get('resolution', '')} | {item.get('source_link', '')} |"
+        )
+        for item in payload.get("gdmch_detail_reconciliation", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 | 无 |"
+    gdmch_affiliate_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('name', ''))} | {item.get('url', '')} | "
+            f"{markdown_table_cell(item.get('relation', ''))} |"
+        )
+        for item in payload.get("affiliate_reconnaissance", [])
+    ) or "| 无 | 无 | 无 |"
+    gdmch_photo_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('name', ''))} | "
+            f"{markdown_table_cell(item.get('department', ''))} | "
+            f"{markdown_table_cell(item.get('title', ''))} | "
+            f"{markdown_table_cell(item.get('filename', ''))} | {item.get('bytes', 0)} | "
+            f"{item.get('width', 0)}×{item.get('height', 0)} | "
+            f"`{item.get('sha256', '')}` | {item.get('photo_url', '')} |"
+        )
+        for item in payload.get("photo_samples", [])
+    ) or "| 无 | 无 | 无 | 无 | 0 | 0×0 | 无 | 无 |"
     campus_relation_summary = "；".join(
         f"{name} {count} 条"
         for name, count in meta.get("campus_relation_counts", {}).items()
@@ -10541,6 +11591,48 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 | 姓名 | 详情 ID | 裁决 | 原关系数 | 合并科室 | 主详情 | 其余详情 |
 |---|---|---|---:|---|---|---|
 {gdgh_identity_lines}
+"""
+        )
+    if payload.get("gdmch_detail_reconciliation"):
+        sample_departments = "、".join(meta.get("covered_departments", [])) or "无"
+        adapter_specific_sections.append(
+            f"""## 广东省妇幼保健院目录、四院区与照片 TRIAL 对账
+
+- 官网服务端分页：{meta.get('pagination_count', 0)} 页；原始卡片 / 唯一数字详情 ID：{meta.get('candidate_membership_count', 0)} / {meta.get('census_unique_detail_count', 0)}。
+- 重复关系：{meta.get('cross_entry_duplicate_count', 0)}；号源/系统账号/非医生排除：{meta.get('excluded_non_doctor_count', 0)}；排除后合规候选：{meta.get('eligible_candidate_count', 0)}。
+- 科室结构：{meta.get('department_structure', '未记录')}。
+- 试采覆盖科室：{meta.get('department_coverage_count', 0)} 个（{sample_departments}）；详情失败：{meta.get('detail_error_count', 0)}。
+- 四院区官网归属证据：{meta.get('affiliate_count', 0)} 条；独立实体信号：{meta.get('independent_entity_count', 0)}。
+- 详情清洗：排班片段排除 {meta.get('schedule_exclusion_count', 0)}，排名/患者片段排除 {meta.get('forbidden_segment_exclusion_count', 0)}，患者案例排除 {meta.get('patient_case_exclusion_count', 0)}；正式字段排班写入 {meta.get('schedule_field_ingested_count', 0)}、私用区字符 {meta.get('private_use_character_count', 0)}。
+- 照片四数：应采 {meta.get('photo_expected_count', 0)} / 实采 {meta.get('photo_downloaded_count', 0)} / 失败 {meta.get('photo_failed_count', 0)} / 无照片 {meta.get('photo_no_source_count', 0)}。
+- 本人职业照可得 / 官网默认占位图：{meta.get('photo_census_available_count', 0)} / {meta.get('photo_census_placeholder_count', 0)}（全目录默认占位图 {meta.get('photo_default_placeholder_count', 0)}）。
+- 平均照片大小：{meta.get('photo_average_bytes', 0)} bytes；按 {meta.get('photo_estimated_full_count', 0)} 位有本人职业照候选估算全院照片容量：{meta.get('photo_estimated_full_bytes', 0)} bytes。
+- 大图阈值：`{meta.get('large_photo_threshold', '单张 >200KB 或宽 >800px')}`；命中 {meta.get('large_photo_count', 0)} 张；照片政策状态：`{meta.get('photo_policy_status', '未记录')}`。原图不压缩；命中阈值时必须等待 owner 裁决本院 FULL 策略。
+- 普通公开会话：{meta.get('standard_public_session', '未记录')}。
+
+### 四院区官方归属证据
+
+| 院区 | 官方链接 | 归属结论 |
+|---|---|---|
+{gdmch_affiliate_lines}
+
+### 10 位样本逐 ID 对账
+
+| 详情 ID | 姓名 | 科室 | 院区 | 详情状态 | 来源链接 |
+|---|---|---|---|---|---|
+{gdmch_detail_lines}
+
+### {meta.get('excluded_non_doctor_count', 0)} 个非医生候选逐 ID 排除表
+
+| 详情 ID | 名称 | 列表身份 | 来源链接 | 排除理由 |
+|---|---|---|---|---|
+{gdmch_excluded_lines}
+
+### TRIAL 照片命名、字节、魔数、SHA-256 与尺寸对照
+
+| 姓名 | 科室 | 主职称 | 文件名 | 字节数 | 宽×高 | SHA-256 | 官网照片 |
+|---|---|---|---|---:|---:|---|---|
+{gdmch_photo_lines}
 """
         )
     adapter_specific_text = "\n\n".join(adapter_specific_sections)
@@ -10854,6 +11946,9 @@ def main() -> None:
     SOURCE_DIR.mkdir(parents=True, exist_ok=True)
     WORK_DIR.mkdir(parents=True, exist_ok=True)
 
+    if clean_text(args.hospital) == "广东省妇幼保健院" and not args.trial_only:
+        validate_gdmch_full_append()
+
     ledger_rows = read_ledger(Path(args.ledger))
     if args.list_targets:
         targets = confirmed_a_targets(ledger_rows, include_generic=True)
@@ -10922,6 +12017,8 @@ def main() -> None:
         )
     if args.force_generic:
         target = replace(target, adapter_id=GENERIC_ADAPTER_ID)
+    if target.adapter_id == GDMCH_ADAPTER_ID and not args.trial_only:
+        validate_gdmch_full_append()
     print(
         f"selected: {target.city} {target.hospital} "
         f"{' '.join(effective_entry_urls(target))} adapter={target.adapter_id}"
@@ -10941,6 +12038,7 @@ def main() -> None:
             GZSYS_ADAPTER_ID,
             FAHSYSU_ADAPTER_ID,
             GDGH_ADAPTER_ID,
+            GDMCH_ADAPTER_ID,
         }
         and not args.trial_only
         and not args.single_output
@@ -10977,6 +12075,8 @@ def main() -> None:
             max_doctors=max_doctors,
             full_mode=not args.trial_only,
         )
+    elif target.adapter_id == GDMCH_ADAPTER_ID:
+        payload = collect_gdmch(target, args.today, max_doctors=max_doctors)
     elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID}:
         payload = collect_generic(
             target,
@@ -11018,7 +12118,11 @@ def main() -> None:
                 f"{'、'.join(payload['meta'].get('sample_entry_categories', [])) or '无'}"
             )
 
-    covered_departments = covered_department_names(payload["rows"])
+    covered_departments = (
+        gdmch_covered_department_names(payload["rows"])
+        if target.adapter_id == GDMCH_ADAPTER_ID
+        else covered_department_names(payload["rows"])
+    )
     payload["meta"]["department_coverage_count"] = len(covered_departments)
     payload["meta"]["covered_departments"] = covered_departments
     if args.min_departments and len(covered_departments) < args.min_departments:
@@ -11035,8 +12139,12 @@ def main() -> None:
         validate_fahsysu_trial(payload, expected_rows=max_doctors or 10)
     if target.adapter_id == GDGH_ADAPTER_ID and args.trial_only:
         validate_gdgh_trial(payload, expected_rows=max_doctors or 10)
+    if target.adapter_id == GDMCH_ADAPTER_ID and args.trial_only:
+        validate_gdmch_trial(payload, expected_rows=max_doctors or 10)
     if target.adapter_id == GDGH_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdgh_full_append(payload)
+    if target.adapter_id == GDMCH_ADAPTER_ID and not args.trial_only:
+        validate_gdmch_full_append(payload)
 
     if target.adapter_id == FAHSYSU_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_fahsysu_full_append(payload)
