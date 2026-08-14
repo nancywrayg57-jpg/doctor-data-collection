@@ -1,16 +1,18 @@
-# Issue #43 广东省妇幼保健院照片 TRIAL
+# Issue #43 广东省妇幼保健院照片 TRIAL → FULL
 
 > 日期：2026-08-14
 > GitHub Issue：<https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/43>
 > 分支：`codex/mhrj/issue-43-gdmch-photo-trial`
-> Phase：`TRIAL`
+> Phase：`FULL_APPEND_AND_OBSIDIAN_READY_FOR_FINAL_AUDIT`
 > 医院：广东省妇幼保健院
 > 官网：<https://www.e3861.com/>
 > 医生目录：<https://www.e3861.com/keshizhuanjia/zhuanjiajieshao>
 
 ## 1. 目标与执行边界
 
-本轮只完成 Issue #43 明确授权的官网目录普查、10 位医生试采、本人职业照下载和审计材料，不写统一总底表、不生成正式 Obsidian 医生画像、不执行 FULL。
+本记录同时保留 TRIAL 历史证据与 owner 审计通过后的 FULL 最终状态。TRIAL 阶段只完成官网目录普查、10 位医生试采和本人职业照审计材料；owner 于 PR #44 明确给出“通过”并切换为 `FULL_APPEND_AND_OBSIDIAN` 后，继续完成正式追加、画像生成和最终验收。
+
+当前最终口径：884 个唯一数字详情 ID，排除 51 个非医生服务项/账号，833 个合规详情，经 1 组同一人归并后形成 832 个正式身份。下文 TRIAL 阶段的 49/835 是当时试采审计快照，已被 FULL 末尾全量身份复核修正，不得作为最终发布口径。
 
 固定边界：
 
@@ -19,7 +21,7 @@
 3. 照片只接受 `/sfyAdmin/Images/Doctor/` 路径，并由响应魔数决定实际扩展名。
 4. 官网默认 `/sfyAdmin/Images/Default/doct.png` 只计为占位图，不作为医生本人职业照。
 5. 患者、儿童、案例影像、评价、排名、排班日期/时段、隐私和第三方平台均不得进入正式字段或照片工件。
-6. 所有广东省妇幼保健院非 `--trial-only` 命令在联网和总底表写入前触发 `GDMCH FULL 发布熔断`；`--allow-generic-append` 不能绕过。
+6. owner 审计切换阶段前，所有广东省妇幼保健院非 `--trial-only` 命令均在联网和总底表写入前触发 `GDMCH FULL 发布熔断`；阶段切换后改为严格 FULL 对账门禁，任何计数、身份、照片或清洗校验不一致均禁止写表。
 
 ## 2. 官网目录普查结论
 
@@ -31,10 +33,10 @@
 | 原始卡片关系 | 884 |
 | 唯一数字详情 ID | 884 |
 | 重复关系 | 0 |
-| 号源/系统账号/非医生身份排除 | 49 |
-| 排除后合规医生候选 | 835 |
+| 号源/系统账号/非医生身份排除 | 51 |
+| 排除后合规医生候选 | 833 |
 | 合规候选中有本人职业照 | 658 |
-| 合规候选中仅有默认占位图 | 177 |
+| 合规候选中仅有默认占位图 | 175 |
 | 全目录默认占位图 | 225 |
 
 详情严格契约：
@@ -47,7 +49,7 @@
 
 目录只有自由文本检索框，没有服务端科室分类树。科室与院区仅从详情页 `出诊安排` 括号标签保守提取；日期和时段不进入正式字段。
 
-49 个排除候选均在试采报告中按数字 ID、名称、列表身份、来源链接和理由逐项列出。典型示例包括 `续费专用号`、`test123`、`系统管理员-正式库`、`急诊号`、`政府免费筛查就诊号`、`名医工作室`、`专科医生`。现场证据修正了预普查阶段的“42 个排除、842 个合规候选”估算；不得为了匹配旧估算而把 7 个明确的非医生身份纳入医生范围。
+TRIAL 先识别 49 个排除候选；FULL 末尾工作簿可视验收又发现详情 ID `35111` `体重管理/其他` 与 `35129` `马淑丹/收费` 仍进入正式行。两者均无科室、无医生职称、无正文和本人照片，分别是服务项与收费账号，最终按逐 ID 证据补入排除表，因此最终排除 51 个、合规详情 833 个。不得为了维持旧审计快照而把明确的非医生账号纳入画像范围。
 
 ### 2.2 四院区归属
 
@@ -67,7 +69,7 @@
 新增专用适配器 `gdmch_paginated_expert_photo`：
 
 1. 精确识别 `https://www.e3861.com/keshizhuanjia/zhuanjiajieshao`，禁止通用模板直接接纳号源账号。
-2. 写出前固定校验 111 页、884 个数字 ID、49 个排除候选、835 个合规候选、658 个本人职业照候选。
+2. 写出前固定校验 111 页、884 个数字 ID、51 个排除候选、833 个合规详情、658 个本人职业照候选。
 3. TRIAL 只从 658 个本人职业照候选中按目录页跨度抽取 10 位，避免默认占位图进入照片样本。
 4. 10 位样本必须覆盖至少 3 个真实科室；本院统计先移除院区后缀，再拆分顿号科室，禁止把“番禺院区、越秀院区”误计为科室。
 5. 排班标题和后续相邻 DOM 尾段一起截断；标题与时段分成多个节点时，命中标题后立即终止正文段遍历。
@@ -171,36 +173,110 @@
 - 解决：增加 GDMCH 专用统计，先移除受控四院区后缀，再拆分原子科室；最终为 14 个真实科室。
 - 防复发：新增科室/多院区组合回归测试，报告只使用专用统计结果。
 
-## 8. 当前停止点
+### 7.6 FULL 首次写表前拦截排班变体
 
-TRIAL 代码、测试、payload、CSV、报告、10 张照片和本 ADR准备提交到原 Issue #43 分支。提交前再次复核 GitHub 身份为 `xtzhou247`、远端分支 ref 与本地提交 parent；仅允许 SSH 非强制 fast-forward push。创建 `base=main`、关联 `Closes #43` 的 PR 后等待 governance CI，并请求 owner 进行 TRIAL 审计。不得自行执行 FULL、合并 PR、关闭 Issue 或领取下一 Issue。
+- 阻塞：第一次 FULL 在写表前拦截苏海浩、邱少红、李鹏三条排班文本，总底表 XLSX/CSV/更新报告保持 TRIAL 基线哈希不变。
+- 根因：排班清洗未覆盖 `出诊地点及时间`、`专科门诊`，以及无标题、直接以“周一……”开头的纯排班段。
+- 解决：只扩展 GDMCH 受控排班标题与纯排班正则；三条真实详情定点探针清洗后零命中，第二次 FULL 成功。
+- 防复发：新增三种现场变体回归测试；FULL 写出前继续对所有正式文本字段执行标题、周次、星期、上午/下午扫描。
+
+### 7.7 FULL 末尾身份漏判
+
+- 阻塞：工作簿末尾可视验收发现 `35111 体重管理/其他` 与 `35129 马淑丹/收费` 被保守成行并生成画像。
+- 根因：`looks_like_person_name` 允许四字中文，既有非医生规则没有识别精确服务项 `体重管理`，也没有把列表身份 `收费` 作为账号标记。
+- 解决：仅增加 `体重管理` 姓名标记和精确 `收费` 身份标记；把两条逐 ID 证据从正式行移入排除表，删除本轮新生成的两份无效画像，离线重建本院 payload、总底表、832 份有效画像与索引。
+- 防复发：专项测试固定覆盖 `体重管理` 和 `马淑丹/收费`；FULL 门禁强制每个正式身份再次通过同一非医生判定，而不是只在目录层分类。
+
+## 8. FULL 最终结果
+
+### 8.1 目录、身份与清洗
+
+| 指标 | 最终结果 |
+|---|---:|
+| 服务端分页 | 111 |
+| 唯一数字详情 ID | 884 |
+| 非医生服务项/账号排除 | 51 |
+| 合规详情 | 833 |
+| 同一人归并 | 1 组（郭庆禄 `34640 + 34931`） |
+| 同名待甄别 | 3 组（周真、刘颖、何裕） |
+| 最终正式身份 | 832 |
+| 详情失败 | 0 |
+| 正式字段排班/患者/导航/私用区命中 | 0 |
+
+### 8.2 照片四数与视觉复核
+
+| 指标 | 最终结果 |
+|---|---:|
+| 应采本人职业照 | 658 |
+| 实采 | 658 |
+| 失败 | 0 |
+| 占位留空 | 174 |
+| 大图阈值命中 | 0 |
+| 正式图片文件 | 658 |
+| 总字节数 | 31,646,191 |
+| 图片 manifest SHA-256 | `81631B1FAE30EDA178479D33DD0A64E97349F3EFFB6BBBD106B5E316FC6090C8` |
+
+658 张正式照片已通过 11 张联系表完成全量视觉复核，均为医生本人单人职业照；未发现患者、儿童、合影、新闻配图或案例影像。底表照片路径、画像 Markdown 引用与磁盘文件集合三方完全一致。
+
+### 8.3 总底表与 Obsidian
+
+- 总底表从 7,401 行增至 8,233 行；当前 18 家医院。
+- 广东省妇幼保健院 832 行、832 个唯一官网详情来源、`已建画像=是` 832。
+- 本院照片行 658、占位留空 174、异常提示 267、异常标签提权 0。
+- 本院正式画像 832 份，唯一来源与总底表一一对应；画像 manifest SHA-256：`7A81B867BC3F9D810107132A2E027F69DBDF0B29B9DA17DA4947459878E52327`。
+- `_索引.md` 832 个唯一链接，链接目标与 832 份画像完全一致；图片引用 658 个且全部命中。
+- 试采 `payload/CSV/report` 三个临时文件已精确删除；正式 payload、正式报告、总底表、入口台账、照片和画像均保留。
+
+## 9. 工作簿与验证闭环
+
+- bundled `@oai/artifact-tool`：6 张工作表均成功解析；公式错误扫描 0。
+- 完成 `自动采集底表` 表头/中段/末尾，以及 `复核清单`、`科室统计`、`重点范围统计`、`医院统计`、`采集说明` 的可视渲染验收。
+- XLSX/CSV：均为 8,233 行；全行 `医院/姓名/来源链接/照片文件/已建画像` 比较差异 0。
+- 单元测试：136 项通过；GDMCH 专项 11 项通过。
+- 提交前仍需执行 `py_compile`、`git diff --check`、`git fsck --no-dangling` 和 Git 身份/远端 fast-forward 门禁。
+
+最终关键哈希：
+
+| 文件 | SHA-256 |
+|---|---|
+| `珠三角三甲医院_医生画像自动采集总底表.xlsx` | `358EECF4CF4D96EAA89EA13BD10A2138E947A6BA1DEAC1EEE7F1C0AF991CDED5` |
+| `珠三角三甲医院_医生画像自动采集总底表.csv` | `BEED742FD6D4E1832CDE3232EA13128D4CFD4D889316CCCDCDFBE5BEB5C618DB` |
+| `珠三角三甲医院_医生画像自动采集总底表_更新报告.md` | `43EE452FA6A7DB2ACBDF48DCA5FFF610CFE2653FB19D2628666B93152703F417` |
+| `work/广东省妇幼保健院_official_doctors_payload.json` | `C93387F598BCE86817484D346EC5B49B669DC6DB9F597C0C1E8D4D15B31E52E0` |
+| `work/广东省妇幼保健院_official_doctors_report.md` | `A934232199415FBE51538715C5A30B6F6C60815B679270B6CDA67B120583087F` |
+| `广东省妇幼保健院/_索引.md` | `9DE6FBF38EB5BEA2EBA2738C916B7CD7EB977932CECD8EA4B5B4BFA5537F61A3` |
+
+## 10. 当前停止点
+
+FULL 工件已完成本地最终验收，下一步仅允许在再次确认 GitHub 身份为 `xtzhou247` 后精确暂存、提交，并使用 SSH 非强制 fast-forward push 更新原分支。推送后等待 PR #44 governance CI 成功，再评论请求 owner 最终画像审计。不得自行合并 PR、关闭 Issue 或领取下一 Issue。
 
 <Handoff_State>
-Target: Issue #43 广东省妇幼保健院 TRIAL
+Target: Issue #43 广东省妇幼保健院 FULL_APPEND_AND_OBSIDIAN
 AgentConstitution: D:\workspace\信息收集整理\Agent.md
 RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/43
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/44
 Branch: codex/mhrj/issue-43-gdmch-photo-trial
-Phase: TRIAL_READY_TO_PUSH
+Phase: FULL_READY_TO_PUSH_AND_FINAL_AUDIT
 Completed:
-- 111 页、884 唯一数字 ID 普查；49 非医生排除、835 合规候选
-- 合规候选本人职业照 658、默认占位图 177；四院区归属证据完整、独立实体信号 0
-- 10 位真实医生、14 个科室、10 张本人职业照；详情/照片失败均为 0
-- 排班/患者/导航/私用区字段门禁通过；133 项单元测试通过
-- 总底表 XLSX/CSV/更新报告前后长度、时间和 SHA-256 一致
+- 111 页、884 唯一 ID；51 非医生排除、833 合规详情、832 正式身份
+- 照片 658/658/0/174；658 张全量视觉复核通过
+- 总底表 8,233 行，本院 832 行；异常 267 行且标签提权 0
+- 832 份画像、832 个索引链接、658 个图片引用均一一对账
+- artifact-tool 6 表可视验收、公式错误 0；136 项单元测试通过
 Next:
-- 精确暂存、提交；复核身份和远端 ref 后 SSH 非强制 fast-forward push
-- 创建关联 Issue #43、base=main 的 PR，等待 CI 后请求 owner TRIAL 审计
-- 仅 owner 明确通过并切换 FULL_APPEND_AND_OBSIDIAN 后解除 FULL 发布熔断
+- 执行最终 py_compile、diff/fsck 和精确范围审查
+- 复核身份与远端 ref，SSH 非强制 fast-forward push 原分支
+- 等待 PR #44 CI 成功后请求 owner 最终画像审计，并恢复单 Issue 监控自动化
 Constraints:
 - 仅官网公开页面和医生本人职业照；禁患者/儿童影像、案例、评价、隐私、第三方和登录/验证码规避
-- 当前只允许 TRIAL，不写总底表、不生成正式画像、不执行 FULL
 - 不自行合并 PR、关闭 Issue 或领取下一 Issue
+- 仅允许 SSH 非强制 fast-forward push
 Artifacts:
-- D:\workspace\信息收集整理\work\广东省妇幼保健院_trial_payload.json
-- D:\workspace\信息收集整理\work\广东省妇幼保健院_trial_doctors.csv
-- D:\workspace\信息收集整理\work\广东省妇幼保健院_trial_report.md
-- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广东省妇幼保健院\照片
+- D:\workspace\信息收集整理\work\广东省妇幼保健院_official_doctors_payload.json
+- D:\workspace\信息收集整理\work\广东省妇幼保健院_official_doctors_report.md
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
+- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广东省妇幼保健院
 - D:\workspace\信息收集整理\docs\architecture_decisions\2026-08-14_issue_43_gdmch_photo_trial.md
 </Handoff_State>
