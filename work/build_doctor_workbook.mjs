@@ -91,6 +91,8 @@ const baseHeaders = [
   "详情正文摘录",
   "来源类型",
   "来源链接",
+  "照片链接",
+  "照片文件",
   "采集入口",
   "采集方式",
   "采集日期",
@@ -117,6 +119,8 @@ const baseSheet = writeTable(workbook, "自动采集底表", baseHeaders, payloa
   详情正文摘录: 70,
   来源类型: 12,
   来源链接: 58,
+  照片链接: 58,
+  照片文件: 54,
   采集入口: 58,
   采集方式: 28,
   采集日期: 14,
@@ -126,7 +130,7 @@ const baseSheet = writeTable(workbook, "自动采集底表", baseHeaders, payloa
   复核状态: 14,
 });
 if (payload.rows.length > 0) {
-  baseSheet.getRange(`A2:W${payload.rows.length + 1}`).format.rowHeight = 64;
+  baseSheet.getRange(`A2:${colLetter(baseHeaders.length)}${payload.rows.length + 1}`).format.rowHeight = 64;
 }
 
 const reviewRows = payload.rows.filter((row) => row["异常提示"]);
@@ -147,6 +151,8 @@ writeTable(workbook, "复核清单", baseHeaders, reviewRows, "DoctorReviewTable
   详情正文摘录: 70,
   来源类型: 12,
   来源链接: 58,
+  照片链接: 58,
+  照片文件: 54,
   采集入口: 58,
   采集方式: 28,
   采集日期: 14,
@@ -206,6 +212,10 @@ const metaRows = [
   { 项目: "唯一医生详情页", 内容: payload.meta.unique_doctor_count },
   { 项目: "列表页失败数", 内容: payload.meta.category_error_count },
   { 项目: "详情页失败数", 内容: payload.meta.detail_error_count },
+  { 项目: "照片样本数", 内容: payload.meta.photo_sample_count ?? "" },
+  { 项目: "照片平均字节数", 内容: payload.meta.photo_average_bytes ?? "" },
+  { 项目: "全院照片估算字节数", 内容: payload.meta.photo_estimated_full_bytes ?? "" },
+  { 项目: "照片方案状态", 内容: payload.meta.photo_policy_status ?? "" },
   { 项目: "已建画像匹配数", 内容: payload.meta.existing_profile_count },
   { 项目: "汇总医院数", 内容: payload.meta.hospital_count ?? "" },
   { 项目: "本次批次医院", 内容: payload.meta.current_batch_hospital ?? "" },
@@ -228,7 +238,7 @@ writeTable(workbook, "采集说明", ["项目", "内容"], metaRows, "Collection
 const inspect = await workbook.inspect({
   kind: "region",
   sheetId: "自动采集底表",
-  range: "A1:W5",
+  range: `A1:${colLetter(baseHeaders.length)}5`,
   maxChars: 2500,
 });
 console.log(inspect.ndjson);
@@ -244,7 +254,7 @@ console.log(errors.ndjson);
 if (args.preview) {
   const preview = await workbook.render({
     sheetName: "自动采集底表",
-    range: "A1:W12",
+    range: `A1:${colLetter(baseHeaders.length)}12`,
     scale: 1,
     format: "png",
   });

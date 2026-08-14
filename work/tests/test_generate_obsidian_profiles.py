@@ -86,6 +86,25 @@ class ProfileFactSectionTests(unittest.TestCase):
 
         self.assertIn("- 异常提示：同名待甄别", profile)
 
+    def test_generated_profile_embeds_repository_photo_above_basic_table(self) -> None:
+        profile = build_profile(
+            {
+                "医院": "广东省人民医院",
+                "姓名": "测试医生",
+                "科室_分类页": "心内科",
+                "职称身份原文": "主任医师",
+                "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_1_subjectid_2.html",
+                "照片文件": "01_试点医院/广东省人民医院/照片/测试医生-心内科-主任医师-广东省人民医院.jpg",
+                "采集日期": "2026-08-14",
+                "复核状态": "待人工复核",
+            },
+            "2026-08-14",
+        )
+
+        image_line = "![测试医生](照片/测试医生-心内科-主任医师-广东省人民医院.jpg)"
+        self.assertIn(image_line, profile)
+        self.assertLess(profile.index(image_line), profile.index("| 字段 | 内容 |"))
+
     def test_refresh_auto_generated_does_not_overwrite_manual_profile(self) -> None:
         rows = [
             {

@@ -406,6 +406,20 @@ def official_profile_text(row: dict[str, str]) -> str:
     return html_to_markdown_text(row.get("_报告修正正文")) or specialty(row)
 
 
+def profile_photo_markdown_path(row: dict[str, str]) -> str:
+    value = clean(row.get("照片文件")).replace("\\", "/")
+    if not value or value.startswith(("http://", "https://", "data:")):
+        return ""
+    parts = [part for part in value.split("/") if part and part != "."]
+    if ".." in parts or "照片" not in parts:
+        return ""
+    photo_index = len(parts) - 1 - parts[::-1].index("照片")
+    relative_parts = parts[photo_index:]
+    if len(relative_parts) != 2 or relative_parts[0] != "照片":
+        return ""
+    return "/".join(relative_parts)
+
+
 def build_bd_summary(row: dict[str, str], focus: list[str]) -> str:
     name = clean(row.get("姓名"))
     hospital = clean(row.get("医院"))
@@ -440,6 +454,7 @@ def build_profile(row: dict[str, str], generated_at: str) -> str:
     highlight_text = clean(row.get("亮眼经历线索"))
     profile_fact_sections = extract_profile_fact_sections(detail_excerpt)
     review_status = clean(row.get("复核状态"))
+    photo_path = profile_photo_markdown_path(row)
     direction = unique_terms(focus, disease_tags)[:12]
     evidence_items = []
     if doctor_title:
@@ -480,12 +495,11 @@ def build_profile(row: dict[str, str], generated_at: str) -> str:
 
     lines: list[str] = []
     lines.extend(yaml_lines)
+    lines.extend([f"# {name}", "", "## 基础信息", ""])
+    if photo_path:
+        lines.extend([f"![{name}]({photo_path})", ""])
     lines.extend(
         [
-            f"# {name}",
-            "",
-            "## 基础信息",
-            "",
             "| 字段 | 内容 |",
             "|---|---|",
             f"| 姓名 | {md_escape(name)} |",

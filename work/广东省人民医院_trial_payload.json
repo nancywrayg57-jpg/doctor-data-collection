@@ -1,0 +1,2529 @@
+{
+  "meta": {
+    "city": "广州市",
+    "hospital": "广东省人民医院",
+    "homepage": "https://www.gdghospital.org.cn/xzfz/list.html",
+    "entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+    "entry_url_source": "GitHub Issue #41（与官网入口台账序号 19 一致）",
+    "ledger_entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+    "adapter_id": "gdghospital_static_department_expert",
+    "collected_at": "2026-08-14",
+    "category_count": 83,
+    "census_group_count": 26,
+    "census_groups": [
+      "心血管内科",
+      "心外科",
+      "广东省儿童心脏中心",
+      "广东省心血管病中心",
+      "内科",
+      "外科",
+      "妇产科",
+      "神经科",
+      "口腔科",
+      "耳鼻喉科",
+      "眼科",
+      "儿科",
+      "肿瘤医院",
+      "皮肤性病科",
+      "老年医学科",
+      "康复医学科",
+      "中医科",
+      "协和高级医疗中心",
+      "广东省精神卫生中心",
+      "重症医学科",
+      "药学部",
+      "医学影像科",
+      "病理科",
+      "检验科",
+      "急诊科",
+      "麻醉科"
+    ],
+    "census_department_count": 83,
+    "census_departments": [
+      "心血管内科",
+      "心外科",
+      "心儿科",
+      "心脏母胎医学科",
+      "广东省心血管病中心",
+      "肾内科",
+      "血液内科",
+      "消化内科",
+      "感染科",
+      "呼吸与危重症医学科",
+      "内分泌科",
+      "风湿免疫科",
+      "临床营养科",
+      "消化内镜中心",
+      "普通外科",
+      "泌尿外科",
+      "胸外科",
+      "血管外科",
+      "整形外科",
+      "烧伤与创面修复外科",
+      "神经外科",
+      "器官移植科",
+      "乳腺科",
+      "脊柱外科",
+      "关节骨病与创伤科",
+      "骨肿瘤科",
+      "微创介入科",
+      "胃肠外科",
+      "肝胆外科",
+      "胰腺中心",
+      "甲状腺疝外科",
+      "肾移植科",
+      "生殖医学科",
+      "产科",
+      "妇科",
+      "神经科",
+      "口腔科门诊",
+      "口腔颌面外科",
+      "咽喉头颈外科",
+      "耳科",
+      "鼻科",
+      "眼科",
+      "新生儿科",
+      "普通儿科",
+      "儿童血液科",
+      "儿科重症监护室",
+      "肺内一科",
+      "肺外科",
+      "肺内二科",
+      "肺内三科",
+      "乳腺肿瘤科",
+      "放射治疗科",
+      "肿瘤内科",
+      "淋巴瘤科",
+      "肿瘤日间病区",
+      "皮肤性病科",
+      "临床心理科(心身医学科)",
+      "老年重症医学科",
+      "老年心血管科",
+      "老年呼吸一科",
+      "老年呼吸二科",
+      "老年神经科",
+      "老年肾病科",
+      "老年内分泌科",
+      "全科医学科",
+      "康复医学科",
+      "中医正骨科",
+      "中医内科",
+      "协和高级医疗中心（全科医学科）",
+      "精神科",
+      "心理科",
+      "心理咨询科",
+      "司法鉴定医学科(广东精卫法医精神病司法鉴定所)",
+      "睡眠医学科",
+      "重症医学科",
+      "药学部",
+      "放射科",
+      "核医学科",
+      "超声科",
+      "病理科",
+      "检验科",
+      "急诊科",
+      "麻醉科"
+    ],
+    "raw_card_rows": 1343,
+    "candidate_membership_count": 1343,
+    "unique_candidate_count": 1343,
+    "eligible_candidate_count": 1334,
+    "unique_doctor_count": 10,
+    "census_unique_detail_count": 1343,
+    "census_named_detail_count": 1343,
+    "census_blank_name_detail_count": 0,
+    "census_unique_nonblank_name_count": 1284,
+    "census_same_name_group_count": 51,
+    "census_same_name_groups": {
+      "张斌": [
+        "23645",
+        "24870",
+        "25494"
+      ],
+      "付明": [
+        "33753",
+        "65710"
+      ],
+      "陈海敏": [
+        "25545",
+        "56791"
+      ],
+      "庄建": [
+        "25508",
+        "33825"
+      ],
+      "李欣": [
+        "23930",
+        "24378"
+      ],
+      "王树水": [
+        "32859",
+        "56888"
+      ],
+      "李渝芬": [
+        "24413",
+        "56840"
+      ],
+      "林婷": [
+        "53317",
+        "54421"
+      ],
+      "曾辉": [
+        "23790",
+        "64123"
+      ],
+      "张晓光": [
+        "24662",
+        "33919"
+      ],
+      "高兴林": [
+        "25378",
+        "33972"
+      ],
+      "陈亮": [
+        "23259",
+        "23638"
+      ],
+      "李远红": [
+        "23862",
+        "24762"
+      ],
+      "曾志刚": [
+        "33920",
+        "59454"
+      ],
+      "周泉波": [
+        "46624",
+        "47198"
+      ],
+      "侯宝华": [
+        "24144",
+        "33793"
+      ],
+      "郑江华": [
+        "24136",
+        "33794"
+      ],
+      "李东": [
+        "24780",
+        "24847"
+      ],
+      "代金池": [
+        "32830",
+        "67089"
+      ],
+      "詹伟锋": [
+        "33769",
+        "55492"
+      ],
+      "吴德庆": [
+        "24156",
+        "62954"
+      ],
+      "王亮": [
+        "54389",
+        "64719"
+      ],
+      "陈盛": [
+        "24145",
+        "46696"
+      ],
+      "李巧": [
+        "53305",
+        "61284"
+      ],
+      "李昊文": [
+        "55043",
+        "60750"
+      ],
+      "刘涛": [
+        "23911",
+        "41733"
+      ],
+      "张雷": [
+        "32918",
+        "58451"
+      ],
+      "吴一龙": [
+        "23176",
+        "32742",
+        "32743",
+        "32744"
+      ],
+      "黎扬斯": [
+        "33901",
+        "56614"
+      ],
+      "林嘉欣": [
+        "33914",
+        "56613"
+      ],
+      "​汪斌超": [
+        "33922",
+        "34013"
+      ],
+      "区丽明": [
+        "23064",
+        "34145"
+      ],
+      "杨帆": [
+        "25125",
+        "33935",
+        "33953",
+        "53291"
+      ],
+      "贾福军": [
+        "24116",
+        "53288",
+        "56701"
+      ],
+      "许明智": [
+        "24117",
+        "53285"
+      ],
+      "姜美俊": [
+        "33932",
+        "53281"
+      ],
+      "郑先振": [
+        "24119",
+        "53283"
+      ],
+      "​黄卓慧": [
+        "33937",
+        "33951"
+      ],
+      "王斐": [
+        "33938",
+        "33950"
+      ],
+      "董敏": [
+        "33939",
+        "33949"
+      ],
+      "侯彩兰": [
+        "24103",
+        "53282"
+      ],
+      "李刚": [
+        "24118",
+        "53284"
+      ],
+      "李雪丽": [
+        "33955",
+        "53279",
+        "56684"
+      ],
+      "杨程甲": [
+        "33954",
+        "53277"
+      ],
+      "王曼": [
+        "33947",
+        "56687"
+      ],
+      "曾瑾": [
+        "33946",
+        "56686"
+      ],
+      "张筝驰": [
+        "33945",
+        "56685",
+        "56699"
+      ],
+      "杨源": [
+        "47240",
+        "56702"
+      ],
+      "郑会蓉": [
+        "53278",
+        "56700"
+      ],
+      "全东明": [
+        "53290",
+        "56704"
+      ],
+      "曾文新": [
+        "25442",
+        "33764"
+      ]
+    },
+    "census_nonempty_department_count": 1343,
+    "census_empty_department_count": 0,
+    "sample_entry_coverage_count": 10,
+    "sample_entry_categories": [
+      "呼吸与危重症医学科",
+      "广东省心血管病中心",
+      "心儿科",
+      "心外科",
+      "心脏母胎医学科",
+      "心血管内科",
+      "感染科",
+      "消化内科",
+      "肾内科",
+      "血液内科"
+    ],
+    "pagination_count": 83,
+    "pagination_method": "83 个科室首页均服务端一次性输出完整专家卡片；未发现分页、加载更多或筛选接口",
+    "category_error_count": 0,
+    "detail_error_count": 0,
+    "cross_entry_duplicate_count": 0,
+    "gdgh_cross_department_identity_count": 0,
+    "excluded_non_doctor_count": 9,
+    "existing_profile_count": 0,
+    "ledger_review": "确认可采集",
+    "ledger_difficulty": "D-待人工补官网",
+    "entry_candidate_counts": {
+      "https://www.gdghospital.org.cn/DepartmentSearch/list.html": 1343
+    },
+    "standard_public_session": "requests 常规公开 GET；无登录、Cookie 注入、验证码/挑战求解或非公开接口",
+    "schedule_exclusion_count": 3,
+    "schedule_field_ingested_count": 0,
+    "forbidden_segment_exclusion_count": 0,
+    "patient_case_exclusion_count": 0,
+    "private_use_character_count": 0,
+    "photo_sample_count": 10,
+    "photo_error_count": 0,
+    "photo_average_bytes": 12206,
+    "photo_estimated_full_count": 1334,
+    "photo_estimated_full_bytes": 16282804,
+    "photo_census_available_count": 1334,
+    "photo_policy_status": "WAITING_OWNER_SIZE_POLICY",
+    "affiliate_count": 4,
+    "independent_entity_count": 0,
+    "department_coverage_count": 10,
+    "covered_departments": [
+      "呼吸与危重症医学科",
+      "广东省心血管病中心",
+      "心儿科",
+      "心外科",
+      "心脏母胎医学科",
+      "心血管内科",
+      "感染科",
+      "消化内科",
+      "肾内科",
+      "血液内科"
+    ],
+    "execution_mode": "trial",
+    "json_path": "D:\\workspace\\信息收集整理\\work\\广东省人民医院_trial_payload.json",
+    "csv_path": "D:\\workspace\\信息收集整理\\work\\广东省人民医院_trial_doctors.csv",
+    "xlsx_path": "D:\\workspace\\信息收集整理\\work\\广东省人民医院_trial_doctors.xlsx",
+    "preview_path": "D:\\workspace\\信息收集整理\\work\\广东省人民医院_official_doctors_preview.png"
+  },
+  "categories": [
+    {
+      "subject_id": "79",
+      "department": "心血管内科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_79.html"
+    },
+    {
+      "subject_id": "80",
+      "department": "心外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_80.html"
+    },
+    {
+      "subject_id": "81",
+      "department": "心儿科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_81.html"
+    },
+    {
+      "subject_id": "118",
+      "department": "心脏母胎医学科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_118.html"
+    },
+    {
+      "subject_id": "84",
+      "department": "广东省心血管病中心",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_84.html"
+    },
+    {
+      "subject_id": "15",
+      "department": "肾内科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_15.html"
+    },
+    {
+      "subject_id": "16",
+      "department": "血液内科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_16.html"
+    },
+    {
+      "subject_id": "17",
+      "department": "消化内科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_17.html"
+    },
+    {
+      "subject_id": "18",
+      "department": "感染科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_18.html"
+    },
+    {
+      "subject_id": "19",
+      "department": "呼吸与危重症医学科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_19.html"
+    },
+    {
+      "subject_id": "20",
+      "department": "内分泌科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_20.html"
+    },
+    {
+      "subject_id": "21",
+      "department": "风湿免疫科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_21.html"
+    },
+    {
+      "subject_id": "23",
+      "department": "临床营养科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_23.html"
+    },
+    {
+      "subject_id": "103",
+      "department": "消化内镜中心",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_103.html"
+    },
+    {
+      "subject_id": "6",
+      "department": "普通外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_6.html"
+    },
+    {
+      "subject_id": "7",
+      "department": "泌尿外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_7.html"
+    },
+    {
+      "subject_id": "8",
+      "department": "胸外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_8.html"
+    },
+    {
+      "subject_id": "9",
+      "department": "血管外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_9.html"
+    },
+    {
+      "subject_id": "117",
+      "department": "整形外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_117.html"
+    },
+    {
+      "subject_id": "10",
+      "department": "烧伤与创面修复外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_10.html"
+    },
+    {
+      "subject_id": "11",
+      "department": "神经外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_11.html"
+    },
+    {
+      "subject_id": "12",
+      "department": "器官移植科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_12.html"
+    },
+    {
+      "subject_id": "29",
+      "department": "乳腺科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_29.html"
+    },
+    {
+      "subject_id": "48",
+      "department": "脊柱外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_48.html"
+    },
+    {
+      "subject_id": "49",
+      "department": "关节骨病与创伤科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_49.html"
+    },
+    {
+      "subject_id": "50",
+      "department": "骨肿瘤科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_50.html"
+    },
+    {
+      "subject_id": "32",
+      "department": "微创介入科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_32.html"
+    },
+    {
+      "subject_id": "104",
+      "department": "胃肠外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_104.html"
+    },
+    {
+      "subject_id": "105",
+      "department": "肝胆外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_105.html"
+    },
+    {
+      "subject_id": "106",
+      "department": "胰腺中心",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_106.html"
+    },
+    {
+      "subject_id": "107",
+      "department": "甲状腺疝外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_107.html"
+    },
+    {
+      "subject_id": "108",
+      "department": "肾移植科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_108.html"
+    },
+    {
+      "subject_id": "53",
+      "department": "生殖医学科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_53.html"
+    },
+    {
+      "subject_id": "52",
+      "department": "产科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_52.html"
+    },
+    {
+      "subject_id": "51",
+      "department": "妇科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_51.html"
+    },
+    {
+      "subject_id": "44",
+      "department": "神经科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_44.html"
+    },
+    {
+      "subject_id": "47",
+      "department": "口腔科门诊",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_47.html"
+    },
+    {
+      "subject_id": "86",
+      "department": "口腔颌面外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_86.html"
+    },
+    {
+      "subject_id": "45",
+      "department": "咽喉头颈外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_45.html"
+    },
+    {
+      "subject_id": "109",
+      "department": "耳科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_109.html"
+    },
+    {
+      "subject_id": "110",
+      "department": "鼻科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_110.html"
+    },
+    {
+      "subject_id": "46",
+      "department": "眼科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_46.html"
+    },
+    {
+      "subject_id": "56",
+      "department": "新生儿科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_56.html"
+    },
+    {
+      "subject_id": "55",
+      "department": "普通儿科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_55.html"
+    },
+    {
+      "subject_id": "54",
+      "department": "儿童血液科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_54.html"
+    },
+    {
+      "subject_id": "57",
+      "department": "儿科重症监护室",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_57.html"
+    },
+    {
+      "subject_id": "24",
+      "department": "肺内一科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_24.html"
+    },
+    {
+      "subject_id": "25",
+      "department": "肺外科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_25.html"
+    },
+    {
+      "subject_id": "26",
+      "department": "肺内二科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_26.html"
+    },
+    {
+      "subject_id": "27",
+      "department": "肺内三科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_27.html"
+    },
+    {
+      "subject_id": "30",
+      "department": "乳腺肿瘤科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_30.html"
+    },
+    {
+      "subject_id": "31",
+      "department": "放射治疗科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_31.html"
+    },
+    {
+      "subject_id": "33",
+      "department": "肿瘤内科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_33.html"
+    },
+    {
+      "subject_id": "34",
+      "department": "淋巴瘤科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_34.html"
+    },
+    {
+      "subject_id": "28",
+      "department": "肿瘤日间病区",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_28.html"
+    },
+    {
+      "subject_id": "22",
+      "department": "皮肤性病科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_22.html"
+    },
+    {
+      "subject_id": "67",
+      "department": "临床心理科(心身医学科)",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_67.html"
+    },
+    {
+      "subject_id": "95",
+      "department": "老年重症医学科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_95.html"
+    },
+    {
+      "subject_id": "94",
+      "department": "老年心血管科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_94.html"
+    },
+    {
+      "subject_id": "88",
+      "department": "老年呼吸一科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_88.html"
+    },
+    {
+      "subject_id": "89",
+      "department": "老年呼吸二科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_89.html"
+    },
+    {
+      "subject_id": "91",
+      "department": "老年神经科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_91.html"
+    },
+    {
+      "subject_id": "92",
+      "department": "老年肾病科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_92.html"
+    },
+    {
+      "subject_id": "93",
+      "department": "老年内分泌科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_93.html"
+    },
+    {
+      "subject_id": "90",
+      "department": "全科医学科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_90.html"
+    },
+    {
+      "subject_id": "97",
+      "department": "康复医学科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_97.html"
+    },
+    {
+      "subject_id": "99",
+      "department": "中医正骨科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_99.html"
+    },
+    {
+      "subject_id": "98",
+      "department": "中医内科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_98.html"
+    },
+    {
+      "subject_id": "75",
+      "department": "协和高级医疗中心（全科医学科）",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_75.html"
+    },
+    {
+      "subject_id": "43",
+      "department": "精神科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_43.html"
+    },
+    {
+      "subject_id": "42",
+      "department": "心理科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_42.html"
+    },
+    {
+      "subject_id": "39",
+      "department": "心理咨询科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_39.html"
+    },
+    {
+      "subject_id": "115",
+      "department": "司法鉴定医学科(广东精卫法医精神病司法鉴定所)",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_115.html"
+    },
+    {
+      "subject_id": "37",
+      "department": "睡眠医学科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_37.html"
+    },
+    {
+      "subject_id": "100",
+      "department": "重症医学科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_100.html"
+    },
+    {
+      "subject_id": "68",
+      "department": "药学部",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_68.html"
+    },
+    {
+      "subject_id": "64",
+      "department": "放射科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_64.html"
+    },
+    {
+      "subject_id": "63",
+      "department": "核医学科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_63.html"
+    },
+    {
+      "subject_id": "62",
+      "department": "超声科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_62.html"
+    },
+    {
+      "subject_id": "59",
+      "department": "病理科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_59.html"
+    },
+    {
+      "subject_id": "60",
+      "department": "检验科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_60.html"
+    },
+    {
+      "subject_id": "112",
+      "department": "急诊科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_112.html"
+    },
+    {
+      "subject_id": "13",
+      "department": "麻醉科",
+      "department_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_13.html"
+    }
+  ],
+  "entry_reconnaissance": [
+    {
+      "category_name": "心血管内科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_79.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 87,
+      "unique_detail_count": 87,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "心外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_80.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 63,
+      "unique_detail_count": 63,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "心儿科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_81.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 18,
+      "unique_detail_count": 18,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "心脏母胎医学科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_118.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 5,
+      "unique_detail_count": 5,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "广东省心血管病中心",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_84.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 5,
+      "unique_detail_count": 5,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "肾内科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_15.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 28,
+      "unique_detail_count": 28,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "血液内科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_16.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 19,
+      "unique_detail_count": 19,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "消化内科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_17.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 14,
+      "unique_detail_count": 14,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "感染科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_18.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "呼吸与危重症医学科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_19.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 16,
+      "unique_detail_count": 16,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "内分泌科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_20.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 18,
+      "unique_detail_count": 18,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "风湿免疫科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_21.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 14,
+      "unique_detail_count": 14,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "临床营养科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_23.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 7,
+      "unique_detail_count": 7,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "消化内镜中心",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_103.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 9,
+      "unique_detail_count": 9,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "普通外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_6.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 3,
+      "unique_detail_count": 3,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "泌尿外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_7.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 27,
+      "unique_detail_count": 27,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "胸外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_8.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 19,
+      "unique_detail_count": 19,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "血管外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_9.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 9,
+      "unique_detail_count": 9,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "整形外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_117.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 7,
+      "unique_detail_count": 7,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "烧伤与创面修复外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_10.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 9,
+      "unique_detail_count": 9,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "神经外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_11.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 25,
+      "unique_detail_count": 25,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "器官移植科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_12.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "乳腺科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_29.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 11,
+      "unique_detail_count": 11,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "脊柱外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_48.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 19,
+      "unique_detail_count": 19,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "关节骨病与创伤科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_49.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 13,
+      "unique_detail_count": 13,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "骨肿瘤科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_50.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 9,
+      "unique_detail_count": 9,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "微创介入科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_32.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 11,
+      "unique_detail_count": 11,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "胃肠外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_104.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 21,
+      "unique_detail_count": 21,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "肝胆外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_105.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 14,
+      "unique_detail_count": 14,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "胰腺中心",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_106.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 12,
+      "unique_detail_count": 12,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "甲状腺疝外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_107.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 12,
+      "unique_detail_count": 12,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "肾移植科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_108.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 5,
+      "unique_detail_count": 5,
+      "out_of_scope_detail_count": 1,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "生殖医学科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_53.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 10,
+      "unique_detail_count": 10,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "产科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_52.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 27,
+      "unique_detail_count": 27,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "妇科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_51.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 29,
+      "unique_detail_count": 29,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "神经科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_44.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 25,
+      "unique_detail_count": 25,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "口腔科门诊",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_47.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 14,
+      "unique_detail_count": 14,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "口腔颌面外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_86.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 10,
+      "unique_detail_count": 10,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "咽喉头颈外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_45.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 11,
+      "unique_detail_count": 11,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "耳科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_109.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 9,
+      "unique_detail_count": 9,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "鼻科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_110.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 8,
+      "unique_detail_count": 8,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "眼科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_46.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 32,
+      "unique_detail_count": 32,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "新生儿科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_56.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 14,
+      "unique_detail_count": 14,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "普通儿科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_55.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 8,
+      "unique_detail_count": 8,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "儿童血液科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_54.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "儿科重症监护室",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_57.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 11,
+      "unique_detail_count": 11,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "肺内一科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_24.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 12,
+      "unique_detail_count": 12,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "肺外科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_25.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 14,
+      "unique_detail_count": 14,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "肺内二科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_26.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 5,
+      "unique_detail_count": 5,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "肺内三科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_27.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 8,
+      "unique_detail_count": 8,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "乳腺肿瘤科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_30.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 11,
+      "unique_detail_count": 11,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "放射治疗科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_31.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 17,
+      "unique_detail_count": 17,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "肿瘤内科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_33.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 10,
+      "unique_detail_count": 10,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "淋巴瘤科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_34.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 9,
+      "unique_detail_count": 9,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "肿瘤日间病区",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_28.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 4,
+      "unique_detail_count": 4,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "皮肤性病科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_22.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 20,
+      "unique_detail_count": 20,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "临床心理科(心身医学科)",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_67.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 8,
+      "unique_detail_count": 8,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "老年重症医学科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_95.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 2,
+      "unique_detail_count": 2,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "老年心血管科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_94.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 7,
+      "unique_detail_count": 7,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "老年呼吸一科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_88.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 3,
+      "unique_detail_count": 3,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "老年呼吸二科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_89.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 11,
+      "unique_detail_count": 11,
+      "out_of_scope_detail_count": 1,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "老年神经科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_91.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 8,
+      "unique_detail_count": 8,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "老年肾病科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_92.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 7,
+      "unique_detail_count": 7,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "老年内分泌科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_93.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 16,
+      "unique_detail_count": 16,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "全科医学科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_90.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 12,
+      "unique_detail_count": 12,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "康复医学科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_97.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 36,
+      "unique_detail_count": 36,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "中医正骨科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_99.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "中医内科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_98.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 25,
+      "unique_detail_count": 25,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "协和高级医疗中心（全科医学科）",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_75.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 27,
+      "unique_detail_count": 27,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "精神科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_43.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 20,
+      "unique_detail_count": 20,
+      "out_of_scope_detail_count": 1,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "心理科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_42.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 14,
+      "unique_detail_count": 14,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "心理咨询科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_39.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 16,
+      "unique_detail_count": 16,
+      "out_of_scope_detail_count": 1,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "司法鉴定医学科(广东精卫法医精神病司法鉴定所)",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_115.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 14,
+      "unique_detail_count": 14,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "睡眠医学科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_37.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 7,
+      "unique_detail_count": 7,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "重症医学科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_100.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 6,
+      "unique_detail_count": 6,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "药学部",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_68.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 31,
+      "unique_detail_count": 31,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "放射科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_64.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 26,
+      "unique_detail_count": 26,
+      "out_of_scope_detail_count": 1,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "核医学科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_63.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 3,
+      "unique_detail_count": 3,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "超声科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_62.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 47,
+      "unique_detail_count": 47,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "病理科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_59.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 22,
+      "unique_detail_count": 22,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "检验科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_60.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 68,
+      "unique_detail_count": 68,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "急诊科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_112.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 20,
+      "unique_detail_count": 20,
+      "out_of_scope_detail_count": 4,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    },
+    {
+      "category_name": "麻醉科",
+      "entry_url": "https://www.gdghospital.org.cn/Specialistthree/index_subjectid_13.html",
+      "page_nature": "官网静态科室首页内嵌完整专家卡片",
+      "list_page_count": 1,
+      "raw_detail_relation_count": 16,
+      "unique_detail_count": 16,
+      "out_of_scope_detail_count": 0,
+      "affiliation": "广东省人民医院",
+      "independent_entity_check": "同域科室页；数字 itemid + subjectid 严格详情关系"
+    }
+  ],
+  "affiliate_reconnaissance": [
+    {
+      "name": "广东省心血管病研究所",
+      "url": "https://www.gdghospital.org.cn/expert/info_itemid_69.html",
+      "relation": "广东省人民医院所属研究所"
+    },
+    {
+      "name": "广东省老年医学研究所",
+      "url": "https://www.gdghospital.org.cn/expert/info_itemid_68.html",
+      "relation": "一套人马、两块牌子；由广东省人民医院代管"
+    },
+    {
+      "name": "惠福分院",
+      "url": "https://www.gdghospital.org.cn/expert/info_itemid_67.html",
+      "relation": "广东省人民医院重要组成部分"
+    },
+    {
+      "name": "广东省肺癌研究所",
+      "url": "https://www.gdghospital.org.cn/expert/info_itemid_65.html",
+      "relation": "广东省人民医院所属研究所"
+    }
+  ],
+  "excluded_candidates": [
+    {
+      "entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "list_title": "李燕娥 副主任护师 护士长",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_32802_subjectid_108.html",
+      "reason": "官网专家卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "list_title": "宋湘红 主管护师 护士长",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_56813_subjectid_89.html",
+      "reason": "官网专家卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "list_title": "谢美香 主管护师",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_56717_subjectid_43.html",
+      "reason": "官网专家卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "list_title": "杨泽漫 护师",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_56690_subjectid_39.html",
+      "reason": "官网专家卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "list_title": "李新云 主任护师",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33707_subjectid_64.html",
+      "reason": "官网专家卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "list_title": "王华军 副主任护师",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33801_subjectid_112.html",
+      "reason": "官网专家卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "list_title": "何斌斌 副主任护师",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33781_subjectid_112.html",
+      "reason": "官网专家卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "list_title": "李冬欣 主管护师",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33779_subjectid_112.html",
+      "reason": "官网专家卡片仅标注护理身份，排除医生画像采集范围"
+    },
+    {
+      "entry_url": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "list_title": "周浩 主管护师",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33802_subjectid_112.html",
+      "reason": "官网专家卡片仅标注护理身份，排除医生画像采集范围"
+    }
+  ],
+  "cross_entry_duplicates": [],
+  "gdgh_detail_reconciliation": [
+    {
+      "detail_id": "25506",
+      "name": "林展翼",
+      "departments": [
+        "心血管内科"
+      ],
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_25506_subjectid_79.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles//Upload/Expert/2019530171193.jpg",
+      "resolution": "详情已读取"
+    },
+    {
+      "detail_id": "33825",
+      "name": "庄建",
+      "departments": [
+        "心外科"
+      ],
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33825_subjectid_80.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles//Upload/Expert/201729118326.jpg",
+      "resolution": "详情已读取"
+    },
+    {
+      "detail_id": "32859",
+      "name": "王树水",
+      "departments": [
+        "心儿科"
+      ],
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_32859_subjectid_81.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2022/01/20220105102415611.jpg?546L5qCR5rC0LW5ldy5qcGc=",
+      "resolution": "详情已读取"
+    },
+    {
+      "detail_id": "24417",
+      "name": "潘微",
+      "departments": [
+        "心脏母胎医学科"
+      ],
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24417_subjectid_118.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210818150722162.jpg?5r2Y5b6uLW5ldC5qcGc=",
+      "resolution": "详情已读取"
+    },
+    {
+      "detail_id": "25495",
+      "name": "冯颖青",
+      "departments": [
+        "广东省心血管病中心"
+      ],
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_25495_subjectid_84.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210830160917040.jpg?5Yav6aKW6Z2SLW5ldC5qcGc=",
+      "resolution": "详情已读取"
+    },
+    {
+      "detail_id": "24650",
+      "name": "余学清",
+      "departments": [
+        "肾内科"
+      ],
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24650_subjectid_15.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2024/05/20240521163521258.jpg?5L2Z5a2m5riFLTIwMTguanBn",
+      "resolution": "详情已读取"
+    },
+    {
+      "detail_id": "23948",
+      "name": "杜欣",
+      "departments": [
+        "血液内科"
+      ],
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_23948_subjectid_16.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles//Upload/Expert/2019114828256.jpg",
+      "resolution": "详情已读取"
+    },
+    {
+      "detail_id": "24663",
+      "name": "沙卫红",
+      "departments": [
+        "消化内科"
+      ],
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24663_subjectid_17.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210830163008485.jpg?5rKZ5Y2r57qiLW5ldC5qcGc=",
+      "resolution": "详情已读取"
+    },
+    {
+      "detail_id": "24748",
+      "name": "陈仁",
+      "departments": [
+        "感染科"
+      ],
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24748_subjectid_18.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210830165000517.jpg?6ZmI5LuBLW5ldC5qcGc=",
+      "resolution": "详情已读取"
+    },
+    {
+      "detail_id": "33972",
+      "name": "高兴林",
+      "departments": [
+        "呼吸与危重症医学科"
+      ],
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33972_subjectid_19.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2022/01/20220110101845981.jpg?6auY5YW05p6XLW5ldy5qcGc=",
+      "resolution": "详情已读取"
+    }
+  ],
+  "gdgh_identity_reconciliation": [
+    {
+      "name": "林展翼",
+      "identity_index": 1,
+      "detail_ids": [
+        "25506"
+      ],
+      "resolution": "唯一身份",
+      "relation_count": 1,
+      "departments": [
+        "心血管内科"
+      ],
+      "primary_source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_25506_subjectid_79.html",
+      "merged_source_links": []
+    },
+    {
+      "name": "庄建",
+      "identity_index": 1,
+      "detail_ids": [
+        "33825"
+      ],
+      "resolution": "唯一身份",
+      "relation_count": 1,
+      "departments": [
+        "心外科"
+      ],
+      "primary_source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33825_subjectid_80.html",
+      "merged_source_links": []
+    },
+    {
+      "name": "王树水",
+      "identity_index": 1,
+      "detail_ids": [
+        "32859"
+      ],
+      "resolution": "唯一身份",
+      "relation_count": 1,
+      "departments": [
+        "心儿科"
+      ],
+      "primary_source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_32859_subjectid_81.html",
+      "merged_source_links": []
+    },
+    {
+      "name": "潘微",
+      "identity_index": 1,
+      "detail_ids": [
+        "24417"
+      ],
+      "resolution": "唯一身份",
+      "relation_count": 1,
+      "departments": [
+        "心脏母胎医学科"
+      ],
+      "primary_source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24417_subjectid_118.html",
+      "merged_source_links": []
+    },
+    {
+      "name": "冯颖青",
+      "identity_index": 1,
+      "detail_ids": [
+        "25495"
+      ],
+      "resolution": "唯一身份",
+      "relation_count": 1,
+      "departments": [
+        "广东省心血管病中心"
+      ],
+      "primary_source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_25495_subjectid_84.html",
+      "merged_source_links": []
+    },
+    {
+      "name": "余学清",
+      "identity_index": 1,
+      "detail_ids": [
+        "24650"
+      ],
+      "resolution": "唯一身份",
+      "relation_count": 1,
+      "departments": [
+        "肾内科"
+      ],
+      "primary_source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24650_subjectid_15.html",
+      "merged_source_links": []
+    },
+    {
+      "name": "杜欣",
+      "identity_index": 1,
+      "detail_ids": [
+        "23948"
+      ],
+      "resolution": "唯一身份",
+      "relation_count": 1,
+      "departments": [
+        "血液内科"
+      ],
+      "primary_source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_23948_subjectid_16.html",
+      "merged_source_links": []
+    },
+    {
+      "name": "沙卫红",
+      "identity_index": 1,
+      "detail_ids": [
+        "24663"
+      ],
+      "resolution": "唯一身份",
+      "relation_count": 1,
+      "departments": [
+        "消化内科"
+      ],
+      "primary_source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24663_subjectid_17.html",
+      "merged_source_links": []
+    },
+    {
+      "name": "陈仁",
+      "identity_index": 1,
+      "detail_ids": [
+        "24748"
+      ],
+      "resolution": "唯一身份",
+      "relation_count": 1,
+      "departments": [
+        "感染科"
+      ],
+      "primary_source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24748_subjectid_18.html",
+      "merged_source_links": []
+    },
+    {
+      "name": "高兴林",
+      "identity_index": 1,
+      "detail_ids": [
+        "33972"
+      ],
+      "resolution": "唯一身份",
+      "relation_count": 1,
+      "departments": [
+        "呼吸与危重症医学科"
+      ],
+      "primary_source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33972_subjectid_19.html",
+      "merged_source_links": []
+    }
+  ],
+  "photo_samples": [
+    {
+      "name": "林展翼",
+      "department": "心血管内科",
+      "title": "主任医师",
+      "detail_id": "25506",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_25506_subjectid_79.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles//Upload/Expert/2019530171193.jpg",
+      "photo_file": "01_试点医院/广东省人民医院/照片/林展翼-心血管内科-主任医师-广东省人民医院.jpg",
+      "filename": "林展翼-心血管内科-主任医师-广东省人民医院.jpg",
+      "bytes": 9193,
+      "sha256": "8840d99b325776a89298093e5feabae6d964575c2c3032726ad3046f7e7b7498",
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广东省人民医院\\照片\\林展翼-心血管内科-主任医师-广东省人民医院.jpg"
+    },
+    {
+      "name": "庄建",
+      "department": "心外科",
+      "title": "主任医师",
+      "detail_id": "33825",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33825_subjectid_80.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles//Upload/Expert/201729118326.jpg",
+      "photo_file": "01_试点医院/广东省人民医院/照片/庄建-心外科-主任医师-广东省人民医院.jpg",
+      "filename": "庄建-心外科-主任医师-广东省人民医院.jpg",
+      "bytes": 8204,
+      "sha256": "c7b974530e47bb0418d6d2b796222d03c8a817d4b6dd8d0c41161a4fe608cb5b",
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广东省人民医院\\照片\\庄建-心外科-主任医师-广东省人民医院.jpg"
+    },
+    {
+      "name": "王树水",
+      "department": "心儿科",
+      "title": "主任医师",
+      "detail_id": "32859",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_32859_subjectid_81.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2022/01/20220105102415611.jpg?546L5qCR5rC0LW5ldy5qcGc=",
+      "photo_file": "01_试点医院/广东省人民医院/照片/王树水-心儿科-主任医师-广东省人民医院.jpg",
+      "filename": "王树水-心儿科-主任医师-广东省人民医院.jpg",
+      "bytes": 12290,
+      "sha256": "bdba1d09a836c6929ce8c2864cf3741f4a930217d399a3be829c7a5766d1a269",
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广东省人民医院\\照片\\王树水-心儿科-主任医师-广东省人民医院.jpg"
+    },
+    {
+      "name": "潘微",
+      "department": "心脏母胎医学科",
+      "title": "主任医师",
+      "detail_id": "24417",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24417_subjectid_118.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210818150722162.jpg?5r2Y5b6uLW5ldC5qcGc=",
+      "photo_file": "01_试点医院/广东省人民医院/照片/潘微-心脏母胎医学科-主任医师-广东省人民医院.jpg",
+      "filename": "潘微-心脏母胎医学科-主任医师-广东省人民医院.jpg",
+      "bytes": 11720,
+      "sha256": "2aaa09d4c36ccab9b128bbedf07ecffb1510d8dabe44b9de458012b90cab5810",
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广东省人民医院\\照片\\潘微-心脏母胎医学科-主任医师-广东省人民医院.jpg"
+    },
+    {
+      "name": "冯颖青",
+      "department": "广东省心血管病中心",
+      "title": "主任医师",
+      "detail_id": "25495",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_25495_subjectid_84.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210830160917040.jpg?5Yav6aKW6Z2SLW5ldC5qcGc=",
+      "photo_file": "01_试点医院/广东省人民医院/照片/冯颖青-广东省心血管病中心-主任医师-广东省人民医院.jpg",
+      "filename": "冯颖青-广东省心血管病中心-主任医师-广东省人民医院.jpg",
+      "bytes": 13042,
+      "sha256": "35c989ffb2899be6ad26b8e82286bdaf166d4f9aa9bceea7007c059b43c8d108",
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广东省人民医院\\照片\\冯颖青-广东省心血管病中心-主任医师-广东省人民医院.jpg"
+    },
+    {
+      "name": "余学清",
+      "department": "肾内科",
+      "title": "主任医师",
+      "detail_id": "24650",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24650_subjectid_15.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2024/05/20240521163521258.jpg?5L2Z5a2m5riFLTIwMTguanBn",
+      "photo_file": "01_试点医院/广东省人民医院/照片/余学清-肾内科-主任医师-广东省人民医院.jpg",
+      "filename": "余学清-肾内科-主任医师-广东省人民医院.jpg",
+      "bytes": 12724,
+      "sha256": "ef1a0ee5818257d925cb5febfdd9063904c0967ba5b9cbcc9e4f502e0e918cd3",
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广东省人民医院\\照片\\余学清-肾内科-主任医师-广东省人民医院.jpg"
+    },
+    {
+      "name": "杜欣",
+      "department": "血液内科",
+      "title": "主任医师",
+      "detail_id": "23948",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_23948_subjectid_16.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles//Upload/Expert/2019114828256.jpg",
+      "photo_file": "01_试点医院/广东省人民医院/照片/杜欣-血液内科-主任医师-广东省人民医院.jpg",
+      "filename": "杜欣-血液内科-主任医师-广东省人民医院.jpg",
+      "bytes": 17902,
+      "sha256": "1716f63cdee85f9fec57dec790eb40145404e4403f2cf4740c418f8e79eb94bc",
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广东省人民医院\\照片\\杜欣-血液内科-主任医师-广东省人民医院.jpg"
+    },
+    {
+      "name": "沙卫红",
+      "department": "消化内科",
+      "title": "主任医师",
+      "detail_id": "24663",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24663_subjectid_17.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210830163008485.jpg?5rKZ5Y2r57qiLW5ldC5qcGc=",
+      "photo_file": "01_试点医院/广东省人民医院/照片/沙卫红-消化内科-主任医师-广东省人民医院.jpg",
+      "filename": "沙卫红-消化内科-主任医师-广东省人民医院.jpg",
+      "bytes": 12409,
+      "sha256": "926c08022b8334825f71b63c709966df08d171afcf22500af04f934054148ab8",
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广东省人民医院\\照片\\沙卫红-消化内科-主任医师-广东省人民医院.jpg"
+    },
+    {
+      "name": "陈仁",
+      "department": "感染科",
+      "title": "主任医师",
+      "detail_id": "24748",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24748_subjectid_18.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210830165000517.jpg?6ZmI5LuBLW5ldC5qcGc=",
+      "photo_file": "01_试点医院/广东省人民医院/照片/陈仁-感染科-主任医师-广东省人民医院.jpg",
+      "filename": "陈仁-感染科-主任医师-广东省人民医院.jpg",
+      "bytes": 11996,
+      "sha256": "4930e8e5af6ff63bbdd6f9131db30f89502e81705a5b54081879eb16a63e2ab9",
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广东省人民医院\\照片\\陈仁-感染科-主任医师-广东省人民医院.jpg"
+    },
+    {
+      "name": "高兴林",
+      "department": "呼吸与危重症医学科",
+      "title": "主任医师",
+      "detail_id": "33972",
+      "source_link": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33972_subjectid_19.html",
+      "photo_url": "https://www.gdghospital.org.cn/uploadfiles/2022/01/20220110101845981.jpg?6auY5YW05p6XLW5ldy5qcGc=",
+      "photo_file": "01_试点医院/广东省人民医院/照片/高兴林-呼吸与危重症医学科-主任医师-广东省人民医院.jpg",
+      "filename": "高兴林-呼吸与危重症医学科-主任医师-广东省人民医院.jpg",
+      "bytes": 12581,
+      "sha256": "d7c72b5a10dd519f4cef24faeeeef1fea70b09af5df0d8cace64cda645e588c0",
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广东省人民医院\\照片\\高兴林-呼吸与危重症医学科-主任医师-广东省人民医院.jpg"
+    }
+  ],
+  "photo_errors": [],
+  "category_errors": [],
+  "detail_errors": [],
+  "category_counts": [
+    [
+      "心血管内科",
+      1
+    ],
+    [
+      "心外科",
+      1
+    ],
+    [
+      "心儿科",
+      1
+    ],
+    [
+      "心脏母胎医学科",
+      1
+    ],
+    [
+      "广东省心血管病中心",
+      1
+    ],
+    [
+      "肾内科",
+      1
+    ],
+    [
+      "血液内科",
+      1
+    ],
+    [
+      "消化内科",
+      1
+    ],
+    [
+      "感染科",
+      1
+    ],
+    [
+      "呼吸与危重症医学科",
+      1
+    ]
+  ],
+  "priority_counts": {
+    "高": 9,
+    "中": 1
+  },
+  "group_counts": {
+    "慢性病": 4,
+    "疑难重症": 5,
+    "术后恢复/康复": 1,
+    "肿瘤": 3,
+    "免疫/风湿/感染": 2
+  },
+  "warning_counts": {},
+  "rows": [
+    {
+      "序号": 1,
+      "医院": "广东省人民医院",
+      "姓名": "林展翼",
+      "科室_分类页": "心血管内科",
+      "科室_列表卡片": "心血管内科",
+      "职称_关键词": "主任医师、副院长",
+      "职称身份原文": "副院长 主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病",
+      "重点疾病标签": "高血压",
+      "擅长诊疗方向摘录": "心内科专业各病种的临床诊治解，特别是高血压病的诊断、鉴别诊断、治疗、顽固性高血压病诊治方面",
+      "亮眼经历线索": "参与多项高血压病大规模临床研究，还参与国家有关高血压防治及老年疾病方面多项指南的制定，主持多项的国际和国内高血压方面的学术会议。 学术任职：中华医学会老年医学分会常委，广东省医学会老年医学分会副主委，广东省医学会心血管分会委员； 广东省医师协会理事。",
+      "列表简介": "",
+      "详情正文摘录": "从事心血管内科临床工作二十余年，熟悉心内科专业各病种的临床诊治解，特别是高血压病的诊断、鉴别诊断、治疗、顽固性高血压病诊治方面。 参与多项高血压病大规模临床研究，还参与国家有关高血压防治及老年疾病方面多项指南的制定，主持多项的国际和国内高血压方面的学术会议。 参与编写《当代心脏病学新进展》等多部专著。 已经获得国家人事部留学人员科技活动择优资助项目、广东省医学科研基金、广东省科技厅科技计划课题和自然科学基金等资助，继续进行小口径组织工程人造血管的研究工作。 目前在读硕士生4名，培养方向为小口径组织工程人造血管的研究。 学术任职：中华医学会老年医学分会常委，广东省医学会老年医学分会副主委，广东省医学会心血管分会委员； 广东省医师协会理事。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_25506_subjectid_79.html",
+      "照片链接": "https://www.gdghospital.org.cn/uploadfiles//Upload/Expert/2019530171193.jpg",
+      "照片文件": "01_试点医院/广东省人民医院/照片/林展翼-心血管内科-主任医师-广东省人民医院.jpg",
+      "采集入口": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "采集方式": "官网科室树+严格 itemid/subjectid 医生详情 DOM+同域本人职业照",
+      "采集日期": "2026-08-14",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 2,
+      "医院": "广东省人民医院",
+      "姓名": "庄建",
+      "科室_分类页": "心外科",
+      "科室_列表卡片": "心外科",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "疑难重症",
+      "重点疾病标签": "重症、复杂",
+      "擅长诊疗方向摘录": "疾病：重症复杂先天性心脏病的外科治疗和研究",
+      "亮眼经历线索": "医学博士、博士生导师 国务院特殊津贴专家、心外科首席专家，广东省心血管病中心主任。 中华医学会胸心血管外科学分会第九届主委、中国医师协会心血管外科分会副会长，国家千百万人才工程“有突出贡献中青年专家”。 主持建立了适合我国国情的先心病外科治疗指南。 在国内率先开展多项新术式应用于复杂先天性心脏病外科治疗，率先建立省级先天性心脏病防治网络，率先开展先天性心脏病产前产后一体化诊疗模式临床应用，率先开展产时胎儿心脏病外科治疗和胎儿先天性心脏病宫内介入治疗，率先将虚拟现实和混合现实技术应用于先天性心脏病辅助诊疗。",
+      "列表简介": "",
+      "详情正文摘录": "医学博士、博士生导师 国务院特殊津贴专家、心外科首席专家，广东省心血管病中心主任。 中华医学会胸心血管外科学分会第九届主委、中国医师协会心血管外科分会副会长，国家千百万人才工程“有突出贡献中青年专家”。 主持建立了适合我国国情的先心病外科治疗指南。 长期从事复杂重症先心病防诊治，带领的先心外科团队步入国际先进行列。 长期从事心脏外科临床、科研和教学工作，重点开展重症复杂先天性心脏病的外科治疗研究、先天性心脏病系统防治研究和先天性心脏病辅助诊疗和评价系统建立的研究。 在国内率先开展多项新术式应用于复杂先天性心脏病外科治疗，率先建立省级先天性心脏病防治网络，率先开展先天性心脏病产前产后一体化诊疗模式临床应用，率先开展产时胎儿心脏病外科治疗和胎儿先天性心脏病宫内介入治疗，率先将虚拟现实和混合现实技术应用于先天性心脏病辅助诊疗。 负责完成国家“十一五”科技支撑计划项目《提高新生儿及小婴儿复杂先天性心脏病外科疗效的临床研究》和国家“十二五”科技支撑计划项目《复杂先心病防治网络建设和优化治疗策略研究》，推动我国复杂先天性心脏病防治水平的提高。 在学术期刊发表论文200余篇，有多项研究成果获奖。 先后获得国家卫生健康委员会和国家有突出贡献中青年专家、广东省“五一”劳动奖章和全国“五一”劳动奖章、广东省“丁颖科技奖”。 擅长疾病：重症复杂先天性心脏病的外科治疗和研究。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33825_subjectid_80.html",
+      "照片链接": "https://www.gdghospital.org.cn/uploadfiles//Upload/Expert/201729118326.jpg",
+      "照片文件": "01_试点医院/广东省人民医院/照片/庄建-心外科-主任医师-广东省人民医院.jpg",
+      "采集入口": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "采集方式": "官网科室树+严格 itemid/subjectid 医生详情 DOM+同域本人职业照",
+      "采集日期": "2026-08-14",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 3,
+      "医院": "广东省人民医院",
+      "姓名": "王树水",
+      "科室_分类页": "心儿科",
+      "科室_列表卡片": "心儿科",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "疑难重症",
+      "重点疾病标签": "疑难、罕见",
+      "擅长诊疗方向摘录": "室间隔缺损、房间隔缺损、动脉导管未闭、肺动脉瓣狭窄等先天性心脏病介入治疗",
+      "亮眼经历线索": "中共党员 医学博士、博士生导师。 广东省心血管病研究所党总支书记、广东省心血管病中心副主任、广东省儿童心脏中心副主任、心儿科主任。 现兼任广东省医师协会儿童心血管医师分会主任委员、中国医院协会罕见病专委会常务委员、广东省医学会罕见病分会常务委员、广东省介入性心脏病学会常务理事等。 在小儿心脏病超声诊断、疑难小儿心血管疾病的诊治亦方面有较深研究。",
+      "列表简介": "",
+      "详情正文摘录": "中共党员 医学博士、博士生导师。 广东省心血管病研究所党总支书记、广东省心血管病中心副主任、广东省儿童心脏中心副主任、心儿科主任。 1993年本科毕业于山东医科大学，后在广东省心血管研究所获得医学硕士、博士学位。 现兼任广东省医师协会儿童心血管医师分会主任委员、中国医院协会罕见病专委会常务委员、广东省医学会罕见病分会常务委员、广东省介入性心脏病学会常务理事等。 从事小儿心血管病诊治工作30余年，擅长室间隔缺损、房间隔缺损、动脉导管未闭、肺动脉瓣狭窄等先天性心脏病介入治疗。 在小儿心脏病超声诊断、疑难小儿心血管疾病的诊治亦方面有较深研究。 是卫生部首批先心病介入治疗培训导师及国家医学考试中心先心病介入治疗资质考试面试考官。 主持承担国家自然科学基金、广东省自然科学基金、广东省及广州市科技计划项目等课题7项，获得国家科技发明二等奖、广东省科技进步一等奖、二等奖等奖励6项。 以第一及通讯作者在国际心脏病学杂志、欧洲儿科杂志、日本儿科杂志、罕见病杂志、欧洲超声医学杂志、美国超声医学杂志等SCI期刊及国内核心期刊等发表临床型研究论文60余篇。 特约专家",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_32859_subjectid_81.html",
+      "照片链接": "https://www.gdghospital.org.cn/uploadfiles/2022/01/20220105102415611.jpg?546L5qCR5rC0LW5ldy5qcGc=",
+      "照片文件": "01_试点医院/广东省人民医院/照片/王树水-心儿科-主任医师-广东省人民医院.jpg",
+      "采集入口": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "采集方式": "官网科室树+严格 itemid/subjectid 医生详情 DOM+同域本人职业照",
+      "采集日期": "2026-08-14",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 4,
+      "医院": "广东省人民医院",
+      "姓名": "潘微",
+      "科室_分类页": "心脏母胎医学科",
+      "科室_列表卡片": "心脏母胎医学科",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "疑难重症",
+      "重点疾病标签": "疑难、重症、复杂",
+      "擅长诊疗方向摘录": "于重症、复杂先心病的超声诊断及围术期处理",
+      "亮眼经历线索": "中共党员 医学博士、博士生导师、心脏母胎医学科主任 1992年7月毕业于吉林大学儿科医学专业获学士学位。 2008年于美国宾夕法尼亚大学附属费城儿童医院心脏中心进修学习。 承担华南地区胎儿及儿童先心病的终端诊断工作，完成了大量疑难病例的会诊。 副主编论著四部，主译一部，发表专业论文40余篇。",
+      "列表简介": "",
+      "详情正文摘录": "中共党员 医学博士、博士生导师、心脏母胎医学科主任 1992年7月毕业于吉林大学儿科医学专业获学士学位。 2000年和2011年先后毕业于广东省心血管病研究所心儿科、心外科获得医学硕士、医学博士学位。 2008年于美国宾夕法尼亚大学附属费城儿童医院心脏中心进修学习。 从事儿科心血管专业近30年，熟练掌握儿科心血管疾病的临床诊断及内科治疗、介入治疗技术。 尤其擅长于重症、复杂先心病的超声诊断及围术期处理。 近二十年以胎儿心脏病的产前诊断、咨询及生后优化治疗为主要研究方向，积累了丰富的临床经验。 承担华南地区胎儿及儿童先心病的终端诊断工作，完成了大量疑难病例的会诊。 作为主要参与者，2015年完成我国第一例胎儿心脏病产时手术、2016年完成我国第一例胎儿宫内介入术、至今已完成7例，均获成功。 副主编论著四部，主译一部，发表专业论文40余篇。 参与制定“中国胎儿心脏超声检查技术规范”、制定了“广东省胎儿心脏超声操作规范和临床咨询技术指南”。 完成广东省科技项目3项，承担国家“十三五”重大课题分课题一项。 两次获得“广东省人民医院新技术奖”。 作为主要参与者获广东省科技进步一等奖一次、获第十一届宋庆龄儿科医学奖一次。 系国家卫健委首批先心病介入治疗培训导师； 兼任中国胎儿心脏病防治委员会副主任委员、广东省优生优育协会先心病专业委员会副主任委员、 广东省预防医学会出生缺陷防治委员会副主任委员、中华医学会儿科分会胎儿心脏病协作组组长，广东省超声医学分会常委等学术职务。 专家",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24417_subjectid_118.html",
+      "照片链接": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210818150722162.jpg?5r2Y5b6uLW5ldC5qcGc=",
+      "照片文件": "01_试点医院/广东省人民医院/照片/潘微-心脏母胎医学科-主任医师-广东省人民医院.jpg",
+      "采集入口": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "采集方式": "官网科室树+严格 itemid/subjectid 医生详情 DOM+同域本人职业照",
+      "采集日期": "2026-08-14",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 5,
+      "医院": "广东省人民医院",
+      "姓名": "冯颖青",
+      "科室_分类页": "广东省心血管病中心",
+      "科室_列表卡片": "广东省心血管病中心",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、术后恢复/康复",
+      "重点疾病标签": "高血压、糖尿病、代谢、术后",
+      "擅长诊疗方向摘录": "",
+      "亮眼经历线索": "广东省人民医院广东省心血管病中心副主任，高血压病研究室主任，心内科主任医师，博士生导师。 目前担任中国医师协会高血压分会常委、广东省医学会高血压分会主任委员、广东省医学会心血管分会常委、中国高血压联盟副主席、粤港澳大湾区高血压联盟主席，2020 年作为中国唯一获奖者被世界高血压联盟授予“人群心血管危险因素控制杰出贡献奖”。 主要致力于高血压、2 型糖尿病与心血管代谢性疾病的临床研究，研究成果于 Eur Heart J、Lancet Reg Health West Pac等杂志发表通讯作者（含共同）SCI 科研论文 200 余篇。 作为项目或课题负责人承担“十三五”国家重点研发计划“我国社区高血压综合管理适宜技术研究及示范推广”及多项重点专项和省市级重大专项科研项目，两次获广东省科技进步成果奖二等奖。",
+      "列表简介": "",
+      "详情正文摘录": "广东省人民医院广东省心血管病中心副主任，高血压病研究室主任，心内科主任医师，博士生导师。 目前担任中国医师协会高血压分会常委、广东省医学会高血压分会主任委员、广东省医学会心血管分会常委、中国高血压联盟副主席、粤港澳大湾区高血压联盟主席，2020 年作为中国唯一获奖者被世界高血压联盟授予“人群心血管危险因素控制杰出贡献奖”。 主要致力于高血压、2 型糖尿病与心血管代谢性疾病的临床研究，研究成果于 Eur Heart J、Lancet Reg Health West Pac等杂志发表通讯作者（含共同）SCI 科研论文 200 余篇。 作为项目或课题负责人承担“十三五”国家重点研发计划“我国社区高血压综合管理适宜技术研究及示范推广”及多项重点专项和省市级重大专项科研项目，两次获广东省科技进步成果奖二等奖。 带领团队在国际上首次通过多中心随机对照研究证实我国老年高血压患者强化降压(收缩压:110~<130 mmHg)与标准降压治疗(130~<150mm Hg)相比可使主要心血管复合事件风险降低26%。 在国内率先将移动互联网及穿戴设备技术用于高血压防治管理，通过该技术的推广应用，大大提高了基层高血压防治效果，形成了一套具有自主知识产权的应对高血压管理的解决方案。 相关成果《高血压综合防治体系关键技术的创建及应用》获得广东省科学技术奖科技进步二等奖。 牵头了全国范围的随机对照研究“血压正常高值合并 2 型糖尿病人群降压干预研究Intervention for High-norMal Blood Pressure in Type 2 Diabetes：A Randomized Controlled Trial（IMPACT）”。 项目预计覆盖全国400家医院和社区，并且后续将进行长达4.5年的随访，以此来探究与常规血压管理相比，强化血压管理是否能够有效的降低复合心血管事件的发生风险。 项目的开展，促进了高血压、心血管疾病防控关口前移，并规范了基层医疗机构人员的心血管代谢性疾病诊疗规范。 带领团队于2023年1月7日成功完成华南地区首例经皮肾动脉交感神经消融术（RDN），实现了高血压治疗从“单纯药物治疗”到“微创介入治疗”的医学科技提升。 手术采用目前国际上临床证据、最先进的新一代Symplicity Spyral肾动脉多极射频消融导管进行，并获得圆满成功。 目前，在广东省人民医院已建立成熟的RDN手术团队，建立了系统的术前患者筛选、评估、术中测量、围术期管理以及术后随访体系，为药物控制不佳的高血压患者提供个体化的精准治疗方案，开辟高血压治疗全新道路。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_25495_subjectid_84.html",
+      "照片链接": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210830160917040.jpg?5Yav6aKW6Z2SLW5ldC5qcGc=",
+      "照片文件": "01_试点医院/广东省人民医院/照片/冯颖青-广东省心血管病中心-主任医师-广东省人民医院.jpg",
+      "采集入口": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "采集方式": "官网科室树+严格 itemid/subjectid 医生详情 DOM+同域本人职业照",
+      "采集日期": "2026-08-14",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 6,
+      "医院": "广东省人民医院",
+      "姓名": "余学清",
+      "科室_分类页": "肾内科",
+      "科室_列表卡片": "肾内科",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "中",
+      "重点关注范围": "",
+      "重点疾病标签": "",
+      "擅长诊疗方向摘录": "",
+      "亮眼经历线索": "肾内科学科带头人 学 习经历 ：1984 年毕业于中山医学院医学系，并先后获得硕士和博士学位。 1996年和2002年先后赴澳大利亚和美国进修学习。 国内主要学术兼职 ：国务院学位委员会学科评议组成员，《中华肾脏病学会》主任委员，《中华肾脏病杂志》总编辑，《Chronic Disease and Translational Medicine》副主编。 国际主要学术兼职 ：《国际腹膜透析协会》候任主席、《亚太肾脏病学会》常务理事、《亚洲肾脏病联盟》主席、《美国肾脏病杂志》编委,《Nephrology》主题编委。",
+      "列表简介": "",
+      "详情正文摘录": "肾内科学科带头人 学 习经历 ：1984 年毕业于中山医学院医学系，并先后获得硕士和博士学位。 1996年和2002年先后赴澳大利亚和美国进修学习。 国内主要学术兼职 ：国务院学位委员会学科评议组成员，《中华肾脏病学会》主任委员，《中华肾脏病杂志》总编辑，《Chronic Disease and Translational Medicine》副主编。 国际主要学术兼职 ：《国际腹膜透析协会》候任主席、《亚太肾脏病学会》常务理事、《亚洲肾脏病联盟》主席、《美国肾脏病杂志》编委,《Nephrology》主题编委。 主要科研业绩 ：至今共承担各级科研基金44项，包括：国家重点研发计划-精准医学专项、国家自然科学基金重点项目、科技部国际合作计划项目、“十二五”科技支撑计划课题组长、973项目课题组长、教育部创新团队项目等； 发表科研论文443篇，其中SCI收入181篇，第一和通讯作者91篇，包括Nature Genetics, Nature Communications, Cell Metabolism, Science Translational Medicine等。 出版学术专著17部，其中主编8部。 主要荣誉 ：教育部“长江学者”特聘教授、国家杰出青年基金获得者、国家“百千万工程”有突出贡献的中青年专家，教育部跨世纪优秀人才、卫生部有突出贡献中青年专家、广东省特聘教授-珠江学者, 广东省南粤百杰人才等。 荣获国家科技进步二等奖1项，教育部科技进步一等奖1项，广东省科技进步一等奖1项，教育部自然科学二等奖1项。 建设了国际领先水平的腹膜透析中心，病人及技术存活率均居世界先进水平，被誉为“广州模式”； 国际著名期刊《柳叶刀》称之为“中国肾脏学发展的引擎”，在《柳叶刀》向全世界介绍“如何建设成功的腹膜透析中心：中国经验”。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24650_subjectid_15.html",
+      "照片链接": "https://www.gdghospital.org.cn/uploadfiles/2024/05/20240521163521258.jpg?5L2Z5a2m5riFLTIwMTguanBn",
+      "照片文件": "01_试点医院/广东省人民医院/照片/余学清-肾内科-主任医师-广东省人民医院.jpg",
+      "采集入口": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "采集方式": "官网科室树+严格 itemid/subjectid 医生详情 DOM+同域本人职业照",
+      "采集日期": "2026-08-14",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 7,
+      "医院": "广东省人民医院",
+      "姓名": "杜欣",
+      "科室_分类页": "血液内科",
+      "科室_列表卡片": "血液内科",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、肿瘤",
+      "重点疾病标签": "慢性、肿瘤、癌、瘤、淋巴瘤、白血病",
+      "擅长诊疗方向摘录": "贫血、急慢性白血病、骨髓增生异常综合征、骨髓增殖性肿瘤、淋巴瘤、多发性骨髓瘤、造血干细胞移植及移植物抗宿主病诊治",
+      "亮眼经历线索": "医学博士、主任医师、教授、博士研究生导师 大内科主任、大内科党总支书记、 血液内科学科带头人 专业特长 ：从事血液病专业30余年，擅长贫血、急慢性白血病、骨髓增生异常综合征、骨髓增殖性肿瘤、淋巴瘤、多发性骨髓瘤、造血干细胞移植及移植物抗宿主病诊治； 尤其对髓系恶性肿瘤的精准诊断和综合个体化治疗具有丰富的经验和较高的造诣。 社会任职 ：中华医学会肿瘤学分会淋巴血液学会委员、中华医学会血液学分会红学组委员、中华老年医学会血液学分会白血病组副组长、中国抗癌协会血液肿瘤专业委员会常委暨MDS/MPN工作组副组长、髓系肿瘤学组副组长，广东省肿瘤防治联盟第一届血液肿瘤分会主任委员、广东省药学会血液科用药专家委员会主任委员、广东省中西医结合学会血液病专业委员会主任委员、广东省精准应用学会精准血液病分会主任委员、广东省医学会血液学分会副主任委员、广东省医学会细胞治疗学分会副主任委员、广东省干细胞临床研究专家委员会专家组成员",
+      "列表简介": "",
+      "详情正文摘录": "医学博士、主任医师、教授、博士研究生导师 大内科主任、大内科党总支书记、 血液内科学科带头人 专业特长 ：从事血液病专业30余年，擅长贫血、急慢性白血病、骨髓增生异常综合征、骨髓增殖性肿瘤、淋巴瘤、多发性骨髓瘤、造血干细胞移植及移植物抗宿主病诊治； 尤其对髓系恶性肿瘤的精准诊断和综合个体化治疗具有丰富的经验和较高的造诣。 社会任职 ：中华医学会肿瘤学分会淋巴血液学会委员、中华医学会血液学分会红学组委员、中华老年医学会血液学分会白血病组副组长、中国抗癌协会血液肿瘤专业委员会常委暨MDS/MPN工作组副组长、髓系肿瘤学组副组长，广东省肿瘤防治联盟第一届血液肿瘤分会主任委员、广东省药学会血液科用药专家委员会主任委员、广东省中西医结合学会血液病专业委员会主任委员、广东省精准应用学会精准血液病分会主任委员、广东省医学会血液学分会副主任委员、广东省医学会细胞治疗学分会副主任委员、广东省干细胞临床研究专家委员会专家组成员",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_23948_subjectid_16.html",
+      "照片链接": "https://www.gdghospital.org.cn/uploadfiles//Upload/Expert/2019114828256.jpg",
+      "照片文件": "01_试点医院/广东省人民医院/照片/杜欣-血液内科-主任医师-广东省人民医院.jpg",
+      "采集入口": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "采集方式": "官网科室树+严格 itemid/subjectid 医生详情 DOM+同域本人职业照",
+      "采集日期": "2026-08-14",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 8,
+      "医院": "广东省人民医院",
+      "姓名": "沙卫红",
+      "科室_分类页": "消化内科",
+      "科室_列表卡片": "消化内科",
+      "职称_关键词": "主任医师、科主任",
+      "职称身份原文": "主任医师 科主任",
+      "重点优先级": "高",
+      "重点关注范围": "",
+      "重点疾病标签": "",
+      "擅长诊疗方向摘录": "消化性溃疡、胃食管返流病，功能性消化不良及脂肪肝、肝硬化、胆石症、胰腺炎、炎症性肠病等疾病的诊治及其内镜下的诊断与治疗",
+      "亮眼经历线索": "教授，消化内科、伟伦内窥镜室行政主任，内科教研室主任、医学博士、博士生导师，消化内科学科带头人。 现任中华医学会消化內镜分会委员，中国医师协会消化医师分会委员，中国医师协会内镜及消化内镜分会委员，广东省医师协会消化科医师分会主任委员，广东省医学会消化病学分会副主任委员，广东省医师协会常务理事。 1992年毕业于中山医科大学全英班并相继获得硕士和博士学位，曾在美国德州大学医学部（UTMB）从事博士后工作，并到日本等地进修学习消化內镜，为学科发展和人才培养搭建了较好的国际交流平台。 从事消化专业临床和科研工作20余年，洞悉国内外研究动向，在本专业领域具有极深的造诣并积累了丰富的临床经验，是国内外知名的专家与学者，近年来获广东省科技进步奖及国家和广东省自然科学基金项目多项，主译和参编专著6本，发表SCI及核心杂志论文100余篇。",
+      "列表简介": "",
+      "详情正文摘录": "教授，消化内科、伟伦内窥镜室行政主任，内科教研室主任、医学博士、博士生导师，消化内科学科带头人。 现任中华医学会消化內镜分会委员，中国医师协会消化医师分会委员，中国医师协会内镜及消化内镜分会委员，广东省医师协会消化科医师分会主任委员，广东省医学会消化病学分会副主任委员，广东省医师协会常务理事。 1992年毕业于中山医科大学全英班并相继获得硕士和博士学位，曾在美国德州大学医学部（UTMB）从事博士后工作，并到日本等地进修学习消化內镜，为学科发展和人才培养搭建了较好的国际交流平台。 从事消化专业临床和科研工作20余年，洞悉国内外研究动向，在本专业领域具有极深的造诣并积累了丰富的临床经验，是国内外知名的专家与学者，近年来获广东省科技进步奖及国家和广东省自然科学基金项目多项，主译和参编专著6本，发表SCI及核心杂志论文100余篇。 擅长消化性溃疡、胃食管返流病，功能性消化不良及脂肪肝、肝硬化、胆石症、胰腺炎、炎症性肠病等疾病的诊治及其内镜下的诊断与治疗。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24663_subjectid_17.html",
+      "照片链接": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210830163008485.jpg?5rKZ5Y2r57qiLW5ldC5qcGc=",
+      "照片文件": "01_试点医院/广东省人民医院/照片/沙卫红-消化内科-主任医师-广东省人民医院.jpg",
+      "采集入口": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "采集方式": "官网科室树+严格 itemid/subjectid 医生详情 DOM+同域本人职业照",
+      "采集日期": "2026-08-14",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 9,
+      "医院": "广东省人民医院",
+      "姓名": "陈仁",
+      "科室_分类页": "感染科",
+      "科室_列表卡片": "感染科",
+      "职称_关键词": "主任医师、科主任",
+      "职称身份原文": "主任医师 科主任",
+      "重点优先级": "高",
+      "重点关注范围": "肿瘤、免疫/风湿/感染、疑难重症",
+      "重点疾病标签": "肝癌、免疫、感染、重症",
+      "擅长诊疗方向摘录": "病毒性肝炎、肝硬化、肝癌、肝功能衰竭、脂肪肝、自身免疫肝病、不明原因肝功能异常、胆道疾病、黄疸、发热查因、腹水查因等疾病的诊断和治疗",
+      "亮眼经历线索": "医学博士、研究生导师、教授、主任医师。 2001年于中南大学湘雅医学院获硕士学位，2004获中南大学湘雅医学院内科学博士学位，2011-2012在美国UTAH肝病中心从事抗病毒药物筛选、生物免疫抗病毒的研究。 主持TOLL样受体介导Hh致肝细胞线粒体蛋白释放谱变化的分子机理、快速诊断早期肝癌血清蛋白质组标准模式图谱的建立应用，肝癌的蛋白质组学研究、生物免疫治疗清除肝细胞中乙肝病毒cccDNA的分子机理、骨髓间充质干细胞联合免疫增强剂治疗中后期肝癌的观察研究等9项广东省自然科学基金及科技项目，主持多项国际及国内多中心临床试验，在J Gen Virol、PLoS One、Oncology Research等SCI收录杂志和中华系列中文核心期刊杂志发表论文50余篇，参编著作2部。 社会任职： 现为美国病毒学会会员、广东省预防医学会感染病专业委员会副主任、广东省医学会感染病学分会常委、广东省肝脏病学会肝炎专业委员会常委、广东省肝脏...",
+      "列表简介": "",
+      "详情正文摘录": "医学博士、研究生导师、教授、主任医师。 2001年于中南大学湘雅医学院获硕士学位，2004获中南大学湘雅医学院内科学博士学位，2011-2012在美国UTAH肝病中心从事抗病毒药物筛选、生物免疫抗病毒的研究。 从事临床、教学和科研工作25年，具有较高的专业理论水平，具有丰富的临床经验和较高水平的诊治能力。 主持国家自然科学资金资助项目：TOLL样受体介导Hh致肝细胞线粒体蛋白释放谱变化的分子机理，作为第二研究者参与两项自然科学资金资助项目； 主持TOLL样受体介导Hh致肝细胞线粒体蛋白释放谱变化的分子机理、快速诊断早期肝癌血清蛋白质组标准模式图谱的建立应用，肝癌的蛋白质组学研究、生物免疫治疗清除肝细胞中乙肝病毒cccDNA的分子机理、骨髓间充质干细胞联合免疫增强剂治疗中后期肝癌的观察研究等9项广东省自然科学基金及科技项目，主持多项国际及国内多中心临床试验，在J Gen Virol、PLoS One、Oncology Research等SCI收录杂志和中华系列中文核心期刊杂志发表论文50余篇，参编著作2部。 专业特长 ： 1、擅长病毒性肝炎、肝硬化、肝癌、肝功能衰竭、脂肪肝、自身免疫肝病、不明原因肝功能异常、胆道疾病、黄疸、发热查因、腹水查因等疾病的诊断和治疗。 2、特别是乙型肝炎及丙型肝炎的抗病毒治疗有独到的见解和心得，尤其是生物免疫联合治疗根除乙肝病毒、治疗肝硬化、肝癌治疗有较深的研究，丰富的临床经验。 社会任职： 现为美国病毒学会会员、广东省预防医学会感染病专业委员会副主任、广东省医学会感染病学分会常委、广东省肝脏病学会肝炎专业委员会常委、广东省肝脏病学会重症医学专业委员会常委、国家自然科学资金项目审专家、广东省自然科学资金项目审专家、广东省科技项目审专家、浙江省自然科学资金项目审专家、江西省自然科学资金项目审专家、广东省委保健局专家。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_24748_subjectid_18.html",
+      "照片链接": "https://www.gdghospital.org.cn/uploadfiles/2021/08/20210830165000517.jpg?6ZmI5LuBLW5ldC5qcGc=",
+      "照片文件": "01_试点医院/广东省人民医院/照片/陈仁-感染科-主任医师-广东省人民医院.jpg",
+      "采集入口": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "采集方式": "官网科室树+严格 itemid/subjectid 医生详情 DOM+同域本人职业照",
+      "采集日期": "2026-08-14",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    },
+    {
+      "序号": 10,
+      "医院": "广东省人民医院",
+      "姓名": "高兴林",
+      "科室_分类页": "呼吸与危重症医学科",
+      "科室_列表卡片": "呼吸与危重症医学科",
+      "职称_关键词": "主任医师",
+      "职称身份原文": "主任医师",
+      "重点优先级": "高",
+      "重点关注范围": "慢性病、肿瘤、免疫/风湿/感染、疑难重症",
+      "重点疾病标签": "慢性、肿瘤、感染、疑难、危重",
+      "擅长诊疗方向摘录": "慢性咳嗽、哮喘、感染、肿瘤的诊治",
+      "亮眼经历线索": "教授，德国医学博士，博士生导师 呼吸科与危重症医学科原主任，现广东省老年医学研究所副所长，老年呼吸一科主任，中华医学会呼吸病学分会委员，广东省医师协会呼吸科医师分会主任委员，对呼吸科疑难少见病的诊治有丰富的经验, 擅长慢性咳嗽、哮喘、感染、肿瘤的诊治。 曾2次留学德国。 以第一及通讯作者发表SCI及核心期刊论文60多篇，《中华老年医学杂志》副总编辑，《中华结核和呼吸杂志》通信编委。",
+      "列表简介": "",
+      "详情正文摘录": "教授，德国医学博士，博士生导师 呼吸科与危重症医学科原主任，现广东省老年医学研究所副所长，老年呼吸一科主任，中华医学会呼吸病学分会委员，广东省医师协会呼吸科医师分会主任委员，对呼吸科疑难少见病的诊治有丰富的经验, 擅长慢性咳嗽、哮喘、感染、肿瘤的诊治。 曾2次留学德国。 以第一及通讯作者发表SCI及核心期刊论文60多篇，《中华老年医学杂志》副总编辑，《中华结核和呼吸杂志》通信编委。 广东省抗击新冠临床救治组副组长。",
+      "来源类型": "医院官网",
+      "来源链接": "https://www.gdghospital.org.cn/Expertlistt/info_itemid_33972_subjectid_19.html",
+      "照片链接": "https://www.gdghospital.org.cn/uploadfiles/2022/01/20220110101845981.jpg?6auY5YW05p6XLW5ldy5qcGc=",
+      "照片文件": "01_试点医院/广东省人民医院/照片/高兴林-呼吸与危重症医学科-主任医师-广东省人民医院.jpg",
+      "采集入口": "https://www.gdghospital.org.cn/DepartmentSearch/list.html",
+      "采集方式": "官网科室树+严格 itemid/subjectid 医生详情 DOM+同域本人职业照",
+      "采集日期": "2026-08-14",
+      "详情页状态": "200",
+      "已建画像": "否",
+      "异常提示": "",
+      "复核状态": "待人工复核"
+    }
+  ]
+}
