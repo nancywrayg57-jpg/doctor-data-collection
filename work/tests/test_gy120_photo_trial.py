@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import sys
 import tempfile
@@ -27,9 +28,11 @@ from collect_official_doctors_batch import (  # noqa: E402
     download_gy120_photo,
     gy120_detail_id,
     gy120_photo_url,
+    merge_gy120_identity_rows,
     parse_gy120_detail,
     parse_gy120_directory,
     select_gy120_trial_doctors,
+    validate_gy120_full_append,
     validate_gy120_trial,
 )
 
@@ -58,6 +61,12 @@ class Gy120PhotoTrialTests(unittest.TestCase):
             gy120_photo_url("files/20260428202157997.jpg", detail),
             "https://www.gy120.net/files/20260428202157997.jpg",
         )
+        self.assertEqual(
+            gy120_photo_url("upsfile/丁彩萍.jpg", detail),
+            "https://www.gy120.net/upsfile/丁彩萍.jpg",
+        )
+        self.assertEqual(gy120_photo_url("other/丁彩萍.jpg", detail), "")
+        self.assertEqual(gy120_photo_url("upsfile/%2Fescape.jpg", detail), "")
         self.assertEqual(gy120_photo_url("https://example.com/files/a.jpg", detail), "")
         self.assertEqual(decode_gy120_html("广东药科大学".encode("gb18030")), "广东药科大学")
         with self.assertRaises(UnicodeDecodeError):
@@ -124,6 +133,29 @@ class Gy120PhotoTrialTests(unittest.TestCase):
         self.assertNotIn("周一", parsed["profile_text"])
         self.assertEqual(parsed["photo_state"], "available")
         self.assertEqual(parsed["photo_url"], "https://www.gy120.net/files/1.JPG")
+
+    def test_detail_parser_removes_schedule_tail_and_private_use_character(self) -> None:
+        source = "https://www.gy120.net/ArticleShow.asp?ArticleID=290"
+        html = """
+        <div class="part1">
+          <div class="img"><img src="files/290.jpg"></div>
+          <div class="dorname"><div class="title1"><strong>何智君</strong></div>
+            <div class="title2">专业职称：主治医师</div>
+            <div class="title2">擅长：</div>
+            <div class="title2">各类错\ue06b畸形矫治 特需门诊时间：周四上午，需预约</div>
+          </div>
+        </div>
+        <div class="part3"><div class="title1">个人介绍</div>
+          <div class="desc">论文作者包括周四萍，内容为公开职业资料。</div></div>
+        """
+
+        parsed = parse_gy120_detail(html, {"name": "何智君", "source_link": source})
+
+        self.assertEqual(parsed["specialty"], "各类错畸形矫治")
+        self.assertNotIn("门诊时间", parsed["specialty"])
+        self.assertIn("周四萍", parsed["profile_text"])
+        self.assertEqual(parsed["schedule_exclusion_count"], 1)
+        self.assertEqual(parsed["private_use_character_exclusion_count"], 1)
 
     def test_trial_selector_guarantees_three_roles_and_department_spread(self) -> None:
         doctors = []
@@ -216,7 +248,7 @@ class Gy120PhotoTrialTests(unittest.TestCase):
         self.assertEqual(result["retry_count"], 1)
         sleep_mock.assert_called_once_with(1)
 
-    def test_full_mode_is_blocked_before_network(self) -> None:
+    def test_full_mode_enters_owner_authorized_collection(self) -> None:
         target = HospitalTarget(
             city="广州市",
             hospital="广东药科大学附属第一医院",
@@ -226,10 +258,49 @@ class Gy120PhotoTrialTests(unittest.TestCase):
             difficulty="D-待人工补官网",
             adapter_id=GY120_ADAPTER_ID,
         )
-        with patch("collect_official_doctors_batch.create_official_session") as session_mock:
-            with self.assertRaisesRegex(RuntimeError, "当前仅授权 TRIAL"):
+        with patch(
+            "collect_official_doctors_batch.create_official_session",
+            side_effect=RuntimeError("authorized-session-created"),
+        ) as session_mock:
+            with self.assertRaisesRegex(RuntimeError, "authorized-session-created"):
                 collect_gy120(target, "2026-08-15", full_mode=True)
-        session_mock.assert_not_called()
+        session_mock.assert_called_once_with()
+
+    def test_full_identity_merge_requires_same_name_and_exact_photo_url(self) -> None:
+        def row(detail_id: str, photo_url: str, department: str) -> dict[str, object]:
+            return {
+                "姓名": "张甲",
+                "科室_分类页": department,
+                "科室_列表卡片": department,
+                "职称身份原文": "主任医师",
+                "职称_关键词": "主任医师",
+                "擅长诊疗方向摘录": "",
+                "亮眼经历线索": "",
+                "详情正文摘录": "",
+                "异常提示": "",
+                "重点优先级": "普通",
+                "重点关注范围": "",
+                "重点疾病标签": "",
+                "来源链接": f"https://www.gy120.net/ArticleShow.asp?ArticleID={detail_id}",
+                "_gy120_detail_id": detail_id,
+                "_gy120_photo_url": photo_url,
+                "_gy120_relation_order": int(detail_id),
+            }
+
+        rows = [
+            row("1", "https://www.gy120.net/files/a.jpg", "科室甲"),
+            row("2", "https://www.gy120.net/files/a.jpg", "科室乙"),
+            row("3", "https://www.gy120.net/files/b.jpg", "科室丙"),
+        ]
+
+        merged, reconciliation = merge_gy120_identity_rows(rows)
+
+        self.assertEqual(len(merged), 2)
+        self.assertEqual(
+            sorted(len(item["detail_ids"]) for item in reconciliation),
+            [1, 2],
+        )
+        self.assertTrue(all("同名待甄别" in str(item["异常提示"]) for item in merged))
 
     def test_trial_validator_accepts_closed_synthetic_reconciliation(self) -> None:
         names = ["张甲", "李乙", "王丙", "赵丁", "周戊", "吴己", "郑庚", "孙辛", "陈壬", "刘癸"]
@@ -240,7 +311,13 @@ class Gy120PhotoTrialTests(unittest.TestCase):
             details = []
             photos = []
             for index, name in enumerate(names, start=1):
-                source = f"https://www.gy120.net/ArticleShow.asp?ArticleID={index}"
+                detail_id = "42" if index == 10 else str(index)
+                source = f"https://www.gy120.net/ArticleShow.asp?ArticleID={detail_id}"
+                photo_url = (
+                    "https://www.gy120.net/upsfile/丁彩萍.jpg"
+                    if detail_id == "42"
+                    else f"https://www.gy120.net/files/{detail_id}.png"
+                )
                 filename = f"{name}-科室-主任医师-广东药科大学附属第一医院.png"
                 disk_path = root / filename
                 disk_path.write_bytes(content)
@@ -248,7 +325,7 @@ class Gy120PhotoTrialTests(unittest.TestCase):
                 roles = ["首席专家"] if index == 1 else ["科室负责人"] if index == 2 else []
                 details.append(
                     {
-                        "detail_id": str(index),
+                        "detail_id": detail_id,
                         "directory_name": name,
                         "detail_name": name,
                         "name_matches_directory": True,
@@ -259,8 +336,10 @@ class Gy120PhotoTrialTests(unittest.TestCase):
                         "title": "主任医师",
                         "featured_roles": roles,
                         "photo_state": "available",
-                        "photo_url": f"https://www.gy120.net/files/{index}.png",
+                        "photo_url": photo_url,
                         "source_link": source,
+                        "detail_status": 200,
+                        "detail_error": "",
                         "resolution": "详情已读取",
                     }
                 )
@@ -284,10 +363,10 @@ class Gy120PhotoTrialTests(unittest.TestCase):
                         "擅长诊疗方向摘录": "",
                         "亮眼经历线索": "",
                         "列表简介": "",
-                        "详情正文摘录": "",
+                        "详情正文摘录": "论文作者：周四萍" if index == 1 else "",
                         "来源类型": "医院官网",
                         "来源链接": source,
-                        "照片链接": f"https://www.gy120.net/files/{index}.png",
+                        "照片链接": photo_url,
                         "照片文件": relative,
                         "采集入口": "https://www.gy120.net/zhuanjia.asp",
                         "采集方式": "测试",
@@ -303,9 +382,9 @@ class Gy120PhotoTrialTests(unittest.TestCase):
                         "name": name,
                         "department": department,
                         "title": "主任医师",
-                        "detail_id": str(index),
+                        "detail_id": detail_id,
                         "source_link": source,
-                        "photo_url": f"https://www.gy120.net/files/{index}.png",
+                        "photo_url": photo_url,
                         "photo_file": relative,
                         "filename": filename,
                         "bytes": len(content),
@@ -332,6 +411,8 @@ class Gy120PhotoTrialTests(unittest.TestCase):
                     "photo_state": "available",
                     "photo_url": "https://www.gy120.net/files/11.png",
                     "source_link": "https://www.gy120.net/ArticleShow.asp?ArticleID=11",
+                    "detail_status": 200,
+                    "detail_error": "",
                     "resolution": "护理身份排除",
                 }
             )
@@ -343,6 +424,23 @@ class Gy120PhotoTrialTests(unittest.TestCase):
                     "source_link": "https://www.gy120.net/ArticleShow.asp?ArticleID=1",
                 }
                 for index in range(58)
+            ]
+            identities = [
+                {
+                    "name": row["姓名"],
+                    "identity_index": 1,
+                    "detail_ids": [gy120_detail_id(str(row["来源链接"]))],
+                    "resolution": "唯一身份",
+                    "relation_count": 1,
+                    "classification_departments": [row["科室_分类页"]],
+                    "card_departments": [row["科室_列表卡片"]],
+                    "titles": [row["职称身份原文"]],
+                    "primary_detail_id": gy120_detail_id(str(row["来源链接"])),
+                    "primary_source_link": row["来源链接"],
+                    "official_photo_url": row["照片链接"],
+                    "merged_source_links": [],
+                }
+                for row in rows
             ]
             payload = {
                 "meta": {
@@ -358,6 +456,14 @@ class Gy120PhotoTrialTests(unittest.TestCase):
                     "featured_department_overlap_count": 58,
                     "excluded_non_doctor_count": 1,
                     "eligible_candidate_count": 10,
+                    "unique_doctor_count": 10,
+                    "final_identity_count": 10,
+                    "identity_merge_count": 0,
+                    "identity_reconciliation_count": 10,
+                    "full_authorization": (
+                        "PR #48 owner 评论明确审计通过并切换 "
+                        "FULL_APPEND_AND_OBSIDIAN"
+                    ),
                     "category_error_count": 0,
                     "detail_error_count": 0,
                     "name_mismatch_count": 0,
@@ -406,6 +512,8 @@ class Gy120PhotoTrialTests(unittest.TestCase):
                 "gy120_detail_reconciliation": details,
                 "gy120_sample_detail_reconciliation": details[:10],
                 "gy120_featured_reconciliation": featured,
+                "gy120_identity_reconciliation": identities,
+                "detail_errors": [],
                 "excluded_candidates": [
                     {
                         "detail_id": "11",
@@ -446,6 +554,72 @@ class Gy120PhotoTrialTests(unittest.TestCase):
             }
             with patch.multiple(collector, **patched):
                 validate_gy120_trial(payload, expected_rows=10)
+                validate_gy120_full_append(payload)
+
+                failure_payload = copy.deepcopy(payload)
+                failed_source = "https://www.gy120.net/ArticleShow.asp?ArticleID=1"
+                failed_detail = failure_payload["gy120_detail_reconciliation"][0]
+                failed_detail.update(
+                    {
+                        "detail_status": None,
+                        "detail_error": "ConnectionError: bounded detail request failed",
+                        "photo_state": "empty",
+                        "photo_url": "",
+                        "resolution": "详情读取失败",
+                    }
+                )
+                failure_payload["detail_errors"] = [
+                    {
+                        "detail_id": "1",
+                        "name": "张甲",
+                        "source_link": failed_source,
+                        "error": "ConnectionError: bounded detail request failed",
+                    }
+                ]
+                failed_row = next(
+                    row for row in failure_payload["rows"] if row["来源链接"] == failed_source
+                )
+                failed_row.update(
+                    {
+                        "照片链接": "",
+                        "照片文件": "",
+                        "详情页状态": "",
+                        "异常提示": "详情读取失败，按 Issue 指令保守成行",
+                    }
+                )
+                failed_identity = next(
+                    item
+                    for item in failure_payload["gy120_identity_reconciliation"]
+                    if item["primary_detail_id"] == "1"
+                )
+                failed_identity["official_photo_url"] = ""
+                failure_payload["photo_samples"] = [
+                    item
+                    for item in failure_payload["photo_samples"]
+                    if item["source_link"] != failed_source
+                ]
+                failure_payload["photo_no_sources"] = [
+                    {
+                        "name": "张甲",
+                        "detail_id": "1",
+                        "source_link": failed_source,
+                        "photo_state": "empty",
+                        "retry_count": 0,
+                        "reason": "官网详情读取失败，照片按批准口径留空",
+                    }
+                ]
+                failure_payload["meta"].update(
+                    {
+                        "detail_error_count": 1,
+                        "photo_census_available_count": 9,
+                        "photo_census_empty_count": 1,
+                        "photo_downloaded_count": 9,
+                        "photo_failed_count": 1,
+                        "photo_no_source_count": 1,
+                    }
+                )
+                validate_gy120_full_append(failure_payload)
+
                 payload["photo_samples"][0]["sha256"] = "0" * 64
                 with self.assertRaisesRegex(RuntimeError, "SHA-256"):
                     validate_gy120_trial(payload, expected_rows=10)

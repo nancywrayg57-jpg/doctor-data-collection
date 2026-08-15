@@ -306,10 +306,11 @@ GY120_EXPECTED_UNIQUE_ID_COUNT = 349
 GY120_EXPECTED_FEATURED_OCCURRENCE_COUNT = 58
 GY120_EXPECTED_FEATURED_UNIQUE_COUNT = 56
 GY120_EXPECTED_NURSING_COUNT = 2
-GY120_EXPECTED_PHOTO_AVAILABLE_COUNT = 346
+GY120_AUDITED_NURSING_DETAIL_IDS = {"404", "603"}
+GY120_EXPECTED_PHOTO_AVAILABLE_COUNT = 347
 GY120_EXPECTED_PHOTO_PLACEHOLDER_COUNT = 0
 GY120_EXPECTED_PHOTO_EMPTY_COUNT = 0
-GY120_EXPECTED_PHOTO_REJECTED_COUNT = 1
+GY120_EXPECTED_PHOTO_REJECTED_COUNT = 0
 GY120_EXPECTED_CATEGORY_COUNTS = {
     "内科": 9,
     "外科": 12,
@@ -6693,6 +6694,21 @@ def gy120_clean_text(value: str | None) -> str:
     return clean_text(re.sub(r"[\u200b\u200c\u200d\ufeff]", "", str(value or "")))
 
 
+GY120_SCHEDULE_TAIL_PATTERN = re.compile(
+    r"(?:特需门诊时间|专科门诊时间|门诊时间|门诊地点|出诊时间|出诊安排|"
+    r"开诊时间|排班信息|坐诊时间)\s*[:：]?.*$",
+    flags=re.IGNORECASE,
+)
+
+
+def strip_gy120_schedule_tail(value: str | None) -> tuple[str, bool]:
+    text = gy120_clean_text(value)
+    match = GY120_SCHEDULE_TAIL_PATTERN.search(text)
+    if not match:
+        return text, False
+    return gy120_clean_text(text[: match.start()]), True
+
+
 def gy120_detail_id(url: str | None) -> str:
     parsed = urlparse(gy120_clean_text(url))
     if (
@@ -6711,12 +6727,22 @@ def gy120_detail_id(url: str | None) -> str:
 def gy120_photo_url(value: str | None, base_url: str) -> str:
     absolute = urljoin(base_url, gy120_clean_text(value))
     parsed = urlparse(absolute)
+    path_parts = parsed.path.split("/")
+    filename = path_parts[-1] if len(path_parts) == 3 else ""
     if (
         parsed.scheme != "https"
         or comparable_host(absolute) != "gy120.net"
         or parsed.query
         or parsed.fragment
-        or not re.fullmatch(r"/files/[A-Za-z0-9_.-]+", parsed.path, flags=re.IGNORECASE)
+        or len(path_parts) != 3
+        or path_parts[1].casefold() not in {"files", "upsfile"}
+        or not filename
+        or filename in {".", ".."}
+        or "\\" in filename
+        or "%2f" in filename.casefold()
+        or "%5c" in filename.casefold()
+        or any(ord(character) < 32 for character in filename)
+        or not re.search(r"\.(?:jpe?g|png|gif|webp)$", filename, flags=re.IGNORECASE)
     ):
         return ""
     return absolute
@@ -6884,6 +6910,8 @@ def parse_gy120_detail(html: str, fallback: dict[str, Any]) -> dict[str, Any]:
             "campuses": [],
             "photo_url": "",
             "photo_state": "empty",
+            "schedule_exclusion_count": 0,
+            "private_use_character_exclusion_count": 0,
             "forbidden_segment_count": 0,
             "patient_case_exclusion_count": 0,
         }
@@ -6966,16 +6994,33 @@ def parse_gy120_detail(html: str, fallback: dict[str, Any]) -> dict[str, Any]:
     else:
         photo_state = "rejected"
 
+    specialty, specialty_schedule_removed = strip_gy120_schedule_tail(specialty)
+    profile_text, profile_schedule_removed = strip_gy120_schedule_tail(
+        " ".join(profile_segments)
+    )
+    private_use_character_exclusion_count = len(
+        re.findall(r"[\ue000-\uf8ff]", f"{specialty}\n{profile_text}")
+    )
+    specialty = gy120_clean_text(re.sub(r"[\ue000-\uf8ff]", "", specialty))
+    profile_text = gy120_clean_text(
+        re.sub(r"[\ue000-\uf8ff]", "", profile_text)
+    )
+
     return {
         "name": name,
         "title": title,
         "specialty": clip(specialty, 1800),
-        "profile_text": clip(" ".join(profile_segments), 6000),
+        "profile_text": clip(profile_text, 6000),
         "detail_departments": detail_departments,
         "campuses": campuses,
         "photo_url": photo_url,
         "photo_state": photo_state,
         "raw_photo": raw_photo,
+        "schedule_exclusion_count": int(specialty_schedule_removed)
+        + int(profile_schedule_removed),
+        "private_use_character_exclusion_count": (
+            private_use_character_exclusion_count
+        ),
         "forbidden_segment_count": forbidden_segment_count,
         "patient_case_exclusion_count": patient_case_exclusion_count,
     }
@@ -7042,6 +7087,143 @@ def select_gy120_trial_doctors(
         if len(selected) >= target_count:
             break
     return selected
+
+
+def merge_gy120_identity_rows(
+    rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Merge only same-name rows that share the exact official portrait URL."""
+
+    by_name: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        by_name.setdefault(gdzy5413_normalized_name(row.get("姓名")), []).append(row)
+
+    merged_rows: list[dict[str, Any]] = []
+    reconciliation: list[dict[str, Any]] = []
+    longest_fields = ["擅长诊疗方向摘录", "详情正文摘录"]
+    for name, name_rows in by_name.items():
+        clusters: list[list[dict[str, Any]]] = []
+        for row in name_rows:
+            photo_url = gy120_clean_text(str(row.get("_gy120_photo_url") or ""))
+            matched_cluster = next(
+                (
+                    cluster
+                    for cluster in clusters
+                    if photo_url
+                    and gy120_clean_text(
+                        str(cluster[0].get("_gy120_photo_url") or "")
+                    )
+                    == photo_url
+                ),
+                None,
+            )
+            if matched_cluster is None:
+                clusters.append([row])
+            else:
+                matched_cluster.append(row)
+
+        distinct_same_name = len(name_rows) > 1 and len(clusters) > 1
+        for identity_index, cluster in enumerate(clusters, start=1):
+            primary = max(
+                cluster,
+                key=lambda item: (
+                    bool(gy120_clean_text(str(item.get("_gy120_photo_url") or ""))),
+                    gdzy5413_primary_row_score(item),
+                    -int(item.get("_gy120_relation_order") or 0),
+                ),
+            )
+            merged = dict(primary)
+            classification_departments: list[str] = []
+            card_departments: list[str] = []
+            highlight_parts: list[str] = []
+            for member in cluster:
+                for department in gy120_clean_text(
+                    str(member.get("科室_分类页") or "")
+                ).split("、"):
+                    if department and department not in classification_departments:
+                        classification_departments.append(department)
+                for department in gy120_clean_text(
+                    str(member.get("科室_列表卡片") or "")
+                ).split("、"):
+                    if department and department not in card_departments:
+                        card_departments.append(department)
+                for part in gy120_clean_text(
+                    str(member.get("亮眼经历线索") or "")
+                ).split("；"):
+                    if part and part not in highlight_parts:
+                        highlight_parts.append(part)
+                for field in longest_fields:
+                    if len(gy120_clean_text(str(member.get(field) or ""))) > len(
+                        gy120_clean_text(str(merged.get(field) or ""))
+                    ):
+                        merged[field] = member.get(field, "")
+
+            merged["科室_分类页"] = "、".join(classification_departments)
+            merged["科室_列表卡片"] = "、".join(card_departments)
+            merged["亮眼经历线索"] = "；".join(highlight_parts)
+            merged["职称_关键词"] = "、".join(
+                extract_terms(
+                    gy120_clean_text(str(merged.get("职称身份原文") or "")),
+                    TITLE_TERMS,
+                )
+            )
+            warnings = [
+                warning
+                for member in cluster
+                for warning in gy120_clean_text(
+                    str(member.get("异常提示") or "")
+                ).split("；")
+                if warning
+            ]
+            titles = {
+                gy120_clean_text(str(member.get("职称身份原文") or ""))
+                for member in cluster
+                if gy120_clean_text(str(member.get("职称身份原文") or ""))
+            }
+            if len(titles) > 1:
+                warnings.append("多详情职称不一致")
+            if distinct_same_name:
+                warnings.append("同名待甄别")
+            merged["异常提示"] = "；".join(dict.fromkeys(warnings))
+            if merged["异常提示"]:
+                merged["重点优先级"] = "普通"
+                merged["重点关注范围"] = ""
+                merged["重点疾病标签"] = ""
+            merged_rows.append(merged)
+            reconciliation.append(
+                {
+                    "name": name,
+                    "identity_index": identity_index,
+                    "detail_ids": [
+                        gy120_clean_text(str(member.get("_gy120_detail_id") or ""))
+                        for member in cluster
+                    ],
+                    "resolution": (
+                        "同名待甄别"
+                        if distinct_same_name
+                        else "同一官方照片归并"
+                        if len(cluster) > 1
+                        else "唯一身份"
+                    ),
+                    "relation_count": len(cluster),
+                    "classification_departments": classification_departments,
+                    "card_departments": card_departments,
+                    "titles": sorted(titles),
+                    "primary_detail_id": gy120_clean_text(
+                        str(merged.get("_gy120_detail_id") or "")
+                    ),
+                    "primary_source_link": merged.get("来源链接", ""),
+                    "official_photo_url": gy120_clean_text(
+                        str(merged.get("_gy120_photo_url") or "")
+                    ),
+                    "merged_source_links": [
+                        member.get("来源链接", "")
+                        for member in cluster
+                        if member.get("来源链接") != merged.get("来源链接")
+                    ],
+                }
+            )
+    return merged_rows, reconciliation
 
 
 def download_gy120_photo(
@@ -7142,11 +7324,6 @@ def collect_gy120(
     photo_root: Path | None = None,
     full_mode: bool = False,
 ) -> dict[str, Any]:
-    if full_mode:
-        raise RuntimeError(
-            "GY120 FULL 发布熔断：Issue #47 当前仅授权 TRIAL；"
-            "必须等待 owner 明确审计通过并切换到 FULL_APPEND_AND_OBSIDIAN。"
-        )
     session = create_official_session()
     entry_status, entry_html, entry_error = fetch_gy120_html(session, target.entry_url)
     if entry_status != 200:
@@ -7161,15 +7338,28 @@ def collect_gy120(
     detail_reconciliation: list[dict[str, Any]] = []
     detail_errors: list[dict[str, str]] = []
     excluded_candidates: list[dict[str, Any]] = []
+    schedule_exclusion_count = 0
+    private_use_character_exclusion_count = 0
     forbidden_segment_count = 0
     patient_case_exclusion_count = 0
     for index, item in enumerate(relations, start=1):
         status, html, error = fetch_gy120_html(session, item["source_link"])
         if status != 200:
-            detail_errors.append({"source_link": item["source_link"], "error": error})
+            detail_errors.append(
+                {
+                    "detail_id": item["id"],
+                    "name": item["name"],
+                    "source_link": item["source_link"],
+                    "error": error,
+                }
+            )
             detail = parse_gy120_detail("", item)
         else:
             detail = parse_gy120_detail(html, item)
+        schedule_exclusion_count += int(detail.get("schedule_exclusion_count") or 0)
+        private_use_character_exclusion_count += int(
+            detail.get("private_use_character_exclusion_count") or 0
+        )
         forbidden_segment_count += int(detail.get("forbidden_segment_count") or 0)
         patient_case_exclusion_count += int(
             detail.get("patient_case_exclusion_count") or 0
@@ -7180,7 +7370,9 @@ def collect_gy120(
             **detail,
             "detail_status": status,
         }
-        is_nursing = gyfyyy_nursing_only_identity(detail.get("title"))
+        is_nursing = gyfyyy_nursing_only_identity(detail.get("title")) or (
+            status != 200 and item["id"] in GY120_AUDITED_NURSING_DETAIL_IDS
+        )
         combined["is_nursing"] = is_nursing
         detailed_candidates.append(combined)
         resolution = "护理身份排除" if is_nursing else (
@@ -7202,7 +7394,15 @@ def collect_gy120(
             "featured_roles": item.get("featured_roles", []),
             "photo_state": detail.get("photo_state", "empty"),
             "photo_url": detail.get("photo_url", ""),
+            "schedule_exclusion_count": int(
+                detail.get("schedule_exclusion_count") or 0
+            ),
+            "private_use_character_exclusion_count": int(
+                detail.get("private_use_character_exclusion_count") or 0
+            ),
             "source_link": item["source_link"],
+            "detail_status": status,
+            "detail_error": error if status != 200 else "",
             "resolution": resolution,
         }
         detail_reconciliation.append(reconciliation)
@@ -7222,11 +7422,7 @@ def collect_gy120(
             print(f"GY120 details: {index}/{len(relations)}")
         time.sleep(0.04)
 
-    eligible = [
-        item
-        for item in detailed_candidates
-        if not item.get("is_nursing") and item.get("detail_status") == 200
-    ]
+    eligible = [item for item in detailed_candidates if not item.get("is_nursing")]
     photo_candidates = [
         item
         for item in eligible
@@ -7236,7 +7432,11 @@ def collect_gy120(
         == gy120_clean_text(str(item.get("directory_name") or ""))
         and looks_like_person_name(gy120_clean_text(str(item.get("name") or "")))
     ]
-    selected_doctors = select_gy120_trial_doctors(photo_candidates, max_doctors)
+    selected_doctors = (
+        eligible
+        if full_mode
+        else select_gy120_trial_doctors(photo_candidates, max_doctors)
+    )
     selected_detail_ids = {str(item.get("id") or "") for item in selected_doctors}
     existing_links = collect_existing_profile_links()
     rows: list[dict[str, Any]] = []
@@ -7270,6 +7470,10 @@ def collect_gy120(
             warnings.append("职称/身份需人工复核")
         if not specialty and not profile_text:
             warnings.append("详情正文为空或未识别")
+        if item.get("detail_status") != 200:
+            warnings.append("详情读取失败，按 Issue 指令保守成行")
+        if int(item.get("private_use_character_exclusion_count") or 0):
+            warnings.append("官网正文私用区字符已清洗")
         if warnings:
             groups_found, tags = [], []
         priority = "普通"
@@ -7321,9 +7525,15 @@ def collect_gy120(
                 "复核状态": "待人工复核",
                 "_gy120_detail_id": item["id"],
                 "_gy120_photo_url": item.get("photo_url", ""),
+                "_gy120_photo_state": item.get("photo_state", "empty"),
                 "_gy120_department": department,
+                "_gy120_relation_order": int(item.get("relation_order") or 0),
             }
         )
+
+    identity_reconciliation: list[dict[str, Any]] = []
+    if full_mode:
+        rows, identity_reconciliation = merge_gy120_identity_rows(rows)
 
     photo_dir = photo_root or (VAULT / "01_试点医院" / target.hospital / "照片")
     used_filenames: set[str] = set()
@@ -7333,15 +7543,24 @@ def collect_gy120(
     for row in rows:
         detail_id = gy120_clean_text(str(row.pop("_gy120_detail_id", "")))
         photo_url = gy120_clean_text(str(row.pop("_gy120_photo_url", "")))
+        photo_state = gy120_clean_text(
+            str(row.pop("_gy120_photo_state", "empty"))
+        )
         department = gy120_clean_text(str(row.pop("_gy120_department", "")))
-        if not photo_url:
+        row.pop("_gy120_relation_order", None)
+        if photo_state != "available" or not photo_url:
             photo_no_sources.append(
                 {
                     "name": row["姓名"],
                     "detail_id": detail_id,
                     "source_link": row["来源链接"],
-                    "photo_state": "empty",
-                    "reason": "官网详情未提供本人职业照",
+                    "photo_state": photo_state or "empty",
+                    "retry_count": 0,
+                    "reason": (
+                        "官网默认占位图，按既定政策留空"
+                        if photo_state == "placeholder"
+                        else "官网详情未提供符合授权范围的本人职业照"
+                    ),
                 }
             )
             continue
@@ -7364,6 +7583,11 @@ def collect_gy120(
                 used_filenames,
             )
         except Exception as exc:  # noqa: BLE001 - photo failure must remain visible
+            if full_mode:
+                raise RuntimeError(
+                    "GY120 图片下载熔断："
+                    f"{row['姓名']}（ArticleID {detail_id}）未形成批准留空结果：{exc}"
+                ) from exc
             warning = "照片获取失败"
             row["异常提示"] = "；".join(
                 dict.fromkeys(
@@ -7433,11 +7657,15 @@ def collect_gy120(
             }
         )
 
-    sample_details = [
-        item
-        for item in detail_reconciliation
-        if str(item.get("detail_id") or "") in selected_detail_ids
-    ]
+    sample_details = (
+        []
+        if full_mode
+        else [
+            item
+            for item in detail_reconciliation
+            if str(item.get("detail_id") or "") in selected_detail_ids
+        ]
+    )
     same_name_groups: dict[str, list[str]] = {}
     for item in eligible:
         same_name_groups.setdefault(
@@ -7472,6 +7700,10 @@ def collect_gy120(
     )
     warning_counter = Counter(
         warning for row in rows for warning in row["异常提示"].split("；") if warning
+    )
+    identity_name_counts = Counter(
+        gy120_clean_text(str(item.get("name") or ""))
+        for item in identity_reconciliation
     )
     return {
         "meta": {
@@ -7511,6 +7743,27 @@ def collect_gy120(
             "excluded_non_doctor_count": len(excluded_candidates),
             "census_same_name_group_count": len(same_name_groups),
             "census_same_name_groups": same_name_groups,
+            "final_identity_count": len(rows),
+            "identity_merge_count": len(eligible) - len(rows),
+            "identity_reconciliation_count": len(identity_reconciliation),
+            "gy120_same_identity_merge_group_count": sum(
+                int(item.get("relation_count") or 0) > 1
+                for item in identity_reconciliation
+            ),
+            "gy120_distinct_same_name_group_count": sum(
+                count > 1 for count in identity_name_counts.values()
+            ),
+            "gy120_distinct_same_name_row_count": sum(
+                count for count in identity_name_counts.values() if count > 1
+            ),
+            "identity_clustering_policy": (
+                "同名且同一官网本人照片 URL 才归并；其余同名保持独立并标注待甄别"
+            ),
+            "full_authorization": (
+                "PR #48 owner 评论明确审计通过并切换 FULL_APPEND_AND_OBSIDIAN"
+                if full_mode
+                else "TRIAL"
+            ),
             "unique_doctor_count": len(rows),
             "sample_entry_coverage_count": len(
                 {str(item.get("category") or "") for item in sample_details}
@@ -7564,8 +7817,11 @@ def collect_gy120(
                 "未手工注入 Cookie、未绕过登录/验证码/挑战，未访问非公开接口"
             ),
             "session_cookie_names": sorted(session.cookies.keys()),
-            "schedule_exclusion_count": 0,
+            "schedule_exclusion_count": schedule_exclusion_count,
             "schedule_field_ingested_count": 0,
+            "private_use_character_exclusion_count": (
+                private_use_character_exclusion_count
+            ),
             "forbidden_segment_exclusion_count": forbidden_segment_count,
             "patient_case_exclusion_count": patient_case_exclusion_count,
             "private_use_character_count": sum(
@@ -7618,6 +7874,7 @@ def collect_gy120(
         "gy120_featured_reconciliation": featured_audit,
         "gy120_detail_reconciliation": detail_reconciliation,
         "gy120_sample_detail_reconciliation": sample_details,
+        "gy120_identity_reconciliation": identity_reconciliation,
         "photo_samples": photo_samples,
         "photo_no_sources": photo_no_sources,
         "photo_errors": photo_errors,
@@ -13320,8 +13577,8 @@ def validate_gy120_trial(payload: dict[str, Any], expected_rows: int) -> None:
 
     formal_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录"]
     schedule_pattern = re.compile(
-        r"(?:门诊时间|出诊时间|出诊安排|排班信息|坐诊时间|周[一二三四五六日天]|"
-        r"星期[一二三四五六日天]|上午|下午)"
+        r"(?:门诊时间|出诊时间|出诊安排|排班信息|坐诊时间|"
+        r"(?:周|星期)[一二三四五六日天](?:上午|下午|全天|夜间))"
     )
     filenames: set[str] = set()
     byte_sizes: list[int] = []
@@ -13427,6 +13684,337 @@ def validate_gy120_trial(payload: dict[str, Any], expected_rows: int) -> None:
 
     if errors:
         raise RuntimeError("GY120 TRIAL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
+
+
+def validate_gy120_full_append(payload: dict[str, Any]) -> None:
+    """Validate Issue #47 FULL census, identity clustering and photo closure."""
+
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    details = payload.get("gy120_detail_reconciliation", [])
+    excluded = payload.get("excluded_candidates", [])
+    identities = payload.get("gy120_identity_reconciliation", [])
+    photos = payload.get("photo_samples", [])
+    no_sources = payload.get("photo_no_sources", [])
+    errors: list[str] = []
+    expected_counts = {
+        "category_count": len(GY120_EXPECTED_CATEGORY_COUNTS),
+        "pagination_count": 1,
+        "census_department_count": GY120_EXPECTED_DEPARTMENT_COUNT,
+        "census_empty_department_count": GY120_EXPECTED_EMPTY_DEPARTMENT_COUNT,
+        "candidate_membership_count": GY120_EXPECTED_RELATION_COUNT,
+        "unique_candidate_count": GY120_EXPECTED_UNIQUE_ID_COUNT,
+        "census_unique_detail_count": GY120_EXPECTED_UNIQUE_ID_COUNT,
+        "featured_occurrence_count": GY120_EXPECTED_FEATURED_OCCURRENCE_COUNT,
+        "featured_unique_count": GY120_EXPECTED_FEATURED_UNIQUE_COUNT,
+        "featured_department_overlap_count": GY120_EXPECTED_FEATURED_OCCURRENCE_COUNT,
+        "excluded_non_doctor_count": GY120_EXPECTED_NURSING_COUNT,
+        "eligible_candidate_count": (
+            GY120_EXPECTED_UNIQUE_ID_COUNT - GY120_EXPECTED_NURSING_COUNT
+        ),
+        "category_error_count": 0,
+        "name_mismatch_count": 0,
+        "encoding_replacement_count": 0,
+        "encoding_mojibake_count": 0,
+        "schedule_field_ingested_count": 0,
+        "private_use_character_count": 0,
+        "independent_entity_count": 0,
+        "photo_error_count": 0,
+    }
+    for field, expected in expected_counts.items():
+        actual = int(meta.get(field) or 0)
+        if actual != expected:
+            errors.append(f"{field}={actual}，预期 {expected}")
+
+    categories = {
+        gy120_clean_text(str(item.get("category_name") or "")): (
+            int(item.get("department_count") or 0),
+            int(item.get("row_count") or 0),
+        )
+        for item in payload.get("categories", [])
+    }
+    expected_categories = {
+        category: (
+            GY120_EXPECTED_CATEGORY_COUNTS[category],
+            GY120_EXPECTED_CATEGORY_RELATION_COUNTS[category],
+        )
+        for category in GY120_EXPECTED_CATEGORY_COUNTS
+    }
+    if categories != expected_categories:
+        errors.append(f"四类科室/关系计数不符合官网现场基线：{categories}")
+
+    detail_by_id = {
+        gy120_clean_text(str(item.get("detail_id") or "")): item for item in details
+    }
+    detail_ids = list(detail_by_id)
+    if (
+        len(details) != GY120_EXPECTED_UNIQUE_ID_COUNT
+        or len(detail_by_id) != len(details)
+        or any(not detail_id.isdigit() for detail_id in detail_ids)
+        or any(
+            gy120_detail_id(str(item.get("source_link") or ""))
+            != gy120_clean_text(str(item.get("detail_id") or ""))
+            for item in details
+        )
+        or any(
+            item.get("resolution")
+            not in {"详情已读取", "详情读取失败", "护理身份排除"}
+            for item in details
+        )
+        or any(not bool(item.get("name_matches_directory")) for item in details)
+    ):
+        errors.append("349 个唯一数字 ArticleID 未完成详情、姓名和状态闭环")
+
+    excluded_ids = {
+        gy120_clean_text(str(item.get("detail_id") or "")) for item in excluded
+    }
+    nursing_ids = {
+        detail_id
+        for detail_id, item in detail_by_id.items()
+        if item.get("resolution") == "护理身份排除"
+    }
+    if (
+        len(excluded_ids) != GY120_EXPECTED_NURSING_COUNT
+        or excluded_ids != nursing_ids
+        or any(not gyfyyy_nursing_only_identity(item.get("list_title")) for item in excluded)
+    ):
+        errors.append("2 个纯护理身份未按详情职称逐 ID 排除")
+    eligible_ids = set(detail_ids) - excluded_ids
+    failed_detail_ids = {
+        detail_id
+        for detail_id, item in detail_by_id.items()
+        if item.get("detail_status") != 200
+    }
+    eligible_failed_ids = failed_detail_ids - excluded_ids
+    payload_detail_error_ids = {
+        gy120_detail_id(str(item.get("source_link") or ""))
+        for item in payload.get("detail_errors", [])
+    }
+    if (
+        int(meta.get("detail_error_count") or 0) != len(failed_detail_ids)
+        or payload_detail_error_ids != failed_detail_ids
+        or any(
+            not gy120_clean_text(str(item.get("detail_error") or ""))
+            for detail_id, item in detail_by_id.items()
+            if detail_id in failed_detail_ids
+        )
+    ):
+        errors.append("详情有限重试失败项未逐 ID 留痕")
+    if (
+        int(meta.get("photo_census_available_count") or 0)
+        != len(eligible_ids) - len(eligible_failed_ids)
+        or int(meta.get("photo_census_empty_count") or 0)
+        != len(eligible_failed_ids)
+        or int(meta.get("photo_census_placeholder_count") or 0) != 0
+        or int(meta.get("photo_census_rejected_count") or 0) != 0
+    ):
+        errors.append("详情失败保守成行后的照片普查计数未闭合")
+
+    detail_42 = detail_by_id.get("42", {})
+    if detail_42.get("detail_status") == 200 and (
+        urlparse(str(detail_42.get("photo_url") or "")).path.casefold().split("/")[1:2]
+        != ["upsfile"]
+    ):
+        errors.append("ArticleID 42 的同域 upsfile 官网头像未按 owner 裁决纳入")
+
+    identity_ids = [
+        gy120_clean_text(str(detail_id))
+        for item in identities
+        for detail_id in item.get("detail_ids", [])
+    ]
+    primary_ids = [
+        gy120_clean_text(str(item.get("primary_detail_id") or ""))
+        for item in identities
+    ]
+    if (
+        not identities
+        or len(identity_ids) != len(set(identity_ids))
+        or set(identity_ids) != eligible_ids
+        or any(primary not in set(item.get("detail_ids", [])) for primary, item in zip(primary_ids, identities))
+        or len(primary_ids) != len(set(primary_ids))
+    ):
+        errors.append("347 个合规 ArticleID 未被身份聚类唯一覆盖")
+    for identity in identities:
+        cluster_ids = [
+            gy120_clean_text(str(value)) for value in identity.get("detail_ids", [])
+        ]
+        cluster_details = [detail_by_id.get(value, {}) for value in cluster_ids]
+        names = {
+            gdzy5413_normalized_name(item.get("detail_name"))
+            for item in cluster_details
+        }
+        photo_urls = {
+            gy120_clean_text(str(item.get("photo_url") or ""))
+            for item in cluster_details
+        }
+        if len(names) != 1 or not next(iter(names), ""):
+            errors.append(f"身份聚类混入不同姓名：{cluster_ids}")
+        if len(cluster_ids) > 1 and (len(photo_urls) != 1 or not next(iter(photo_urls), "")):
+            errors.append(f"身份聚类未由同一官网照片 URL 证明：{cluster_ids}")
+        if gy120_clean_text(str(identity.get("official_photo_url") or "")) not in photo_urls:
+            errors.append(f"身份主照片不属于聚类详情：{cluster_ids}")
+
+    row_by_id = {
+        gy120_detail_id(str(row.get("来源链接") or "")): row for row in rows
+    }
+    if (
+        len(rows) != len(identities)
+        or len(row_by_id) != len(rows)
+        or set(row_by_id) != set(primary_ids)
+        or int(meta.get("final_identity_count") or 0) != len(rows)
+        or int(meta.get("identity_reconciliation_count") or 0) != len(identities)
+        or int(meta.get("identity_merge_count") or 0)
+        != len(eligible_ids) - len(rows)
+        or int(meta.get("unique_doctor_count") or 0) != len(rows)
+    ):
+        errors.append("FULL 最终行数、身份数与逐 ID 聚类结果未闭合")
+
+    identities_by_name: Counter[str] = Counter(
+        gdzy5413_normalized_name(item.get("name")) for item in identities
+    )
+    for identity in identities:
+        if identities_by_name[gdzy5413_normalized_name(identity.get("name"))] > 1:
+            primary_row = row_by_id.get(
+                gy120_clean_text(str(identity.get("primary_detail_id") or "")), {}
+            )
+            if "同名待甄别" not in gy120_clean_text(
+                str(primary_row.get("异常提示") or "")
+            ):
+                errors.append(f"多身份同名未标注待甄别：{identity.get('name')}")
+
+    photo_by_source = {
+        gy120_clean_text(str(item.get("source_link") or "")): item for item in photos
+    }
+    no_source_by_source = {
+        gy120_clean_text(str(item.get("source_link") or "")): item
+        for item in no_sources
+    }
+    if (
+        set(photo_by_source) & set(no_source_by_source)
+        or int(meta.get("photo_expected_count") or 0) != len(rows)
+        or int(meta.get("photo_downloaded_count") or 0) != len(photos)
+        or int(meta.get("photo_no_source_count") or 0) != len(no_sources)
+        or int(meta.get("photo_failed_count") or 0) != len(no_sources)
+        or len(photos) + len(no_sources) != len(rows)
+    ):
+        errors.append("FULL 照片应采、实采、批准留空与最终身份数未形成四数闭环")
+    actual_retries = sum(
+        int(item.get("retry_count") or 0) for item in [*photos, *no_sources]
+    )
+    if (
+        any(int(item.get("retry_count") or 0) not in {0, 1} for item in photos)
+        or any(
+            item.get("photo_state") == "bounded_transfer_failure"
+            and (
+                int(item.get("retry_count") or 0) != 1
+                or len(item.get("attempt_results", [])) != 2
+            )
+            for item in no_sources
+        )
+        or int(meta.get("photo_bounded_retry_count") or 0) != actual_retries
+        or meta.get("photo_retry_policy") != GY120_PHOTO_RETRY_POLICY
+    ):
+        errors.append("FULL 照片有界传输策略未逐图闭合")
+
+    formal_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录"]
+    schedule_pattern = re.compile(
+        r"(?:门诊时间|出诊时间|出诊安排|排班信息|坐诊时间|"
+        r"(?:周|星期)[一二三四五六日天](?:上午|下午|全天|夜间))"
+    )
+    filenames: set[str] = set()
+    for row in rows:
+        name = gy120_clean_text(str(row.get("姓名") or ""))
+        source = gy120_clean_text(str(row.get("来源链接") or ""))
+        if not looks_like_person_name(name) or gyfyyy_nursing_only_identity(
+            row.get("职称身份原文")
+        ):
+            errors.append(f"FULL 行不是明确医生身份：{name or source}")
+        if source in no_source_by_source:
+            item = no_source_by_source[source]
+            detail_id = gy120_detail_id(source)
+            bounded_failure = item.get("photo_state") == "bounded_transfer_failure"
+            conservative_detail_failure = (
+                detail_id in eligible_failed_ids and item.get("photo_state") == "empty"
+            )
+            warning_text = gy120_clean_text(str(row.get("异常提示") or ""))
+            if row.get("照片链接") or row.get("照片文件"):
+                errors.append(f"照片批准留空行未按规则清空并标注：{name}")
+            elif bounded_failure and GY120_PHOTO_UNAVAILABLE_WARNING not in warning_text:
+                errors.append(f"照片连续两次失败行未标注：{name}")
+            elif conservative_detail_failure and "详情读取失败" not in warning_text:
+                errors.append(f"详情失败保守成行未标注：{name}")
+            elif not bounded_failure and not conservative_detail_failure:
+                errors.append(f"照片留空缺少批准原因：{name}")
+        else:
+            item = photo_by_source.get(source)
+            photo_url = gy120_clean_text(str(row.get("照片链接") or ""))
+            if not item or not gy120_photo_url(photo_url, source):
+                errors.append(f"缺少 gy120.net 官网本人职业照对账：{name or source}")
+                continue
+            filename = gy120_clean_text(str(item.get("filename") or ""))
+            if not filename or filename.casefold() in filenames:
+                errors.append(f"照片文件名为空或覆盖冲突：{filename or name}")
+            filenames.add(filename.casefold())
+            expected_relative = (
+                Path("01_试点医院")
+                / "广东药科大学附属第一医院"
+                / "照片"
+                / filename
+            ).as_posix()
+            if row.get("照片文件") != expected_relative or item.get("photo_file") != expected_relative:
+                errors.append(f"照片相对路径不符合约定：{name}")
+            disk_path = Path(str(item.get("disk_path") or ""))
+            if not disk_path.is_file():
+                errors.append(f"照片文件不存在：{disk_path}")
+                continue
+            content = disk_path.read_bytes()
+            extension = disk_path.suffix.lower().lstrip(".")
+            media_type = {
+                "jpg": "image/jpeg",
+                "png": "image/png",
+                "gif": "image/gif",
+                "webp": "image/webp",
+            }.get(extension, "")
+            width, height = gdmch_photo_dimensions(content, extension)
+            if (
+                gdgh_photo_extension(content, media_type) != extension
+                or int(item.get("bytes") or 0) != len(content)
+                or gy120_clean_text(str(item.get("sha256") or ""))
+                != hashlib.sha256(content).hexdigest()
+                or int(item.get("width") or 0) != width
+                or int(item.get("height") or 0) != height
+                or width <= 0
+                or height <= 0
+            ):
+                errors.append(f"照片字节/SHA-256/魔数/宽高对账失败：{filename}")
+
+        formal_text = "\n".join(
+            gy120_clean_text(str(row.get(field) or "")) for field in formal_fields
+        )
+        if schedule_pattern.search(formal_text):
+            errors.append(f"正式字段仍含排班日期/时段：{name}")
+        if any(marker in formal_text for marker in GDGH_FORBIDDEN_SENTENCE_MARKERS):
+            errors.append(f"正式字段仍含排名/患者片段：{name}")
+        if contains_gzbrain_patient_case_text(formal_text):
+            errors.append(f"正式字段仍含患者案例或可识别信息：{name}")
+        if re.search(
+            r"[\ue000-\uf8ff]",
+            "\n".join(str(row.get(field) or "") for field in BASE_HEADERS),
+        ):
+            errors.append(f"正式字段仍含私用区字符：{name}")
+        if gy120_clean_text(str(row.get("异常提示") or "")) and (
+            gy120_clean_text(str(row.get("重点关注范围") or ""))
+            or gy120_clean_text(str(row.get("重点疾病标签") or ""))
+            or gy120_clean_text(str(row.get("重点优先级") or "")) != "普通"
+        ):
+            errors.append(f"异常行仍被打标签或提升优先级：{name}")
+
+    if meta.get("full_authorization") != (
+        "PR #48 owner 评论明确审计通过并切换 FULL_APPEND_AND_OBSIDIAN"
+    ):
+        errors.append("FULL 授权证据未写入 payload")
+    if errors:
+        raise RuntimeError("GY120 FULL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
 
 
 def validate_gd2h_full_append(payload: dict[str, Any] | None = None) -> None:
@@ -15159,6 +15747,19 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         )
         for item in payload.get("excluded_candidates", [])
     ) or "| 无 | 无 | 无 | 无 | 无 | 无 |"
+    gy120_identity_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('name', ''))} | "
+            f"{','.join(str(value) for value in item.get('detail_ids', []))} | "
+            f"{item.get('resolution', '')} | {item.get('relation_count', 0)} | "
+            f"{'、'.join(item.get('classification_departments', [])) or '无'} | "
+            f"{item.get('primary_detail_id', '')} | "
+            f"{item.get('primary_source_link', '')} |"
+        )
+        for item in payload.get("gy120_identity_reconciliation", [])
+        if int(item.get("relation_count") or 0) > 1
+        or item.get("resolution") == "同名待甄别"
+    ) or "| 无 | 无 | 无 | 0 | 无 | 无 | 无 |"
     gy120_photo_lines = "\n".join(
         (
             f"| {markdown_table_cell(item.get('name', ''))} | {item.get('detail_id', '')} | "
@@ -15490,20 +16091,40 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
             f"{name}={count}"
             for name, count in meta.get("census_campus_counts", {}).items()
         ) or "无"
+        gy120_scope_line = (
+            f"FULL 最终身份 {meta.get('final_identity_count', len(payload.get('rows', [])))} 行；"
+            f"同一官网照片归并 {meta.get('gy120_same_identity_merge_group_count', 0)} 组；"
+            f"实质不同同名 {meta.get('gy120_distinct_same_name_group_count', 0)} 组 / "
+            f"{meta.get('gy120_distinct_same_name_row_count', 0)} 行。"
+            if full_append
+            else (
+                f"TRIAL 固定 10 位：覆盖科室 {meta.get('department_coverage_count', 0)} 个"
+                f"（{sample_departments}）；首席专家 "
+                f"{meta.get('sample_featured_role_counts', {}).get('首席专家', 0)}、"
+                f"科室负责人 {meta.get('sample_featured_role_counts', {}).get('科室负责人', 0)}、"
+                f"非推荐医生 {meta.get('sample_non_featured_count', 0)}。"
+            )
+        )
+        gy120_phase_statement = (
+            "Owner 已在 PR #48 明确审计通过并切换 FULL_APPEND_AND_OBSIDIAN；"
+            "本报告为正式追加与画像生成输入。"
+            if full_append
+            else "当前仍为 TRIAL，严禁写总底表或生成正式 Obsidian 画像。"
+        )
         adapter_specific_sections.append(
             f"""## 广东药科大学附属第一医院推荐区、科室树、编码与照片{run_label}对账
 
 - 官网旧版 ASP 单页目录：推荐区 {meta.get('featured_occurrence_count', 0)} 次 / {meta.get('featured_unique_count', 0)} 个唯一 ArticleID；角色 {featured_role_summary}；全部与科室树重叠 {meta.get('featured_department_overlap_count', 0)} 次。
 - 科室树：{meta.get('census_department_count', 0)} 个科室，其中空科室 {meta.get('census_empty_department_count', 0)} 个；医生—科室关系 / 唯一数字 ArticleID：{meta.get('candidate_membership_count', 0)} / {meta.get('census_unique_detail_count', 0)}。
 - 详情顺序公开 GET：成功 {len(payload.get('gy120_detail_reconciliation', [])) - meta.get('detail_error_count', 0)}，失败 {meta.get('detail_error_count', 0)}；纯护理身份排除 {meta.get('excluded_non_doctor_count', 0)}，合规候选 {meta.get('eligible_candidate_count', 0)}。
-- {run_label}固定 10 位：覆盖科室 {meta.get('department_coverage_count', 0)} 个（{sample_departments}）；首席专家 {meta.get('sample_featured_role_counts', {}).get('首席专家', 0)}、科室负责人 {meta.get('sample_featured_role_counts', {}).get('科室负责人', 0)}、非推荐医生 {meta.get('sample_non_featured_count', 0)}。
+- {gy120_scope_line}
 - 公开出诊点标签普查：{campus_summary}；多出诊点详情 {meta.get('census_multi_campus_count', 0)} 个。仅保留官网明确地点标签，不采集日期、星期、上午/下午等排班时段。
 - 编码自检：{meta.get('encoding_policy', '未记录')}；替换字符 {meta.get('encoding_replacement_count', 0)}、高置信乱码标记 {meta.get('encoding_mojibake_count', 0)}、列表/详情姓名不一致 {meta.get('name_mismatch_count', 0)}。
-- 详情清洗：排班正式字段写入 {meta.get('schedule_field_ingested_count', 0)}，排名/患者片段排除 {meta.get('forbidden_segment_exclusion_count', 0)}，患者案例排除 {meta.get('patient_case_exclusion_count', 0)}，私用区字符 {meta.get('private_use_character_count', 0)}。
+- 详情清洗：排班尾段排除 {meta.get('schedule_exclusion_count', 0)}、正式字段写入 {meta.get('schedule_field_ingested_count', 0)}；排名/患者片段排除 {meta.get('forbidden_segment_exclusion_count', 0)}，患者案例排除 {meta.get('patient_case_exclusion_count', 0)}；私用区字符清洗 {meta.get('private_use_character_exclusion_count', 0)}、正式字段残留 {meta.get('private_use_character_count', 0)}。
 - 照片普查：本人职业照 {meta.get('photo_census_available_count', 0)}、占位图 {meta.get('photo_census_placeholder_count', 0)}、空图 {meta.get('photo_census_empty_count', 0)}、拒绝路径 {meta.get('photo_census_rejected_count', 0)}。
 - 照片四数：应采 {meta.get('photo_expected_count', 0)} / 实采 {meta.get('photo_downloaded_count', 0)} / 连续两次失败留空 {meta.get('photo_failed_count', 0)} / 无照片 {meta.get('photo_no_source_count', 0)}；本轮触发单次重试 {meta.get('photo_bounded_retry_count', 0)} 张。
 - 照片传输策略：{meta.get('photo_retry_policy', '未记录')}；原图不压缩；平均 {meta.get('photo_average_bytes', 0)} bytes，估算 {meta.get('photo_estimated_full_count', 0)} 张 / {meta.get('photo_estimated_full_bytes', 0)} bytes，大图阈值命中 {meta.get('large_photo_count', 0)} 张。
-- 普通公开会话：{meta.get('standard_public_session', '未记录')}；最终 Cookie 名称仅留痕为 `{'、'.join(meta.get('session_cookie_names', [])) or '无'}`。当前仍为 TRIAL，严禁写总底表或生成正式 Obsidian 画像。
+- 普通公开会话：{meta.get('standard_public_session', '未记录')}；最终 Cookie 名称仅留痕为 `{'、'.join(meta.get('session_cookie_names', [])) or '无'}`。{gy120_phase_statement}
 
 ### 四类科室汇总
 
@@ -15534,6 +16155,12 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 | ArticleID | 姓名 | 官网详情职称 | 列表科室 | 排除理由 | 来源链接 |
 |---|---|---|---|---|---|
 {gy120_nursing_lines}
+
+### 同名身份聚类与主详情裁决
+
+| 姓名 | ArticleID | 裁决 | 详情关系 | 合并科室/出诊点 | 主详情 ID | 主详情来源 |
+|---|---|---|---:|---|---|---|
+{gy120_identity_lines}
 
 ### {run_label}照片字节、魔数、SHA-256、尺寸及重试对账
 
@@ -16082,6 +16709,8 @@ def main() -> None:
         validate_gdmch_full_append(payload)
     if target.adapter_id == GD2H_ADAPTER_ID and not args.trial_only:
         validate_gd2h_full_append(payload)
+    if target.adapter_id == GY120_ADAPTER_ID and not args.trial_only:
+        validate_gy120_full_append(payload)
 
     if target.adapter_id == FAHSYSU_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_fahsysu_full_append(payload)

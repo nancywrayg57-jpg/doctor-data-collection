@@ -1,16 +1,16 @@
-# Issue #47 广东药科大学附属第一医院照片 TRIAL
+# Issue #47 广东药科大学附属第一医院照片 TRIAL 与 FULL
 
 > 日期：2026-08-15
 > GitHub Issue：<https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/47>
 > 分支：`codex/mhrj/issue-47-gy120-photo-trial`
-> Phase：`TRIAL_READY_FOR_OWNER_AUDIT`
+> Phase：`FULL_READY_FOR_OWNER_PROFILE_AUDIT`
 > 医院：广东药科大学附属第一医院
 > 官网：<https://www.gy120.net/>
 > 医生目录：<https://www.gy120.net/zhuanjia.asp>
 
 ## 1. 目标与边界
 
-本轮只完成官网目录普查、349 个唯一 ArticleID 顺序详情核验、纯护理身份排除、10 位医生试采和本人职业照审计材料，不写入统一总底表，不生成正式 Obsidian 画像，不进入 FULL。
+TRIAL 先完成官网目录普查、349 个唯一 ArticleID 顺序详情核验、纯护理身份排除、10 位医生试采和本人职业照审计材料。owner 随后在 PR #48 明确审计“通过”并切换 `FULL_APPEND_AND_OBSIDIAN`；后续 FULL 结果与最终停止点见第 8 节起的追加记录。
 
 固定边界：
 
@@ -157,40 +157,115 @@
 
 - 阻塞：ArticleID 42 的图片 `upsfile/丁彩萍.jpg` 不符合预期 `/files/<文件名>` 路径。
 - 根因：官网存在一条旧版图片目录遗留。
-- 解决：只标为 `rejected`，不下载、不补第三方图片，不影响详情对账。
-- 防复发：照片 URL 函数只接受同域 `/files/<安全文件名>`；现场固定可得 346、拒绝 1，范围扩展必须由 owner 明确裁决。
+- 解决：TRIAL 先标为 `rejected`；owner 在 PR #48 明确扩展为同域、页面内本人头像 `upsfile/`，FULL 已纳入并完成照片字节闭环，未补第三方图片。
+- 防复发：照片 URL 函数只接受同域 `/files/<安全文件名>` 与 owner 明确批准的 `/upsfile/<安全文件名>`；仍须由官网目录/详情页本人头像引用证明，其他路径继续拒绝。
 
-## 8. 当前停止点
+### 7.5 第一次 FULL 写出前清洗门禁
 
-TRIAL 工件已完成本地验收。提交并推送原工作分支、创建关联 Issue #47 的 PR 后，停止等待 owner 对 TRIAL 明确审计。只有 owner 在该 PR 中给出 `通过` / `有条件通过` 且明确切换为 `FULL_APPEND_AND_OBSIDIAN`，才可进入 FULL；不得自行追加总底表、生成正式画像、合并 PR、关闭 Issue 或领取下一 Issue。
+- 阻塞：郑祥光的擅长尾部仍含“特需门诊时间：周四上午”；何智君官网正文含 `U+E06B` 私用区字符；旧排班正则又把论文作者“周四萍”误判成排班片段。该次运行在总底表写入前停止，三份受保护资产哈希保持第 5 节基线。
+- 根因：GY120 旧页面的排班标签可出现在正文尾部；GB18030 正确解码后仍可能保留官网私用字形；无边界的“周四”规则不能区分星期与人名。
+- 解决：增加 GY120 专用排班尾段清洗，只在明确标签/时段结构成立时移除；私用区字符在适配器边界删除但不猜字；异常行取消标签提权。修正后专项与全量测试通过。
+- 防复发：FULL 写出前同时扫描正式字段中的排班标签/时段、全部基础字段中的私用区字符和异常行提权；测试固定“周四萍”不被误删。
+
+### 7.6 第二次 FULL 详情漂移门禁
+
+- 阻塞：一个详情在 `fetch_gy120_html` 的三次有限请求后仍失败，旧 FULL 门禁把 `detail_error_count=0` 与照片可得 347 写成静态常量，导致候选 346 并停止写表；受保护总底表仍未变化。
+- 根因：Issue 已固化“详情失败保守成行”，但 FULL validator 仍沿用 TRIAL 的零失败与固定照片常量，采集器也先过滤了失败详情，契约不一致。
+- 解决：保留目录姓名、科室和官方详情来源；失败详情按逐 ID 留痕保守成行、照片留空、异常标注、取消标签提权。TRIAL 继续固定零详情失败；FULL 改为动态核对失败 ID、`detail_errors`、照片可得/留空四数。新增合成详情失败回归测试。
+- 防复发：FULL 门禁不再把瞬时详情成功数写死，但必须维持 349 个目录 ID、2 个已审计护理 ID、347 个合规候选和失败详情逐 ID 对账；未知失败不得静默丢行。
+
+## 8. Owner 审计与 FULL 授权
+
+owner `nancywrayg57-jpg` 在 PR #48 评论 <https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/48#issuecomment-5300363191> 明确给出：
+
+1. TRIAL 审计结论“通过”。
+2. Phase 切换为 `FULL_APPEND_AND_OBSIDIAN`。
+3. 照片白名单扩展为同域 `/files/` 与页面内本人头像 `upsfile/`。
+4. FULL 必须维持 349 − 2 = 347 候选、逐 ID 对账、身份聚类、GB18030 零替换字符、院区/门诊括注、异常降权与照片四数。
+
+用户随后明确解除两次历史熔断，并重申图片首次非 200 或 `Timeout` / `ConnectionError` / `ChunkedEncodingError` / `IncompleteRead` 后等待 1 秒，以同 URL、同 Referer、同请求头只重试一次；连续两次失败留空并标注，不注入 Cookie、不绕过验证。
+
+## 9. FULL 最终结果
+
+### 9.1 详情、护理与身份聚类
+
+- 57 科室、3 空科室、349 个唯一数字 ArticleID 与推荐区 58 次/56 ID 全量闭环。
+- 349/349 详情顺序公开 GET 成功，详情失败 0、姓名不一致 0。
+- 纯护理身份逐 ID 排除 2：何淑敏（404）、李巧姬（603）；合规候选 347。
+- 只按“同名 + 完全相同官网照片 URL”合并，形成 340 个最终身份，合并差额 7；同一照片归并组 3，实质不同同名 7 组/14 行均保留并标注“同名待甄别”。
+- 编码替换字符 0、乱码标记 0、正式字段排班残留 0、私用区字符残留 0。
+
+### 9.2 照片四数
+
+| 指标 | 结果 |
+|---|---:|
+| FULL 最终身份应采 | 340 |
+| 实际下载/复用并通过字节闭环 | 338 |
+| 连续两次失败批准留空 | 2 |
+| 最终无照片画像 | 2 |
+| 本轮重试总数 | 4 |
+
+- 臧晶（587）、周玉婷（593）的官网 `/files/` 图片均为 `HTTP 404 → 等待 1 秒 → HTTP 404`，照片字段留空、异常标注、普通优先级、无标签提权。
+- 钟德泉（60）、金文敏（358）首次 `ConnectionError`，保持同 URL/Referer/请求头唯一重试后 `HTTP 200`。
+- ArticleID 42 的 owner 批准同域 `upsfile/丁彩萍.jpg` 已成功纳入。
+- 338 张正式照片全部保持官网原始字节；平均 462,587 bytes，大图阈值命中 205。
+
+### 9.3 总底表
+
+- 新增 340 行，重复跳过 0；总底表由 8,800 行增至 9,140 行、由 19 家增至 20 家。
+- FULL payload 与 CSV 按 340 个唯一来源逐字段一致；差异仅为总表全局序号重排及画像生成后的 `已建画像=是`。
+- 画像生成后离线执行 `--rebuild-master-only`，没有重新联网；总行数仍为 9,140，本院 340 行及医院统计的已建画像数均为 340。
+- artifact-tool 最终检查 6 个工作表均可渲染，公式错误扫描 0。
+
+## 10. Obsidian 画像验收
+
+- 生成 340 份自动画像、1 个 `_索引.md`，跳过 0；39 条异常提示均保留。
+- 340 画像来源链接唯一且与本院 340 行一一对应；索引恰有 340 个唯一画像链接。
+- 使用 bundled `marked` 解析 Markdown 图片节点：338 个画像嵌入 `照片/<文件名>`，全部落在本院照片目录且文件存在；照片目录无未引用文件。
+- 臧晶、周玉婷两份画像无错误图片嵌入；39 个异常画像均保留总底表原始异常提示。
+
+## 11. 最终工件与哈希
+
+| 工件 | 长度 | SHA-256 |
+|---|---:|---|
+| `珠三角三甲医院_医生画像自动采集总底表.xlsx` | 4,360,914 | `E4F358CB18EE5DAD4DB43B198193CF90C9129FFE77A017AFB1E61FFBA3514DF3` |
+| `珠三角三甲医院_医生画像自动采集总底表.csv` | 17,206,358 | `BBB98873B79AC3AF31965943290369413A1734E07E0712B068C2E4AE0257FA79` |
+| `珠三角三甲医院_医生画像自动采集总底表_更新报告.md` | 5,417 | `8E59BE8F9E48597DF3262CA3BB90DF1C9F52E2C728BDBCBBB6480CC156E31EE8` |
+| `work/广东药科大学附属第一医院_official_doctors_payload.json` | 1,821,836 | `D1D19D05D0809161E410DFF0ED84932FCCBF8BE56BE843EE2E826F95049EEF20` |
+| `work/广东药科大学附属第一医院_official_doctors_report.md` | 190,942 | `1C56FD24AD82FB853CC01BE1EFB801A3FA131C32ADFE48E3489D39A347CB9D13` |
+| `珠三角三甲医院_Obsidian画像全量生成报告.md` | 10,751 | `B559109399A210D2924670D67E0B866A20587391170259104362EA68CE242B08` |
+| `广东药科大学附属第一医院/_索引.md` | 64,413 | `26B7E8821F5E7132C24BEF9F7481820CEDF834BA7B7016EE2F556D6066BDA927` |
+
+## 12. 当前停止点
+
+FULL、总底表、照片、画像和索引已完成本地闭环。下一步只允许完成最终测试、Git 工件核验、提交并非强制推送原分支，然后在 PR #48 请求 owner 最终画像审计并停止。不得自行合并 PR、关闭 Issue 或领取下一 Issue。
 
 <Handoff_State>
-Target: Issue #47 广东药科大学附属第一医院照片 TRIAL
+Target: Issue #47 广东药科大学附属第一医院 FULL_APPEND_AND_OBSIDIAN
 AgentConstitution: D:\workspace\信息收集整理\Agent.md
 RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/47
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/48
 Branch: codex/mhrj/issue-47-gy120-photo-trial
-Phase: TRIAL_READY_FOR_OWNER_AUDIT
+Phase: FULL_READY_FOR_OWNER_PROFILE_AUDIT
 Completed:
-- 57 个科室、3 个空科室、349 个唯一数字 ArticleID、推荐区 58 次/56 ID 完成全量对账
-- 349 个详情顺序读取成功；2 个纯护理身份逐 ID 排除；347 个医生候选
-- 10 行、10 科室、10 张本人职业照完成字节/SHA-256/魔数/宽高与视觉复核
-- GB18030、出诊点标签、排班清洗、图片同请求唯一重试与 FULL 前置熔断已固定
-- 总底表 XLSX/CSV/更新报告零变更
+- 349 个详情顺序读取成功；2 个纯护理身份排除；347 个候选经保守身份聚类形成 340 个最终身份
+- 总底表新增 340 行并离线同步 340 个已建画像标记；当前 20 家、9,140 行
+- 照片四数 340/338/2/2；两张双 404 留空标注，四次有界重试逐项留痕
+- 340 画像、340 索引链接、338 图片引用和 39 个异常提示闭环
 Next:
-- 精确暂存代码、专项测试、10 图、三个 TRIAL 工件和本 ADR
-- 复核身份后提交并以 SSH 非强制 fast-forward push 原分支
-- 创建关联并 `Closes #47` 的 PR，等待 CI 后请求 owner TRIAL 审计
+- 运行最终专项/全量测试、静态检查与 Git 完整性检查
+- 复核身份后提交并通过非强制方式推送原分支
+- 在 PR #48 请求 owner 最终画像审计并停止
 Constraints:
 - 仅官网公开页面和医生本人职业照；禁患者/合影/新闻图/隐私、第三方和登录/验证码规避
 - 图片只允许同 URL、同 Referer、同请求头的一次 1 秒后重试；连续两次失败留空并标注
-- 旧 `upsfile/丁彩萍.jpg` 维持拒绝，除非 owner 明确扩展范围
-- 不自行 FULL、合并 PR、关闭 Issue 或领取下一 Issue
+- 不自行合并 PR、关闭 Issue 或领取下一 Issue
 Artifacts:
-- D:\workspace\信息收集整理\work\广东药科大学附属第一医院_trial_payload.json
-- D:\workspace\信息收集整理\work\广东药科大学附属第一医院_trial_doctors.csv
-- D:\workspace\信息收集整理\work\广东药科大学附属第一医院_trial_report.md
-- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广东药科大学附属第一医院\照片
+- D:\workspace\信息收集整理\work\广东药科大学附属第一医院_official_doctors_payload.json
+- D:\workspace\信息收集整理\work\广东药科大学附属第一医院_official_doctors_report.md
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
+- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广东药科大学附属第一医院
 - D:\workspace\信息收集整理\docs\architecture_decisions\2026-08-15_issue_47_gy120_photo_trial.md
 </Handoff_State>
