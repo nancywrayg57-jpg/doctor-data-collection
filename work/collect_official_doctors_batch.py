@@ -23,7 +23,7 @@ from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 
 try:
     import requests
-    from bs4 import BeautifulSoup
+    from bs4 import BeautifulSoup, Comment
     from openpyxl import load_workbook
 except ImportError as exc:
     raise SystemExit(
@@ -335,6 +335,50 @@ GY120_MOJIBAKE_MARKERS = (
     "涓撳",
     "闂ㄨ瘖",
     "绉戝",
+)
+GZTCM_ADAPTER_ID = "gztcm_scope_tree_famous_photo"
+GZTCM_SCOPE_TREE_URL = "https://www.gztcm.com.cn/ksjs/"
+GZTCM_FAMOUS_URL = "https://www.gztcm.com.cn/myzl/myhc/"
+GZTCM_EXPECTED_CATEGORY_COUNTS = {
+    "大内科": 13,
+    "大外科": 10,
+    "妇儿中心": 7,
+    "骨伤中心": 13,
+    "针灸推拿康复中心": 3,
+    "肿瘤中心": 5,
+    "脑病中心": 2,
+    "急诊中心": 2,
+    "其他": 15,
+}
+GZTCM_EXPECTED_CATEGORY_RELATION_COUNTS = {
+    "大内科": 18,
+    "大外科": 12,
+    "妇儿中心": 2,
+    "骨伤中心": 0,
+    "针灸推拿康复中心": 3,
+    "肿瘤中心": 0,
+    "脑病中心": 0,
+    "急诊中心": 0,
+    "其他": 6,
+}
+GZTCM_EXPECTED_DEPARTMENT_COUNT = 70
+GZTCM_EXPECTED_DEAD_DIRECTORY_COUNT = 19
+GZTCM_EXPECTED_EMPTY_DIRECTORY_COUNT = 42
+GZTCM_EXPECTED_DEPARTMENT_RELATION_COUNT = 41
+GZTCM_EXPECTED_DEPARTMENT_UNIQUE_ID_COUNT = 41
+GZTCM_EXPECTED_FAMOUS_COUNT = 41
+GZTCM_EXPECTED_FAMOUS_PAGE_COUNT = 3
+GZTCM_EXPECTED_CHANNEL_OVERLAP_COUNT = 0
+GZTCM_EXPECTED_COMBINED_UNIQUE_ID_COUNT = 82
+GZTCM_PHOTO_RETRY_POLICY = (
+    "同一官方图片 URL + 同一公开详情页 Referer + 同一请求头；首次 HTTP 非 200 "
+    "或 Timeout/ConnectionError/ChunkedEncodingError/IncompleteRead 后等待 1 秒，"
+    "仅重试 1 次；不注入 Cookie、不绕过验证；连续两次失败则留空并标注"
+)
+GZTCM_PHOTO_UNAVAILABLE_WARNING = "官网本人职业照连续两次获取失败，按既定政策留空"
+GZTCM_PHOTO_INVALID_WARNING = "官网图片响应不是可识别的本人职业照，按既定政策留空"
+GZTCM_FULL_AUTHORIZATION = (
+    "PR #50 owner 评论明确审计通过并切换 FULL_APPEND_AND_OBSIDIAN"
 )
 GD2H_EXPECTED_SAME_NAME_GROUPS = {
     "付钰": ["42089", "d3730bba6ddc416399018016cd1d36ce"],
@@ -1321,6 +1365,13 @@ def dedicated_adapter_for(entry_url: str) -> str:
         and not parsed.fragment
     ):
         return GY120_ADAPTER_ID
+    if (
+        host.removeprefix("www.") == "gztcm.com.cn"
+        and path.rstrip("/") == "/myzl/myhc"
+        and not parsed.query
+        and not parsed.fragment
+    ):
+        return GZTCM_ADAPTER_ID
     if "gzzoc.org.cn" in host and "/expert-introduction" in path:
         return "gzzoc_drupal_doctor"
     if "nbkjyy.mil.cn" in host and "/expert" in path:
@@ -7888,6 +7939,1294 @@ def collect_gy120(
     }
 
 
+def gztcm_clean_text(value: str | None) -> str:
+    return clean_text(re.sub(r"[\u200b\u200c\u200d\ufeff]", "", str(value or "")))
+
+
+def gztcm_person_name(value: str | None) -> str:
+    """Normalize visual spacing inside an otherwise valid Chinese doctor name."""
+
+    candidate = gztcm_clean_text(value)
+    compact = re.sub(r"\s+", "", candidate)
+    return compact if candidate != compact and looks_like_person_name(compact) else candidate
+
+
+def gztcm_covered_department_names(rows: list[dict[str, Any]]) -> list[str]:
+    """Keep official GZTCM department labels intact when they contain dunhao."""
+
+    return sorted(
+        {
+            gztcm_clean_text(str(row.get("科室_分类页") or ""))
+            for row in rows
+            if "非医生页面或姓名异常" not in str(row.get("异常提示") or "")
+            and gztcm_clean_text(str(row.get("科室_分类页") or ""))
+        }
+    )
+
+
+def decode_gztcm_html(content: bytes) -> str:
+    text = content.decode("utf-8", errors="strict")
+    if "\ufffd" in text or any(marker in text for marker in GY120_MOJIBAKE_MARKERS):
+        raise RuntimeError("GZTCM UTF-8 转码自检失败")
+    return text
+
+
+def fetch_gztcm_html(
+    session: requests.Session,
+    url: str,
+    retries: int = 3,
+) -> tuple[int | None, str, str]:
+    parsed = urlparse(gztcm_clean_text(url))
+    if parsed.scheme != "https" or comparable_host(parsed.geturl()) != "gztcm.com.cn":
+        return None, "", f"拒绝非 gztcm.com.cn HTTPS 页面：{url}"
+    last_error = ""
+    for attempt in range(1, retries + 1):
+        try:
+            response = session.get(url, timeout=35)
+            if any(comparable_host(item.url) != "gztcm.com.cn" for item in response.history):
+                return None, "", f"页面发生跨域重定向：{url}"
+            if comparable_host(response.url) != "gztcm.com.cn":
+                return None, "", f"页面最终地址越出官网：{response.url}"
+            if response.status_code != 200:
+                return response.status_code, "", f"HTTP {response.status_code}"
+            content_type = gztcm_clean_text(response.headers.get("Content-Type")).lower()
+            if "text/html" not in content_type:
+                return response.status_code, "", f"非 HTML 响应：{content_type or '未声明'}"
+            return response.status_code, decode_gztcm_html(response.content), ""
+        except (
+            requests.Timeout,
+            requests.ConnectionError,
+            requests.exceptions.ChunkedEncodingError,
+            IncompleteRead,
+            UnicodeDecodeError,
+        ) as exc:
+            last_error = f"{type(exc).__name__}: {exc}"
+            if attempt < retries:
+                time.sleep(0.8 * attempt)
+    return None, "", last_error or "未知读取错误"
+
+
+def gztcm_detail_id(url: str | None) -> str:
+    parsed = urlparse(gztcm_clean_text(url))
+    if (
+        parsed.scheme != "https"
+        or comparable_host(parsed.geturl()) != "gztcm.com.cn"
+        or parsed.query
+        or parsed.fragment
+    ):
+        return ""
+    match = re.fullmatch(
+        r"/(?:[a-z0-9_-]+/kszj|myzl/myhc)/([a-z0-9]+)\.shtml",
+        parsed.path,
+        flags=re.IGNORECASE,
+    )
+    return match.group(1).lower() if match else ""
+
+
+def gztcm_photo_url(value: str | None, base_url: str) -> str:
+    absolute = urljoin(base_url, gztcm_clean_text(value))
+    parsed = urlparse(absolute)
+    if (
+        parsed.scheme != "https"
+        or comparable_host(absolute) != "gztcm.com.cn"
+        or parsed.query
+        or parsed.fragment
+    ):
+        return ""
+    path = parsed.path
+    valid = bool(
+        re.fullmatch(
+            r"/(?:export/sites/default/gztcm/)?[a-z0-9_-]+/kszj/resource/[a-z0-9_-]+\.(?:jpe?g|png|gif|webp)",
+            path,
+            flags=re.IGNORECASE,
+        )
+        or re.fullmatch(
+            r"/(?:export/sites/default/gztcm/)?myzl/myhc/resource/[a-z0-9_-]+\.(?:jpe?g|png|gif|webp)",
+            path,
+            flags=re.IGNORECASE,
+        )
+    )
+    filename = path.rsplit("/", 1)[-1]
+    if not valid or re.search(
+        r"(?:default|no[-_]?photo|placeholder)", filename, re.IGNORECASE
+    ):
+        return ""
+    return urlunparse(parsed._replace(fragment=""))
+
+
+GZTCM_PAGING_PATTERN = re.compile(
+    r"'size'\s*:\s*(\d+)\s*,\s*'page'\s*:\s*(\d+)\s*,\s*"
+    r"'itemCount'\s*:\s*(\d+)\s*,\s*'pageCount'\s*:\s*(\d+)",
+    flags=re.IGNORECASE,
+)
+
+
+def gztcm_paging_metadata(html: str) -> dict[str, int]:
+    match = GZTCM_PAGING_PATTERN.search(html)
+    if not match:
+        raise RuntimeError("官网列表缺少 PagingTag 分页元数据")
+    size, page, item_count, page_count = (int(value) for value in match.groups())
+    return {
+        "size": size,
+        "page": page,
+        "item_count": item_count,
+        "page_count": page_count,
+    }
+
+
+def gztcm_list_page_url(directory_url: str, page_number: int) -> str:
+    if page_number < 1:
+        raise ValueError("分页必须从 1 开始")
+    return urljoin(directory_url, f"index.html?_page_={page_number}")
+
+
+def parse_gztcm_scope_tree(
+    html: str,
+    entry_url: str = GZTCM_SCOPE_TREE_URL,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    soup = BeautifulSoup(html, "html.parser")
+    hidden_category_urls: dict[str, str] = {}
+    for comment in soup.find_all(string=lambda value: isinstance(value, Comment)):
+        fragment = BeautifulSoup(str(comment), "html.parser")
+        for anchor in fragment.select("a[href]"):
+            label = gztcm_clean_text(anchor.get_text(" ", strip=True))
+            url = urljoin(entry_url, str(anchor.get("href") or ""))
+            if label and comparable_host(url) == "gztcm.com.cn":
+                hidden_category_urls[label] = url
+
+    categories: list[dict[str, Any]] = []
+    departments: list[dict[str, Any]] = []
+    seen_departments: set[str] = set()
+    for category_index, node in enumerate(soup.select("div.department_name"), start=1):
+        category = gztcm_clean_text(node.get_text(" ", strip=True))
+        if not category:
+            continue
+        category_anchor = node.find("a", href=True)
+        category_url = (
+            urljoin(entry_url, str(category_anchor.get("href") or ""))
+            if category_anchor
+            else hidden_category_urls.get(category, entry_url)
+        )
+        category_departments: list[dict[str, str]] = []
+        for anchor in node.parent.select("a[href]"):
+            name = gztcm_clean_text(
+                str(anchor.get("title") or "") or anchor.get_text(" ", strip=True)
+            )
+            department_url = urljoin(entry_url, str(anchor.get("href") or ""))
+            parsed = urlparse(department_url)
+            if (
+                not name
+                or parsed.scheme != "https"
+                or comparable_host(department_url) != "gztcm.com.cn"
+                or not re.fullmatch(r"/[a-z0-9_-]+/", parsed.path, flags=re.IGNORECASE)
+                or parsed.query
+                or parsed.fragment
+            ):
+                continue
+            key = canonical_url(department_url)
+            if key in seen_departments:
+                continue
+            seen_departments.add(key)
+            item = {
+                "category": category,
+                "department": name,
+                "department_url": department_url,
+                "directory_url": urljoin(department_url, "kszj/"),
+            }
+            category_departments.append(item)
+            departments.append(item)
+        categories.append(
+            {
+                "category_index": category_index,
+                "category_name": category,
+                "category_url": category_url,
+                "department_count": len(category_departments),
+            }
+        )
+    return categories, departments
+
+
+def parse_gztcm_list_page(
+    html: str,
+    page_url: str,
+    channel: str,
+    category: str = "",
+    department: str = "",
+) -> list[dict[str, Any]]:
+    soup = BeautifulSoup(html, "html.parser")
+    selector = (
+        "#pageregion .list > ul > li"
+        if channel == "科室树"
+        else "#pageregion .list_ul > ul > li"
+    )
+    rows: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    for card in soup.select(selector):
+        detail_anchor = None
+        detail_id = ""
+        for anchor in card.select("a[href]"):
+            candidate_url = urljoin(page_url, str(anchor.get("href") or ""))
+            candidate_id = gztcm_detail_id(candidate_url)
+            if candidate_id:
+                detail_anchor = anchor
+                detail_id = candidate_id
+                break
+        if not detail_anchor or not detail_id or detail_id in seen_ids:
+            continue
+        seen_ids.add(detail_id)
+        source_link = urljoin(page_url, str(detail_anchor.get("href") or ""))
+        name_node = card.select_one("h4")
+        name = gztcm_person_name(
+            str(detail_anchor.get("title") or "")
+            or (name_node.get_text(" ", strip=True) if name_node else "")
+        )
+        title_node = card.select_one(".title span, .subtitle")
+        description_node = card.select_one(".description")
+        image = card.find("img")
+        list_photo = gztcm_photo_url(
+            str(image.get("src") or "") if image else "",
+            source_link,
+        )
+        specialty = gztcm_clean_text(
+            description_node.get_text(" ", strip=True) if description_node else ""
+        )
+        specialty = re.sub(r"^擅长\s*[:：]?\s*", "", specialty)
+        rows.append(
+            {
+                "id": detail_id,
+                "name": name,
+                "source_link": source_link,
+                "channel": channel,
+                "category": category,
+                "department": department,
+                "list_title": gztcm_clean_text(
+                    title_node.get_text(" ", strip=True) if title_node else ""
+                ),
+                "list_specialty": clip(specialty, 520),
+                "list_photo_url": list_photo,
+            }
+        )
+    return rows
+
+
+def parse_gztcm_detail(html: str, fallback: dict[str, Any]) -> dict[str, Any]:
+    soup = BeautifulSoup(html, "html.parser") if html else BeautifulSoup("", "html.parser")
+    container = soup.select_one(".zj-list.details")
+    if not container:
+        return {
+            "name": gztcm_person_name(str(fallback.get("name") or "")),
+            "title": gztcm_clean_text(str(fallback.get("list_title") or "")),
+            "specialty": gztcm_clean_text(str(fallback.get("list_specialty") or "")),
+            "profile_text": "",
+            "highlights": "",
+            "photo_url": gztcm_clean_text(str(fallback.get("list_photo_url") or "")),
+            "photo_state": (
+                "available" if fallback.get("list_photo_url") else "empty"
+            ),
+            "campuses": [],
+            "schedule_exclusion_count": 0,
+            "forbidden_segment_count": 0,
+            "patient_case_exclusion_count": 0,
+            "private_use_character_exclusion_count": 0,
+        }
+
+    name_node = container.select_one("h3.title")
+    subtitle_node = container.select_one(".subtitle")
+    description_node = container.select_one(".description")
+    name = gztcm_person_name(name_node.get_text(" ", strip=True) if name_node else "")
+    subtitle = gztcm_clean_text(
+        subtitle_node.get_text(" ", strip=True) if subtitle_node else ""
+    )
+    raw_profile = gztcm_clean_text(
+        description_node.get_text(" ", strip=True) if description_node else ""
+    )
+    private_use_character_exclusion_count = len(re.findall(r"[\ue000-\uf8ff]", raw_profile))
+    raw_profile = gztcm_clean_text(re.sub(r"[\ue000-\uf8ff]", "", raw_profile))
+    schedule_exclusion_count = 0
+    forbidden_segment_count = 0
+    patient_case_exclusion_count = 0
+    kept_sentences: list[str] = []
+    for sentence in [
+        gztcm_clean_text(value)
+        for value in re.split(r"(?<=[。！？；;])", raw_profile)
+        if gztcm_clean_text(value)
+    ]:
+        cleaned, schedule_removed = strip_gy120_schedule_tail(sentence)
+        if schedule_removed:
+            schedule_exclusion_count += 1
+        if any(marker in cleaned for marker in GDGH_FORBIDDEN_SENTENCE_MARKERS):
+            forbidden_segment_count += 1
+            continue
+        if contains_gzbrain_patient_case_text(cleaned):
+            patient_case_exclusion_count += 1
+            continue
+        if cleaned:
+            kept_sentences.append(cleaned)
+    profile_text = clip(" ".join(kept_sentences), 1800)
+    specialty = gztcm_clean_text(str(fallback.get("list_specialty") or ""))
+    if not specialty:
+        match = re.search(
+            r"(?:擅长(?:治疗)?|专长|主攻)\s*[:：]?\s*([^。！？；;]{4,520})",
+            profile_text,
+        )
+        specialty = gztcm_clean_text(match.group(1)) if match else ""
+    specialty, specialty_schedule_removed = strip_gy120_schedule_tail(specialty)
+    schedule_exclusion_count += int(specialty_schedule_removed)
+    title_evidence = extract_sentences(profile_text, TITLE_TERMS, limit=2, max_len=420)
+    title = clip("；".join(dict.fromkeys(value for value in [subtitle, title_evidence] if value)), 500)
+    image = container.find("img")
+    raw_photo = str(image.get("src") or "") if image else ""
+    photo_url = gztcm_photo_url(
+        raw_photo,
+        str(fallback.get("source_link") or GZTCM_SCOPE_TREE_URL),
+    )
+    if not photo_url:
+        photo_url = gztcm_photo_url(
+            str(fallback.get("list_photo_url") or ""),
+            str(fallback.get("source_link") or GZTCM_SCOPE_TREE_URL),
+        )
+    campus_terms = ["先烈东门诊", "第二门诊部", "白云医院"]
+    campuses = [term for term in campus_terms if term in profile_text]
+    return {
+        "name": first_nonempty(name, fallback.get("name")),
+        "title": title,
+        "specialty": clip(specialty, 520),
+        "profile_text": profile_text,
+        "highlights": extract_clean_highlights(profile_text),
+        "photo_url": photo_url,
+        "photo_state": "available" if photo_url else "empty",
+        "campuses": campuses,
+        "schedule_exclusion_count": schedule_exclusion_count,
+        "forbidden_segment_count": forbidden_segment_count,
+        "patient_case_exclusion_count": patient_case_exclusion_count,
+        "private_use_character_exclusion_count": private_use_character_exclusion_count,
+    }
+
+
+def select_gztcm_trial_doctors(
+    doctors: list[dict[str, Any]],
+    max_doctors: int | None,
+) -> list[dict[str, Any]]:
+    if not max_doctors or len(doctors) <= max_doctors:
+        return doctors[:]
+    selected: list[dict[str, Any]] = []
+    selected_ids: set[str] = set()
+    covered_departments: set[str] = set()
+
+    def add(item: dict[str, Any]) -> bool:
+        detail_id = gztcm_clean_text(str(item.get("id") or ""))
+        name = gztcm_clean_text(str(item.get("name") or ""))
+        if (
+            not detail_id
+            or not name
+            or detail_id in selected_ids
+            or len(selected) >= max_doctors
+        ):
+            return False
+        selected.append(item)
+        selected_ids.add(detail_id)
+        covered_departments.update(
+            gztcm_clean_text(str(value))
+            for value in item.get("departments", [])
+            if gztcm_clean_text(str(value))
+        )
+        return True
+
+    for item in doctors:
+        if "名医荟萃" in item.get("channels", []):
+            add(item)
+            break
+    for item in doctors:
+        departments = {
+            gztcm_clean_text(str(value))
+            for value in item.get("departments", [])
+            if gztcm_clean_text(str(value))
+        }
+        if "科室树" in item.get("channels", []) and departments - covered_departments:
+            add(item)
+        if len(selected) >= max_doctors:
+            return selected
+    for item in doctors:
+        if "科室树" in item.get("channels", []):
+            add(item)
+        if len(selected) >= max_doctors:
+            return selected
+    for item in doctors:
+        add(item)
+        if len(selected) >= max_doctors:
+            return selected
+    return selected
+
+
+def download_gztcm_photo(
+    session: requests.Session,
+    photo_url: str,
+    source_link: str,
+    output_dir: Path,
+    filename_stem: str,
+    detail_id: str,
+    used_filenames: set[str],
+) -> dict[str, Any]:
+    official_url = gztcm_photo_url(photo_url, photo_url)
+    if not official_url:
+        raise RuntimeError(f"照片 URL 不属于 gztcm.com.cn 官网专家资源路径：{photo_url}")
+    if gztcm_detail_id(source_link) != detail_id:
+        raise RuntimeError(f"照片 Referer 未与详情 ID 对齐：{source_link}")
+    request_headers = {"Referer": source_link}
+
+    def attempt() -> tuple[requests.Response | None, str]:
+        try:
+            return session.get(official_url, headers=request_headers, timeout=35), ""
+        except requests.exceptions.ChunkedEncodingError:
+            return None, "ChunkedEncodingError"
+        except IncompleteRead:
+            return None, "IncompleteRead"
+        except requests.Timeout:
+            return None, "Timeout"
+        except requests.ConnectionError:
+            return None, "ConnectionError"
+
+    response, first_error = attempt()
+    attempt_results = [
+        first_error or f"HTTP {response.status_code if response is not None else '无响应'}"
+    ]
+    retry_count = 0
+    if response is None or response.status_code != 200:
+        time.sleep(1)
+        retry_count = 1
+        response, second_error = attempt()
+        attempt_results.append(
+            second_error or f"HTTP {response.status_code if response is not None else '无响应'}"
+        )
+    if response is None or response.status_code != 200:
+        return {
+            "approved_no_source": True,
+            "approved_no_source_reason": "bounded_transfer_failure",
+            "original_photo_url": official_url,
+            "attempt_results": attempt_results,
+            "retry_count": retry_count,
+        }
+    content_type = gztcm_clean_text(response.headers.get("Content-Type"))
+    extension = gdgh_photo_extension(response.content, content_type)
+    if not extension:
+        return {
+            "approved_no_source": True,
+            "approved_no_source_reason": "invalid_official_image",
+            "original_photo_url": official_url,
+            "attempt_results": attempt_results,
+            "retry_count": retry_count,
+            "validation_error": (
+                f"照片响应格式不受支持：{content_type or '未声明 Content-Type'}"
+            ),
+        }
+    width, height = gdmch_photo_dimensions(response.content, extension)
+    if width <= 0 or height <= 0:
+        return {
+            "approved_no_source": True,
+            "approved_no_source_reason": "invalid_official_image",
+            "original_photo_url": official_url,
+            "attempt_results": attempt_results,
+            "retry_count": retry_count,
+            "validation_error": "照片尺寸无法从原图解析",
+        }
+    output_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"{filename_stem}.{extension}"
+    path = output_dir / filename
+    if filename.casefold() in used_filenames or (
+        path.exists() and path.read_bytes() != response.content
+    ):
+        filename = f"{filename_stem}-{gdgh_photo_part(detail_id)}.{extension}"
+        path = output_dir / filename
+    if path.exists() and path.read_bytes() != response.content:
+        raise RuntimeError(f"照片目标已存在且内容不同，拒绝覆盖：{path}")
+    if not path.exists():
+        path.write_bytes(response.content)
+    used_filenames.add(filename.casefold())
+    return {
+        "photo_url": official_url,
+        "filename": filename,
+        "bytes": len(response.content),
+        "sha256": hashlib.sha256(response.content).hexdigest(),
+        "width": width,
+        "height": height,
+        "disk_path": str(path),
+        "retry_count": retry_count,
+        "attempt_results": attempt_results,
+    }
+
+
+def collect_gztcm(
+    target: HospitalTarget,
+    today: str,
+    max_doctors: int | None = None,
+    photo_root: Path | None = None,
+    full_mode: bool = False,
+) -> dict[str, Any]:
+    if canonical_url(target.entry_url) != canonical_url(GZTCM_FAMOUS_URL):
+        raise RuntimeError("GZTCM 适配器只接受 Issue #49 指定的名医荟萃入口")
+    session = create_official_session()
+    scope_status, scope_html, scope_error = fetch_gztcm_html(
+        session, GZTCM_SCOPE_TREE_URL
+    )
+    if scope_status != 200:
+        raise RuntimeError(f"GZTCM 科室树公开 GET 失败：{scope_error}")
+    if target.hospital not in scope_html or "科室介绍" not in scope_html:
+        raise RuntimeError("GZTCM 科室树页面身份或性质校验失败")
+    categories, department_tree = parse_gztcm_scope_tree(scope_html)
+
+    department_relations: list[dict[str, Any]] = []
+    scope_entries: list[dict[str, Any]] = []
+    dead_directories: list[dict[str, Any]] = []
+    category_errors: list[dict[str, str]] = []
+    relation_order = 0
+    for index, department in enumerate(department_tree, start=1):
+        directory_url = str(department["directory_url"])
+        status, html, error = fetch_gztcm_html(session, directory_url, retries=1)
+        if status == 404:
+            home_status, home_html, home_error = fetch_gztcm_html(
+                session, str(department["department_url"]), retries=1
+            )
+            if home_status != 200:
+                raise RuntimeError(
+                    f"GZTCM 科室首页读取失败：{department['department']} {home_error}"
+                )
+            home_soup = BeautifulSoup(home_html, "html.parser")
+            links_to_dead_directory = [
+                urljoin(str(department["department_url"]), str(anchor.get("href") or ""))
+                for anchor in home_soup.select("a[href]")
+                if canonical_url(
+                    urljoin(
+                        str(department["department_url"]),
+                        str(anchor.get("href") or ""),
+                    )
+                )
+                == canonical_url(directory_url)
+            ]
+            if not links_to_dead_directory:
+                raise RuntimeError(
+                    f"GZTCM 404 专家目录未能回溯到科室首页导航：{directory_url}"
+                )
+            audit = {
+                **department,
+                "http_status": 404,
+                "page_count": 0,
+                "relation_count": 0,
+                "unique_detail_ids": [],
+                "directory_state": "官网科室首页所链专家目录 HTTP 404",
+            }
+            dead_directories.append(audit)
+            scope_entries.append(audit)
+            continue
+        if status != 200:
+            category_errors.append(
+                {
+                    "page": str(index),
+                    "url": directory_url,
+                    "error": error,
+                }
+            )
+            continue
+        metadata = gztcm_paging_metadata(html)
+        relations: list[dict[str, Any]] = []
+        page_total = max(metadata["page_count"], 1)
+        for page_number in range(1, page_total + 1):
+            page_url = gztcm_list_page_url(directory_url, page_number)
+            page_html = html
+            if page_number > 1:
+                page_status, page_html, page_error = fetch_gztcm_html(session, page_url)
+                if page_status != 200:
+                    raise RuntimeError(
+                        f"GZTCM 科室专家分页失败：{page_url} {page_error}"
+                    )
+            relations.extend(
+                parse_gztcm_list_page(
+                    page_html,
+                    page_url,
+                    "科室树",
+                    str(department["category"]),
+                    str(department["department"]),
+                )
+            )
+        unique_relations = {str(item["id"]): item for item in relations}
+        if len(unique_relations) != metadata["item_count"]:
+            raise RuntimeError(
+                "GZTCM 科室目录分页对账失败："
+                f"{directory_url} itemCount={metadata['item_count']} "
+                f"解析={len(unique_relations)}"
+            )
+        for item in unique_relations.values():
+            relation_order += 1
+            item["relation_order"] = relation_order
+            department_relations.append(item)
+        audit = {
+            **department,
+            "http_status": 200,
+            "page_count": metadata["page_count"],
+            "relation_count": len(unique_relations),
+            "unique_detail_ids": list(unique_relations),
+            "directory_state": (
+                "公开专家目录" if unique_relations else "公开空专家目录"
+            ),
+        }
+        scope_entries.append(audit)
+        if index % 15 == 0:
+            print(f"GZTCM departments: {index}/{len(department_tree)}")
+        time.sleep(0.02)
+    if category_errors:
+        raise RuntimeError(
+            "GZTCM 科室树普查存在未裁决错误："
+            + "；".join(f"{item['url']} {item['error']}" for item in category_errors)
+        )
+
+    famous_status, famous_html, famous_error = fetch_gztcm_html(
+        session, GZTCM_FAMOUS_URL
+    )
+    if famous_status != 200:
+        raise RuntimeError(f"GZTCM 名医荟萃入口失败：{famous_error}")
+    famous_metadata = gztcm_paging_metadata(famous_html)
+    famous_relations: list[dict[str, Any]] = []
+    for page_number in range(1, famous_metadata["page_count"] + 1):
+        page_url = gztcm_list_page_url(GZTCM_FAMOUS_URL, page_number)
+        page_html = famous_html
+        if page_number > 1:
+            page_status, page_html, page_error = fetch_gztcm_html(session, page_url)
+            if page_status != 200:
+                raise RuntimeError(f"GZTCM 名医荟萃分页失败：{page_url} {page_error}")
+        famous_relations.extend(
+            parse_gztcm_list_page(page_html, page_url, "名医荟萃")
+        )
+    famous_by_id = {str(item["id"]): item for item in famous_relations}
+    if len(famous_by_id) != famous_metadata["item_count"]:
+        raise RuntimeError(
+            "GZTCM 名医荟萃分页对账失败："
+            f"itemCount={famous_metadata['item_count']} 解析={len(famous_by_id)}"
+        )
+
+    identities: dict[str, dict[str, Any]] = {}
+    for relation in [*department_relations, *famous_by_id.values()]:
+        detail_id = str(relation["id"])
+        identity = identities.setdefault(
+            detail_id,
+            {
+                "id": detail_id,
+                "name": str(relation.get("name") or ""),
+                "source_link": str(relation.get("source_link") or ""),
+                "channels": [],
+                "channel_urls": [],
+                "categories": [],
+                "departments": [],
+                "list_titles": [],
+                "list_specialties": [],
+                "list_photo_urls": [],
+                "relation_order": int(relation.get("relation_order") or 10**9),
+            },
+        )
+        channel = str(relation.get("channel") or "")
+        source_link = str(relation.get("source_link") or "")
+        for field, value in [
+            ("channels", channel),
+            ("channel_urls", source_link),
+            ("categories", str(relation.get("category") or "")),
+            ("departments", str(relation.get("department") or "")),
+            ("list_titles", str(relation.get("list_title") or "")),
+            ("list_specialties", str(relation.get("list_specialty") or "")),
+            ("list_photo_urls", str(relation.get("list_photo_url") or "")),
+        ]:
+            if value and value not in identity[field]:
+                identity[field].append(value)
+        if channel == "科室树":
+            identity["name"] = str(relation.get("name") or identity["name"])
+            identity["source_link"] = source_link
+            identity["relation_order"] = min(
+                int(identity.get("relation_order") or 10**9),
+                int(relation.get("relation_order") or 10**9),
+            )
+
+    detailed_candidates: list[dict[str, Any]] = []
+    detail_reconciliation: list[dict[str, Any]] = []
+    detail_errors: list[dict[str, str]] = []
+    excluded_candidates: list[dict[str, Any]] = []
+    schedule_exclusion_count = 0
+    forbidden_segment_count = 0
+    patient_case_exclusion_count = 0
+    private_use_character_exclusion_count = 0
+    for index, identity in enumerate(
+        sorted(identities.values(), key=lambda item: int(item.get("relation_order") or 10**9)),
+        start=1,
+    ):
+        parsed_details: list[dict[str, Any]] = []
+        channel_audit: list[dict[str, Any]] = []
+        for source_link in identity["channel_urls"]:
+            fallback = {
+                **identity,
+                "source_link": source_link,
+                "list_title": "；".join(identity["list_titles"]),
+                "list_specialty": "；".join(identity["list_specialties"]),
+                "list_photo_url": first_nonempty(*identity["list_photo_urls"]),
+            }
+            status, html, error = fetch_gztcm_html(session, source_link)
+            if status != 200:
+                detail_errors.append(
+                    {
+                        "detail_id": str(identity["id"]),
+                        "name": str(identity["name"]),
+                        "source_link": source_link,
+                        "error": error,
+                    }
+                )
+            parsed = parse_gztcm_detail(html if status == 200 else "", fallback)
+            parsed["source_link"] = source_link
+            parsed["detail_status"] = status
+            parsed["detail_error"] = error if status != 200 else ""
+            parsed_details.append(parsed)
+            channel_audit.append(
+                {
+                    "source_link": source_link,
+                    "detail_status": status,
+                    "detail_error": error if status != 200 else "",
+                    "detail_name": parsed.get("name", ""),
+                }
+            )
+        primary = next(
+            (
+                item
+                for item in parsed_details
+                if canonical_url(str(item.get("source_link") or ""))
+                == canonical_url(str(identity.get("source_link") or ""))
+            ),
+            parsed_details[0],
+        )
+        merged_title = "；".join(
+            dict.fromkeys(
+                gztcm_clean_text(str(item.get("title") or ""))
+                for item in parsed_details
+                if gztcm_clean_text(str(item.get("title") or ""))
+            )
+        )
+        merged_specialty = first_nonempty(
+            *(str(item.get("specialty") or "") for item in parsed_details)
+        )
+        merged_profile = " ".join(
+            dict.fromkeys(
+                gztcm_clean_text(str(item.get("profile_text") or ""))
+                for item in parsed_details
+                if gztcm_clean_text(str(item.get("profile_text") or ""))
+            )
+        )
+        merged_highlights = "；".join(
+            dict.fromkeys(
+                gztcm_clean_text(str(item.get("highlights") or ""))
+                for item in parsed_details
+                if gztcm_clean_text(str(item.get("highlights") or ""))
+            )
+        )
+        photo_detail = next(
+            (item for item in parsed_details if item.get("photo_state") == "available"),
+            primary,
+        )
+        combined = {
+            **identity,
+            "name": gztcm_person_name(str(primary.get("name") or identity["name"])),
+            "title": clip(merged_title, 500),
+            "specialty": clip(merged_specialty, 520),
+            "profile_text": clip(merged_profile, 1800),
+            "highlights": merged_highlights,
+            "photo_url": str(photo_detail.get("photo_url") or ""),
+            "photo_state": str(photo_detail.get("photo_state") or "empty"),
+            "campuses": list(
+                dict.fromkeys(
+                    str(value)
+                    for item in parsed_details
+                    for value in item.get("campuses", [])
+                    if value
+                )
+            ),
+            "detail_status": primary.get("detail_status"),
+            "channel_audit": channel_audit,
+        }
+        schedule_exclusion_count += sum(
+            int(item.get("schedule_exclusion_count") or 0) for item in parsed_details
+        )
+        forbidden_segment_count += sum(
+            int(item.get("forbidden_segment_count") or 0) for item in parsed_details
+        )
+        patient_case_exclusion_count += sum(
+            int(item.get("patient_case_exclusion_count") or 0) for item in parsed_details
+        )
+        private_use_character_exclusion_count += sum(
+            int(item.get("private_use_character_exclusion_count") or 0)
+            for item in parsed_details
+        )
+        combined["is_nursing"] = gyfyyy_nursing_only_identity(
+            " ".join([combined["title"], combined["profile_text"]])
+        )
+        detailed_candidates.append(combined)
+        name_matches = all(
+            not item.get("detail_name")
+            or gztcm_person_name(str(item.get("detail_name")))
+            == gztcm_person_name(str(identity["name"]))
+            for item in channel_audit
+        )
+        detail_reconciliation.append(
+            {
+                "detail_id": identity["id"],
+                "directory_name": identity["name"],
+                "detail_name": combined["name"],
+                "name_matches_directory": name_matches,
+                "channels": identity["channels"],
+                "categories": identity["categories"],
+                "departments": identity["departments"],
+                "title": combined["title"],
+                "campuses": combined["campuses"],
+                "photo_state": combined["photo_state"],
+                "photo_url": combined["photo_url"],
+                "source_link": identity["source_link"],
+                "channel_audit": channel_audit,
+                "resolution": (
+                    "护理身份排除"
+                    if combined["is_nursing"]
+                    else "详情已读取"
+                    if all(item.get("detail_status") == 200 for item in channel_audit)
+                    else "详情读取失败，按 Issue 指令保守成行"
+                ),
+            }
+        )
+        if combined["is_nursing"]:
+            excluded_candidates.append(
+                {
+                    "detail_id": identity["id"],
+                    "name": combined["name"],
+                    "list_title": combined["title"],
+                    "department": "、".join(identity["departments"]),
+                    "entry_url": target.entry_url,
+                    "source_link": identity["source_link"],
+                    "reason": "官网详情身份明确为纯护理身份，按医生画像范围排除",
+                }
+            )
+        if index % 20 == 0:
+            print(f"GZTCM details: {index}/{len(identities)}")
+        time.sleep(0.03)
+
+    eligible = [item for item in detailed_candidates if not item.get("is_nursing")]
+    photo_candidates = [
+        item
+        for item in eligible
+        if item.get("photo_state") == "available"
+        and item.get("photo_url")
+        and looks_like_person_name(gztcm_clean_text(str(item.get("name") or "")))
+        and all(
+            not audit.get("detail_name")
+            or gztcm_clean_text(str(audit.get("detail_name")))
+            == gztcm_clean_text(str(item.get("name") or ""))
+            for audit in item.get("channel_audit", [])
+        )
+    ]
+    selected_doctors = (
+        eligible
+        if full_mode
+        else select_gztcm_trial_doctors(photo_candidates, max_doctors)
+    )
+    selected_detail_ids = {str(item.get("id") or "") for item in selected_doctors}
+    existing_links = collect_existing_profile_links()
+    rows: list[dict[str, Any]] = []
+    for item in selected_doctors:
+        name = gztcm_person_name(str(item.get("name") or ""))
+        departments = [
+            gztcm_clean_text(str(value))
+            for value in item.get("departments", [])
+            if gztcm_clean_text(str(value))
+        ]
+        department = "、".join(departments)
+        campuses = [
+            gztcm_clean_text(str(value))
+            for value in item.get("campuses", [])
+            if gztcm_clean_text(str(value))
+        ]
+        department_with_campus = (
+            f"{department}（{'、'.join(campuses)}）" if department and campuses else department
+        )
+        title_identity = gztcm_clean_text(str(item.get("title") or ""))
+        specialty = gztcm_clean_text(str(item.get("specialty") or ""))
+        profile_text = gztcm_clean_text(str(item.get("profile_text") or ""))
+        channels = [
+            gztcm_clean_text(str(value))
+            for value in item.get("channels", [])
+            if gztcm_clean_text(str(value))
+        ]
+        combined_text = "\n".join(
+            [target.hospital, department, title_identity, specialty, profile_text]
+        )
+        title_hits = extract_terms(title_identity, TITLE_TERMS)
+        groups_found, tags = group_tags(combined_text)
+        warnings: list[str] = []
+        if not looks_like_person_name(name):
+            warnings.append("非医生页面或姓名异常")
+        if not department:
+            warnings.append("名医荟萃详情未标当前科室")
+        if not title_hits:
+            warnings.append("职称/身份需人工复核")
+        if not specialty and not profile_text:
+            warnings.append("详情正文为空或未识别")
+        if item.get("detail_status") != 200:
+            warnings.append("详情读取失败，按 Issue 指令保守成行")
+        if warnings:
+            groups_found, tags = [], []
+        priority = "普通"
+        if not warnings and (
+            any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups_found
+        ):
+            priority = "高"
+        elif not warnings and any(term != "医师" for term in title_hits):
+            priority = "中"
+        highlights = [gztcm_clean_text(str(item.get("highlights") or ""))]
+        if "名医荟萃" in channels:
+            highlights.insert(0, "官网名医荟萃收录")
+        rows.append(
+            {
+                "序号": len(rows) + 1,
+                "医院": target.hospital,
+                "姓名": name,
+                "科室_分类页": department_with_campus,
+                "科室_列表卡片": department,
+                "职称_关键词": "、".join(title_hits),
+                "职称身份原文": clip(title_identity, 500),
+                "重点优先级": priority,
+                "重点关注范围": "、".join(groups_found),
+                "重点疾病标签": "、".join(tags),
+                "擅长诊疗方向摘录": specialty,
+                "亮眼经历线索": "；".join(dict.fromkeys(value for value in highlights if value)),
+                "列表简介": "；".join(item.get("list_specialties", [])),
+                "详情正文摘录": profile_text,
+                "来源类型": "医院官网",
+                "来源链接": item["source_link"],
+                "照片链接": "",
+                "照片文件": "",
+                "采集入口": f"{GZTCM_SCOPE_TREE_URL} + {GZTCM_FAMOUS_URL}",
+                "采集方式": "官网9类70科室树+名医荟萃+CMS详情ID去重+UTF-8详情DOM+本人职业照",
+                "采集日期": today,
+                "详情页状态": str(item.get("detail_status") or ""),
+                "已建画像": (
+                    "是" if canonical_url(item["source_link"]) in existing_links else "否"
+                ),
+                "异常提示": "；".join(dict.fromkeys(warnings)),
+                "复核状态": "待人工复核",
+                "_gztcm_detail_id": item["id"],
+                "_gztcm_photo_url": item.get("photo_url", ""),
+                "_gztcm_photo_state": item.get("photo_state", "empty"),
+                "_gztcm_department": department,
+                "_gztcm_channels": channels,
+            }
+        )
+
+    photo_dir = photo_root or (VAULT / "01_试点医院" / target.hospital / "照片")
+    used_filenames: set[str] = set()
+    photo_samples: list[dict[str, Any]] = []
+    photo_errors: list[dict[str, str]] = []
+    photo_no_sources: list[dict[str, Any]] = []
+    sample_channels: set[str] = set()
+    sample_tree_departments: set[str] = set()
+    for row in rows:
+        detail_id = gztcm_clean_text(str(row.pop("_gztcm_detail_id", "")))
+        photo_url = gztcm_clean_text(str(row.pop("_gztcm_photo_url", "")))
+        photo_state = gztcm_clean_text(str(row.pop("_gztcm_photo_state", "empty")))
+        department = gztcm_clean_text(str(row.pop("_gztcm_department", "")))
+        channels = [gztcm_clean_text(str(value)) for value in row.pop("_gztcm_channels", [])]
+        sample_channels.update(value for value in channels if value)
+        if "科室树" in channels and department:
+            sample_tree_departments.add(department)
+        if photo_state != "available" or not photo_url:
+            warning = "官网详情未提供符合范围的本人职业照，留空并标注"
+            row["异常提示"] = "；".join(
+                dict.fromkeys(value for value in [row.get("异常提示", ""), warning] if value)
+            )
+            row["重点优先级"] = "普通"
+            row["重点关注范围"] = ""
+            row["重点疾病标签"] = ""
+            photo_no_sources.append(
+                {
+                    "name": row["姓名"],
+                    "detail_id": detail_id,
+                    "source_link": row["来源链接"],
+                    "photo_state": photo_state or "empty",
+                    "retry_count": 0,
+                    "reason": warning,
+                    "channels": channels,
+                }
+            )
+            continue
+        stem = "-".join(
+            [
+                gdgh_photo_part(row.get("姓名")),
+                gdgh_photo_part(department),
+                gdgh_photo_part(gd2h_primary_title(row.get("职称身份原文"))),
+                gdgh_photo_part(target.hospital),
+            ]
+        )
+        photo = download_gztcm_photo(
+            session,
+            photo_url,
+            row["来源链接"],
+            photo_dir,
+            stem,
+            detail_id,
+            used_filenames,
+        )
+        if photo.get("approved_no_source"):
+            approved_reason = str(photo.get("approved_no_source_reason") or "")
+            warning = (
+                GZTCM_PHOTO_INVALID_WARNING
+                if approved_reason == "invalid_official_image"
+                else GZTCM_PHOTO_UNAVAILABLE_WARNING
+            )
+            row["异常提示"] = "；".join(
+                dict.fromkeys(
+                    value
+                    for value in [
+                        row.get("异常提示", ""),
+                        warning,
+                    ]
+                    if value
+                )
+            )
+            row["重点优先级"] = "普通"
+            row["重点关注范围"] = ""
+            row["重点疾病标签"] = ""
+            photo_no_sources.append(
+                {
+                    "name": row["姓名"],
+                    "detail_id": detail_id,
+                    "source_link": row["来源链接"],
+                    "photo_url": photo_url,
+                    "photo_state": approved_reason,
+                    "reason": warning,
+                    "validation_error": photo.get("validation_error", ""),
+                    "attempt_results": photo.get("attempt_results", []),
+                    "retry_count": int(photo.get("retry_count") or 0),
+                    "channels": channels,
+                }
+            )
+            continue
+        relative_path = (
+            Path("01_试点医院") / target.hospital / "照片" / photo["filename"]
+        ).as_posix()
+        row["照片链接"] = photo["photo_url"]
+        row["照片文件"] = relative_path
+        photo_samples.append(
+            {
+                "name": row["姓名"],
+                "department": department or "未标注",
+                "title": gd2h_primary_title(row["职称身份原文"]) or "未标注",
+                "detail_id": detail_id,
+                "source_link": row["来源链接"],
+                "channels": channels,
+                "photo_url": photo["photo_url"],
+                "photo_file": relative_path,
+                "filename": photo["filename"],
+                "bytes": photo["bytes"],
+                "sha256": photo["sha256"],
+                "width": photo["width"],
+                "height": photo["height"],
+                "disk_path": photo["disk_path"],
+                "retry_count": int(photo.get("retry_count") or 0),
+                "attempt_results": photo.get("attempt_results", []),
+            }
+        )
+
+    tree_ids = {str(item["id"]) for item in department_relations}
+    famous_ids = set(famous_by_id)
+    photo_state_counts = Counter(
+        str(item.get("photo_state") or "empty") for item in eligible
+    )
+    same_name_groups: dict[str, list[str]] = {}
+    for item in eligible:
+        same_name_groups.setdefault(gztcm_clean_text(str(item.get("name") or "")), []).append(
+            str(item.get("id") or "")
+        )
+    same_name_groups = {
+        name: ids for name, ids in same_name_groups.items() if name and len(ids) > 1
+    }
+    average_photo_bytes = (
+        round(sum(int(item["bytes"]) for item in photo_samples) / len(photo_samples))
+        if photo_samples
+        else 0
+    )
+    large_photos = [
+        item
+        for item in photo_samples
+        if int(item["bytes"]) > 200 * 1024 or int(item["width"]) > 800
+    ]
+    category_relation_counts = Counter(
+        str(item.get("category") or "") for item in department_relations
+    )
+    category_counter = Counter(
+        row["科室_列表卡片"] or "名医荟萃（未标当前科室）" for row in rows
+    )
+    priority_counter = Counter(row["重点优先级"] for row in rows)
+    group_counter = Counter(
+        group for row in rows for group in row["重点关注范围"].split("、") if group
+    )
+    warning_counter = Counter(
+        warning for row in rows for warning in row["异常提示"].split("；") if warning
+    )
+    sample_details = [
+        item
+        for item in detail_reconciliation
+        if str(item.get("detail_id") or "") in selected_detail_ids
+    ]
+    scope_reconnaissance = [
+        {
+            "category_name": f"{item['category']} / {item['department']}",
+            "entry_url": item["directory_url"],
+            "page_nature": item["directory_state"],
+            "list_page_count": item["page_count"],
+            "raw_detail_relation_count": item["relation_count"],
+            "unique_detail_count": item["relation_count"],
+            "out_of_scope_detail_count": 0,
+            "affiliation": target.hospital,
+            "independent_entity_check": "同域科室树入口；未越出 owner 授权的 70 科室集合",
+        }
+        for item in scope_entries
+    ]
+    scope_reconnaissance.append(
+        {
+            "category_name": "名医荟萃",
+            "entry_url": GZTCM_FAMOUS_URL,
+            "page_nature": "官网精选名医补充通道",
+            "list_page_count": famous_metadata["page_count"],
+            "raw_detail_relation_count": len(famous_by_id),
+            "unique_detail_count": len(famous_by_id),
+            "out_of_scope_detail_count": 0,
+            "affiliation": target.hospital,
+            "independent_entity_check": "同一医院官网；只按详情 ID 与科室树去重",
+        }
+    )
+    return {
+        "meta": {
+            "city": target.city,
+            "hospital": target.hospital,
+            "homepage": target.homepage,
+            "entry_url": target.entry_url,
+            "entry_url_source": "GitHub Issue #49 + PR #50 owner 范围裁决",
+            "ledger_entry_url": target.ledger_entry_url or target.entry_url,
+            "adapter_id": target.adapter_id,
+            "collected_at": today,
+            "category_count": len(categories) + 1,
+            "scope_category_count": len(categories),
+            "pagination_count": sum(int(item["page_count"]) for item in scope_entries)
+            + famous_metadata["page_count"],
+            "pagination_method": "每科室官网 kszj PagingTag + 名医荟萃 _page_ 参数；顺序公开 GET",
+            "department_structure": "owner 授权 /ksjs/ 9 类 70 科室全集 + /myzl/myhc/ 41 人补充通道",
+            "census_department_count": len(department_tree),
+            "census_dead_directory_count": len(dead_directories),
+            "census_empty_department_count": sum(
+                item["http_status"] == 200 and item["relation_count"] == 0
+                for item in scope_entries
+            ),
+            "census_nonempty_department_count": sum(
+                item["http_status"] == 200 and item["relation_count"] > 0
+                for item in scope_entries
+            ),
+            "department_relation_count": len(department_relations),
+            "department_unique_detail_count": len(tree_ids),
+            "famous_relation_count": len(famous_by_id),
+            "famous_page_count": famous_metadata["page_count"],
+            "department_famous_overlap_count": len(tree_ids & famous_ids),
+            "famous_only_detail_count": len(famous_ids - tree_ids),
+            "candidate_membership_count": len(department_relations) + len(famous_by_id),
+            "unique_candidate_count": len(identities),
+            "census_unique_detail_count": len(identities),
+            "census_named_detail_count": sum(bool(item.get("name")) for item in identities.values()),
+            "census_blank_name_detail_count": sum(not item.get("name") for item in identities.values()),
+            "census_unique_nonblank_name_count": len(
+                {item["name"] for item in identities.values() if item.get("name")}
+            ),
+            "census_same_name_group_count": len(same_name_groups),
+            "cross_entry_duplicate_count": len(tree_ids & famous_ids),
+            "raw_card_rows": len(department_relations) + len(famous_by_id),
+            "raw_person_rows": len(identities),
+            "unique_doctor_count": len(rows),
+            "excluded_non_doctor_count": len(excluded_candidates),
+            "eligible_candidate_count": len(eligible),
+            "detail_error_count": len(detail_errors),
+            "category_error_count": 0,
+            "name_mismatch_count": sum(
+                not bool(item.get("name_matches_directory")) for item in detail_reconciliation
+            ),
+            "encoding_policy": "HTTP 原始字节按 UTF-8 strict 解码；替换字符或高置信乱码立即失败",
+            "encoding_replacement_count": 0,
+            "encoding_mojibake_count": 0,
+            "schedule_exclusion_count": schedule_exclusion_count,
+            "schedule_field_ingested_count": 0,
+            "forbidden_segment_exclusion_count": forbidden_segment_count,
+            "patient_case_exclusion_count": patient_case_exclusion_count,
+            "private_use_character_exclusion_count": private_use_character_exclusion_count,
+            "private_use_character_count": 0,
+            "sample_entry_coverage_count": len(sample_channels),
+            "sample_entry_categories": sorted(sample_channels),
+            "sample_tree_department_coverage_count": len(sample_tree_departments),
+            "sample_tree_departments": sorted(sample_tree_departments),
+            "photo_expected_count": len(rows),
+            "photo_sample_count": len(photo_samples),
+            "photo_downloaded_count": len(photo_samples),
+            "photo_failed_count": len(photo_no_sources) + len(photo_errors),
+            "photo_no_source_count": len(photo_no_sources),
+            "photo_error_count": len(photo_errors),
+            "photo_bounded_retry_count": sum(
+                int(item.get("retry_count") or 0)
+                for item in [*photo_samples, *photo_no_sources]
+            ),
+            "photo_retry_policy": GZTCM_PHOTO_RETRY_POLICY,
+            "photo_census_available_count": photo_state_counts.get("available", 0),
+            "photo_census_empty_count": photo_state_counts.get("empty", 0),
+            "photo_census_rejected_count": photo_state_counts.get("rejected", 0),
+            "photo_average_bytes": average_photo_bytes,
+            "photo_estimated_full_count": photo_state_counts.get("available", 0),
+            "photo_estimated_full_bytes": (
+                average_photo_bytes * photo_state_counts.get("available", 0)
+            ),
+            "large_photo_count": len(large_photos),
+            "large_photo_threshold": "单张 >200KB 或宽 >800px（仅留痕）",
+            "photo_policy_status": "OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT",
+            "standard_public_session": "requests.Session 普通公开 GET；未手工注入 Cookie 或挑战应答",
+            "session_cookie_names": sorted(session.cookies.keys()),
+            "census_group_count": len(categories),
+            "independent_entity_count": 0,
+            "ledger_review": target.review,
+            "ledger_difficulty": target.difficulty,
+            "category_relation_counts": dict(category_relation_counts),
+            "final_identity_count": len(rows),
+            "existing_profile_count": sum(row["已建画像"] == "是" for row in rows),
+            "execution_mode": "full_append" if full_mode else "trial",
+            "full_authorization": GZTCM_FULL_AUTHORIZATION if full_mode else "TRIAL",
+        },
+        "categories": [
+            {
+                **item,
+                "row_count": int(category_relation_counts.get(item["category_name"], 0)),
+            }
+            for item in categories
+        ],
+        "department_tree": scope_entries,
+        "entry_reconnaissance": scope_reconnaissance,
+        "excluded_candidates": excluded_candidates,
+        "gztcm_channel_relations": [*department_relations, *famous_by_id.values()],
+        "gztcm_dead_directories": dead_directories,
+        "gztcm_detail_reconciliation": detail_reconciliation,
+        "gztcm_sample_detail_reconciliation": sample_details,
+        "same_name_groups": same_name_groups,
+        "photo_samples": photo_samples,
+        "photo_no_sources": photo_no_sources,
+        "photo_errors": photo_errors,
+        "category_errors": [],
+        "detail_errors": detail_errors,
+        "category_counts": category_counter.most_common(),
+        "priority_counts": dict(priority_counter),
+        "group_counts": dict(group_counter),
+        "warning_counts": dict(warning_counter),
+        "rows": rows,
+    }
+
+
 def fahsysu_detail_id(url: str | None) -> str:
     parsed = urlparse(clean_text(url))
     if comparable_host(parsed.geturl()) != "fahsysu.org.cn" or parsed.query or parsed.fragment:
@@ -14017,6 +15356,451 @@ def validate_gy120_full_append(payload: dict[str, Any]) -> None:
         raise RuntimeError("GY120 FULL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
 
 
+def validate_gztcm_census(payload: dict[str, Any], errors: list[str]) -> set[str]:
+    """Validate the owner-approved 9-category/70-department + famous scope."""
+
+    meta = payload.get("meta", {})
+    expected_counts = {
+        "category_count": len(GZTCM_EXPECTED_CATEGORY_COUNTS) + 1,
+        "scope_category_count": len(GZTCM_EXPECTED_CATEGORY_COUNTS),
+        "census_department_count": GZTCM_EXPECTED_DEPARTMENT_COUNT,
+        "census_dead_directory_count": GZTCM_EXPECTED_DEAD_DIRECTORY_COUNT,
+        "census_empty_department_count": GZTCM_EXPECTED_EMPTY_DIRECTORY_COUNT,
+        "census_nonempty_department_count": (
+            GZTCM_EXPECTED_DEPARTMENT_COUNT
+            - GZTCM_EXPECTED_DEAD_DIRECTORY_COUNT
+            - GZTCM_EXPECTED_EMPTY_DIRECTORY_COUNT
+        ),
+        "department_relation_count": GZTCM_EXPECTED_DEPARTMENT_RELATION_COUNT,
+        "department_unique_detail_count": GZTCM_EXPECTED_DEPARTMENT_UNIQUE_ID_COUNT,
+        "famous_relation_count": GZTCM_EXPECTED_FAMOUS_COUNT,
+        "famous_page_count": GZTCM_EXPECTED_FAMOUS_PAGE_COUNT,
+        "department_famous_overlap_count": GZTCM_EXPECTED_CHANNEL_OVERLAP_COUNT,
+        "famous_only_detail_count": (
+            GZTCM_EXPECTED_FAMOUS_COUNT - GZTCM_EXPECTED_CHANNEL_OVERLAP_COUNT
+        ),
+        "candidate_membership_count": (
+            GZTCM_EXPECTED_DEPARTMENT_RELATION_COUNT + GZTCM_EXPECTED_FAMOUS_COUNT
+        ),
+        "unique_candidate_count": GZTCM_EXPECTED_COMBINED_UNIQUE_ID_COUNT,
+        "census_unique_detail_count": GZTCM_EXPECTED_COMBINED_UNIQUE_ID_COUNT,
+        "raw_card_rows": (
+            GZTCM_EXPECTED_DEPARTMENT_RELATION_COUNT + GZTCM_EXPECTED_FAMOUS_COUNT
+        ),
+        "raw_person_rows": GZTCM_EXPECTED_COMBINED_UNIQUE_ID_COUNT,
+        "category_error_count": 0,
+        "detail_error_count": 0,
+        "name_mismatch_count": 0,
+        "encoding_replacement_count": 0,
+        "encoding_mojibake_count": 0,
+        "schedule_field_ingested_count": 0,
+        "private_use_character_count": 0,
+        "independent_entity_count": 0,
+        "photo_error_count": 0,
+    }
+    for field, expected in expected_counts.items():
+        actual = int(meta.get(field) or 0)
+        if actual != expected:
+            errors.append(f"{field}={actual}，预期 {expected}")
+
+    categories = {
+        gztcm_clean_text(str(item.get("category_name") or "")): (
+            int(item.get("department_count") or 0),
+            int(item.get("row_count") or 0),
+        )
+        for item in payload.get("categories", [])
+    }
+    expected_categories = {
+        category: (
+            GZTCM_EXPECTED_CATEGORY_COUNTS[category],
+            GZTCM_EXPECTED_CATEGORY_RELATION_COUNTS[category],
+        )
+        for category in GZTCM_EXPECTED_CATEGORY_COUNTS
+    }
+    if categories != expected_categories:
+        errors.append(f"九类科室/关系计数不符合官网现场基线：{categories}")
+
+    departments = payload.get("department_tree", [])
+    department_urls = [
+        canonical_url(str(item.get("directory_url") or "")) for item in departments
+    ]
+    department_counts = Counter(
+        gztcm_clean_text(str(item.get("category") or "")) for item in departments
+    )
+    department_relations = Counter()
+    tree_ids: list[str] = []
+    for item in departments:
+        category = gztcm_clean_text(str(item.get("category") or ""))
+        relation_count = int(item.get("relation_count") or 0)
+        unique_ids = [gztcm_clean_text(str(value)) for value in item.get("unique_detail_ids", [])]
+        department_relations[category] += relation_count
+        tree_ids.extend(unique_ids)
+        directory_url = str(item.get("directory_url") or "")
+        parsed = urlparse(directory_url)
+        if (
+            parsed.scheme != "https"
+            or comparable_host(directory_url) != "gztcm.com.cn"
+            or parsed.query
+            or parsed.fragment
+            or not re.fullmatch(r"/[a-z0-9_-]+/kszj/", parsed.path, re.IGNORECASE)
+        ):
+            errors.append(f"科室专家入口越出封闭范围：{directory_url}")
+        if relation_count != len(unique_ids) or len(unique_ids) != len(set(unique_ids)):
+            errors.append(f"科室逐 ID 计数不闭合：{directory_url}")
+    if (
+        len(departments) != GZTCM_EXPECTED_DEPARTMENT_COUNT
+        or any(not value for value in department_urls)
+        or len(set(department_urls)) != len(department_urls)
+        or dict(department_counts) != GZTCM_EXPECTED_CATEGORY_COUNTS
+        or dict(department_relations) != GZTCM_EXPECTED_CATEGORY_RELATION_COUNTS
+        or len(tree_ids) != GZTCM_EXPECTED_DEPARTMENT_RELATION_COUNT
+        or len(set(tree_ids)) != GZTCM_EXPECTED_DEPARTMENT_UNIQUE_ID_COUNT
+    ):
+        errors.append("70 科室、41 条科室关系及逐科室详情 ID 未完整对账")
+
+    dead = payload.get("gztcm_dead_directories", [])
+    dead_urls = {
+        canonical_url(str(item.get("directory_url") or "")) for item in dead
+    }
+    expected_dead_urls = {
+        canonical_url(str(item.get("directory_url") or ""))
+        for item in departments
+        if int(item.get("http_status") or 0) == 404
+    }
+    empty_count = sum(
+        int(item.get("http_status") or 0) == 200
+        and int(item.get("relation_count") or 0) == 0
+        for item in departments
+    )
+    nonempty_count = sum(
+        int(item.get("http_status") or 0) == 200
+        and int(item.get("relation_count") or 0) > 0
+        for item in departments
+    )
+    if (
+        len(dead) != GZTCM_EXPECTED_DEAD_DIRECTORY_COUNT
+        or dead_urls != expected_dead_urls
+        or any(
+            int(item.get("http_status") or 0) != 404
+            or "HTTP 404" not in str(item.get("directory_state") or "")
+            for item in dead
+        )
+        or empty_count != GZTCM_EXPECTED_EMPTY_DIRECTORY_COUNT
+        or nonempty_count
+        != (
+            GZTCM_EXPECTED_DEPARTMENT_COUNT
+            - GZTCM_EXPECTED_DEAD_DIRECTORY_COUNT
+            - GZTCM_EXPECTED_EMPTY_DIRECTORY_COUNT
+        )
+    ):
+        errors.append("19 个官网死链、42 个空目录和 9 个非空目录未逐入口闭合")
+
+    relations = payload.get("gztcm_channel_relations", [])
+    tree_relations = [item for item in relations if item.get("channel") == "科室树"]
+    famous_relations = [item for item in relations if item.get("channel") == "名医荟萃"]
+    tree_relation_ids = [gztcm_clean_text(str(item.get("id") or "")) for item in tree_relations]
+    famous_ids = [gztcm_clean_text(str(item.get("id") or "")) for item in famous_relations]
+    if (
+        len(tree_relations) != GZTCM_EXPECTED_DEPARTMENT_RELATION_COUNT
+        or len(set(tree_relation_ids)) != GZTCM_EXPECTED_DEPARTMENT_UNIQUE_ID_COUNT
+        or set(tree_relation_ids) != set(tree_ids)
+        or len(famous_relations) != GZTCM_EXPECTED_FAMOUS_COUNT
+        or len(set(famous_ids)) != GZTCM_EXPECTED_FAMOUS_COUNT
+        or len(set(tree_relation_ids) & set(famous_ids))
+        != GZTCM_EXPECTED_CHANNEL_OVERLAP_COUNT
+        or len(set(tree_relation_ids) | set(famous_ids))
+        != GZTCM_EXPECTED_COMBINED_UNIQUE_ID_COUNT
+        or any(
+            gztcm_detail_id(str(item.get("source_link") or ""))
+            != gztcm_clean_text(str(item.get("id") or ""))
+            for item in relations
+        )
+    ):
+        errors.append("科室树 41 ID 与名医荟萃 41 ID 的双通道去重对账失败")
+
+    details = payload.get("gztcm_detail_reconciliation", [])
+    detail_ids = [gztcm_clean_text(str(item.get("detail_id") or "")) for item in details]
+    all_relation_ids = set(tree_relation_ids) | set(famous_ids)
+    if (
+        len(details) != GZTCM_EXPECTED_COMBINED_UNIQUE_ID_COUNT
+        or any(not value for value in detail_ids)
+        or len(set(detail_ids)) != len(detail_ids)
+        or set(detail_ids) != all_relation_ids
+        or any(
+            gztcm_detail_id(str(item.get("source_link") or ""))
+            != gztcm_clean_text(str(item.get("detail_id") or ""))
+            for item in details
+        )
+        or any(not bool(item.get("name_matches_directory")) for item in details)
+        or any(
+            item.get("resolution") not in {"详情已读取", "护理身份排除"}
+            for item in details
+        )
+        or any(
+            not item.get("channel_audit")
+            or any(
+                audit.get("detail_status") != 200
+                or gztcm_detail_id(str(audit.get("source_link") or ""))
+                != gztcm_clean_text(str(item.get("detail_id") or ""))
+                for audit in item.get("channel_audit", [])
+            )
+            for item in details
+        )
+    ):
+        errors.append("82 个唯一详情 ID 未全部成功读取并完成列表/详情姓名对账")
+
+    excluded_ids = {
+        gztcm_clean_text(str(item.get("detail_id") or ""))
+        for item in payload.get("excluded_candidates", [])
+    }
+    nursing_ids = {
+        gztcm_clean_text(str(item.get("detail_id") or ""))
+        for item in details
+        if item.get("resolution") == "护理身份排除"
+    }
+    if excluded_ids != nursing_ids or len(excluded_ids) != int(
+        meta.get("excluded_non_doctor_count") or 0
+    ):
+        errors.append("护理身份排除未逐 ID 闭合")
+    return set(detail_ids) - excluded_ids
+
+
+def validate_gztcm_rows_and_photos(
+    payload: dict[str, Any],
+    expected_rows: int,
+    eligible_ids: set[str],
+    errors: list[str],
+) -> None:
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    photos = payload.get("photo_samples", [])
+    no_sources = payload.get("photo_no_sources", [])
+    photo_errors = payload.get("photo_errors", [])
+    if len(rows) != expected_rows:
+        errors.append(f"结果 {len(rows)} 行，预期 {expected_rows} 行")
+    row_ids = [gztcm_detail_id(str(row.get("来源链接") or "")) for row in rows]
+    if (
+        any(not value for value in row_ids)
+        or len(set(row_ids)) != len(row_ids)
+        or not set(row_ids).issubset(eligible_ids)
+    ):
+        errors.append("结果行的官网详情 ID 不完整、重复或混入排除项")
+
+    photo_by_source = {
+        gztcm_clean_text(str(item.get("source_link") or "")): item for item in photos
+    }
+    no_source_by_source = {
+        gztcm_clean_text(str(item.get("source_link") or "")): item for item in no_sources
+    }
+    row_sources = {gztcm_clean_text(str(row.get("来源链接") or "")) for row in rows}
+    if (
+        len(photo_by_source) != len(photos)
+        or len(no_source_by_source) != len(no_sources)
+        or set(photo_by_source) & set(no_source_by_source)
+        or set(photo_by_source) | set(no_source_by_source) != row_sources
+        or photo_errors
+    ):
+        errors.append("照片成功、授权留空与结果行未一一闭合")
+    if (
+        int(meta.get("photo_expected_count") or 0) != expected_rows
+        or int(meta.get("photo_sample_count") or 0) != len(photos)
+        or int(meta.get("photo_downloaded_count") or 0) != len(photos)
+        or int(meta.get("photo_failed_count") or 0) != len(no_sources)
+        or int(meta.get("photo_no_source_count") or 0) != len(no_sources)
+        or int(meta.get("photo_error_count") or 0) != 0
+        or len(photos) + len(no_sources) != expected_rows
+    ):
+        errors.append("照片应采、实采、失败及授权留空四数未闭合")
+
+    actual_retries = sum(
+        int(item.get("retry_count") or 0) for item in [*photos, *no_sources]
+    )
+    if (
+        any(int(item.get("retry_count") or 0) not in {0, 1} for item in photos)
+        or any(int(item.get("retry_count") or 0) not in {0, 1} for item in no_sources)
+        or int(meta.get("photo_bounded_retry_count") or 0) != actual_retries
+        or meta.get("photo_retry_policy") != GZTCM_PHOTO_RETRY_POLICY
+    ):
+        errors.append("照片同 URL/Referer/请求头的有界重试策略未逐图对账")
+
+    formal_fields = [
+        "职称身份原文",
+        "擅长诊疗方向摘录",
+        "亮眼经历线索",
+        "列表简介",
+        "详情正文摘录",
+    ]
+    schedule_pattern = re.compile(
+        r"(?:门诊时间|出诊时间|出诊安排|排班信息|坐诊时间|"
+        r"(?:周|星期)[一二三四五六日天](?:上午|下午|全天|夜间))"
+    )
+    filenames: set[str] = set()
+    byte_sizes: list[int] = []
+    large_photo_count = 0
+    for row in rows:
+        name = gztcm_clean_text(str(row.get("姓名") or ""))
+        source = gztcm_clean_text(str(row.get("来源链接") or ""))
+        photo_url = gztcm_clean_text(str(row.get("照片链接") or ""))
+        photo_file = gztcm_clean_text(str(row.get("照片文件") or ""))
+        if not looks_like_person_name(name) or gyfyyy_nursing_only_identity(
+            row.get("职称身份原文")
+        ):
+            errors.append(f"结果行不是明确医生身份：{name or source}")
+        if source in no_source_by_source:
+            item = no_source_by_source[source]
+            state = gztcm_clean_text(str(item.get("photo_state") or ""))
+            warning_text = gztcm_clean_text(str(row.get("异常提示") or ""))
+            if photo_url or photo_file:
+                errors.append(f"照片授权留空行仍写入照片字段：{name}")
+            if state == "bounded_transfer_failure":
+                if (
+                    int(item.get("retry_count") or 0) != 1
+                    or len(item.get("attempt_results", [])) != 2
+                    or GZTCM_PHOTO_UNAVAILABLE_WARNING not in warning_text
+                ):
+                    errors.append(f"连续两次传输失败未按裁决留空标注：{name}")
+            elif state == "invalid_official_image":
+                if (
+                    not gztcm_clean_text(str(item.get("validation_error") or ""))
+                    or GZTCM_PHOTO_INVALID_WARNING not in warning_text
+                ):
+                    errors.append(f"失效官方图片未按裁决留空标注：{name}")
+            elif "官网详情未提供符合范围的本人职业照" not in warning_text:
+                errors.append(f"官网无照片行未留空标注：{name}")
+        else:
+            item = photo_by_source.get(source)
+            if not item or gztcm_photo_url(photo_url, source) != photo_url:
+                errors.append(f"缺少 gztcm.com.cn 官网本人职业照对账：{name or source}")
+                continue
+            detail_id = gztcm_detail_id(source)
+            if detail_id != gztcm_clean_text(str(item.get("detail_id") or "")):
+                errors.append(f"照片与详情 ID/Referer 未对齐：{name}")
+            filename = gztcm_clean_text(str(item.get("filename") or ""))
+            expected_relative = (
+                Path("01_试点医院") / str(meta.get("hospital") or "") / "照片" / filename
+            ).as_posix()
+            if photo_file != expected_relative or item.get("photo_file") != expected_relative:
+                errors.append(f"照片相对路径不符合约定：{name}")
+            if not filename or filename.casefold() in filenames:
+                errors.append(f"照片文件名为空或覆盖冲突：{filename or name}")
+            filenames.add(filename.casefold())
+            disk_path = Path(str(item.get("disk_path") or ""))
+            if not disk_path.is_file():
+                errors.append(f"照片文件不存在：{disk_path}")
+                continue
+            content = disk_path.read_bytes()
+            extension = disk_path.suffix.lower().lstrip(".")
+            media_type = {
+                "jpg": "image/jpeg",
+                "png": "image/png",
+                "gif": "image/gif",
+                "webp": "image/webp",
+            }.get(extension, "")
+            width, height = gdmch_photo_dimensions(content, extension)
+            if (
+                gdgh_photo_extension(content, media_type) != extension
+                or int(item.get("bytes") or 0) != len(content)
+                or gztcm_clean_text(str(item.get("sha256") or ""))
+                != hashlib.sha256(content).hexdigest()
+                or int(item.get("width") or 0) != width
+                or int(item.get("height") or 0) != height
+                or width <= 0
+                or height <= 0
+            ):
+                errors.append(f"照片字节/SHA-256/魔数/宽高对账失败：{filename}")
+            byte_sizes.append(len(content))
+            large_photo_count += int(len(content) > 200 * 1024 or width > 800)
+
+        formal_text = "\n".join(
+            gztcm_clean_text(str(row.get(field) or "")) for field in formal_fields
+        )
+        all_text = "\n".join(str(row.get(field) or "") for field in BASE_HEADERS)
+        if schedule_pattern.search(formal_text):
+            errors.append(f"正式字段仍含排班日期/时段：{name}")
+        if any(marker in formal_text for marker in GDGH_FORBIDDEN_SENTENCE_MARKERS):
+            errors.append(f"正式字段仍含排名/患者片段：{name}")
+        if contains_gzbrain_patient_case_text(formal_text):
+            errors.append(f"正式字段仍含患者案例或可识别信息：{name}")
+        if "\ufffd" in all_text or any(marker in all_text for marker in GY120_MOJIBAKE_MARKERS):
+            errors.append(f"正式字段仍含替换字符或高置信乱码：{name}")
+        if re.search(r"[\ue000-\uf8ff]", all_text):
+            errors.append(f"正式字段仍含私用区字符：{name}")
+        if gztcm_clean_text(str(row.get("异常提示") or "")) and (
+            gztcm_clean_text(str(row.get("重点关注范围") or ""))
+            or gztcm_clean_text(str(row.get("重点疾病标签") or ""))
+            or gztcm_clean_text(str(row.get("重点优先级") or "")) != "普通"
+        ):
+            errors.append(f"异常行仍被打标签或提升优先级：{name}")
+
+    if byte_sizes:
+        average_bytes = round(sum(byte_sizes) / len(byte_sizes))
+        if int(meta.get("photo_average_bytes") or 0) != average_bytes:
+            errors.append("平均单张照片大小对账失败")
+        if int(meta.get("photo_estimated_full_bytes") or 0) != (
+            average_bytes * int(meta.get("photo_estimated_full_count") or 0)
+        ):
+            errors.append("全院照片容量估算对账失败")
+    elif int(meta.get("photo_average_bytes") or 0) != 0:
+        errors.append("无成功照片时平均照片大小必须为 0")
+    if int(meta.get("large_photo_count") or 0) != large_photo_count:
+        errors.append("大图阈值计数对账失败")
+    if meta.get("photo_policy_status") != "OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT":
+        errors.append("照片政策未保持 owner 已批准的原图不压缩口径")
+
+
+def validate_gztcm_trial(payload: dict[str, Any], expected_rows: int) -> None:
+    """Validate Issue #49 census, dual-channel sample, cleaning and photos."""
+
+    errors: list[str] = []
+    eligible_ids = validate_gztcm_census(payload, errors)
+    validate_gztcm_rows_and_photos(payload, expected_rows, eligible_ids, errors)
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    sample_details = payload.get("gztcm_sample_detail_reconciliation", [])
+    row_ids = {gztcm_detail_id(str(row.get("来源链接") or "")) for row in rows}
+    sample_ids = {
+        gztcm_clean_text(str(item.get("detail_id") or "")) for item in sample_details
+    }
+    if expected_rows != 10 or len(rows) != 10:
+        errors.append("Issue #49 TRIAL 必须固定 10 行")
+    if int(meta.get("department_coverage_count") or 0) < 3:
+        errors.append("TRIAL 未覆盖至少 3 个真实科室")
+    if (
+        int(meta.get("sample_entry_coverage_count") or 0) != 2
+        or set(meta.get("sample_entry_categories", [])) != {"科室树", "名医荟萃"}
+        or int(meta.get("sample_tree_department_coverage_count") or 0) < 3
+    ):
+        errors.append("TRIAL 未同时覆盖科室树、名医荟萃和至少 3 个树内科室")
+    if (
+        len(sample_details) != 10
+        or sample_ids != row_ids
+        or any(item.get("resolution") != "详情已读取" for item in sample_details)
+        or any(not bool(item.get("name_matches_directory")) for item in sample_details)
+    ):
+        errors.append("10 个试采详情与 82-ID 普查对账不一致")
+    if not payload.get("photo_samples"):
+        errors.append("TRIAL 必须至少包含 1 张成功下载的本人职业照")
+    if errors:
+        raise RuntimeError("GZTCM TRIAL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
+
+
+def validate_gztcm_full_append(payload: dict[str, Any]) -> None:
+    """Keep Issue #49 FULL blocked until the owner explicitly switches phase."""
+
+    errors: list[str] = []
+    eligible_ids = validate_gztcm_census(payload, errors)
+    validate_gztcm_rows_and_photos(payload, len(eligible_ids), eligible_ids, errors)
+    row_ids = {
+        gztcm_detail_id(str(row.get("来源链接") or "")) for row in payload.get("rows", [])
+    }
+    if row_ids != eligible_ids:
+        errors.append("FULL 结果未覆盖护理排除后的全部详情 ID")
+    if payload.get("meta", {}).get("full_authorization") != GZTCM_FULL_AUTHORIZATION:
+        errors.append("FULL 授权证据未写入 payload")
+    if errors:
+        raise RuntimeError("GZTCM FULL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
+
+
 def validate_gd2h_full_append(payload: dict[str, Any] | None = None) -> None:
     """Block the master write unless the owner-approved FULL census reconciles."""
 
@@ -15781,6 +17565,66 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         )
         for item in payload.get("photo_no_sources", [])
     ) or "| 无 | 无 | 无 | 无 | 无 | 无 |"
+    gztcm_category_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('category_name', ''))} | "
+            f"{item.get('department_count', 0)} | {item.get('row_count', 0)} | "
+            f"{item.get('category_url', '')} |"
+        )
+        for item in payload.get("categories", [])
+    ) or "| 无 | 0 | 0 | 无 |"
+    gztcm_department_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('category', ''))} | "
+            f"{markdown_table_cell(item.get('department', ''))} | "
+            f"{item.get('department_url', '')} | {item.get('directory_url', '')} | "
+            f"{item.get('http_status', '')} | "
+            f"{markdown_table_cell(item.get('directory_state', ''))} | "
+            f"{item.get('relation_count', 0)} | "
+            f"{','.join(str(value) for value in item.get('unique_detail_ids', [])) or '无'} |"
+        )
+        for item in payload.get("department_tree", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 | 无 | 0 | 无 |"
+    gztcm_detail_lines = "\n".join(
+        (
+            f"| {item.get('detail_id', '')} | "
+            f"{markdown_table_cell(item.get('directory_name', ''))} | "
+            f"{markdown_table_cell(item.get('detail_name', ''))} | "
+            f"{'、'.join(item.get('channels', [])) or '无'} | "
+            f"{'、'.join(item.get('categories', [])) or '无'} | "
+            f"{'、'.join(item.get('departments', [])) or '官网详情未标当前科室'} | "
+            f"{markdown_table_cell(item.get('title', '')) or '无'} | "
+            f"{item.get('photo_state', '')} | {item.get('resolution', '')} | "
+            f"{item.get('source_link', '')} |"
+        )
+        for item in payload.get("gztcm_detail_reconciliation", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 | 无 | 无 | 无 | 无 | 无 |"
+    gztcm_same_name_lines = "\n".join(
+        f"| {markdown_table_cell(name)} | {','.join(ids)} | 按详情 ID 保持独立 |"
+        for name, ids in payload.get("same_name_groups", {}).items()
+    ) or "| 无 | 无 | 无 |"
+    gztcm_photo_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('name', ''))} | {item.get('detail_id', '')} | "
+            f"{markdown_table_cell(item.get('department', ''))} | "
+            f"{markdown_table_cell(item.get('title', ''))} | "
+            f"{markdown_table_cell(item.get('filename', ''))} | {item.get('bytes', 0)} | "
+            f"{item.get('width', 0)}×{item.get('height', 0)} | "
+            f"`{item.get('sha256', '')}` | {item.get('retry_count', 0)} | "
+            f"{item.get('photo_url', '')} |"
+        )
+        for item in payload.get("photo_samples", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 | 0 | 0×0 | 无 | 0 | 无 |"
+    gztcm_photo_failure_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('name', ''))} | {item.get('detail_id', '')} | "
+            f"{item.get('source_link', '')} | {item.get('photo_url', '')} | "
+            f"{item.get('photo_state', '')} | {item.get('retry_count', 0)} | "
+            f"{'；'.join(item.get('attempt_results', [])) or '无请求'} | "
+            f"{markdown_table_cell(item.get('reason', ''))} |"
+        )
+        for item in payload.get("photo_no_sources", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 | 0 | 无 | 无 |"
     campus_relation_summary = "；".join(
         f"{name} {count} 条"
         for name, count in meta.get("campus_relation_counts", {}).items()
@@ -16173,6 +18017,66 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 | 姓名 | ArticleID | 详情 Referer | 官网照片 | 两次结果 | 处置 |
 |---|---|---|---|---|---|
 {gy120_photo_failure_lines}
+"""
+        )
+    if payload.get("gztcm_detail_reconciliation"):
+        sample_departments = "；".join(meta.get("covered_departments", [])) or "无"
+        channel_summary = "、".join(meta.get("sample_entry_categories", [])) or "无"
+        phase_statement = (
+            "Owner 尚未在 PR #50 审计 TRIAL 并切换 FULL_APPEND_AND_OBSIDIAN；"
+            "当前工件不得写入统一总底表或生成正式 Obsidian 画像。"
+            if not full_append
+            else "本报告只有在 PR #50 owner 明确切换 FULL 且授权证据进入 payload 后才可写总底表。"
+        )
+        adapter_specific_sections.append(
+            f"""## 广州中医药大学第一附属医院科室树、名医荟萃与照片{run_label}对账
+
+- Owner 封闭范围：`{GZTCM_SCOPE_TREE_URL}` 九大类下全部 70 个科室入口 + `{GZTCM_FAMOUS_URL}` 41 人补充通道；只按详情 ID 去重，不越出科室树。
+- 科室入口：70 个；官网科室首页仍链接但专家目录 HTTP 404 共 {meta.get('census_dead_directory_count', 0)} 个；HTTP 200 空目录 {meta.get('census_empty_department_count', 0)} 个；非空目录 {meta.get('census_nonempty_department_count', 0)} 个。
+- 科室树医生关系 / 唯一详情 ID：{meta.get('department_relation_count', 0)} / {meta.get('department_unique_detail_count', 0)}；名医荟萃 {meta.get('famous_relation_count', 0)} ID / {meta.get('famous_page_count', 0)} 页；双通道交集 {meta.get('department_famous_overlap_count', 0)}，合并后 {meta.get('census_unique_detail_count', 0)} 个唯一 ID。
+- 详情顺序公开 GET：成功 {len(payload.get('gztcm_detail_reconciliation', [])) - meta.get('detail_error_count', 0)}，失败 {meta.get('detail_error_count', 0)}；纯护理排除 {meta.get('excluded_non_doctor_count', 0)}，合规候选 {meta.get('eligible_candidate_count', 0)}。
+- {run_label}覆盖：通道 {channel_summary}；树内真实科室 {meta.get('sample_tree_department_coverage_count', 0)} 个；结果科室 {meta.get('department_coverage_count', 0)} 个（{sample_departments}）。
+- 编码/清洗：UTF-8 替换字符 {meta.get('encoding_replacement_count', 0)}、高置信乱码 {meta.get('encoding_mojibake_count', 0)}、列表/详情姓名不一致 {meta.get('name_mismatch_count', 0)}；排班尾段排除 {meta.get('schedule_exclusion_count', 0)}、排名/患者片段排除 {meta.get('forbidden_segment_exclusion_count', 0)}、患者案例排除 {meta.get('patient_case_exclusion_count', 0)}、私用区字符清洗 {meta.get('private_use_character_exclusion_count', 0)}。
+- 照片普查：页面声明本人职业照 {meta.get('photo_census_available_count', 0)}、无有效照片 {meta.get('photo_census_empty_count', 0)}、拒绝路径 {meta.get('photo_census_rejected_count', 0)}。
+- 照片四数：应采 {meta.get('photo_expected_count', 0)} / 实采 {meta.get('photo_downloaded_count', 0)} / 失败留空 {meta.get('photo_failed_count', 0)} / 无照片 {meta.get('photo_no_source_count', 0)}；触发单次重试 {meta.get('photo_bounded_retry_count', 0)} 张。
+- 照片传输策略：{meta.get('photo_retry_policy', '未记录')}；原图不压缩；平均 {meta.get('photo_average_bytes', 0)} bytes，估算 {meta.get('photo_estimated_full_count', 0)} 张 / {meta.get('photo_estimated_full_bytes', 0)} bytes，大图阈值命中 {meta.get('large_photo_count', 0)} 张。
+- 普通公开会话：{meta.get('standard_public_session', '未记录')}；最终 Cookie 名称仅留痕为 `{'、'.join(meta.get('session_cookie_names', [])) or '无'}`。{phase_statement}
+
+### 九大类科室汇总
+
+| 类别 | 科室数 | 医生—科室关系 | 官方分类入口 |
+|---|---:|---:|---|
+{gztcm_category_lines}
+
+### 70 个科室封闭入口与逐 ID 清单
+
+| 类别 | 科室 | 科室首页 | 专家目录 | HTTP | 目录状态 | 唯一 ID 数 | 唯一详情 ID |
+|---|---|---|---|---:|---|---:|---|
+{gztcm_department_lines}
+
+### 82 个唯一详情 ID 双通道对账
+
+| 详情 ID | 列表姓名 | 详情姓名 | 通道 | 类别 | 科室 | 职称 | 照片状态 | 处置 | 来源链接 |
+|---|---|---|---|---|---|---|---|---|---|
+{gztcm_detail_lines}
+
+### 同名不同 ID 留痕
+
+| 姓名 | 详情 ID | 处置 |
+|---|---|---|
+{gztcm_same_name_lines}
+
+### {run_label}照片字节、魔数、SHA-256、尺寸及重试对账
+
+| 姓名 | 详情 ID | 科室 | 主职称 | 文件名 | 字节数 | 宽×高 | SHA-256 | 重试次数 | 官网照片 |
+|---|---|---|---|---|---:|---:|---|---:|---|
+{gztcm_photo_lines}
+
+### 管理员批准的失效官方图片/有界传输失败留空标注
+
+| 姓名 | 详情 ID | 详情 Referer | 官网照片 | 状态 | 重试次数 | 请求结果 | 处置 |
+|---|---|---|---|---|---:|---|---|
+{gztcm_photo_failure_lines}
 """
         )
     adapter_specific_text = "\n\n".join(adapter_specific_sections)
@@ -16576,6 +18480,7 @@ def main() -> None:
             GDMCH_ADAPTER_ID,
             GD2H_ADAPTER_ID,
             GY120_ADAPTER_ID,
+            GZTCM_ADAPTER_ID,
         }
         and not args.trial_only
         and not args.single_output
@@ -16633,6 +18538,13 @@ def main() -> None:
             max_doctors=max_doctors,
             full_mode=not args.trial_only,
         )
+    elif target.adapter_id == GZTCM_ADAPTER_ID:
+        payload = collect_gztcm(
+            target,
+            args.today,
+            max_doctors=max_doctors,
+            full_mode=not args.trial_only,
+        )
     elif target.adapter_id in {GENERIC_ADAPTER_ID, GDSKIN_ADAPTER_ID, NY5Y_ADAPTER_ID, GDZY5413_ADAPTER_ID}:
         payload = collect_generic(
             target,
@@ -16679,6 +18591,8 @@ def main() -> None:
         if target.adapter_id == GDMCH_ADAPTER_ID
         else gd2h_covered_department_names(payload["rows"])
         if target.adapter_id == GD2H_ADAPTER_ID
+        else gztcm_covered_department_names(payload["rows"])
+        if target.adapter_id == GZTCM_ADAPTER_ID
         else covered_department_names(payload["rows"])
     )
     payload["meta"]["department_coverage_count"] = len(covered_departments)
@@ -16703,6 +18617,8 @@ def main() -> None:
         validate_gd2h_trial(payload, expected_rows=max_doctors or 10)
     if target.adapter_id == GY120_ADAPTER_ID and args.trial_only:
         validate_gy120_trial(payload, expected_rows=max_doctors or 10)
+    if target.adapter_id == GZTCM_ADAPTER_ID and args.trial_only:
+        validate_gztcm_trial(payload, expected_rows=max_doctors or 10)
     if target.adapter_id == GDGH_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdgh_full_append(payload)
     if target.adapter_id == GDMCH_ADAPTER_ID and not args.trial_only:
@@ -16711,6 +18627,8 @@ def main() -> None:
         validate_gd2h_full_append(payload)
     if target.adapter_id == GY120_ADAPTER_ID and not args.trial_only:
         validate_gy120_full_append(payload)
+    if target.adapter_id == GZTCM_ADAPTER_ID and not args.trial_only:
+        validate_gztcm_full_append(payload)
 
     if target.adapter_id == FAHSYSU_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_fahsysu_full_append(payload)
