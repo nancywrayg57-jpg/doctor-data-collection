@@ -377,6 +377,9 @@ GZTCM_PHOTO_RETRY_POLICY = (
 )
 GZTCM_PHOTO_UNAVAILABLE_WARNING = "官网本人职业照连续两次获取失败，按既定政策留空"
 GZTCM_PHOTO_INVALID_WARNING = "官网图片响应不是可识别的本人职业照，按既定政策留空"
+GZTCM_FULL_AUTHORIZATION = (
+    "PR #50 owner 评论明确审计通过并切换 FULL_APPEND_AND_OBSIDIAN"
+)
 GD2H_EXPECTED_SAME_NAME_GROUPS = {
     "付钰": ["42089", "d3730bba6ddc416399018016cd1d36ce"],
     "刘百川": ["42083", "ae7ffec5cd0d443db0edebecde984a51"],
@@ -7940,6 +7943,27 @@ def gztcm_clean_text(value: str | None) -> str:
     return clean_text(re.sub(r"[\u200b\u200c\u200d\ufeff]", "", str(value or "")))
 
 
+def gztcm_person_name(value: str | None) -> str:
+    """Normalize visual spacing inside an otherwise valid Chinese doctor name."""
+
+    candidate = gztcm_clean_text(value)
+    compact = re.sub(r"\s+", "", candidate)
+    return compact if candidate != compact and looks_like_person_name(compact) else candidate
+
+
+def gztcm_covered_department_names(rows: list[dict[str, Any]]) -> list[str]:
+    """Keep official GZTCM department labels intact when they contain dunhao."""
+
+    return sorted(
+        {
+            gztcm_clean_text(str(row.get("科室_分类页") or ""))
+            for row in rows
+            if "非医生页面或姓名异常" not in str(row.get("异常提示") or "")
+            and gztcm_clean_text(str(row.get("科室_分类页") or ""))
+        }
+    )
+
+
 def decode_gztcm_html(content: bytes) -> str:
     text = content.decode("utf-8", errors="strict")
     if "\ufffd" in text or any(marker in text for marker in GY120_MOJIBAKE_MARKERS):
@@ -8152,7 +8176,7 @@ def parse_gztcm_list_page(
         seen_ids.add(detail_id)
         source_link = urljoin(page_url, str(detail_anchor.get("href") or ""))
         name_node = card.select_one("h4")
-        name = gztcm_clean_text(
+        name = gztcm_person_name(
             str(detail_anchor.get("title") or "")
             or (name_node.get_text(" ", strip=True) if name_node else "")
         )
@@ -8190,7 +8214,7 @@ def parse_gztcm_detail(html: str, fallback: dict[str, Any]) -> dict[str, Any]:
     container = soup.select_one(".zj-list.details")
     if not container:
         return {
-            "name": gztcm_clean_text(str(fallback.get("name") or "")),
+            "name": gztcm_person_name(str(fallback.get("name") or "")),
             "title": gztcm_clean_text(str(fallback.get("list_title") or "")),
             "specialty": gztcm_clean_text(str(fallback.get("list_specialty") or "")),
             "profile_text": "",
@@ -8209,7 +8233,7 @@ def parse_gztcm_detail(html: str, fallback: dict[str, Any]) -> dict[str, Any]:
     name_node = container.select_one("h3.title")
     subtitle_node = container.select_one(".subtitle")
     description_node = container.select_one(".description")
-    name = gztcm_clean_text(name_node.get_text(" ", strip=True) if name_node else "")
+    name = gztcm_person_name(name_node.get_text(" ", strip=True) if name_node else "")
     subtitle = gztcm_clean_text(
         subtitle_node.get_text(" ", strip=True) if subtitle_node else ""
     )
@@ -8702,7 +8726,7 @@ def collect_gztcm(
         )
         combined = {
             **identity,
-            "name": gztcm_clean_text(str(primary.get("name") or identity["name"])),
+            "name": gztcm_person_name(str(primary.get("name") or identity["name"])),
             "title": clip(merged_title, 500),
             "specialty": clip(merged_specialty, 520),
             "profile_text": clip(merged_profile, 1800),
@@ -8739,8 +8763,8 @@ def collect_gztcm(
         detailed_candidates.append(combined)
         name_matches = all(
             not item.get("detail_name")
-            or gztcm_clean_text(str(item.get("detail_name")))
-            == gztcm_clean_text(str(identity["name"]))
+            or gztcm_person_name(str(item.get("detail_name")))
+            == gztcm_person_name(str(identity["name"]))
             for item in channel_audit
         )
         detail_reconciliation.append(
@@ -8806,7 +8830,7 @@ def collect_gztcm(
     existing_links = collect_existing_profile_links()
     rows: list[dict[str, Any]] = []
     for item in selected_doctors:
-        name = gztcm_clean_text(str(item.get("name") or ""))
+        name = gztcm_person_name(str(item.get("name") or ""))
         departments = [
             gztcm_clean_text(str(value))
             for value in item.get("departments", [])
@@ -8908,10 +8932,8 @@ def collect_gztcm(
         department = gztcm_clean_text(str(row.pop("_gztcm_department", "")))
         channels = [gztcm_clean_text(str(value)) for value in row.pop("_gztcm_channels", [])]
         sample_channels.update(value for value in channels if value)
-        if "科室树" in channels:
-            sample_tree_departments.update(
-                value for value in department.split("、") if gztcm_clean_text(value)
-            )
+        if "科室树" in channels and department:
+            sample_tree_departments.add(department)
         if photo_state != "available" or not photo_url:
             warning = "官网详情未提供符合范围的本人职业照，留空并标注"
             row["异常提示"] = "；".join(
@@ -9175,6 +9197,7 @@ def collect_gztcm(
             "final_identity_count": len(rows),
             "existing_profile_count": sum(row["已建画像"] == "是" for row in rows),
             "execution_mode": "full_append" if full_mode else "trial",
+            "full_authorization": GZTCM_FULL_AUTHORIZATION if full_mode else "TRIAL",
         },
         "categories": [
             {
@@ -15772,9 +15795,7 @@ def validate_gztcm_full_append(payload: dict[str, Any]) -> None:
     }
     if row_ids != eligible_ids:
         errors.append("FULL 结果未覆盖护理排除后的全部详情 ID")
-    if payload.get("meta", {}).get("full_authorization") != (
-        "PR #50 owner 评论明确审计通过并切换 FULL_APPEND_AND_OBSIDIAN"
-    ):
+    if payload.get("meta", {}).get("full_authorization") != GZTCM_FULL_AUTHORIZATION:
         errors.append("FULL 授权证据未写入 payload")
     if errors:
         raise RuntimeError("GZTCM FULL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
@@ -17999,7 +18020,7 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 """
         )
     if payload.get("gztcm_detail_reconciliation"):
-        sample_departments = "、".join(meta.get("covered_departments", [])) or "无"
+        sample_departments = "；".join(meta.get("covered_departments", [])) or "无"
         channel_summary = "、".join(meta.get("sample_entry_categories", [])) or "无"
         phase_statement = (
             "Owner 尚未在 PR #50 审计 TRIAL 并切换 FULL_APPEND_AND_OBSIDIAN；"
@@ -18570,6 +18591,8 @@ def main() -> None:
         if target.adapter_id == GDMCH_ADAPTER_ID
         else gd2h_covered_department_names(payload["rows"])
         if target.adapter_id == GD2H_ADAPTER_ID
+        else gztcm_covered_department_names(payload["rows"])
+        if target.adapter_id == GZTCM_ADAPTER_ID
         else covered_department_names(payload["rows"])
     )
     payload["meta"]["department_coverage_count"] = len(covered_departments)

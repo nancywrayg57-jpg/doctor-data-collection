@@ -21,12 +21,14 @@ from collect_official_doctors_batch import (  # noqa: E402
     GZTCM_EXPECTED_CATEGORY_COUNTS,
     GZTCM_EXPECTED_CATEGORY_RELATION_COUNTS,
     GZTCM_FAMOUS_URL,
+    GZTCM_FULL_AUTHORIZATION,
     GZTCM_PHOTO_INVALID_WARNING,
     GZTCM_PHOTO_RETRY_POLICY,
     GZTCM_SCOPE_TREE_URL,
     decode_gztcm_html,
     dedicated_adapter_for,
     download_gztcm_photo,
+    gztcm_covered_department_names,
     gztcm_detail_id,
     gztcm_paging_metadata,
     gztcm_photo_url,
@@ -133,8 +135,8 @@ class GztcmPhotoTrialTests(unittest.TestCase):
 
         famous_html = """
         <div id="pageregion"><div class="list_ul"><ul><li>
-          <a href="f1.shtml" title="李乙"><img src="resource/f1.png"></a>
-          <h4>李乙</h4><div class="subtitle">主任中医师</div>
+          <a href="f1.shtml" title="李 乙"><img src="resource/f1.png"></a>
+          <h4>李 乙</h4><div class="subtitle">主任中医师</div>
         </li></ul></div></div>
         """
         famous_rows = parse_gztcm_list_page(
@@ -144,13 +146,14 @@ class GztcmPhotoTrialTests(unittest.TestCase):
         )
         self.assertEqual(len(famous_rows), 1)
         self.assertEqual(famous_rows[0]["id"], "f1")
+        self.assertEqual(famous_rows[0]["name"], "李乙")
         self.assertEqual(famous_rows[0]["department"], "")
 
     def test_detail_parser_cleans_schedule_patient_and_private_use_text(self) -> None:
         source = "https://www.gztcm.com.cn/pwb/kszj/a1.shtml"
         html = """
         <div class="zj-list details">
-          <h3 class="title">张甲</h3><div class="subtitle">主任中医师</div>
+          <h3 class="title">张 甲</h3><div class="subtitle">主任中医师</div>
           <img src="/export/sites/default/gztcm/pwb/kszj/resource/a1.jpg">
           <div class="description">擅长治疗复杂脾胃疾病。门诊时间：周一上午；
           患者王某治疗后排名第一。长期从事中医临床工作。</div>
@@ -612,7 +615,21 @@ class GztcmPhotoTrialTests(unittest.TestCase):
     def test_invalid_image_warning_constant_is_explicit(self) -> None:
         self.assertIn("留空", GZTCM_PHOTO_INVALID_WARNING)
         self.assertIn("仅重试 1 次", GZTCM_PHOTO_RETRY_POLICY)
+        self.assertIn("PR #50", GZTCM_FULL_AUTHORIZATION)
+        self.assertIn("FULL_APPEND_AND_OBSIDIAN", GZTCM_FULL_AUTHORIZATION)
         self.assertEqual(sum(GZTCM_EXPECTED_CATEGORY_COUNTS.values()), 70)
+
+    def test_department_coverage_preserves_official_dunhao_labels(self) -> None:
+        rows = [
+            {"科室_分类页": "胃肠外科、结直肠外科", "异常提示": ""},
+            {"科室_分类页": "肾病一科（慢性肾衰、代谢性肾病）", "异常提示": ""},
+            {"科室_分类页": "", "异常提示": "名医荟萃详情未标当前科室"},
+        ]
+
+        self.assertEqual(
+            gztcm_covered_department_names(rows),
+            ["肾病一科（慢性肾衰、代谢性肾病）", "胃肠外科、结直肠外科"],
+        )
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 > 日期：2026-08-15
 > GitHub Issue：<https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/49>
 > 分支：`codex/mhrj/issue-49-gztcm-photo-trial`
-> Phase：`TRIAL_READY_FOR_OWNER_AUDIT`
+> Phase：`FULL_READY_FOR_OWNER_PROFILE_AUDIT`
 > 医院：广州中医药大学第一附属医院
 > 官网：<https://www.gztcm.com.cn/gztcm/gzb.html>
 > owner 指定医生入口：<https://www.gztcm.com.cn/myzl/myhc/>
@@ -130,43 +130,138 @@ TRIAL 样本为周岱翰（名医荟萃，官网详情未标当前科室并已�
 
 ## 9. 验证闭环
 
-- GZTCM 专项测试：`9/9` 通过。
-- `work/tests` 全量单元测试：`165/165` 通过。
+- GZTCM 专项测试：`10/10` 通过。
+- `work/tests` 全量单元测试：`166/166` 通过。
 - JSON、CSV、报告均按 UTF-8 复核，无替换字符、高置信乱码或私用区残留。
 - 只读对账确认：70 个唯一科室入口、41 个科室树关系、41 个名医关系、82 个唯一详情、10 行 CSV、10 张照片与报告 70 行科室表全部闭合。
 - 10 张照片的本地字节数和 SHA-256 与 payload、报告逐张一致。
-- FULL 门禁仍要求 PR #50 owner 明确审计通过并切换 `FULL_APPEND_AND_OBSIDIAN`；当前不得执行正式追加。
+- PR #50 owner 已于 2026-08-15T09:20:18Z 明确审计“通过”并切换为 `FULL_APPEND_AND_OBSIDIAN`；以下第 10 节起记录授权后的正式执行结果。
+
+## 10. Owner 审计与 FULL 授权
+
+owner `nancywrayg57-jpg` 在 PR #50 评论 <https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/50#issuecomment-5301571392> 明确给出：
+
+1. TRIAL 审计结论“通过”。
+2. Phase 切换为 `FULL_APPEND_AND_OBSIDIAN`。
+3. 封闭范围为科室树 41 ID + 名医荟萃 41 ID，交集 0，共 82 个唯一详情 ID。
+4. 名医荟萃未展示当前科室时留空标注；同名“邓中光”两个不同 ID 独立保留。
+5. FULL 须完成照片四数、末尾身份复核、总底表追加、Obsidian 画像与索引核验。
+
+采集 payload 通过 `GZTCM_FULL_AUTHORIZATION` 写入上述 PR/Phase 授权证据；TRIAL 保持写入 `TRIAL`。验证器与测试复用同一常量，避免授权文案漂移。
+
+## 11. FULL 执行中的阻塞、根因与最小修正
+
+### 11.1 自动化提示词 UTF-8 损坏
+
+- 阻塞：心跳自动化配置一度真实包含 UTF-8 替换字符，不是终端显示问题。
+- 根因：自动化长提示词在一次保存链路中发生编码损坏。
+- 解决：从本任务已有完整指令历史恢复通用单 Issue 提示词；现场确认无 `U+FFFD`、无高置信乱码，且自动化保持 `PAUSED`。
+- 防复发：不再因 Issue 编号改写通用提示词；恢复或更新后固定执行替换字符、乱码标记、动态发现章节和状态四项检查。
+
+### 11.2 FULL 授权证据缺失
+
+- 阻塞：FULL 前置代码审计发现 GZTCM payload 未写 `full_authorization`，而写出前验证器要求该字段。
+- 根因：TRIAL 实现先于 owner FULL 授权，采集端与验证端契约未同时接线。
+- 解决：新增单一 `GZTCM_FULL_AUTHORIZATION` 常量；FULL 写入 owner PR #50 授权证据，TRIAL 写 `TRIAL`，验证器复用同一常量。
+- 防复发：专项测试固定断言授权证据含 `PR #50` 与 `FULL_APPEND_AND_OBSIDIAN`。
+
+### 11.3 第一次 FULL 姓名视觉空格门禁
+
+- 阻塞：第一次 FULL 已完成 82 个详情与照片处理，但在总底表写入前因 `何 伟、吴 伟、朱 敏、阮 岩、黄 枫` 不满足 2–4 个连续汉字姓名规则而停止；三份受保护总底表资产的长度、时间与 SHA-256 均保持第 6 节基线。
+- 根因：官网用空格做双字姓名的视觉排版；GZTCM 通用文本清洗只折叠空白，没有对姓名字段做专用规范化。TRIAL 10 人未包含这五位，故该边界只在 FULL 暴露。
+- 解决：新增 `gztcm_person_name()`，仅当移除内部空白后形成既有严格姓名规则认可的中文姓名时才返回紧凑形式；应用于 GZTCM 列表、详情、归并、姓名对账和正式行，不改变正文、科室或其他适配器。第二次且最终 FULL 成功。
+- 防复发：列表与详情解析测试均覆盖带视觉空格的中文姓名；FULL 仍以 `looks_like_person_name()` 执行写出前末尾身份复核。
+
+### 11.4 最终审查发现覆盖统计误拆官方科室名
+
+- 阻塞：最终 Git 审查发现 payload/report 把两个官方完整科室名中的顿号当作多科室分隔符，导致覆盖摘要把 9 个公开非空科室误报为 11 个；医生行、总底表和画像中的科室值始终完整，未发生业务字段损坏。
+- 根因：通用 `covered_department_names()` 与 GZTCM 树内覆盖统计无条件按 `、` 拆分，而官网科室名本身包含 `肾病一科（慢性肾衰、代谢性肾病）` 和 `胃肠外科、结直肠外科`。
+- 解决：新增 GZTCM 专用覆盖统计，按官方科室树标签整体计数；树内统计同步保留完整标签，报告以分号列举科室。离线修正 payload/report 后，`sample_tree_department_coverage_count`、`department_coverage_count` 与 82 行实际唯一非空科室标签均为 9。
+- 防复发：专项测试固定断言含顿号及括号内顿号的官方科室名不被拆分；不改变需要顿号合并多科室的其他医院适配器。
+
+## 12. FULL 最终结果
+
+### 12.1 范围、详情与总底表
+
+- 9 大类 70 科室入口保持封闭：19 个 404、42 个公开空目录、9 个非空目录。
+- 科室树 41 ID、名医荟萃 41 ID、交集 0；82/82 详情成功，详情失败 0、姓名不一致 0、护理排除 0。
+- 最终 82 行、82 个唯一官方来源；同名“邓中光”两个不同详情 ID 独立保留。
+- 总底表新增 82、重复跳过 0、既有刷新 0；总行数由 9,140 增至 9,222，医院数由 20 增至 21。
+- 画像生成后离线执行 `--rebuild-master-only`，未重新联网；本院 82 行均同步为 `已建画像=是`。
+- 本院异常提示非空 66 行：名医荟萃未标当前科室 41 次、官网无合规职业照 25 次、职称/身份需人工复核 2 次；重叠记录保留原始多项提示且不提权。
+
+### 12.2 照片四数
+
+| 指标 | 结果 |
+|---|---:|
+| FULL 最终身份应采 | 82 |
+| 官网原图下载并完成字节闭环 | 57 |
+| 未提供合规本人职业照 | 25 |
+| 最终无照片画像 | 25 |
+| 传输重试 / 连续两次传输失败 | 0 / 0 |
+
+57 张照片均保持官网原始字节；payload、磁盘文件的文件名、长度和 SHA-256 逐张一致。25 个官网详情没有可用本人职业照，照片字段留空并标注；本轮没有 HTTP/传输重试，也没有未裁决 `photo_errors`。
+
+## 13. Obsidian 画像与索引验收
+
+- `--hospital 广州中医药大学第一附属医院 --generate-missing-only` 新生成 82 份画像、刷新 0、跳过 0，重建 1 个 `_索引.md`。
+- 82 份画像来源链接唯一，和本院 82 行一一对应；索引有 82 个唯一画像链接。
+- 57 份画像嵌入 `照片/<文件名>`，25 份无照片画像不生成错误图片链接。
+- 照片目录最终恰有 57 个正式文件；未引用文件 0、缺失引用 0、长度或 SHA-256 不一致 0。
+- 同名双 ID 分别使用 `邓中光.md` 和 `邓中光_9208.md`，索引保留两个独立链接。
+- 画像无替换字符和私用区残留；内容只来自统一总底表，没有疗效承诺、患者评价或第三方补写。
+
+## 14. 临时工件清理
+
+- 3 个 TRIAL JSON/CSV/报告已从仓库工作区移出。
+- 第一次失败产生的 5 个带视觉空格重复照片已移出；最终照片目录只保留 payload 引用的 57 张正式照片。
+- 6 个表格可视检查 PNG 已移出；总底表、FULL payload/报告、画像、索引和正式照片未删除。
+- 因宿主策略拒绝直接删除，上述 14 个临时文件移入可恢复隔离目录 `C:\Users\Administrator\AppData\Local\Temp\doctor-data-issue49-cleanup-20260815-issue49`。
+
+## 15. 最终验证与工件哈希
+
+- GZTCM 专项测试 `10/10`、`work/tests` 全量测试 `166/166` 通过。
+- artifact-tool 复核 6 个工作表均可导入和渲染；公式错误扫描 0。
+- 总底表 CSV 为 9,222 行，本院 82 行/82 唯一来源/82 已建画像；XLSX 医院统计同样为 82/82。
+- FULL payload、报告、CSV、画像和索引均按 UTF-8 检查，无替换字符或高置信乱码。
+
+| 工件 | 长度 | SHA-256 |
+|---|---:|---|
+| `珠三角三甲医院_医生画像自动采集总底表.xlsx` | 4,427,427 | `DE43F144BC82440BE2F42923A71B8BEF6B619044656FE9C53849B4FAABE55472` |
+| `珠三角三甲医院_医生画像自动采集总底表.csv` | 17,366,142 | `E6BE9E931174F96F8581AEFB28CCA0725F920C02859E824FA011873FB5F7C2CE` |
+| `珠三角三甲医院_医生画像自动采集总底表_更新报告.md` | 5,604 | `AE2522550F2CF9719A64503F1AD3E8F3A32921EDA59C7AC688E9FF8F1C5757E7` |
+| `work/广州中医药大学第一附属医院_official_doctors_payload.json` | 588,583 | `F1AF9BF69856E0276A414DFEDBB46AA36686341DA98B155D296F7044EB968705` |
+| `work/广州中医药大学第一附属医院_official_doctors_report.md` | 94,739 | `F5386357B5A80E85E9225B200AA8E76084543A879A976AF0F47ECF056AF3C9AB` |
+| `珠三角三甲医院_Obsidian缺失画像补充生成报告.md` | 876 | `DF5985FFC434AE316B1BB6EFA654F698C0E92F1BDC75160134E4BE08B6050FD1` |
+| `广州中医药大学第一附属医院/_索引.md` | 34,674 | `06CBA8336F2E011706554FDC6232377D82E403F3B3EB2670B6F56454094A4C78` |
 
 <Handoff_State>
-Target: Issue #49 广州中医药大学第一附属医院照片 TRIAL 审计
+Target: Issue #49 广州中医药大学第一附属医院 FULL_APPEND_AND_OBSIDIAN
 AgentConstitution: D:\workspace\信息收集整理\Agent.md
 RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/49
 PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/50
 Branch: codex/mhrj/issue-49-gztcm-photo-trial
-Phase: TRIAL_READY_FOR_OWNER_AUDIT
+Phase: FULL_READY_FOR_OWNER_PROFILE_AUDIT
 Completed:
-- 已按 owner 裁决封闭 9 类 70 科室树 + 41 人名医荟萃范围，仅按详情 ID 去重
-- 82 个唯一详情全部读取成功；TRIAL 10 行覆盖双通道和 4 个真实科室
-- 10 张官网本人职业照全部下载、逐张目视复核并完成字节/尺寸/SHA-256 对账
-- GZTCM 专项测试 9/9、全量单元测试 165/165 通过
-- 总底表 XLSX、CSV 和更新报告的长度、时间、SHA-256 均保持不变
-CurrentFacts:
-- 70 科室中 19 个专家目录 404、42 个空目录、9 个非空目录；科室树 41 ID、名医 41 ID、交集 0、合计 82 ID
-- 照片应采/实采/失败/留空为 10/10/0/0；编码、乱码、排班和私用区残留均为 0
-- FULL 授权尚未下发，统一总底表和正式 Obsidian 画像均未变更
+- 82 个封闭详情全部读取并追加，总底表当前 21 家、9,222 行；本院 82 行均标记已建画像
+- 照片应采/实采/官网无照片/最终留空为 82/57/25/25，57 张原图逐张 SHA 闭环
+- 82 份画像、82 个唯一索引链接、57 个图片嵌入闭合；同名邓中光双 ID 独立保留
+- TRIAL 与失败运行临时工件已从仓库移出；专项 10/10、全量 166/166 通过
 Next:
-- 精确提交并通过非强制 Git Data API 更新原分支
-- 在 PR #50 请求 owner 审计 TRIAL；等待明确通过并切换 FULL_APPEND_AND_OBSIDIAN
+- 完成 Git 范围、编码、静态检查与对象完整性复核
+- 复核身份后精确提交，并通过非强制 Git Data API 更新原分支
+- 等 CI 成功后在 PR #50 请求 owner 最终画像审计并停止
 Constraints:
 - 仅官方公开页面；禁第三方、患者信息、排班入库、登录/验证码/挑战绕过
-- 不越出 owner 授权的 70 科室 + 41 名医范围；同名不同 ID 保持独立
-- 当前不写总底表、不生成正式画像、不自行合并 PR、关闭 Issue 或领取下一 Issue
+- 照片仅允许同 URL/Referer/请求头等待 1 秒后重试一次；连续失败或失效图留空标注
+- 不越出 82-ID 封闭范围；同名不同 ID 保持独立
+- 不自行合并 PR、关闭 Issue 或领取下一 Issue
 Artifacts:
 - D:\workspace\信息收集整理\docs\architecture_decisions\2026-08-15_issue_49_gztcm_scope_gate.md
-- D:\workspace\信息收集整理\work\广州中医药大学第一附属医院_trial_payload.json
-- D:\workspace\信息收集整理\work\广州中医药大学第一附属医院_trial_doctors.csv
-- D:\workspace\信息收集整理\work\广州中医药大学第一附属医院_trial_report.md
-- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广州中医药大学第一附属医院\照片
+- D:\workspace\信息收集整理\work\广州中医药大学第一附属医院_official_doctors_payload.json
+- D:\workspace\信息收集整理\work\广州中医药大学第一附属医院_official_doctors_report.md
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
+- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广州中医药大学第一附属医院
 </Handoff_State>
