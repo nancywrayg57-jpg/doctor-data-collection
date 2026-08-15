@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import hashlib
+import requests
 import sys
 import tempfile
 import unittest
 from collections import Counter
+from http.client import IncompleteRead
 from pathlib import Path
 from unittest.mock import patch
 
@@ -15,9 +17,11 @@ if str(WORK_DIR) not in sys.path:
 
 from collect_official_doctors_batch import (  # noqa: E402
     GD2H_ADAPTER_ID,
+    GD2H_BROKEN_PHOTO_WARNING,
     GD2H_EXPECTED_CATEGORY_COUNTS,
     GD2H_EXPECTED_ELIGIBLE_COUNT,
     GD2H_EXPECTED_EMPTY_PHOTO_COUNT,
+    GD2H_EXPECTED_FINAL_IDENTITY_COUNT,
     GD2H_EXPECTED_HASH_ID_COUNT,
     GD2H_EXPECTED_NURSING_COUNT,
     GD2H_EXPECTED_NUMERIC_ID_COUNT,
@@ -25,6 +29,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     GD2H_EXPECTED_PLACEHOLDER_COUNT,
     GD2H_EXPECTED_RELATION_COUNT,
     GD2H_PHOTO_RETRY_POLICY,
+    GD2H_TRANSPORT_FAILURE_WARNING,
     HospitalTarget,
     collect_gd2h,
     dedicated_adapter_for,
@@ -32,6 +37,9 @@ from collect_official_doctors_batch import (  # noqa: E402
     gd2h_detail_id,
     gd2h_photo_url,
     gd2h_primary_title,
+    mark_gd2h_broken_photo_row,
+    mark_gd2h_transport_failed_photo_row,
+    merge_gd2h_identity_rows,
     parse_gd2h_detail,
     parse_gd2h_directory,
     select_gd2h_trial_doctors,
@@ -67,7 +75,7 @@ class Gd2hPhotoTrialTests(unittest.TestCase):
         html = """
         <div class="xxk-item1">
           <ul class="zjlist0"><li><div class="subject">心血管内科</div>
-            <a href="/site/detail/AbC1.html">张甲</a></li></ul>
+            <a href="/site/detail/AbC1.html">\u200b张甲</a></li></ul>
           <ul class="zjlist1"><li><div class="subject">放射科</div>
             <a href="/site/detail/1002.html">钱乙</a></li></ul>
           <div class="zjlist2"><div class="item"><a href="/site/detail/1003.html">
@@ -87,6 +95,8 @@ class Gd2hPhotoTrialTests(unittest.TestCase):
 
         self.assertEqual(len(relations), 6)
         self.assertEqual(len({item["id"] for item in relations}), 6)
+        self.assertEqual(relations[0]["name"], "张甲")
+        self.assertNotIn("\u200b", "".join(item["name"] for item in relations))
         self.assertEqual(len(categories), 6)
         self.assertEqual(sum(item["row_count"] for item in categories), 6)
         self.assertEqual(sum(item["relation_count"] for item in departments), 6)
@@ -99,7 +109,7 @@ class Gd2hPhotoTrialTests(unittest.TestCase):
         <div class="right-container">
           <div class="grjj">
             <img src="http://gd2h.com/static/seygw/resources/upload/doctor/AbC123.png">
-            <p>姓名：张甲</p><p>职称：主任医师</p><p>科室：心血管内科</p>
+            <p>姓名：\u200b张甲</p><p>职称：主任医师</p><p>科室：心血管内科</p>
             <p>擅长：复杂心血管疾病诊疗</p>
           </div>
           <div class="expertIntro">
@@ -117,6 +127,7 @@ class Gd2hPhotoTrialTests(unittest.TestCase):
         )
 
         self.assertEqual(parsed["name"], "张甲")
+        self.assertNotIn("\u200b", "".join(str(value) for value in parsed.values()))
         self.assertEqual(parsed["department"], "心血管内科")
         self.assertEqual(parsed["photo_state"], "available")
         self.assertTrue(parsed["photo_url"].startswith("https://gd2h.com/static/"))
@@ -212,6 +223,189 @@ class Gd2hPhotoTrialTests(unittest.TestCase):
         self.assertEqual(len(failing_session.calls), 2)
         self.assertEqual(failing_session.calls[0], failing_session.calls[1])
         sleep_mock.assert_called_once_with(1)
+
+        class ApprovedBrokenSession(Session):
+            def get(self, url: str, *, headers: dict[str, str], timeout: int) -> Response:
+                self.calls.append((url, headers.copy(), timeout))
+                return Response(content, 404)
+
+        approved_session = ApprovedBrokenSession()
+        with patch("collect_official_doctors_batch.time.sleep") as sleep_mock:
+            with tempfile.TemporaryDirectory() as directory:
+                approved = download_gd2h_photo(
+                    approved_session,  # type: ignore[arg-type]
+                    photo_url,
+                    source,
+                    Path(directory),
+                    "张甲-心血管内科-主任医师-广东省第二人民医院",
+                    "AbC123",
+                    set(),
+                )
+        self.assertTrue(approved["approved_no_source"])
+        self.assertEqual(approved["original_photo_url"], photo_url)
+        self.assertEqual(approved["http_status"], 404)
+        self.assertEqual(approved["approved_no_source_reason"], "double_404")
+        self.assertEqual(approved["retry_count"], 1)
+        self.assertEqual(len(approved_session.calls), 2)
+        self.assertEqual(approved_session.calls[0], approved_session.calls[1])
+        sleep_mock.assert_called_once_with(1)
+
+        class TimeoutThenSuccessSession(Session):
+            def get(self, url: str, *, headers: dict[str, str], timeout: int) -> Response:
+                self.calls.append((url, headers.copy(), timeout))
+                if len(self.calls) == 1:
+                    raise requests.Timeout("first timeout")
+                return Response(content, 200)
+
+        timeout_then_success = TimeoutThenSuccessSession()
+        with patch("collect_official_doctors_batch.time.sleep") as sleep_mock:
+            with tempfile.TemporaryDirectory() as directory:
+                recovered = download_gd2h_photo(
+                    timeout_then_success,  # type: ignore[arg-type]
+                    photo_url,
+                    source,
+                    Path(directory),
+                    "张甲-心血管内科-主任医师-广东省第二人民医院",
+                    "AbC123",
+                    set(),
+                )
+        self.assertEqual(recovered["retry_count"], 1)
+        self.assertEqual(len(timeout_then_success.calls), 2)
+        self.assertEqual(
+            timeout_then_success.calls[0], timeout_then_success.calls[1]
+        )
+        sleep_mock.assert_called_once_with(1)
+
+        class DoubleTransportFailureSession(Session):
+            def get(self, url: str, *, headers: dict[str, str], timeout: int) -> Response:
+                self.calls.append((url, headers.copy(), timeout))
+                if len(self.calls) == 1:
+                    raise requests.Timeout("first timeout")
+                raise requests.ConnectionError("second connection error")
+
+        double_transport_failure = DoubleTransportFailureSession()
+        with patch("collect_official_doctors_batch.time.sleep") as sleep_mock:
+            with tempfile.TemporaryDirectory() as directory:
+                transport_approved = download_gd2h_photo(
+                    double_transport_failure,  # type: ignore[arg-type]
+                    photo_url,
+                    source,
+                    Path(directory),
+                    "张甲-心血管内科-主任医师-广东省第二人民医院",
+                    "AbC123",
+                    set(),
+                )
+        self.assertTrue(transport_approved["approved_no_source"])
+        self.assertEqual(
+            transport_approved["approved_no_source_reason"], "transport_failure"
+        )
+        self.assertEqual(
+            transport_approved["transport_error_kinds"],
+            ["timeout", "connection_error"],
+        )
+        self.assertEqual(len(double_transport_failure.calls), 2)
+        self.assertEqual(
+            double_transport_failure.calls[0], double_transport_failure.calls[1]
+        )
+        sleep_mock.assert_called_once_with(1)
+
+        class DoubleIncompleteReadSession(Session):
+            def get(self, url: str, *, headers: dict[str, str], timeout: int) -> Response:
+                self.calls.append((url, headers.copy(), timeout))
+                if len(self.calls) == 1:
+                    raise requests.exceptions.ChunkedEncodingError(
+                        "first incomplete response"
+                    )
+                raise IncompleteRead(b"partial", 10)
+
+        double_incomplete_read = DoubleIncompleteReadSession()
+        with patch("collect_official_doctors_batch.time.sleep") as sleep_mock:
+            with tempfile.TemporaryDirectory() as directory:
+                incomplete_approved = download_gd2h_photo(
+                    double_incomplete_read,  # type: ignore[arg-type]
+                    photo_url,
+                    source,
+                    Path(directory),
+                    "张甲-心血管内科-主任医师-广东省第二人民医院",
+                    "AbC123",
+                    set(),
+                )
+        self.assertTrue(incomplete_approved["approved_no_source"])
+        self.assertEqual(
+            incomplete_approved["transport_error_kinds"],
+            ["incomplete_read", "incomplete_read"],
+        )
+        self.assertEqual(len(double_incomplete_read.calls), 2)
+        self.assertEqual(
+            double_incomplete_read.calls[0], double_incomplete_read.calls[1]
+        )
+        sleep_mock.assert_called_once_with(1)
+
+        class MixedFailureSession(Session):
+            def get(self, url: str, *, headers: dict[str, str], timeout: int) -> Response:
+                self.calls.append((url, headers.copy(), timeout))
+                if len(self.calls) == 1:
+                    raise requests.Timeout("first timeout")
+                return Response(content, 404)
+
+        mixed_failure = MixedFailureSession()
+        with patch("collect_official_doctors_batch.time.sleep") as sleep_mock:
+            with tempfile.TemporaryDirectory() as directory:
+                with self.assertRaisesRegex(
+                    RuntimeError, "首次发生传输层 timeout，唯一重试为 HTTP 404"
+                ):
+                    download_gd2h_photo(
+                        mixed_failure,  # type: ignore[arg-type]
+                        photo_url,
+                        source,
+                        Path(directory),
+                        "张甲-心血管内科-主任医师-广东省第二人民医院",
+                        "AbC123",
+                        set(),
+                    )
+        self.assertEqual(len(mixed_failure.calls), 2)
+        self.assertEqual(mixed_failure.calls[0], mixed_failure.calls[1])
+        sleep_mock.assert_called_once_with(1)
+
+    def test_admin_approved_broken_photo_is_blank_and_downgraded(self) -> None:
+        row = {
+            "异常提示": "既有提示",
+            "重点优先级": "高",
+            "重点关注范围": "慢性病",
+            "重点疾病标签": "高血压",
+            "照片链接": "https://gd2h.com/static/doctor/broken.jpg",
+            "照片文件": "01_试点医院/广东省第二人民医院/照片/失效.jpg",
+        }
+
+        mark_gd2h_broken_photo_row(row)
+        mark_gd2h_broken_photo_row(row)
+
+        self.assertEqual(
+            row["异常提示"], f"既有提示；{GD2H_BROKEN_PHOTO_WARNING}"
+        )
+        self.assertEqual(row["重点优先级"], "普通")
+        self.assertEqual(row["重点关注范围"], "")
+        self.assertEqual(row["重点疾病标签"], "")
+        self.assertEqual(row["照片链接"], "")
+        self.assertEqual(row["照片文件"], "")
+
+        transport_row = {
+            "异常提示": "",
+            "重点优先级": "高",
+            "重点关注范围": "术后恢复",
+            "重点疾病标签": "骨折",
+            "照片链接": "https://gd2h.com/static/doctor/timeout.jpg",
+            "照片文件": "01_试点医院/广东省第二人民医院/照片/超时.jpg",
+        }
+        mark_gd2h_transport_failed_photo_row(transport_row)
+        self.assertEqual(
+            transport_row["异常提示"], GD2H_TRANSPORT_FAILURE_WARNING
+        )
+        self.assertEqual(transport_row["重点优先级"], "普通")
+        self.assertEqual(transport_row["重点关注范围"], "")
+        self.assertEqual(transport_row["重点疾病标签"], "")
+        self.assertEqual(transport_row["照片链接"], "")
+        self.assertEqual(transport_row["照片文件"], "")
 
     def test_primary_title_keeps_deputy_director_title(self) -> None:
         self.assertEqual(gd2h_primary_title("副主任医师"), "副主任医师")
@@ -454,7 +648,67 @@ class Gd2hPhotoTrialTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "大小写原样"):
                 validate_gd2h_trial(payload, expected_rows=10)
 
-    def test_full_is_blocked_before_network_and_master_write(self) -> None:
+    def test_full_identity_merge_uses_explicit_groups_and_preserves_distinct_names(self) -> None:
+        def row(
+            name: str,
+            detail_id: str,
+            department: str,
+            campus: str,
+            profile: str,
+            *,
+            photo_state: str = "available",
+        ) -> dict[str, object]:
+            source = f"https://gd2h.com/site/detail/{detail_id}.html"
+            return {
+                "姓名": name,
+                "科室_分类页": f"{department}（{campus}）",
+                "科室_列表卡片": f"{department}（{campus}）",
+                "职称身份原文": "副主任医师",
+                "职称_关键词": "副主任医师",
+                "重点优先级": "高",
+                "重点关注范围": "慢性病",
+                "重点疾病标签": "高血压",
+                "擅长诊疗方向摘录": profile,
+                "亮眼经历线索": "",
+                "详情正文摘录": profile,
+                "来源链接": source,
+                "异常提示": "",
+                "_gd2h_detail_id": detail_id,
+                "_gd2h_photo_url": f"https://gd2h.com/static/{detail_id}.jpg",
+                "_gd2h_photo_state": photo_state,
+                "_gd2h_first_department": department,
+                "_gd2h_campus": campus,
+                "_gd2h_relation_order": 1,
+            }
+
+        rows = [
+            row("张晓", "42013", "儿科", "琶洲院区", "短简介"),
+            row("张晓", "42041", "风湿免疫科", "琶洲院区", "更完整的官方职业简介"),
+            row("张辉", "41995", "脊柱骨科", "琶洲院区", "骨科职业简介"),
+            row("张辉", "42337", "麻醉科", "琶洲院区", "麻醉职业简介"),
+        ]
+
+        merged, reconciliation = merge_gd2h_identity_rows(rows)
+
+        self.assertEqual(len(merged), 3)
+        self.assertEqual(
+            sum(len(item["detail_ids"]) for item in reconciliation),  # type: ignore[arg-type]
+            4,
+        )
+        zhang_xiao = next(item for item in merged if item["姓名"] == "张晓")
+        self.assertEqual(
+            zhang_xiao["科室_分类页"],
+            "儿科（琶洲院区）、风湿免疫科（琶洲院区）",
+        )
+        self.assertEqual(zhang_xiao["来源链接"], "https://gd2h.com/site/detail/42041.html")
+        zhang_hui = [item for item in merged if item["姓名"] == "张辉"]
+        self.assertEqual(len(zhang_hui), 2)
+        self.assertTrue(all("同名待甄别" in str(item["异常提示"]) for item in zhang_hui))
+        self.assertTrue(all(item["重点优先级"] == "普通" for item in zhang_hui))
+        self.assertTrue(all(not item["重点关注范围"] for item in zhang_hui))
+        self.assertEqual(GD2H_EXPECTED_FINAL_IDENTITY_COUNT, 567)
+
+    def test_full_is_authorised_but_requires_complete_payload(self) -> None:
         target = HospitalTarget(
             city="广州市",
             hospital="广东省第二人民医院",
@@ -465,9 +719,13 @@ class Gd2hPhotoTrialTests(unittest.TestCase):
             adapter_id=GD2H_ADAPTER_ID,
         )
 
-        with self.assertRaisesRegex(RuntimeError, "当前仅授权 TRIAL"):
-            collect_gd2h(target, "2026-08-14", full_mode=True)
-        with self.assertRaisesRegex(RuntimeError, "当前仅授权 TRIAL"):
+        with patch(
+            "collect_official_doctors_batch.create_official_session",
+            side_effect=RuntimeError("FULL reached official network boundary"),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "official network boundary"):
+                collect_gd2h(target, "2026-08-14", full_mode=True)
+        with self.assertRaisesRegex(RuntimeError, "缺少全量 payload"):
             validate_gd2h_full_append({})
 
 

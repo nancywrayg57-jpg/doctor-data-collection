@@ -186,3 +186,91 @@ Artifacts:
 - D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广东省第二人民医院\照片
 - D:\workspace\信息收集整理\docs\architecture_decisions\2026-08-14_issue_45_gd2h_photo_trial.md
 </Handoff_State>
+
+## 9. FULL 失效图片裁决与最新执行现场
+
+管理员解除前序图片熔断，并裁决严格 `gd2h.com` 官方图片在首次请求和唯一重试均为 HTTP 404 时可按“无照片留空”处理。实现固定为：保留同一官方图片 URL、同一详情页 Referer 和同一请求头，不注入 Cookie、不绕过验证；双 404 行写入 `官网照片链接失效（两次 HTTP 404，管理员批准留空）`，清空照片、重点关注范围与疾病标签，并将优先级降为“普通”。403、5xx、格式错误和其他未获授权的失败仍熔断。专项测试 10/10、全量测试 146/146 通过。
+
+解除熔断后的唯一一次 FULL 于 2026-08-14 执行：581/581 个合规详情读取完成，但卓日波（详情 ID `41970`）的严格官网图片 `https://gd2h.com/static//seygw//resources/upload/2024/05/28/638200840389145859.jpg` 在首次请求阶段发生传输层 `Read timed out`。该异常不是 HTTP 非 200 响应，当前授权的状态码重试分支尚未生效，因此按既定边界立即熔断，没有自动重跑，也没有把超时擅自标成失效图片。
+
+熔断后复核：采集进程数为 0；本院照片目录仍为 87 个文件、126,189,832 bytes；统一总底表 XLSX、CSV 和更新报告 SHA-256 仍分别为 `358EECF4CF4D96EAA89EA13BD10A2138E947A6BA1DEAC1EEE7F1C0AF991CDED5`、`2305257ABCB0143155380B572A3E2F2789C680FE9541EB6B63B397D38457B4A5`、`561B1DAFBDC1975CF8A95511D2CCB035EB0415FD872E8760D15532ABB12022CD`，三份受保护资产未写入。下一步只等待管理员明确裁决传输层超时是否也可按同 URL/Referer/请求头等待 1 秒、仅重试 1 次，以及连续两次传输失败时是否允许留空并作独立标注。
+
+## 10. 传输异常授权、零宽字符修正与连续失败熔断
+
+2026-08-15 管理员明确授权：`requests.Timeout` / `ConnectionError` 首次发生后保持同一官方图片 URL、同一详情页 Referer 和同一请求头，等待 1 秒仅重试一次；连续两次传输失败可按无照片留空并写入独立异常提示。实现同时固定：双 404 与双传输失败分别计数；HTTP 403、5xx、图片格式错误及“传输异常与 HTTP 状态码混合失败”仍熔断。专项测试 10/10、全量测试 146/146 通过。
+
+授权后的第一次 FULL 在写表前被身份门禁拦截：官网目录和详情 ID `42274` 的姓名均为 `U+200B + 程远雄`。本地 TRIAL 全量对账中仅发现 3 个 U+200B，全部是该姓名在 `directory_name`、`detail_name`、`name` 三处的同源格式字符。根因为通用 `clean_text()` 的 `\s+` 不能移除 U+200B；解决为仅在 GD2H 适配器解析边界移除 U+200B/U+200C/U+200D/FEFF，不改变全局清洗或可见文本。专项与全量测试均再次通过。
+
+零宽修正后的第二次 FULL 又在图片阶段熔断：刘晓明（详情 ID `3ad80584a42340bf8a761a07874978f0`）的严格官网图片连接中断，异常为 `ChunkedEncodingError` / `IncompleteRead(409254 bytes read, 6198 more expected)`。根因假设：服务器在响应体未完整传输时关闭连接；`requests.ChunkedEncodingError` 属于传输层响应读取失败，但不是当前捕获的 `requests.Timeout` 或 `requests.ConnectionError` 子类，因此没有进入获批的有界重试分支。最小候选方案是由管理员明确裁决是否将 `ChunkedEncodingError` 纳入同一传输失败集合；仍须保持同 URL/Referer/请求头、等待 1 秒、仅重试一次，连续两次才留空，混合失败仍熔断。
+
+该轮后已触发 `Agent.md` 连续两次采集验证失败门禁，当前停止代码修改和重跑并等待人类裁决。采集进程和 Excel 进程均为 0；部分照片目录为 520 个文件、393,292,395 bytes，保留现场不删除。统一总底表 XLSX、CSV 和更新报告 SHA-256 仍为 `358EECF4CF4D96EAA89EA13BD10A2138E947A6BA1DEAC1EEE7F1C0AF991CDED5`、`2305257ABCB0143155380B572A3E2F2789C680FE9541EB6B63B397D38457B4A5`、`561B1DAFBDC1975CF8A95511D2CCB035EB0415FD872E8760D15532ABB12022CD`，受保护资产仍未写入。
+
+## 11. 响应体不完整授权与照片集合差异定位
+
+2026-08-15 管理员解除本次熔断，并明确将 `requests.exceptions.ChunkedEncodingError` / `http.client.IncompleteRead` 纳入与超时、连接错误相同的有界传输规则：保持同一官方图片 URL、同一公开详情页 Referer 和同一请求头，等待 1 秒，仅重试 1 次；连续两次均为获批传输异常时按无照片留空并标注。不得改变请求头、注入 Cookie 或绕过验证；传输异常与 HTTP 状态码混合失败、403、5xx 和格式错误继续熔断。专项测试已固定两次 `incomplete_read` 的调用参数完全一致、恰好一次等待和连续失败留空标注。
+
+解除后的一次 FULL 已完成 581 个详情、567 个正式身份和照片内容下载，在总底表写入前被照片目录集合门禁拦截。总底表 XLSX、CSV 和更新报告哈希仍保持不变。只读核验显示：本轮照片对账表中的 519 个预期文件全部存在；目录额外包含前一次失败 FULL 遗留的 `钟广宇-结直肠癌诊治中心-未标注-广东省第二人民医院.png`。该文件 UTC 修改时间为 `2026-08-14T16:36:22.2913148Z`，早于本轮 519 张文件的 `2026-08-14T17:09:10Z` 至 `17:17Z` 写入窗口；其 SHA-256 为 `F68CBF29E87CAFC5B778EF6BC00F817DCDFB8F64AC2C28B5C3DDB70D65E6529F`。钟广宇的两个详情已按显式同一人证据归并，主详情为有明确职称的胃肠外科详情 `7c6df1663f604e218a9f9609448cb24e`，本轮对应文件为 `钟广宇-胃肠外科-医师-广东省第二人民医院.png`；旧文件来自无职称副详情 `6b1da92804f94192a3d724320f3bef65`，不属于当前 FULL 对账集合。
+
+为保留恢复路径，没有删除旧文件；已将其移动到 `work/issue_45_gd2h_stale_photo_quarantine/钟广宇-结直肠癌诊治中心-未标注-广东省第二人民医院.png`。本院正式照片目录现为 519 个文件。下一步先复跑专项与全量测试，再只执行一次 FULL；若再次失败，按 `Agent.md` 立即熔断并停止修改。
+
+## 12. FULL、总底表与 Obsidian 最终本地验收
+
+隔离旧副详情照片后，`py_compile`、GD2H 专项测试 10/10 和全量测试 146/146 全部通过。随后只执行一次获批 FULL，执行成功且未再次熔断：
+
+- 581/581 个合规详情读取成功，详情错误 0。
+- 14 组强证据同一人归并，20 组实质不同同名保持 40 行并标注，最终正式身份 567。
+- 照片四数为应采 567 / 实采 519 / 失败 0 / 无照片 48；6 张严格双 HTTP 404 在同请求唯一重试后按管理员裁决留空并标注；连续两次传输失败 0；单次重试总计 6。
+- 总底表新增 567 行，重复跳过 0，总行数由 8233 增至 8800。
+- CSV 与 XLSX 均为 8800 行；本院均为 567 行，来源链接集合、照片文件集合和 75 条异常提示逐项一致。
+- 本院 567 个来源链接唯一；519 行照片链接/文件均存在，48 行保持照片字段为空。
+
+写入后受保护资产哈希：
+
+| 工件 | 长度 | SHA-256 |
+|---|---:|---|
+| 统一总底表 XLSX | 4,163,089 | `C30AF03AD65842573437FD193D245C0E3D9FE260A4CA7BE029A5C0F02EA8C0EE` |
+| 统一总底表 CSV | 16,504,853 | `511AA1801755987C84A81F4FBE288EEC02BB182456E6B643622266CCCE3FFE41` |
+| 总底表更新报告 | 5,168 | `8A8D60FDAB8C707C5360A4C55D4D8018F406EB9F0EDCFA3BD6B6D867E761A743` |
+| 本院 FULL payload | 2,583,782 | `61EE5B04B8873A5DC037E4BABF31F017EBBE44FBFA58D451ED9C249F23E004B0` |
+| 本院 FULL 报告 | 322,271 | `79BFD0E426BB4C86068ACFB0D49547F9181E07B3AC3980B83BE85999D8B6258C` |
+
+Obsidian 使用 `--generate-missing-only --hospital 广东省第二人民医院` 生成：567 个医生画像、1 个 `_索引.md`、跳过 0。独立交叉核验结果为：567 个画像来源链接唯一且与本院 567 行一一对应；519 个应嵌照片全部使用 `照片/<文件名>` 相对路径且文件存在；48 个无照片身份没有错误图片嵌入；索引恰有 567 个画像链接；全部画像带自动生成标记。缺失画像补充报告记录新增 567、跳过 0、重建索引 1。
+
+FULL 与画像核验后，精确删除三个允许清理的 TRIAL 临时工件：`work/广东省第二人民医院_trial_payload.json`、`work/广东省第二人民医院_trial_doctors.csv`、`work/广东省第二人民医院_trial_report.md`。总底表、更新报告、入口台账、FULL payload/报告、正式照片和正式画像均保留。旧副详情照片没有删除，已从 Git 工作区隔离到 `C:/Users/Administrator/AppData/Local/Temp/doctor-data-issue45-gd2h-stale-photo/钟广宇-结直肠癌诊治中心-未标注-广东省第二人民医院.png`，SHA-256 仍为 `F68CBF29E87CAFC5B778EF6BC00F817DCDFB8F64AC2C28B5C3DDB70D65E6529F`。
+
+当前阶段切换为 `FULL_READY_FOR_OWNER_PROFILE_AUDIT`。下一步只做最终差异、测试、身份和 Git 工件核验，提交并非强制推送原分支后，在 PR #46 请求 owner 最终画像审计；不得自行合并 PR、关闭 Issue 或领取下一 Issue。
+
+<Handoff_State>
+Target: Issue #45 广东省第二人民医院 FULL_APPEND_AND_OBSIDIAN
+AgentConstitution: D:\workspace\信息收集整理\Agent.md
+RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
+RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/45
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/46
+Branch: codex/mhrj/issue-45-gd2h-photo-trial
+Phase: FULL_READY_FOR_OWNER_PROFILE_AUDIT
+Completed:
+- 581 个合规详情完成；567 个正式身份已追加总底表，详情错误 0
+- 519 张本人职业照与 48 个无照片身份完成四数对账；6 个双 404 按管理员裁决留空并标注
+- 567 个 Obsidian 画像和 1 个索引已生成；照片嵌入与索引链接逐项核验一致
+- 三个 TRIAL 临时工件已精确清理；旧副详情照片保留在工作区外的可恢复隔离路径
+CurrentFacts:
+- 总底表 CSV/XLSX 均为 8800 行；本院 567 行、567 个唯一来源、75 条异常提示
+- 本院正式照片目录 519 个文件、393,140,622 bytes
+- 专项测试 10/10、全量测试 146/146、py_compile 通过
+Next:
+- 最终检查差异、LF/语法、Git 对象和身份
+- 提交并通过 SSH 非强制推送原分支
+- 在 PR #46 请求 nancywrayg57-jpg 最终画像审计并停止
+Constraints:
+- 不自行合并 PR、关闭 Issue 或领取下一 Issue
+- 只认 owner 在当前 PR 的最终画像审计结论
+- 自动化保持 PAUSED，直到本次工件成功推送并进入等待审计状态
+Artifacts:
+- D:\workspace\信息收集整理\work\广东省第二人民医院_official_doctors_payload.json
+- D:\workspace\信息收集整理\work\广东省第二人民医院_official_doctors_report.md
+- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\广东省第二人民医院
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.csv
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表_更新报告.md
+</Handoff_State>
