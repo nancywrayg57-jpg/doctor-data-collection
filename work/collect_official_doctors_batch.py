@@ -16,6 +16,7 @@ from dataclasses import dataclass, replace
 from datetime import date
 from difflib import SequenceMatcher
 from html import unescape
+from http.client import IncompleteRead
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
@@ -279,6 +280,81 @@ GDMCH_EXPECTED_SAME_NAME_GROUPS = {
 GDMCH_SAME_IDENTITY_DETAIL_GROUPS = {frozenset({"34640", "34931"})}
 GDMCH_EXPECTED_FINAL_IDENTITY_COUNT = (
     GDMCH_EXPECTED_RELATION_COUNT - GDMCH_EXPECTED_NON_DOCTOR_COUNT - 1
+)
+GD2H_ADAPTER_ID = "gd2h_static_campus_expert_photo"
+GD2H_EXPECTED_RELATION_COUNT = 608
+GD2H_EXPECTED_NURSING_COUNT = 27
+GD2H_EXPECTED_ELIGIBLE_COUNT = 581
+GD2H_EXPECTED_NUMERIC_ID_COUNT = 484
+GD2H_EXPECTED_HASH_ID_COUNT = 124
+GD2H_EXPECTED_PHOTO_AVAILABLE_COUNT = 539
+GD2H_EXPECTED_PLACEHOLDER_COUNT = 39
+GD2H_EXPECTED_EMPTY_PHOTO_COUNT = 3
+GD2H_EXPECTED_CATEGORY_COUNTS = {
+    "琶洲院区-临床专家": 461,
+    "琶洲院区-医技专家": 38,
+    "琶洲院区-护理专家": 21,
+    "民航院区-临床专家": 81,
+    "民航院区-医技专家": 1,
+    "民航院区-护理专家": 6,
+}
+GD2H_EXPECTED_SAME_NAME_GROUPS = {
+    "付钰": ["42089", "d3730bba6ddc416399018016cd1d36ce"],
+    "刘百川": ["42083", "ae7ffec5cd0d443db0edebecde984a51"],
+    "吴洋": ["42073", "c7a5bd287e794633acc25ce882060be3"],
+    "周声宁": ["ddafdca553174ed8842e81fc27dead53", "65b0ae940d5a48959462ce0164d000a5"],
+    "宋杰": ["42385", "f90441b3f2c844bf90e868b970f734b6"],
+    "张云松": ["42201", "4a14c72e03ac4a168a12662994202b92"],
+    "张敏": ["42190", "e931976c91484cb3b4908b55a18533c3"],
+    "张晓": ["42013", "42041"],
+    "张琴": ["41959", "41945"],
+    "张辉": ["41995", "42337"],
+    "曾锦涛": ["ceeb882e904d4105944190690424db22", "46e0d490af224122843faaf8fa6ab370"],
+    "李业海": ["42419", "91d1521d8f4c4d56a864d109f3a1a0f3"],
+    "李昆松": ["42363", "66b8bcb60da2457284d5d793d45ac022"],
+    "林周胜": ["41989", "41981"],
+    "林岱华": ["41955", "42408"],
+    "梁飞": ["42349", "acf74a7e52cd40069fd78d4ff08a3800"],
+    "毛邱娴": ["41954", "42407"],
+    "焦勇钢": ["42264", "2d3627906cd343c29d3b5ea4db7a6412"],
+    "王业杨": ["42001", "90b864bc18624c078b48c721bb533d74"],
+    "王健富": ["42084", "42121"],
+    "王文林": ["42308", "407dff4f33b34d958fe238f3ebbf957a"],
+    "罗金现": ["42304", "42289"],
+    "谢烨权": ["8ca5a8f10e8e4eda9c11614cca774a9f", "b6c62b2947c340f99e99adeea7a931df"],
+    "谭嘉男": ["724302d963df4982b611955eaf014913", "c23cd071940c450392746ffd2030c493"],
+    "赵红莉": ["42100", "f0807ab14464409baff0b0a85904620e"],
+    "郝建志": ["42333", "90406795a63d4dc88e8b83c98a2b617b"],
+    "钟广宇": ["7c6df1663f604e218a9f9609448cb24e", "6b1da92804f94192a3d724320f3bef65"],
+    "陈杨": ["385290f3518144948f8469c1f27806e0", "e8561207c6624bbcaa2764a3e9202837"],
+    "韩方海": ["bf9b5866a6944b9eac920eca5820beba", "546bf5f38ea94b4f8c1f09c989adbcc9"],
+    "颜剑豪": ["42421", "35e8a6767c504c408d2e8e3749bb49a5"],
+    "马晓芬": ["42451", "42426"],
+    "黄永军": ["41991", "41966"],
+    "齐勇": ["69c9d534b5344fb49848fc7362242270", "41979"],
+    "龙伟光": ["42311", "688c07d882ac4303ae6bcae04ddf71c5"],
+}
+# Issue #45 FULL evidence: identical official portrait, near-identical official
+# biography, or the owner-reviewed material identity decision. Every other
+# duplicate name remains separate and is marked 同名待甄别.
+GD2H_SAME_IDENTITY_DETAIL_GROUPS = {
+    frozenset({"42013", "42041"}),  # 张晓：同一官网职业照、正文一致
+    frozenset({"41959", "41945"}),  # 张琴：同一官网职业照、正文高度一致
+    frozenset({"ceeb882e904d4105944190690424db22", "46e0d490af224122843faaf8fa6ab370"}),  # 曾锦涛
+    frozenset({"41989", "41981"}),  # 林周胜：同一官网职业照
+    frozenset({"41955", "42408"}),  # 林岱华：同一官网职业照、正文一致
+    frozenset({"41954", "42407"}),  # 毛邱娴：同一官网职业照、正文一致
+    frozenset({"42084", "42121"}),  # 王健富：同一官网职业照、正文一致
+    frozenset({"42304", "42289"}),  # 罗金现：同一官网职业照、姓名与职称一致
+    frozenset({"8ca5a8f10e8e4eda9c11614cca774a9f", "b6c62b2947c340f99e99adeea7a931df"}),  # 谢烨权
+    frozenset({"724302d963df4982b611955eaf014913", "c23cd071940c450392746ffd2030c493"}),  # 谭嘉男
+    frozenset({"7c6df1663f604e218a9f9609448cb24e", "6b1da92804f94192a3d724320f3bef65"}),  # 钟广宇
+    frozenset({"385290f3518144948f8469c1f27806e0", "e8561207c6624bbcaa2764a3e9202837"}),  # 陈杨
+    frozenset({"42451", "42426"}),  # 马晓芬：同一官网职业照、正文一致
+    frozenset({"41991", "41966"}),  # 黄永军：同一官网职业照、正文一致
+}
+GD2H_EXPECTED_FINAL_IDENTITY_COUNT = GD2H_EXPECTED_ELIGIBLE_COUNT - sum(
+    len(group) - 1 for group in GD2H_SAME_IDENTITY_DETAIL_GROUPS
 )
 FAHSYSU_EXPECTED_SAME_NAME_GROUPS = {
     "庄锦涛": ["29148", "31480"],
@@ -1193,6 +1269,13 @@ def dedicated_adapter_for(entry_url: str) -> str:
         and not parsed.fragment
     ):
         return GDMCH_ADAPTER_ID
+    if (
+        host.removeprefix("www.") == "gd2h.com"
+        and path == "/site/column/107_1_20.html"
+        and not parsed.query
+        and not parsed.fragment
+    ):
+        return GD2H_ADAPTER_ID
     if "gzzoc.org.cn" in host and "/expert-introduction" in path:
         return "gzzoc_drupal_doctor"
     if "nbkjyy.mil.cn" in host and "/expert" in path:
@@ -5414,6 +5497,1145 @@ def collect_gdmch(
         "photo_samples": photo_samples,
         "photo_errors": photo_errors,
         "category_errors": category_errors,
+        "detail_errors": detail_errors,
+        "category_counts": category_counter.most_common(),
+        "priority_counts": dict(priority_counter),
+        "group_counts": dict(group_counter),
+        "warning_counts": dict(warning_counter),
+        "rows": rows,
+    }
+
+
+def gd2h_detail_id(url: str | None) -> str:
+    """Return the case-sensitive numeric/hash ID from the one authorised detail route."""
+
+    parsed = urlparse(clean_text(url))
+    if comparable_host(parsed.geturl()) != "gd2h.com" or parsed.query or parsed.fragment:
+        return ""
+    match = re.fullmatch(r"/site/detail/([A-Za-z0-9]+)\.html", parsed.path)
+    return match.group(1) if match else ""
+
+
+GD2H_DEFAULT_PHOTO_PATH = "/static//seygw//resources/upload/2024/05/28/default_ys.gif"
+GD2H_PHOTO_RETRY_POLICY = (
+    "同一官方图片 URL + 同一公开详情页 Referer；首次 HTTP 非 200 或传输层"
+    "超时/连接错误/响应体不完整后等待 1 秒，仅重试 1 次；请求头不变且不注入 Cookie；"
+    "仅双 404 或连续两次传输失败可按管理员裁决留空"
+)
+GD2H_APPROVED_BROKEN_PHOTO_STATUS = 404
+GD2H_BROKEN_PHOTO_WARNING = "官网照片链接失效（两次 HTTP 404，管理员批准留空）"
+GD2H_TRANSPORT_FAILURE_WARNING = (
+    "官网照片请求连续两次传输失败（超时、连接错误或响应体不完整，管理员批准留空）"
+)
+GD2H_APPROVED_TRANSPORT_ERROR_KINDS = frozenset(
+    {"timeout", "connection_error", "incomplete_read"}
+)
+GD2H_OBSERVED_BROKEN_PHOTO_DETAIL_IDS = {
+    "adb0d1a824b14c5db57e38e0e10ab27f",  # 陈鹏程
+    "42020",  # 廖耀华
+}
+
+
+def gd2h_clean_text(value: str | None) -> str:
+    """Remove only zero-width format characters observed in GD2H public text."""
+
+    return clean_text(re.sub(r"[\u200b-\u200d\ufeff]", "", value or ""))
+
+
+def gd2h_photo_url(value: str | None, base_url: str) -> str:
+    raw_value = clean_text(value)
+    if not raw_value:
+        return ""
+    absolute = urljoin(base_url, raw_value)
+    parsed = urlparse(absolute)
+    path_lower = parsed.path.lower()
+    if (
+        parsed.scheme not in {"http", "https"}
+        or comparable_host(absolute) != "gd2h.com"
+        or parsed.query
+        or parsed.fragment
+        or not (
+            path_lower.startswith("/static/")
+            or path_lower.startswith("/system/profile/upload/")
+        )
+        or path_lower.replace("//", "/")
+        == GD2H_DEFAULT_PHOTO_PATH.lower().replace("//", "/")
+    ):
+        return ""
+    if parsed.scheme == "http":
+        parsed = parsed._replace(scheme="https")
+    return urlunparse(parsed)
+
+
+def parse_gd2h_directory(
+    html: str, entry_url: str
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    soup = BeautifulSoup(html, "html.parser")
+    relations: list[dict[str, Any]] = []
+    categories: list[dict[str, Any]] = []
+    department_tree: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    relation_order = 0
+    campus_definitions = (
+        (".xxk-item1", "琶洲院区"),
+        (".xxk-item2", "民航院区"),
+    )
+    category_definitions = (
+        (".zjlist0", "临床专家"),
+        (".zjlist1", "医技专家"),
+        (".zjlist2", "护理专家"),
+    )
+    for campus_selector, campus in campus_definitions:
+        campus_node = soup.select_one(campus_selector)
+        if not campus_node:
+            continue
+        for category_selector, category in category_definitions:
+            category_node = campus_node.select_one(category_selector)
+            category_relations: list[dict[str, Any]] = []
+            if not category_node:
+                continue
+            if category == "护理专家":
+                for item in category_node.select(".item"):
+                    anchor = item.select_one('a[href*="/site/detail/"]')
+                    if not anchor:
+                        continue
+                    source_link = urljoin(entry_url, str(anchor.get("href") or ""))
+                    detail_id = gd2h_detail_id(source_link)
+                    name_node = item.select_one(".info span")
+                    identity_node = item.select_one(".info li")
+                    name = gd2h_clean_text(
+                        name_node.get_text(" ", strip=True) if name_node else ""
+                    )
+                    identity = gd2h_clean_text(
+                        identity_node.get_text(" ", strip=True) if identity_node else ""
+                    )
+                    if not detail_id or not name or detail_id in seen_ids:
+                        continue
+                    relation_order += 1
+                    relation = {
+                        "id": detail_id,
+                        "name": name,
+                        "campus": campus,
+                        "category": category,
+                        "department": "护理专家",
+                        "list_title": identity,
+                        "source_link": source_link,
+                        "relation_order": relation_order,
+                    }
+                    seen_ids.add(detail_id)
+                    relations.append(relation)
+                    category_relations.append(relation)
+                department_tree.append(
+                    {
+                        "campus": campus,
+                        "category": category,
+                        "department": "护理专家",
+                        "relation_count": len(category_relations),
+                    }
+                )
+            else:
+                for group in category_node.select(":scope > li"):
+                    department_node = group.select_one(":scope > .subject")
+                    department = gd2h_clean_text(
+                        department_node.get_text(" ", strip=True)
+                        if department_node
+                        else ""
+                    )
+                    group_relations: list[dict[str, Any]] = []
+                    for anchor in group.select('a[href*="/site/detail/"]'):
+                        source_link = urljoin(entry_url, str(anchor.get("href") or ""))
+                        detail_id = gd2h_detail_id(source_link)
+                        name = gd2h_clean_text(anchor.get_text(" ", strip=True))
+                        if not detail_id or not name or detail_id in seen_ids:
+                            continue
+                        relation_order += 1
+                        relation = {
+                            "id": detail_id,
+                            "name": name,
+                            "campus": campus,
+                            "category": category,
+                            "department": department,
+                            "list_title": "",
+                            "source_link": source_link,
+                            "relation_order": relation_order,
+                        }
+                        seen_ids.add(detail_id)
+                        relations.append(relation)
+                        category_relations.append(relation)
+                        group_relations.append(relation)
+                    department_tree.append(
+                        {
+                            "campus": campus,
+                            "category": category,
+                            "department": department,
+                            "relation_count": len(group_relations),
+                        }
+                    )
+            categories.append(
+                {
+                    "category_id": f"{campus}-{category}",
+                    "category_name": f"{campus}-{category}",
+                    "url": entry_url,
+                    "row_count": len(category_relations),
+                }
+            )
+    return relations, categories, department_tree
+
+
+GD2H_SCHEDULE_TAIL_PATTERN = re.compile(
+    r"(?:门诊时间|门诊地点|出诊时间|出诊安排|开诊时间|排班信息|坐诊时间)\s*[:：]?.*$",
+    flags=re.IGNORECASE | re.DOTALL,
+)
+
+
+def strip_gd2h_schedule_tail(value: str | None) -> tuple[str, bool]:
+    text = clean_text(value)
+    match = GD2H_SCHEDULE_TAIL_PATTERN.search(text)
+    if not match:
+        return text, False
+    return clean_text(text[: match.start()]), True
+
+
+GD2H_BREADCRUMB_PREFIX_PATTERN = re.compile(
+    r"^首页\s*[>＞]\s*患者服务\s*专家介绍"
+    r"(?:[（(](?:琶洲|民航)院区[）)])?\s*"
+    r"(?:临床专家|医技专家)\s*"
+)
+
+
+def strip_gd2h_breadcrumb_prefix(value: str | None) -> str:
+    """Remove only the observed GD2H expert-page breadcrumb at text start."""
+
+    return clean_text(GD2H_BREADCRUMB_PREFIX_PATTERN.sub("", clean_text(value), count=1))
+
+
+def parse_gd2h_detail(html: str, fallback: dict[str, Any]) -> dict[str, Any]:
+    soup = BeautifulSoup(html, "html.parser")
+    summary = soup.select_one(".grjj")
+    if not summary:
+        return {
+            "name": gd2h_clean_text(str(fallback.get("name") or "")),
+            "title": gd2h_clean_text(str(fallback.get("list_title") or "")),
+            "department": gd2h_clean_text(str(fallback.get("department") or "")),
+            "specialty": "",
+            "profile_text": "",
+            "photo_url": "",
+            "photo_state": "empty",
+            "raw_photo_url": "",
+            "schedule_exclusion_count": 0,
+            "forbidden_segment_count": 0,
+            "patient_case_exclusion_count": 0,
+        }
+    labeled: dict[str, str] = {}
+    for paragraph in summary.select("p"):
+        text = gd2h_clean_text(paragraph.get_text(" ", strip=True))
+        match = re.match(r"^(姓名|职称|科室|擅长)\s*[:：]\s*(.*)$", text)
+        if match:
+            labeled[match.group(1)] = gd2h_clean_text(match.group(2))
+
+    profile_root = (
+        soup.select_one(".expertIntro")
+        or soup.select_one(".right-container")
+        or summary.parent
+        or summary
+    )
+    clone = BeautifulSoup(str(profile_root), "html.parser")
+    for node in clone.select(".grjj, script, style"):
+        node.decompose()
+    raw_segments = [
+        gd2h_clean_text(segment)
+        for segment in clone.get_text("\n", strip=True).splitlines()
+        if gd2h_clean_text(segment)
+    ]
+    kept_segments: list[str] = []
+    schedule_exclusion_count = 0
+    forbidden_segment_count = 0
+    patient_case_exclusion_count = 0
+    for segment in raw_segments:
+        segment, schedule_removed = strip_gd2h_schedule_tail(segment)
+        schedule_exclusion_count += int(schedule_removed)
+        if not segment:
+            if schedule_removed:
+                break
+            continue
+        if any(marker in segment for marker in GDGH_FORBIDDEN_SENTENCE_MARKERS):
+            forbidden_segment_count += 1
+            continue
+        if contains_gzbrain_patient_case_text(segment):
+            patient_case_exclusion_count += 1
+            continue
+        segment = strip_profile_navigation_text(segment)
+        if segment and segment not in kept_segments:
+            kept_segments.append(segment)
+        if schedule_removed:
+            break
+
+    image_node = summary.select_one("img")
+    raw_photo_url = clean_text(str(image_node.get("src") or "")) if image_node else ""
+    photo_url = gd2h_photo_url(raw_photo_url, str(fallback.get("source_link") or ""))
+    normalized_raw_path = urlparse(
+        urljoin(str(fallback.get("source_link") or ""), raw_photo_url)
+    ).path.lower().replace("//", "/")
+    if not raw_photo_url:
+        photo_state = "empty"
+    elif normalized_raw_path == GD2H_DEFAULT_PHOTO_PATH.lower().replace("//", "/"):
+        photo_state = "placeholder"
+    elif photo_url:
+        photo_state = "available"
+    else:
+        photo_state = "rejected"
+    return {
+        "name": first_nonempty(labeled.get("姓名"), str(fallback.get("name") or "")),
+        "title": first_nonempty(labeled.get("职称"), str(fallback.get("list_title") or "")),
+        "department": first_nonempty(
+            labeled.get("科室"), str(fallback.get("department") or "")
+        ),
+        "specialty": labeled.get("擅长", ""),
+        "profile_text": clip(
+            strip_gd2h_breadcrumb_prefix(" ".join(kept_segments)), 1800
+        ),
+        "photo_url": photo_url,
+        "photo_state": photo_state,
+        "raw_photo_url": raw_photo_url,
+        "schedule_exclusion_count": schedule_exclusion_count,
+        "forbidden_segment_count": forbidden_segment_count,
+        "patient_case_exclusion_count": patient_case_exclusion_count,
+    }
+
+
+def select_gd2h_trial_doctors(
+    doctors: list[dict[str, Any]], max_doctors: int | None
+) -> list[dict[str, Any]]:
+    if not max_doctors or len(doctors) <= max_doctors:
+        return doctors[:]
+    ordered = sorted(doctors, key=lambda item: int(item.get("relation_order") or 0))
+    selected: list[dict[str, Any]] = []
+    selected_ids: set[str] = set()
+    selected_names: set[str] = set()
+
+    def choose(predicate: Any) -> None:
+        for item in ordered:
+            if (
+                item["id"] not in selected_ids
+                and clean_text(str(item.get("name") or "")) not in selected_names
+                and predicate(item)
+            ):
+                selected.append(item)
+                selected_ids.add(item["id"])
+                selected_names.add(clean_text(str(item.get("name") or "")))
+                return
+
+    mandatory = (
+        lambda item: item["campus"] == "琶洲院区"
+        and item["category"] == "临床专家"
+        and not item["id"].isdigit(),
+        lambda item: item["campus"] == "琶洲院区"
+        and item["category"] == "临床专家"
+        and item["id"].isdigit(),
+        lambda item: item["campus"] == "琶洲院区" and item["category"] == "医技专家",
+        lambda item: item["campus"] == "民航院区" and item["category"] == "临床专家",
+        lambda item: item["campus"] == "民航院区" and item["category"] == "医技专家",
+    )
+    for predicate in mandatory:
+        choose(predicate)
+    while len(selected) < max_doctors:
+        campuses = {item["campus"] for item in selected}
+        categories = {item["category"] for item in selected}
+        departments = {item["department"] for item in selected}
+        id_formats = {"numeric" if item["id"].isdigit() else "hash" for item in selected}
+        candidates = [
+            item
+            for item in ordered
+            if item["id"] not in selected_ids
+            and clean_text(str(item.get("name") or "")) not in selected_names
+        ]
+        if not candidates:
+            break
+        candidates.sort(
+            key=lambda item: (
+                -(
+                    8 * int(item["department"] not in departments)
+                    + 4 * int(item["campus"] not in campuses)
+                    + 4 * int(item["category"] not in categories)
+                    + 3
+                    * int(
+                        ("numeric" if item["id"].isdigit() else "hash")
+                        not in id_formats
+                    )
+                ),
+                int(item.get("relation_order") or 0),
+            )
+        )
+        item = candidates[0]
+        selected.append(item)
+        selected_ids.add(item["id"])
+        selected_names.add(clean_text(str(item.get("name") or "")))
+    return selected[:max_doctors]
+
+
+GD2H_CAMPUS_SUFFIX_PATTERN = re.compile(r"（(?:琶洲|民航)院区）$")
+
+
+def gd2h_covered_department_names(rows: list[dict[str, Any]]) -> list[str]:
+    return sorted(
+        {
+            GD2H_CAMPUS_SUFFIX_PATTERN.sub(
+                "", department
+            )
+            for row in rows
+            for department in clean_text(str(row.get("科室_分类页") or "")).split("、")
+            if department
+        }
+    )
+
+
+def gd2h_primary_title(value: str | None) -> str:
+    """Select the longest non-overlapping title so 副主任 is not reduced to 主任."""
+
+    titles = extract_terms(clean_text(value), TITLE_TERMS)
+    return titles[0] if titles else ""
+
+
+def mark_gd2h_no_photo_row(row: dict[str, Any], warning: str) -> None:
+    """Keep an admin-approved unavailable official image blank and abnormal."""
+
+    warnings = [
+        warning
+        for warning in clean_text(str(row.get("异常提示") or "")).split("；")
+        if warning
+    ]
+    warnings.append(warning)
+    row["异常提示"] = "；".join(dict.fromkeys(warnings))
+    row["重点优先级"] = "普通"
+    row["重点关注范围"] = ""
+    row["重点疾病标签"] = ""
+    row["照片链接"] = ""
+    row["照片文件"] = ""
+
+
+def mark_gd2h_broken_photo_row(row: dict[str, Any]) -> None:
+    """Keep an admin-approved double-404 official image blank and abnormal."""
+
+    mark_gd2h_no_photo_row(row, GD2H_BROKEN_PHOTO_WARNING)
+
+
+def mark_gd2h_transport_failed_photo_row(row: dict[str, Any]) -> None:
+    """Keep an admin-approved double transport failure blank and abnormal."""
+
+    mark_gd2h_no_photo_row(row, GD2H_TRANSPORT_FAILURE_WARNING)
+
+
+def merge_gd2h_identity_rows(
+    rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Apply the explicit Issue #45 identity decisions without name-only merging."""
+
+    same_identity_by_id = {
+        detail_id: group
+        for group in GD2H_SAME_IDENTITY_DETAIL_GROUPS
+        for detail_id in group
+    }
+    by_name: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        by_name.setdefault(gdzy5413_normalized_name(row.get("姓名")), []).append(row)
+
+    merged_rows: list[dict[str, Any]] = []
+    reconciliation: list[dict[str, Any]] = []
+    longest_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "详情正文摘录"]
+    for name, name_rows in by_name.items():
+        clusters: list[list[dict[str, Any]]] = []
+        for row in name_rows:
+            detail_id = clean_text(str(row.get("_gd2h_detail_id") or ""))
+            expected_group = same_identity_by_id.get(detail_id)
+            matched_cluster = next(
+                (
+                    cluster
+                    for cluster in clusters
+                    if expected_group
+                    and any(
+                        clean_text(str(member.get("_gd2h_detail_id") or ""))
+                        in expected_group
+                        for member in cluster
+                    )
+                ),
+                None,
+            )
+            if matched_cluster is None:
+                clusters.append([row])
+            else:
+                matched_cluster.append(row)
+
+        distinct_same_name = len(name_rows) > 1 and len(clusters) > 1
+        for identity_index, cluster in enumerate(clusters, start=1):
+            primary = max(
+                cluster,
+                key=lambda item: (
+                    clean_text(str(item.get("_gd2h_photo_state") or "")) == "available",
+                    gdzy5413_primary_row_score(item),
+                    -int(item.get("_gd2h_relation_order") or 0),
+                ),
+            )
+            merged = dict(primary)
+            departments: list[str] = []
+            campuses: list[str] = []
+            for member in cluster:
+                for department in clean_text(
+                    str(member.get("科室_分类页") or "")
+                ).split("、"):
+                    if department and department not in departments:
+                        departments.append(department)
+                campus = clean_text(str(member.get("_gd2h_campus") or ""))
+                if campus and campus not in campuses:
+                    campuses.append(campus)
+                for field in longest_fields:
+                    if len(clean_text(str(member.get(field) or ""))) > len(
+                        clean_text(str(merged.get(field) or ""))
+                    ):
+                        merged[field] = member.get(field, "")
+            merged["科室_分类页"] = "、".join(departments)
+            merged["科室_列表卡片"] = "、".join(departments)
+            merged["职称_关键词"] = "、".join(
+                extract_terms(
+                    clean_text(str(merged.get("职称身份原文") or "")), TITLE_TERMS
+                )
+            )
+            warnings = [
+                warning
+                for member in cluster
+                for warning in clean_text(str(member.get("异常提示") or "")).split("；")
+                if warning
+            ]
+            titles = {
+                clean_text(str(member.get("职称身份原文") or ""))
+                for member in cluster
+                if clean_text(str(member.get("职称身份原文") or ""))
+            }
+            if len(titles) > 1:
+                warnings.append("多详情职称不一致")
+            if distinct_same_name:
+                warnings.append("同名待甄别")
+            merged["异常提示"] = "；".join(dict.fromkeys(warnings))
+            if merged["异常提示"]:
+                merged["重点优先级"] = "普通"
+                merged["重点关注范围"] = ""
+                merged["重点疾病标签"] = ""
+            merged_rows.append(merged)
+            reconciliation.append(
+                {
+                    "name": name,
+                    "identity_index": identity_index,
+                    "detail_ids": [
+                        clean_text(str(member.get("_gd2h_detail_id") or ""))
+                        for member in cluster
+                    ],
+                    "resolution": (
+                        "同名待甄别"
+                        if distinct_same_name
+                        else "同一人归并"
+                        if len(cluster) > 1
+                        else "唯一身份"
+                    ),
+                    "relation_count": len(cluster),
+                    "departments": departments,
+                    "campuses": campuses,
+                    "titles": sorted(titles),
+                    "primary_detail_id": clean_text(
+                        str(merged.get("_gd2h_detail_id") or "")
+                    ),
+                    "primary_source_link": merged.get("来源链接", ""),
+                    "primary_photo_state": clean_text(
+                        str(merged.get("_gd2h_photo_state") or "")
+                    ),
+                    "merged_source_links": [
+                        member.get("来源链接", "")
+                        for member in cluster
+                        if member.get("来源链接") != merged.get("来源链接")
+                    ],
+                }
+            )
+    return merged_rows, reconciliation
+
+
+def download_gd2h_photo(
+    session: requests.Session,
+    photo_url: str,
+    source_link: str,
+    photo_dir: Path,
+    filename_stem: str,
+    detail_id: str,
+    used_filenames: set[str],
+) -> dict[str, Any]:
+    official_url = gd2h_photo_url(photo_url, photo_url)
+    if not official_url:
+        raise RuntimeError(f"照片 URL 不属于 gd2h.com 官网医生图片路径：{photo_url}")
+    if gd2h_detail_id(source_link) != detail_id:
+        raise RuntimeError(f"照片 Referer 未与详情 ID 对齐：{source_link}")
+    request_headers = {"Referer": source_link}
+    first_transport_error = ""
+    try:
+        response = session.get(
+            official_url,
+            headers=request_headers,
+            timeout=30,
+        )
+    except requests.Timeout:
+        response = None
+        first_transport_error = "timeout"
+    except requests.ConnectionError:
+        response = None
+        first_transport_error = "connection_error"
+    except (requests.exceptions.ChunkedEncodingError, IncompleteRead):
+        response = None
+        first_transport_error = "incomplete_read"
+    first_status_code = response.status_code if response is not None else None
+    retry_count = 0
+    if response is None or response.status_code != 200:
+        time.sleep(1)
+        retry_count = 1
+        second_transport_error = ""
+        try:
+            response = session.get(
+                official_url,
+                headers=request_headers,
+                timeout=30,
+            )
+        except requests.Timeout:
+            response = None
+            second_transport_error = "timeout"
+        except requests.ConnectionError:
+            response = None
+            second_transport_error = "connection_error"
+        except (requests.exceptions.ChunkedEncodingError, IncompleteRead):
+            response = None
+            second_transport_error = "incomplete_read"
+        if response is None:
+            if first_transport_error:
+                return {
+                    "approved_no_source": True,
+                    "approved_no_source_reason": "transport_failure",
+                    "original_photo_url": official_url,
+                    "transport_error_kinds": [
+                        first_transport_error,
+                        second_transport_error,
+                    ],
+                    "retry_count": retry_count,
+                }
+            raise RuntimeError(
+                "照片首次为 HTTP "
+                f"{first_status_code}，唯一重试发生传输层 {second_transport_error}："
+                f"{official_url}"
+            )
+        if first_transport_error and response.status_code != 200:
+            raise RuntimeError(
+                f"照片首次发生传输层 {first_transport_error}，唯一重试为 HTTP "
+                f"{response.status_code}：{official_url}"
+            )
+    if response.status_code != 200:
+        if (
+            first_status_code == GD2H_APPROVED_BROKEN_PHOTO_STATUS
+            and response.status_code == GD2H_APPROVED_BROKEN_PHOTO_STATUS
+        ):
+            return {
+                "approved_no_source": True,
+                "approved_no_source_reason": "double_404",
+                "original_photo_url": official_url,
+                "http_status": GD2H_APPROVED_BROKEN_PHOTO_STATUS,
+                "retry_count": retry_count,
+            }
+        raise RuntimeError(
+            f"照片下载在同请求单次重试后仍为 HTTP {response.status_code}：{official_url}"
+        )
+    extension = gdgh_photo_extension(response.content, response.headers.get("Content-Type"))
+    if not extension:
+        raise RuntimeError(f"照片响应格式不受支持：{official_url}")
+    filename = f"{filename_stem}.{extension}"
+    if filename.casefold() in used_filenames:
+        filename = f"{filename_stem}-{gdgh_photo_part(detail_id)}.{extension}"
+    used_filenames.add(filename.casefold())
+    photo_dir.mkdir(parents=True, exist_ok=True)
+    path = photo_dir / filename
+    if path.exists() and path.read_bytes() != response.content:
+        raise RuntimeError(f"照片目标已存在且内容不同，拒绝覆盖：{path}")
+    path.write_bytes(response.content)
+    width, height = gdmch_photo_dimensions(response.content, extension)
+    if width <= 0 or height <= 0:
+        raise RuntimeError(f"照片尺寸无法从原图解析：{official_url}")
+    return {
+        "photo_url": official_url,
+        "filename": filename,
+        "bytes": len(response.content),
+        "sha256": hashlib.sha256(response.content).hexdigest(),
+        "width": width,
+        "height": height,
+        "disk_path": str(path),
+        "retry_count": retry_count,
+    }
+
+
+def collect_gd2h(
+    target: HospitalTarget,
+    today: str,
+    max_doctors: int | None = None,
+    photo_root: Path | None = None,
+    full_mode: bool = False,
+) -> dict[str, Any]:
+    session = create_official_session()
+    entry_status, entry_html, entry_error = fetch(session, target.entry_url)
+    if entry_status != 200:
+        raise RuntimeError(f"入口页普通公开 GET 读取失败：{entry_error}")
+    relations, categories, department_tree = parse_gd2h_directory(
+        entry_html, target.entry_url
+    )
+    nursing_relations = [item for item in relations if item["category"] == "护理专家"]
+    eligible_relations = [item for item in relations if item["category"] != "护理专家"]
+    excluded_candidates: list[dict[str, Any]] = []
+    nursing_identity_mismatch_count = 0
+    for item in nursing_relations:
+        individual_nursing = gyfyyy_nursing_only_identity(item.get("list_title"))
+        nursing_identity_mismatch_count += int(not individual_nursing)
+        excluded_candidates.append(
+            {
+                "detail_id": item["id"],
+                "name": item["name"],
+                "list_title": item["list_title"],
+                "campus": item["campus"],
+                "category": item["category"],
+                "department": item["department"],
+                "entry_url": target.entry_url,
+                "source_link": item["source_link"],
+                "individual_nursing_identity": individual_nursing,
+                "reason": (
+                    "官网护理专家栏目整栏排除；个体职称同时明确为护理身份"
+                    if individual_nursing
+                    else "官网护理专家栏目整栏排除；个体职称疑似非护理身份，待 owner 甄别"
+                ),
+            }
+        )
+
+    detailed_candidates: list[dict[str, Any]] = []
+    detail_reconciliation: list[dict[str, Any]] = []
+    detail_errors: list[dict[str, str]] = []
+    schedule_exclusion_count = 0
+    forbidden_segment_count = 0
+    patient_case_exclusion_count = 0
+    for index, item in enumerate(eligible_relations, start=1):
+        status, html, error = fetch(session, item["source_link"])
+        if status == 200:
+            detail = parse_gd2h_detail(html, item)
+        else:
+            detail_errors.append({"source_link": item["source_link"], "error": error})
+            detail = parse_gd2h_detail("", item)
+        schedule_exclusion_count += int(detail.get("schedule_exclusion_count") or 0)
+        forbidden_segment_count += int(detail.get("forbidden_segment_count") or 0)
+        patient_case_exclusion_count += int(detail.get("patient_case_exclusion_count") or 0)
+        combined = {
+            **item,
+            "directory_name": item["name"],
+            **detail,
+            "detail_status": status,
+        }
+        detailed_candidates.append(combined)
+        detail_reconciliation.append(
+            {
+                "detail_id": item["id"],
+                "id_format": "numeric" if item["id"].isdigit() else "hash",
+                "directory_name": item["name"],
+                "detail_name": gd2h_clean_text(str(detail.get("name") or "")),
+                "name": gd2h_clean_text(str(detail.get("name") or item["name"])),
+                "name_matches_directory": gd2h_clean_text(
+                    str(detail.get("name") or item["name"])
+                )
+                == item["name"],
+                "campus": item["campus"],
+                "category": item["category"],
+                "directory_department": item["department"],
+                "detail_department": clean_text(str(detail.get("department") or "")),
+                "title": clean_text(str(detail.get("title") or "")),
+                "photo_state": detail.get("photo_state", "empty"),
+                "photo_url": detail.get("photo_url", ""),
+                "source_link": item["source_link"],
+                "resolution": "详情已读取" if status == 200 else "详情读取失败",
+            }
+        )
+        if index % 100 == 0:
+            print(f"GD2H details: {index}/{len(eligible_relations)}")
+        time.sleep(0.04)
+
+    photo_candidates = [
+        item
+        for item in detailed_candidates
+        if item.get("detail_status") == 200
+        and item.get("photo_state") == "available"
+        and clean_text(str(item.get("directory_name") or ""))
+        == clean_text(str(item.get("name") or ""))
+        and not gyfyyy_nursing_only_identity(item.get("title"))
+    ]
+    selected_doctors = (
+        detailed_candidates
+        if full_mode
+        else select_gd2h_trial_doctors(photo_candidates, max_doctors)
+    )
+    existing_links = collect_existing_profile_links()
+    rows: list[dict[str, Any]] = []
+    selected_detail_ids = {item["id"] for item in selected_doctors}
+    for item in selected_doctors:
+        name = gd2h_clean_text(str(item.get("name") or ""))
+        title_identity = clean_text(str(item.get("title") or item.get("list_title") or ""))
+        department = clean_text(str(item.get("department") or ""))
+        department_with_campus = f"{department}（{item['campus']}）" if department else ""
+        specialty = clean_text(str(item.get("specialty") or ""))
+        profile_text = clean_text(str(item.get("profile_text") or ""))
+        combined_text = "\n".join(
+            [target.hospital, department, title_identity, specialty, profile_text]
+        )
+        title_hits = extract_terms(title_identity, TITLE_TERMS)
+        groups_found, tags = group_tags(combined_text)
+        warnings: list[str] = []
+        if name != clean_text(str(item.get("directory_name") or "")):
+            warnings.append("列表与详情姓名不一致")
+        if not looks_like_person_name(name):
+            warnings.append("非医生页面或姓名异常")
+        if not department:
+            warnings.append("科室需人工复核")
+        if not title_hits:
+            warnings.append("职称/身份需人工复核")
+        if not specialty and not profile_text:
+            warnings.append("详情正文为空或未识别")
+        if warnings:
+            groups_found, tags = [], []
+        priority = "普通"
+        if not warnings and (
+            any(term in combined_text for term in PRIORITY_DEPARTMENTS) or groups_found
+        ):
+            priority = "高"
+        elif not warnings and any(term != "医师" for term in title_hits):
+            priority = "中"
+        rows.append(
+            {
+                "序号": len(rows) + 1,
+                "医院": target.hospital,
+                "姓名": name,
+                "科室_分类页": department_with_campus,
+                "科室_列表卡片": f"{item['department']}（{item['campus']}）",
+                "职称_关键词": "、".join(title_hits),
+                "职称身份原文": clip(title_identity, 500),
+                "重点优先级": priority,
+                "重点关注范围": "、".join(groups_found),
+                "重点疾病标签": "、".join(tags),
+                "擅长诊疗方向摘录": specialty,
+                "亮眼经历线索": extract_clean_highlights(profile_text),
+                "列表简介": "",
+                "详情正文摘录": profile_text,
+                "来源类型": "医院官网",
+                "来源链接": item["source_link"],
+                "照片链接": "",
+                "照片文件": "",
+                "采集入口": target.entry_url,
+                "采集方式": "官网同页两院区三栏目静态目录+大小写敏感数字/hash ID+详情 DOM+本人职业照",
+                "采集日期": today,
+                "详情页状态": str(item.get("detail_status") or ""),
+                "已建画像": "是" if canonical_url(item["source_link"]) in existing_links else "否",
+                "异常提示": "；".join(dict.fromkeys(warnings)),
+                "复核状态": "待人工复核",
+                "_gd2h_detail_id": item["id"],
+                "_gd2h_photo_url": clean_text(str(item.get("photo_url") or "")),
+                "_gd2h_photo_state": clean_text(str(item.get("photo_state") or "empty")),
+                "_gd2h_first_department": department,
+                "_gd2h_campus": item["campus"],
+                "_gd2h_relation_order": int(item.get("relation_order") or 0),
+            }
+        )
+
+    identity_reconciliation: list[dict[str, Any]] = []
+    if full_mode:
+        rows, identity_reconciliation = merge_gd2h_identity_rows(rows)
+
+    photo_dir = photo_root or (VAULT / "01_试点医院" / target.hospital / "照片")
+    used_filenames: set[str] = set()
+    photo_samples: list[dict[str, Any]] = []
+    photo_no_sources: list[dict[str, Any]] = []
+    photo_errors: list[dict[str, str]] = []
+    for row in rows:
+        detail_id = clean_text(str(row.pop("_gd2h_detail_id", "")))
+        photo_url = clean_text(str(row.pop("_gd2h_photo_url", "")))
+        photo_state = clean_text(str(row.pop("_gd2h_photo_state", "empty")))
+        first_department = clean_text(str(row.pop("_gd2h_first_department", "")))
+        row.pop("_gd2h_campus", None)
+        row.pop("_gd2h_relation_order", None)
+        if photo_state != "available" or not photo_url:
+            photo_no_sources.append(
+                {
+                    "name": row["姓名"],
+                    "detail_id": detail_id,
+                    "source_link": row["来源链接"],
+                    "photo_state": photo_state or "empty",
+                    "retry_count": 0,
+                    "reason": (
+                        "官网默认占位图，按 owner 指令留空"
+                        if photo_state == "placeholder"
+                        else "官网详情未提供本人职业照，按 owner 指令留空"
+                    ),
+                }
+            )
+            continue
+        stem = "-".join(
+            [
+                gdgh_photo_part(row.get("姓名")),
+                gdgh_photo_part(first_department),
+                gdgh_photo_part(gd2h_primary_title(row.get("职称身份原文"))),
+                gdgh_photo_part(target.hospital),
+            ]
+        )
+        try:
+            photo = download_gd2h_photo(
+                session,
+                photo_url,
+                row["来源链接"],
+                photo_dir,
+                stem,
+                detail_id,
+                used_filenames,
+            )
+        except Exception as exc:  # noqa: BLE001 - enforce the authorised hard stop
+            raise RuntimeError(
+                "GD2H 图片下载熔断："
+                f"{row['姓名']}（详情 ID {detail_id}）在唯一重试后仍失败：{exc}"
+            ) from exc
+        if photo.get("approved_no_source"):
+            approved_reason = clean_text(
+                str(photo.get("approved_no_source_reason") or "")
+            )
+            if approved_reason == "double_404":
+                mark_gd2h_broken_photo_row(row)
+                photo_state = "approved_broken"
+                reason = "管理员裁决：失效官方图片两次 HTTP 404 后按无照片留空并标注"
+            elif approved_reason == "transport_failure":
+                mark_gd2h_transport_failed_photo_row(row)
+                photo_state = "approved_transport_failure"
+                reason = "管理员裁决：官方图片连续两次传输失败后按无照片留空并标注"
+            else:
+                raise RuntimeError(
+                    f"GD2H 未知管理员批准无照片原因：{approved_reason or '空'}"
+                )
+            photo_no_sources.append(
+                {
+                    "name": row["姓名"],
+                    "detail_id": detail_id,
+                    "source_link": row["来源链接"],
+                    "photo_state": photo_state,
+                    "original_photo_url": photo["original_photo_url"],
+                    "http_status": photo.get("http_status"),
+                    "transport_error_kinds": photo.get(
+                        "transport_error_kinds", []
+                    ),
+                    "retry_count": photo["retry_count"],
+                    "reason": reason,
+                }
+            )
+            continue
+        relative_path = (
+            Path("01_试点医院") / target.hospital / "照片" / photo["filename"]
+        ).as_posix()
+        row["照片链接"] = photo["photo_url"]
+        row["照片文件"] = relative_path
+        photo_samples.append(
+            {
+                "name": row["姓名"],
+                "department": first_department or "未标注",
+                "title": gd2h_primary_title(row["职称身份原文"]) or "未标注",
+                "detail_id": detail_id,
+                "source_link": row["来源链接"],
+                "photo_url": photo["photo_url"],
+                "photo_file": relative_path,
+                "filename": photo["filename"],
+                "bytes": photo["bytes"],
+                "sha256": photo["sha256"],
+                "width": photo["width"],
+                "height": photo["height"],
+                "disk_path": photo["disk_path"],
+                "retry_count": photo["retry_count"],
+            }
+        )
+
+    sample_details = (
+        []
+        if full_mode
+        else [
+            item
+            for item in detail_reconciliation
+            if item["detail_id"] in selected_detail_ids
+        ]
+    )
+    sample_departments = gd2h_covered_department_names(rows)
+    coverage_details = detail_reconciliation if full_mode else sample_details
+    sample_campus_counts = Counter(item["campus"] for item in coverage_details)
+    sample_category_counts = Counter(item["category"] for item in coverage_details)
+    sample_id_format_counts = Counter(item["id_format"] for item in coverage_details)
+    same_name_groups: dict[str, list[str]] = {}
+    for item in eligible_relations:
+        same_name_groups.setdefault(item["name"], []).append(item["id"])
+    same_name_groups = {
+        name: ids for name, ids in same_name_groups.items() if len(ids) > 1
+    }
+    category_counter = Counter(
+        GD2H_CAMPUS_SUFFIX_PATTERN.sub("", department)
+        for row in rows
+        for department in clean_text(str(row.get("科室_分类页") or "")).split("、")
+        if department
+    )
+    priority_counter = Counter(row["重点优先级"] for row in rows)
+    group_counter = Counter(
+        group for row in rows for group in row["重点关注范围"].split("、") if group
+    )
+    warning_counter = Counter(
+        warning for row in rows for warning in row["异常提示"].split("；") if warning
+    )
+    average_photo_bytes = (
+        round(sum(item["bytes"] for item in photo_samples) / len(photo_samples))
+        if photo_samples
+        else 0
+    )
+    large_photos = [
+        item
+        for item in photo_samples
+        if int(item["bytes"]) > 200 * 1024 or int(item["width"]) > 800
+    ]
+    photo_state_counts = Counter(item.get("photo_state", "empty") for item in detailed_candidates)
+    return {
+        "meta": {
+            "city": target.city,
+            "hospital": target.hospital,
+            "homepage": target.homepage,
+            "entry_url": target.entry_url,
+            "entry_url_source": "GitHub Issue #45（与官网入口台账序号 23 一致）",
+            "ledger_entry_url": target.ledger_entry_url or target.entry_url,
+            "adapter_id": target.adapter_id,
+            "collected_at": today,
+            "category_count": len(categories),
+            "pagination_count": 1,
+            "pagination_method": "同一静态 HTML 内 .xxk-item1/.xxk-item2 前端显隐切换；无独立院区 URL、无搜索构造",
+            "department_structure": "两院区各含临床/医技/护理三栏目；临床与医技按 .subject 科室树组织，护理整栏排除",
+            "raw_card_rows": len(relations),
+            "candidate_membership_count": len(relations),
+            "unique_candidate_count": len(relations),
+            "census_unique_detail_count": len(relations),
+            "census_numeric_id_count": sum(item["id"].isdigit() for item in relations),
+            "census_hash_id_count": sum(not item["id"].isdigit() for item in relations),
+            "eligible_candidate_count": len(eligible_relations),
+            "excluded_non_doctor_count": len(excluded_candidates),
+            "nursing_column_count": len(nursing_relations),
+            "nursing_identity_mismatch_count": nursing_identity_mismatch_count,
+            "census_same_name_group_count": len(same_name_groups),
+            "census_same_name_groups": same_name_groups,
+            "unique_doctor_count": len(rows),
+            "gd2h_final_identity_count": len(rows),
+            "gd2h_identity_detail_count": sum(
+                int(item.get("relation_count") or 0)
+                for item in identity_reconciliation
+            ),
+            "gd2h_same_identity_merge_group_count": sum(
+                item.get("resolution") == "同一人归并"
+                for item in identity_reconciliation
+            ),
+            "gd2h_distinct_same_name_group_count": len(
+                {
+                    item.get("name")
+                    for item in identity_reconciliation
+                    if item.get("resolution") == "同名待甄别"
+                }
+            ),
+            "gd2h_distinct_same_name_row_count": sum(
+                item.get("resolution") == "同名待甄别"
+                for item in identity_reconciliation
+            ),
+            "sample_entry_coverage_count": len(sample_departments),
+            "sample_entry_categories": sample_departments,
+            "department_coverage_count": len(sample_departments),
+            "covered_departments": sample_departments,
+            "sample_campus_counts": dict(sample_campus_counts),
+            "sample_category_counts": dict(sample_category_counts),
+            "sample_id_format_counts": dict(sample_id_format_counts),
+            "category_error_count": 0,
+            "detail_error_count": len(detail_errors),
+            "cross_entry_duplicate_count": 0,
+            "existing_profile_count": sum(row["已建画像"] == "是" for row in rows),
+            "ledger_review": target.review,
+            "ledger_difficulty": target.difficulty,
+            "entry_candidate_counts": {target.entry_url: len(relations)},
+            "standard_public_session": (
+                "requests 常规公开 GET；图片请求仅携带对应公开详情页同域 Referer "
+                "以符合官网防盗链；无登录、Cookie 注入、验证码/挑战求解或非公开接口"
+            ),
+            "schedule_exclusion_count": schedule_exclusion_count,
+            "schedule_field_ingested_count": 0,
+            "forbidden_segment_exclusion_count": forbidden_segment_count,
+            "patient_case_exclusion_count": patient_case_exclusion_count,
+            "private_use_character_count": sum(
+                len(re.findall(r"[\ue000-\uf8ff]", str(row.get(field) or "")))
+                for row in rows
+                for field in BASE_HEADERS
+            ),
+            "photo_sample_count": len(photo_samples),
+            "photo_error_count": len(photo_errors),
+            "photo_expected_count": len(rows),
+            "photo_downloaded_count": len(photo_samples),
+            "photo_failed_count": len(photo_errors),
+            "photo_no_source_count": len(photo_no_sources),
+            "photo_no_source_placeholder_count": sum(
+                item.get("photo_state") == "placeholder" for item in photo_no_sources
+            ),
+            "photo_no_source_empty_count": sum(
+                item.get("photo_state") == "empty" for item in photo_no_sources
+            ),
+            "photo_no_source_approved_broken_count": sum(
+                item.get("photo_state") == "approved_broken"
+                for item in photo_no_sources
+            ),
+            "photo_no_source_approved_transport_count": sum(
+                item.get("photo_state") == "approved_transport_failure"
+                for item in photo_no_sources
+            ),
+            "photo_average_bytes": average_photo_bytes,
+            "photo_bounded_retry_count": sum(
+                int(item.get("retry_count") or 0) for item in photo_samples
+            )
+            + sum(int(item.get("retry_count") or 0) for item in photo_no_sources),
+            "photo_retry_policy": GD2H_PHOTO_RETRY_POLICY,
+            "photo_estimated_full_count": photo_state_counts.get("available", 0),
+            "photo_estimated_full_bytes": average_photo_bytes
+            * photo_state_counts.get("available", 0),
+            "photo_census_available_count": photo_state_counts.get("available", 0),
+            "photo_census_placeholder_count": photo_state_counts.get("placeholder", 0),
+            "photo_census_empty_count": photo_state_counts.get("empty", 0),
+            "photo_census_rejected_count": photo_state_counts.get("rejected", 0),
+            "large_photo_count": len(large_photos),
+            "large_photo_threshold": "单张 >200KB 或宽 >800px（仅留痕）",
+            "photo_policy_status": "OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT",
+            "affiliate_count": 2,
+            "independent_entity_count": 0,
+        },
+        "categories": categories,
+        "department_tree": department_tree,
+        "entry_reconnaissance": [
+            {
+                "entry_url": target.entry_url,
+                "page_nature": "官网单页静态专家目录；两院区/三栏目仅由 tapxxk()/tapzk() 前端显隐",
+                "list_page_count": 1,
+                "raw_detail_relation_count": len(relations),
+                "unique_detail_count": len(relations),
+                "out_of_scope_detail_count": len(excluded_candidates),
+                "affiliation": target.hospital,
+                "independent_entity_check": "琶洲/民航是同页院区标签；未发现独立 URL 或独立实体入口",
+            }
+        ],
+        "excluded_candidates": excluded_candidates,
+        "gd2h_detail_reconciliation": detail_reconciliation,
+        "gd2h_sample_detail_reconciliation": sample_details,
+        "gd2h_identity_reconciliation": identity_reconciliation,
+        "photo_samples": photo_samples,
+        "photo_no_sources": photo_no_sources,
+        "photo_errors": photo_errors,
+        "category_errors": [],
         "detail_errors": detail_errors,
         "category_counts": category_counter.most_common(),
         "priority_counts": dict(priority_counter),
@@ -10655,6 +11877,773 @@ def validate_gdmch_trial(payload: dict[str, Any], expected_rows: int) -> None:
         raise RuntimeError("GDMCH TRIAL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
 
 
+def validate_gd2h_trial(payload: dict[str, Any], expected_rows: int) -> None:
+    """Validate the fixed Issue #45 census and ten auditable photo rows."""
+
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    excluded = payload.get("excluded_candidates", [])
+    details = payload.get("gd2h_detail_reconciliation", [])
+    sample_details = payload.get("gd2h_sample_detail_reconciliation", [])
+    photos = payload.get("photo_samples", [])
+    errors: list[str] = []
+    expected_counts = {
+        "category_count": len(GD2H_EXPECTED_CATEGORY_COUNTS),
+        "pagination_count": 1,
+        "raw_card_rows": GD2H_EXPECTED_RELATION_COUNT,
+        "candidate_membership_count": GD2H_EXPECTED_RELATION_COUNT,
+        "unique_candidate_count": GD2H_EXPECTED_RELATION_COUNT,
+        "census_unique_detail_count": GD2H_EXPECTED_RELATION_COUNT,
+        "census_numeric_id_count": GD2H_EXPECTED_NUMERIC_ID_COUNT,
+        "census_hash_id_count": GD2H_EXPECTED_HASH_ID_COUNT,
+        "excluded_non_doctor_count": GD2H_EXPECTED_NURSING_COUNT,
+        "nursing_column_count": GD2H_EXPECTED_NURSING_COUNT,
+        "eligible_candidate_count": GD2H_EXPECTED_ELIGIBLE_COUNT,
+        "photo_census_available_count": GD2H_EXPECTED_PHOTO_AVAILABLE_COUNT,
+        "photo_census_placeholder_count": GD2H_EXPECTED_PLACEHOLDER_COUNT,
+        "photo_census_empty_count": GD2H_EXPECTED_EMPTY_PHOTO_COUNT,
+        "photo_census_rejected_count": 0,
+        "cross_entry_duplicate_count": 0,
+        "category_error_count": 0,
+        "detail_error_count": 0,
+        "photo_error_count": 0,
+        "photo_failed_count": 0,
+        "photo_no_source_count": 0,
+        "schedule_field_ingested_count": 0,
+        "private_use_character_count": 0,
+        "affiliate_count": 2,
+        "independent_entity_count": 0,
+    }
+    for field, expected in expected_counts.items():
+        actual = int(meta.get(field) or 0)
+        if actual != expected:
+            errors.append(f"{field}={actual}，预期 {expected}")
+
+    categories = payload.get("categories", [])
+    category_counts = {
+        clean_text(str(item.get("category_name") or "")): int(
+            item.get("row_count") or 0
+        )
+        for item in categories
+    }
+    if category_counts != GD2H_EXPECTED_CATEGORY_COUNTS:
+        errors.append(f"两院区六栏目计数不符合现场基线：{category_counts}")
+    department_totals = Counter()
+    for item in payload.get("department_tree", []):
+        key = (
+            f"{clean_text(str(item.get('campus') or ''))}-"
+            f"{clean_text(str(item.get('category') or ''))}"
+        )
+        department_totals[key] += int(item.get("relation_count") or 0)
+    if dict(department_totals) != GD2H_EXPECTED_CATEGORY_COUNTS:
+        errors.append("科室树关系数未与两院区六栏目逐项对齐")
+
+    excluded_ids = [clean_text(str(item.get("detail_id") or "")) for item in excluded]
+    if (
+        len(excluded) != GD2H_EXPECTED_NURSING_COUNT
+        or any(not value for value in excluded_ids)
+        or len(set(excluded_ids)) != len(excluded_ids)
+        or any(item.get("category") != "护理专家" for item in excluded)
+        or any(
+            gd2h_detail_id(str(item.get("source_link") or ""))
+            != clean_text(str(item.get("detail_id") or ""))
+            for item in excluded
+        )
+        or any(not clean_text(str(item.get("reason") or "")) for item in excluded)
+    ):
+        errors.append("27 个护理栏目候选的逐 ID 排除与个体身份留痕不完整")
+    nursing_mismatch_count = sum(
+        not bool(item.get("individual_nursing_identity")) for item in excluded
+    )
+    if nursing_mismatch_count != int(meta.get("nursing_identity_mismatch_count") or 0):
+        errors.append("护理栏目个体职称疑似非护理身份计数未对账")
+
+    detail_ids = [clean_text(str(item.get("detail_id") or "")) for item in details]
+    if (
+        len(details) != GD2H_EXPECTED_ELIGIBLE_COUNT
+        or any(not value for value in detail_ids)
+        or len(set(detail_ids)) != len(detail_ids)
+        or any(item.get("resolution") != "详情已读取" for item in details)
+        or any(
+            gd2h_detail_id(str(item.get("source_link") or ""))
+            != clean_text(str(item.get("detail_id") or ""))
+            for item in details
+        )
+        or any(
+            item.get("id_format")
+            != ("numeric" if str(item.get("detail_id") or "").isdigit() else "hash")
+            for item in details
+        )
+    ):
+        errors.append("581 个临床/医技详情 ID 未完整、唯一、大小写原样且成功读取")
+    if set(detail_ids) & set(excluded_ids) or len(set(detail_ids + excluded_ids)) != GD2H_EXPECTED_RELATION_COUNT:
+        errors.append("581 个合规详情与 27 个护理排除未形成互斥的 608-ID 全量对账")
+
+    if expected_rows != 10 or len(rows) != expected_rows:
+        errors.append(f"试采结果 {len(rows)} 行，必须固定为 10 行")
+    if int(meta.get("department_coverage_count") or 0) < 3:
+        errors.append("试采未覆盖至少 3 个科室")
+    if (
+        len(photos) != expected_rows
+        or int(meta.get("photo_sample_count") or 0) != expected_rows
+        or int(meta.get("photo_expected_count") or 0) != expected_rows
+        or int(meta.get("photo_downloaded_count") or 0) != expected_rows
+    ):
+        errors.append("试采未形成 10 张可逐项对账的本人职业照样本")
+
+    sample_ids = [clean_text(str(item.get("detail_id") or "")) for item in sample_details]
+    if (
+        len(sample_details) != expected_rows
+        or any(not value for value in sample_ids)
+        or len(set(sample_ids)) != len(sample_ids)
+        or not set(sample_ids).issubset(set(detail_ids))
+        or any(item.get("resolution") != "详情已读取" for item in sample_details)
+        or any(not bool(item.get("name_matches_directory")) for item in sample_details)
+    ):
+        errors.append("10 个样本详情 ID 或列表/详情同一人证据未完整对账")
+    if set(meta.get("sample_campus_counts", {})) != {"琶洲院区", "民航院区"}:
+        errors.append("试采未同时覆盖琶洲、民航两院区")
+    if set(meta.get("sample_category_counts", {})) != {"临床专家", "医技专家"}:
+        errors.append("试采未同时覆盖临床、医技两类医生")
+    if set(meta.get("sample_id_format_counts", {})) != {"numeric", "hash"}:
+        errors.append("试采未同时覆盖数字、hash 两类大小写敏感详情 ID")
+
+    formal_text_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录"]
+    schedule_pattern = re.compile(
+        r"(?:门诊时间|门诊地点|出诊时间|出诊安排|开诊时间|排班信息|坐诊时间|"
+        r"周[一二三四五六日天]|星期[一二三四五六日天]|上午|下午)"
+    )
+    photo_by_source = {
+        clean_text(str(item.get("source_link") or "")): item for item in photos
+    }
+    filenames: set[str] = set()
+    byte_sizes: list[int] = []
+    large_photo_count = 0
+    for row in rows:
+        name = clean_text(str(row.get("姓名") or ""))
+        source = clean_text(str(row.get("来源链接") or ""))
+        photo_url = clean_text(str(row.get("照片链接") or ""))
+        photo_file = clean_text(str(row.get("照片文件") or ""))
+        if not looks_like_person_name(name) or gyfyyy_nursing_only_identity(
+            row.get("职称身份原文")
+        ):
+            errors.append(f"样本不是明确临床/医技医生身份：{name or source}")
+        detail_id = gd2h_detail_id(source)
+        if not detail_id or detail_id not in sample_ids:
+            errors.append(f"非严格官网样本详情链接或 ID 未对账：{source or '空'}")
+        if not gd2h_photo_url(photo_url, photo_url):
+            errors.append(f"非 gd2h.com 官网本人职业照路径：{photo_url or '空'}")
+
+        sample = photo_by_source.get(source)
+        if not sample:
+            errors.append(f"缺少照片命名与校验对照：{name or source}")
+            continue
+        if clean_text(str(sample.get("detail_id") or "")) != detail_id:
+            errors.append(f"照片与大小写敏感详情 ID 未对齐：{name}")
+        filename = clean_text(str(sample.get("filename") or ""))
+        expected_stem = "-".join(
+            [
+                gdgh_photo_part(name),
+                gdgh_photo_part(
+                    GD2H_CAMPUS_SUFFIX_PATTERN.sub(
+                        "", clean_text(str(row.get("科室_分类页") or ""))
+                    )
+                ),
+                gdgh_photo_part(gd2h_primary_title(row.get("职称身份原文"))),
+                gdgh_photo_part("广东省第二人民医院"),
+            ]
+        )
+        expected_relative = (
+            Path("01_试点医院") / "广东省第二人民医院" / "照片" / filename
+        ).as_posix()
+        if photo_file != expected_relative or sample.get("photo_file") != expected_relative:
+            errors.append(f"照片相对路径不符合约定：{name}")
+        if not filename or re.search(r'[\\/:*?"<>|]', filename):
+            errors.append(f"照片文件名为空或含非法字符：{name}")
+        if Path(filename).stem not in {expected_stem, f"{expected_stem}-{detail_id}"}:
+            errors.append(f"照片文件名未按姓名-科室-主职称-医院对账：{name}")
+        if filename.casefold() in filenames:
+            errors.append(f"照片文件名发生覆盖冲突：{filename}")
+        filenames.add(filename.casefold())
+
+        disk_path = Path(str(sample.get("disk_path") or ""))
+        if not disk_path.is_file():
+            errors.append(f"照片文件不存在：{disk_path}")
+            continue
+        content = disk_path.read_bytes()
+        extension = disk_path.suffix.lower().lstrip(".")
+        media_type = {
+            "jpg": "image/jpeg",
+            "png": "image/png",
+            "gif": "image/gif",
+            "webp": "image/webp",
+        }.get(extension, "")
+        if gdgh_photo_extension(content, media_type) != extension:
+            errors.append(f"照片扩展名与魔数不一致：{filename}")
+        if int(sample.get("bytes") or 0) != len(content):
+            errors.append(f"照片字节数对账失败：{filename}")
+        if clean_text(str(sample.get("sha256") or "")) != hashlib.sha256(content).hexdigest():
+            errors.append(f"照片 SHA-256 对账失败：{filename}")
+        width, height = gdmch_photo_dimensions(content, extension)
+        if (
+            width <= 0
+            or height <= 0
+            or int(sample.get("width") or 0) != width
+            or int(sample.get("height") or 0) != height
+        ):
+            errors.append(f"照片宽高对账失败：{filename}")
+        byte_sizes.append(len(content))
+        if len(content) > 200 * 1024 or width > 800:
+            large_photo_count += 1
+
+        formal_text = "\n".join(
+            clean_text(str(row.get(field) or "")) for field in formal_text_fields
+        )
+        if schedule_pattern.search(formal_text):
+            errors.append(f"正式字段仍含排班日期/时段：{name}")
+        if any(marker in formal_text for marker in GDGH_FORBIDDEN_SENTENCE_MARKERS):
+            errors.append(f"正式字段仍含排名/患者片段：{name}")
+        if contains_gzbrain_patient_case_text(formal_text):
+            errors.append(f"正式字段仍含患者案例或可识别信息：{name}")
+        if contains_navigation_text(formal_text):
+            errors.append(f"正式字段仍含导航片段：{name}")
+        if re.search(
+            r"[\ue000-\uf8ff]",
+            "\n".join(str(row.get(field) or "") for field in BASE_HEADERS),
+        ):
+            errors.append(f"正式字段仍含私用区字符：{name}")
+        if clean_text(str(row.get("异常提示") or "")) and (
+            clean_text(str(row.get("重点关注范围") or ""))
+            or clean_text(str(row.get("重点疾病标签") or ""))
+            or clean_text(str(row.get("重点优先级") or "")) != "普通"
+        ):
+            errors.append(f"异常行仍被打标签或提升优先级：{name}")
+
+    if byte_sizes:
+        average_bytes = round(sum(byte_sizes) / len(byte_sizes))
+        if int(meta.get("photo_average_bytes") or 0) != average_bytes:
+            errors.append("平均单张照片大小对账失败")
+        if int(meta.get("photo_estimated_full_count") or 0) != GD2H_EXPECTED_PHOTO_AVAILABLE_COUNT:
+            errors.append("全院本人职业照候选估算数量不是 539")
+        if int(meta.get("photo_estimated_full_bytes") or 0) != average_bytes * GD2H_EXPECTED_PHOTO_AVAILABLE_COUNT:
+            errors.append("全院照片容量估算对账失败")
+    if int(meta.get("large_photo_count") or 0) != large_photo_count:
+        errors.append("大图阈值计数对账失败")
+    if meta.get("photo_policy_status") != "OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT":
+        errors.append("照片政策未保持 owner 已批准的原图不压缩口径")
+    actual_retry_count = sum(int(item.get("retry_count") or 0) for item in photos)
+    if (
+        any(int(item.get("retry_count") or 0) not in {0, 1} for item in photos)
+        or int(meta.get("photo_bounded_retry_count") or 0) != actual_retry_count
+        or actual_retry_count > len(photos)
+        or meta.get("photo_retry_policy") != GD2H_PHOTO_RETRY_POLICY
+    ):
+        errors.append("图片单次同请求重试次数或策略未按管理员授权对账")
+
+    if errors:
+        raise RuntimeError("GD2H TRIAL 写出前门禁失败：" + "；".join(dict.fromkeys(errors)))
+
+
+def validate_gd2h_full_append(payload: dict[str, Any] | None = None) -> None:
+    """Block the master write unless the owner-approved FULL census reconciles."""
+
+    if not payload:
+        raise RuntimeError("GD2H FULL 写入前门禁失败：缺少全量 payload")
+    meta = payload.get("meta", {})
+    rows = payload.get("rows", [])
+    excluded = payload.get("excluded_candidates", [])
+    details = payload.get("gd2h_detail_reconciliation", [])
+    identities = payload.get("gd2h_identity_reconciliation", [])
+    photos = payload.get("photo_samples", [])
+    no_sources = payload.get("photo_no_sources", [])
+    errors: list[str] = []
+
+    expected_counts = {
+        "category_count": len(GD2H_EXPECTED_CATEGORY_COUNTS),
+        "pagination_count": 1,
+        "raw_card_rows": GD2H_EXPECTED_RELATION_COUNT,
+        "candidate_membership_count": GD2H_EXPECTED_RELATION_COUNT,
+        "unique_candidate_count": GD2H_EXPECTED_RELATION_COUNT,
+        "census_unique_detail_count": GD2H_EXPECTED_RELATION_COUNT,
+        "census_numeric_id_count": GD2H_EXPECTED_NUMERIC_ID_COUNT,
+        "census_hash_id_count": GD2H_EXPECTED_HASH_ID_COUNT,
+        "excluded_non_doctor_count": GD2H_EXPECTED_NURSING_COUNT,
+        "nursing_column_count": GD2H_EXPECTED_NURSING_COUNT,
+        "nursing_identity_mismatch_count": 0,
+        "eligible_candidate_count": GD2H_EXPECTED_ELIGIBLE_COUNT,
+        "census_same_name_group_count": len(GD2H_EXPECTED_SAME_NAME_GROUPS),
+        "gd2h_final_identity_count": GD2H_EXPECTED_FINAL_IDENTITY_COUNT,
+        "gd2h_identity_detail_count": GD2H_EXPECTED_ELIGIBLE_COUNT,
+        "gd2h_same_identity_merge_group_count": len(
+            GD2H_SAME_IDENTITY_DETAIL_GROUPS
+        ),
+        "gd2h_distinct_same_name_group_count": len(
+            GD2H_EXPECTED_SAME_NAME_GROUPS
+        )
+        - len(GD2H_SAME_IDENTITY_DETAIL_GROUPS),
+        "gd2h_distinct_same_name_row_count": 2
+        * (
+            len(GD2H_EXPECTED_SAME_NAME_GROUPS)
+            - len(GD2H_SAME_IDENTITY_DETAIL_GROUPS)
+        ),
+        "photo_census_available_count": GD2H_EXPECTED_PHOTO_AVAILABLE_COUNT,
+        "photo_census_placeholder_count": GD2H_EXPECTED_PLACEHOLDER_COUNT,
+        "photo_census_empty_count": GD2H_EXPECTED_EMPTY_PHOTO_COUNT,
+        "photo_census_rejected_count": 0,
+        "cross_entry_duplicate_count": 0,
+        "category_error_count": 0,
+        "detail_error_count": 0,
+        "photo_error_count": 0,
+        "photo_failed_count": 0,
+        "schedule_field_ingested_count": 0,
+        "private_use_character_count": 0,
+        "affiliate_count": 2,
+        "independent_entity_count": 0,
+    }
+    for field, expected in expected_counts.items():
+        actual = int(meta.get(field) or 0)
+        if actual != expected:
+            errors.append(f"{field}={actual}，预期 {expected}")
+
+    category_counts = {
+        clean_text(str(item.get("category_name") or "")): int(
+            item.get("row_count") or 0
+        )
+        for item in payload.get("categories", [])
+    }
+    if category_counts != GD2H_EXPECTED_CATEGORY_COUNTS:
+        errors.append(f"两院区六栏目计数不符合现场基线：{category_counts}")
+    department_totals = Counter()
+    for item in payload.get("department_tree", []):
+        key = (
+            f"{clean_text(str(item.get('campus') or ''))}-"
+            f"{clean_text(str(item.get('category') or ''))}"
+        )
+        department_totals[key] += int(item.get("relation_count") or 0)
+    if dict(department_totals) != GD2H_EXPECTED_CATEGORY_COUNTS:
+        errors.append("科室树关系数未与两院区六栏目逐项对齐")
+
+    excluded_ids = [clean_text(str(item.get("detail_id") or "")) for item in excluded]
+    if (
+        len(excluded_ids) != GD2H_EXPECTED_NURSING_COUNT
+        or len(set(excluded_ids)) != len(excluded_ids)
+        or any(not value for value in excluded_ids)
+        or any(item.get("category") != "护理专家" for item in excluded)
+        or any(not bool(item.get("individual_nursing_identity")) for item in excluded)
+        or any(
+            gd2h_detail_id(str(item.get("source_link") or ""))
+            != clean_text(str(item.get("detail_id") or ""))
+            for item in excluded
+        )
+    ):
+        errors.append("27 个护理栏目候选未形成完整、唯一的逐 ID 排除证据")
+
+    detail_ids = [clean_text(str(item.get("detail_id") or "")) for item in details]
+    if (
+        len(detail_ids) != GD2H_EXPECTED_ELIGIBLE_COUNT
+        or len(set(detail_ids)) != len(detail_ids)
+        or any(not value for value in detail_ids)
+        or any(item.get("resolution") != "详情已读取" for item in details)
+        or any(not bool(item.get("name_matches_directory")) for item in details)
+        or any(
+            gd2h_detail_id(str(item.get("source_link") or ""))
+            != clean_text(str(item.get("detail_id") or ""))
+            for item in details
+        )
+        or any(
+            item.get("id_format")
+            != ("numeric" if str(item.get("detail_id") or "").isdigit() else "hash")
+            for item in details
+        )
+    ):
+        errors.append("581 个临床/医技详情 ID 未完整、唯一、大小写原样且成功读取")
+    if (
+        set(detail_ids) & set(excluded_ids)
+        or len(set(detail_ids + excluded_ids)) != GD2H_EXPECTED_RELATION_COUNT
+    ):
+        errors.append("581 个合规详情与 27 个护理排除未形成互斥的 608-ID 对账")
+
+    actual_same_name: dict[str, list[str]] = {}
+    for item in details:
+        name = clean_text(str(item.get("name") or ""))
+        actual_same_name.setdefault(name, []).append(
+            clean_text(str(item.get("detail_id") or ""))
+        )
+    actual_same_name = {
+        name: ids for name, ids in actual_same_name.items() if len(ids) > 1
+    }
+    if {
+        name: frozenset(ids) for name, ids in actual_same_name.items()
+    } != {
+        name: frozenset(ids) for name, ids in GD2H_EXPECTED_SAME_NAME_GROUPS.items()
+    }:
+        errors.append("34 组同名详情 ID 与 FULL 身份证据基线不一致")
+
+    mapped_ids = [
+        clean_text(str(detail_id or ""))
+        for item in identities
+        for detail_id in item.get("detail_ids", [])
+    ]
+    if (
+        len(rows) != GD2H_EXPECTED_FINAL_IDENTITY_COUNT
+        or len(identities) != len(rows)
+        or len(mapped_ids) != GD2H_EXPECTED_ELIGIBLE_COUNT
+        or len(set(mapped_ids)) != len(mapped_ids)
+        or set(mapped_ids) != set(detail_ids)
+    ):
+        errors.append("581 个合规详情未完整、唯一映射到正式身份")
+    actual_merge_groups = {
+        frozenset(clean_text(str(value or "")) for value in item.get("detail_ids", []))
+        for item in identities
+        if item.get("resolution") == "同一人归并"
+    }
+    if actual_merge_groups != GD2H_SAME_IDENTITY_DETAIL_GROUPS:
+        errors.append("显式同一人归并组与 Issue #45 FULL 证据裁决不一致")
+    merged_names = {
+        name
+        for name, ids in GD2H_EXPECTED_SAME_NAME_GROUPS.items()
+        if frozenset(ids) in GD2H_SAME_IDENTITY_DETAIL_GROUPS
+    }
+    expected_distinct_names = set(GD2H_EXPECTED_SAME_NAME_GROUPS) - merged_names
+    actual_distinct_names = {
+        clean_text(str(item.get("name") or ""))
+        for item in identities
+        if item.get("resolution") == "同名待甄别"
+    }
+    if actual_distinct_names != expected_distinct_names:
+        errors.append("未获强证据的同名详情未全部保持分行并标记同名待甄别")
+
+    detail_by_id = {
+        clean_text(str(item.get("detail_id") or "")): item for item in details
+    }
+    identity_by_source = {
+        clean_text(str(item.get("primary_source_link") or "")): item
+        for item in identities
+    }
+    if len(identity_by_source) != len(identities):
+        errors.append("身份主详情来源链接为空或重复")
+    formal_text_fields = ["擅长诊疗方向摘录", "亮眼经历线索", "列表简介", "详情正文摘录"]
+    schedule_pattern = re.compile(
+        r"(?:门诊时间|门诊地点|出诊时间|出诊安排|开诊时间|排班信息|坐诊时间|"
+        r"周[一二三四五六日天]|星期[一二三四五六日天]|上午|下午)"
+    )
+    row_by_source: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        name = clean_text(str(row.get("姓名") or ""))
+        source = clean_text(str(row.get("来源链接") or ""))
+        identity = identity_by_source.get(source)
+        if source in row_by_source:
+            errors.append(f"正式身份主来源链接重复：{source}")
+        row_by_source[source] = row
+        if not identity:
+            errors.append(f"正式身份缺少身份归并对账：{name or source}")
+            continue
+        primary_id = clean_text(str(identity.get("primary_detail_id") or ""))
+        detail = detail_by_id.get(primary_id)
+        if (
+            not detail
+            or gd2h_detail_id(source) != primary_id
+            or source != clean_text(str(identity.get("primary_source_link") or ""))
+        ):
+            errors.append(f"主详情 ID、来源和身份对账不一致：{name}")
+        if not looks_like_person_name(name) or gyfyyy_nursing_only_identity(
+            row.get("职称身份原文")
+        ):
+            errors.append(f"末尾非医生身份复核不通过：{name or source}")
+        if detail and clean_text(str(row.get("职称身份原文") or "")) != clean_text(
+            str(detail.get("title") or "")
+        ):
+            errors.append(f"职称未严格只取主详情：{name}")
+        departments = [
+            value
+            for value in clean_text(str(row.get("科室_分类页") or "")).split("、")
+            if value
+        ]
+        if (
+            not departments
+            or departments != list(identity.get("departments", []))
+            or clean_text(str(row.get("科室_列表卡片") or ""))
+            != "、".join(departments)
+            or any(
+                not re.fullmatch(r".+（(?:琶洲|民航)院区）", value)
+                for value in departments
+            )
+        ):
+            errors.append(f"科室与两院区括注未按身份对账：{name}")
+        warning = clean_text(str(row.get("异常提示") or ""))
+        if identity.get("resolution") == "同名待甄别" and "同名待甄别" not in warning:
+            errors.append(f"实质不同同名身份未标记：{name}")
+        if warning and (
+            clean_text(str(row.get("重点关注范围") or ""))
+            or clean_text(str(row.get("重点疾病标签") or ""))
+            or clean_text(str(row.get("重点优先级") or "")) != "普通"
+        ):
+            errors.append(f"异常行仍被打标签或提升优先级：{name}")
+        formal_text = "\n".join(
+            clean_text(str(row.get(field) or "")) for field in formal_text_fields
+        )
+        if schedule_pattern.search(formal_text):
+            errors.append(f"正式字段仍含排班日期/时段：{name}")
+        if any(marker in formal_text for marker in GDGH_FORBIDDEN_SENTENCE_MARKERS):
+            errors.append(f"正式字段仍含排名/患者片段：{name}")
+        if contains_gzbrain_patient_case_text(formal_text):
+            errors.append(f"正式字段仍含患者案例或可识别信息：{name}")
+        if contains_navigation_text(formal_text):
+            errors.append(f"正式字段仍含面包屑/导航片段：{name}")
+        if re.search(
+            r"[\ue000-\uf8ff]",
+            "\n".join(str(row.get(field) or "") for field in BASE_HEADERS),
+        ):
+            errors.append(f"正式字段仍含私用区字符：{name}")
+
+    photo_by_source = {
+        clean_text(str(item.get("source_link") or "")): item for item in photos
+    }
+    no_source_by_source = {
+        clean_text(str(item.get("source_link") or "")): item for item in no_sources
+    }
+    if (
+        len(photo_by_source) != len(photos)
+        or len(no_source_by_source) != len(no_sources)
+        or set(photo_by_source) & set(no_source_by_source)
+        or set(photo_by_source) | set(no_source_by_source) != set(row_by_source)
+    ):
+        errors.append("最终身份照片与无来源四数未形成互斥完整分区")
+    if (
+        int(meta.get("photo_expected_count") or 0) != len(rows)
+        or int(meta.get("photo_downloaded_count") or 0) != len(photos)
+        or int(meta.get("photo_failed_count") or 0) != 0
+        or int(meta.get("photo_no_source_count") or 0) != len(no_sources)
+        or len(photos) + len(no_sources) != len(rows)
+    ):
+        errors.append("照片四数应采/实采/失败/无来源未与最终身份对账")
+    if (
+        int(meta.get("photo_no_source_placeholder_count") or 0)
+        + int(meta.get("photo_no_source_empty_count") or 0)
+        + int(meta.get("photo_no_source_approved_broken_count") or 0)
+        + int(meta.get("photo_no_source_approved_transport_count") or 0)
+        != len(no_sources)
+        or any(
+            item.get("photo_state")
+            not in {
+                "placeholder",
+                "empty",
+                "approved_broken",
+                "approved_transport_failure",
+            }
+            for item in no_sources
+        )
+    ):
+        errors.append("占位图、空 src 与管理员批准图片失败未与无照片身份对账")
+    approved_broken = [
+        item for item in no_sources if item.get("photo_state") == "approved_broken"
+    ]
+    approved_broken_ids = {
+        clean_text(str(item.get("detail_id") or "")) for item in approved_broken
+    }
+    if (
+        int(meta.get("photo_no_source_approved_broken_count") or 0)
+        != len(approved_broken)
+        or not GD2H_OBSERVED_BROKEN_PHOTO_DETAIL_IDS.issubset(approved_broken_ids)
+        or len(approved_broken_ids) != len(approved_broken)
+        or any(
+            clean_text(str(item.get("original_photo_url") or ""))
+            != clean_text(
+                str(
+                    detail_by_id.get(
+                        clean_text(str(item.get("detail_id") or "")), {}
+                    ).get("photo_url")
+                    or ""
+                )
+            )
+            or not gd2h_photo_url(
+                clean_text(str(item.get("original_photo_url") or "")),
+                clean_text(str(item.get("original_photo_url") or "")),
+            )
+            or int(item.get("http_status") or 0)
+            != GD2H_APPROVED_BROKEN_PHOTO_STATUS
+            or int(item.get("retry_count") or 0) != 1
+            or GD2H_BROKEN_PHOTO_WARNING
+            not in clean_text(
+                str(
+                    row_by_source.get(
+                        clean_text(str(item.get("source_link") or "")), {}
+                    ).get("异常提示")
+                    or ""
+                )
+            )
+            for item in approved_broken
+        )
+    ):
+        errors.append("失效官方图片未按严格官方 URL/两次 404/异常标注规则留空")
+    approved_transport = [
+        item
+        for item in no_sources
+        if item.get("photo_state") == "approved_transport_failure"
+    ]
+    if (
+        int(meta.get("photo_no_source_approved_transport_count") or 0)
+        != len(approved_transport)
+        or len(
+            {
+                clean_text(str(item.get("detail_id") or ""))
+                for item in approved_transport
+            }
+        )
+        != len(approved_transport)
+        or any(
+            clean_text(str(item.get("original_photo_url") or ""))
+            != clean_text(
+                str(
+                    detail_by_id.get(
+                        clean_text(str(item.get("detail_id") or "")), {}
+                    ).get("photo_url")
+                    or ""
+                )
+            )
+            or not gd2h_photo_url(
+                clean_text(str(item.get("original_photo_url") or "")),
+                clean_text(str(item.get("original_photo_url") or "")),
+            )
+            or item.get("http_status") is not None
+            or not isinstance(item.get("transport_error_kinds"), list)
+            or len(item.get("transport_error_kinds") or []) != 2
+            or any(
+                kind not in GD2H_APPROVED_TRANSPORT_ERROR_KINDS
+                for kind in item.get("transport_error_kinds") or []
+            )
+            or int(item.get("retry_count") or 0) != 1
+            or GD2H_TRANSPORT_FAILURE_WARNING
+            not in clean_text(
+                str(
+                    row_by_source.get(
+                        clean_text(str(item.get("source_link") or "")), {}
+                    ).get("异常提示")
+                    or ""
+                )
+            )
+            for item in approved_transport
+        )
+    ):
+        errors.append("传输层失败图片未按同请求单次重试/异常标注规则留空")
+
+    filenames: set[str] = set()
+    byte_sizes: list[int] = []
+    large_photo_count = 0
+    photo_directories: set[Path] = set()
+    for source, row in row_by_source.items():
+        name = clean_text(str(row.get("姓名") or ""))
+        photo = photo_by_source.get(source)
+        if not photo:
+            if clean_text(str(row.get("照片链接") or "")) or clean_text(
+                str(row.get("照片文件") or "")
+            ):
+                errors.append(f"无本人职业照身份未保持照片字段为空：{name}")
+            continue
+        detail_id = gd2h_detail_id(source)
+        photo_url = clean_text(str(photo.get("photo_url") or ""))
+        filename = clean_text(str(photo.get("filename") or ""))
+        department = clean_text(str(photo.get("department") or ""))
+        title = gd2h_primary_title(row.get("职称身份原文"))
+        expected_stem = "-".join(
+            [
+                gdgh_photo_part(name),
+                gdgh_photo_part(department),
+                gdgh_photo_part(title),
+                gdgh_photo_part("广东省第二人民医院"),
+            ]
+        )
+        expected_relative = (
+            Path("01_试点医院") / "广东省第二人民医院" / "照片" / filename
+        ).as_posix()
+        if (
+            clean_text(str(photo.get("detail_id") or "")) != detail_id
+            or not gd2h_photo_url(photo_url, photo_url)
+            or clean_text(str(row.get("照片链接") or "")) != photo_url
+            or clean_text(str(row.get("照片文件") or "")) != expected_relative
+            or clean_text(str(photo.get("photo_file") or "")) != expected_relative
+        ):
+            errors.append(f"本人职业照 URL、Referer 详情或相对路径未对账：{name}")
+        row_departments = clean_text(str(row.get("科室_分类页") or ""))
+        if not any(
+            GD2H_CAMPUS_SUFFIX_PATTERN.sub("", value) == department
+            for value in row_departments.split("、")
+            if value
+        ):
+            errors.append(f"照片命名科室不是主身份明确科室：{name}")
+        if (
+            not filename
+            or re.search(r'[\\/:*?"<>|]', filename)
+            or Path(filename).stem not in {expected_stem, f"{expected_stem}-{detail_id}"}
+            or filename.casefold() in filenames
+        ):
+            errors.append(f"照片文件名未按姓名-主科室-主职称-医院唯一对账：{name}")
+        filenames.add(filename.casefold())
+        disk_path = Path(str(photo.get("disk_path") or ""))
+        if not disk_path.is_file():
+            errors.append(f"照片文件不存在：{disk_path}")
+            continue
+        photo_directories.add(disk_path.parent)
+        content = disk_path.read_bytes()
+        extension = disk_path.suffix.lower().lstrip(".")
+        media_type = {
+            "jpg": "image/jpeg",
+            "png": "image/png",
+            "gif": "image/gif",
+            "webp": "image/webp",
+        }.get(extension, "")
+        if gdgh_photo_extension(content, media_type) != extension:
+            errors.append(f"照片扩展名与魔数不一致：{filename}")
+        if int(photo.get("bytes") or 0) != len(content):
+            errors.append(f"照片字节数对账失败：{filename}")
+        if clean_text(str(photo.get("sha256") or "")) != hashlib.sha256(content).hexdigest():
+            errors.append(f"照片 SHA-256 对账失败：{filename}")
+        width, height = gdmch_photo_dimensions(content, extension)
+        if (
+            width <= 0
+            or height <= 0
+            or int(photo.get("width") or 0) != width
+            or int(photo.get("height") or 0) != height
+        ):
+            errors.append(f"照片宽高对账失败：{filename}")
+        byte_sizes.append(len(content))
+        if len(content) > 200 * 1024 or width > 800:
+            large_photo_count += 1
+
+    if len(photo_directories) != 1:
+        errors.append("照片全集未落在唯一的本院照片目录")
+    elif {
+        path.name for path in next(iter(photo_directories)).iterdir() if path.is_file()
+    } != {clean_text(str(item.get("filename") or "")) for item in photos}:
+        errors.append("本院照片目录磁盘集合与 FULL 照片对账表不一致")
+    if byte_sizes:
+        average_bytes = round(sum(byte_sizes) / len(byte_sizes))
+        if int(meta.get("photo_average_bytes") or 0) != average_bytes:
+            errors.append("平均单张照片大小对账失败")
+    if int(meta.get("large_photo_count") or 0) != large_photo_count:
+        errors.append("大图阈值计数对账失败")
+    actual_retry_count = sum(int(item.get("retry_count") or 0) for item in photos)
+    actual_retry_count += sum(
+        int(item.get("retry_count") or 0) for item in no_sources
+    )
+    if (
+        any(int(item.get("retry_count") or 0) not in {0, 1} for item in photos)
+        or any(
+            int(item.get("retry_count") or 0) not in {0, 1}
+            for item in no_sources
+        )
+        or int(meta.get("photo_bounded_retry_count") or 0) != actual_retry_count
+        or actual_retry_count > len(photos) + len(no_sources)
+        or meta.get("photo_retry_policy") != GD2H_PHOTO_RETRY_POLICY
+    ):
+        errors.append("图片同 URL/Referer/请求头单次重试策略未逐图对账")
+    if meta.get("photo_policy_status") != "OWNER_APPROVED_ORIGINAL_NO_WIDTH_LIMIT":
+        errors.append("照片政策未保持 owner 已批准的原图不压缩口径")
+
+    if errors:
+        raise RuntimeError("GD2H FULL 写入前门禁失败：" + "；".join(dict.fromkeys(errors)))
+
+
 def validate_gdmch_full_append(payload: dict[str, Any] | None = None) -> None:
     """Block the master write unless the owner-approved FULL census fully reconciles."""
 
@@ -11770,6 +13759,73 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
         if int(item.get("relation_count") or 0) > 1
         or item.get("resolution") == "同名待甄别"
     ) or "| 无 | 无 | 无 | 0 | 无 | 无 | 无 |"
+    gd2h_category_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('category_name', ''))} | "
+            f"{item.get('row_count', 0)} | {item.get('url', '')} |"
+        )
+        for item in payload.get("categories", [])
+    ) or "| 无 | 0 | 无 |"
+    gd2h_department_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('campus', ''))} | "
+            f"{markdown_table_cell(item.get('category', ''))} | "
+            f"{markdown_table_cell(item.get('department', '')) or '无'} | "
+            f"{item.get('relation_count', 0)} |"
+        )
+        for item in payload.get("department_tree", [])
+    ) or "| 无 | 无 | 无 | 0 |"
+    gd2h_detail_lines = "\n".join(
+        (
+            f"| {item.get('detail_id', '')} | {item.get('id_format', '')} | "
+            f"{markdown_table_cell(item.get('directory_name', ''))} | "
+            f"{markdown_table_cell(item.get('detail_name', ''))} | "
+            f"{markdown_table_cell(item.get('campus', ''))} | "
+            f"{markdown_table_cell(item.get('category', ''))} | "
+            f"{markdown_table_cell(item.get('directory_department', ''))} → "
+            f"{markdown_table_cell(item.get('detail_department', ''))} | "
+            f"{markdown_table_cell(item.get('title', '')) or '无'} | "
+            f"{item.get('photo_state', '')} | {item.get('resolution', '')} | "
+            f"{item.get('source_link', '')} |"
+        )
+        for item in payload.get("gd2h_detail_reconciliation", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 | 无 | 无 | 无 | 无 | 无 | 无 |"
+    gd2h_nursing_lines = "\n".join(
+        (
+            f"| {item.get('detail_id', '')} | {markdown_table_cell(item.get('name', ''))} | "
+            f"{markdown_table_cell(item.get('list_title', '')) or '无'} | "
+            f"{markdown_table_cell(item.get('campus', ''))} | "
+            f"{'是' if item.get('individual_nursing_identity') else '否，待甄别'} | "
+            f"{markdown_table_cell(item.get('reason', ''))} | {item.get('source_link', '')} |"
+        )
+        for item in payload.get("excluded_candidates", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 | 无 | 无 |"
+    gd2h_photo_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('name', ''))} | "
+            f"{item.get('detail_id', '')} | "
+            f"{markdown_table_cell(item.get('department', ''))} | "
+            f"{markdown_table_cell(item.get('title', ''))} | "
+            f"{markdown_table_cell(item.get('filename', ''))} | {item.get('bytes', 0)} | "
+            f"{item.get('width', 0)}×{item.get('height', 0)} | "
+            f"`{item.get('sha256', '')}` | {item.get('photo_url', '')} |"
+        )
+        for item in payload.get("photo_samples", [])
+    ) or "| 无 | 无 | 无 | 无 | 无 | 0 | 0×0 | 无 | 无 |"
+    gd2h_identity_lines = "\n".join(
+        (
+            f"| {markdown_table_cell(item.get('name', ''))} | "
+            f"{','.join(str(value) for value in item.get('detail_ids', []))} | "
+            f"{item.get('resolution', '')} | {item.get('relation_count', 0)} | "
+            f"{'、'.join(item.get('departments', [])) or '无'} | "
+            f"{'、'.join(item.get('campuses', [])) or '无'} | "
+            f"{item.get('primary_detail_id', '')} | "
+            f"{item.get('primary_source_link', '')} |"
+        )
+        for item in payload.get("gd2h_identity_reconciliation", [])
+        if int(item.get("relation_count") or 0) > 1
+        or item.get("resolution") == "同名待甄别"
+    ) or "| 无 | 无 | 无 | 0 | 无 | 无 | 无 | 无 |"
     campus_relation_summary = "；".join(
         f"{name} {count} 条"
         for name, count in meta.get("campus_relation_counts", {}).items()
@@ -11996,6 +14052,78 @@ def write_report(path: Path, payload: dict[str, Any], csv_path: Path, xlsx_path:
 | 姓名 | 详情 ID | 裁决 | 原关系数 | 合并科室 | 主详情 | 其余详情 |
 |---|---|---|---:|---|---|---|
 {gdmch_identity_lines}
+"""
+        )
+    if payload.get("gd2h_detail_reconciliation"):
+        sample_departments = "、".join(meta.get("covered_departments", [])) or "无"
+        sample_campus_summary = "、".join(
+            f"{name}={count}"
+            for name, count in meta.get("sample_campus_counts", {}).items()
+        ) or "无"
+        sample_category_summary = "、".join(
+            f"{name}={count}"
+            for name, count in meta.get("sample_category_counts", {}).items()
+        ) or "无"
+        sample_id_summary = "、".join(
+            f"{name}={count}"
+            for name, count in meta.get("sample_id_format_counts", {}).items()
+        ) or "无"
+        phase_statement = (
+            "Owner 已明确审计通过并切换到 FULL_APPEND_AND_OBSIDIAN；本报告为正式追加写入前的全量门禁结果。"
+            if full_append
+            else "当前仍为 TRIAL；所有非 --trial-only 命令须等待 owner 明确切换阶段。"
+        )
+        adapter_specific_sections.append(
+            f"""## 广东省第二人民医院两院区、六栏目、双格式 ID 与照片{run_label}对账
+
+- 官网单页静态目录：{meta.get('pagination_count', 0)} 页；两院区六栏目仅由前端 `tapxxk()` / `tapzk()` 显隐，不构造独立院区 URL、关键词或搜索请求。
+- 原始关系 / 唯一详情 ID：{meta.get('candidate_membership_count', 0)} / {meta.get('census_unique_detail_count', 0)}；数字 ID {meta.get('census_numeric_id_count', 0)}，hash ID {meta.get('census_hash_id_count', 0)}，均大小写敏感原样保留。
+- 护理栏目整栏排除：{meta.get('nursing_column_count', 0)}；其中个体职称疑似非护理身份、待 owner 甄别：{meta.get('nursing_identity_mismatch_count', 0)}；排除后临床/医技候选：{meta.get('eligible_candidate_count', 0)}。
+- 581 个临床/医技详情公开 GET：成功 {len(payload.get('gd2h_detail_reconciliation', [])) - meta.get('detail_error_count', 0)}，失败 {meta.get('detail_error_count', 0)}；普通公开会话：{meta.get('standard_public_session', '未记录')}。
+- {run_label}覆盖：院区 {sample_campus_summary}；栏目 {sample_category_summary}；ID 格式 {sample_id_summary}；科室 {meta.get('department_coverage_count', 0)} 个（{sample_departments}）。
+- 详情清洗：排班尾段排除 {meta.get('schedule_exclusion_count', 0)}，排名/患者片段排除 {meta.get('forbidden_segment_exclusion_count', 0)}，患者案例排除 {meta.get('patient_case_exclusion_count', 0)}；正式字段排班写入 {meta.get('schedule_field_ingested_count', 0)}、私用区字符 {meta.get('private_use_character_count', 0)}。
+- 照片普查：本人职业照 {meta.get('photo_census_available_count', 0)}、默认占位 {meta.get('photo_census_placeholder_count', 0)}、空 `src` {meta.get('photo_census_empty_count', 0)}、拒绝路径 {meta.get('photo_census_rejected_count', 0)}。
+- 照片四数：应采 {meta.get('photo_expected_count', 0)} / 实采 {meta.get('photo_downloaded_count', 0)} / 失败 {meta.get('photo_failed_count', 0)} / 无照片 {meta.get('photo_no_source_count', 0)}；其中管理员批准双 404 留空 {meta.get('photo_no_source_approved_broken_count', 0)}、连续两次传输失败留空 {meta.get('photo_no_source_approved_transport_count', 0)}；平均 {meta.get('photo_average_bytes', 0)} bytes。
+- 图片瞬时失败策略：{meta.get('photo_retry_policy', '未记录')}；本轮触发单次重试 {meta.get('photo_bounded_retry_count', 0)} 张。
+- 按 {meta.get('photo_estimated_full_count', 0)} 位本人职业照候选估算全院照片容量：{meta.get('photo_estimated_full_bytes', 0)} bytes；大图阈值命中 {meta.get('large_photo_count', 0)} 张；照片政策：`{meta.get('photo_policy_status', '未记录')}`。
+- 最终身份：{meta.get('gd2h_final_identity_count', len(payload.get('rows', [])))}；同一人归并 {meta.get('gd2h_same_identity_merge_group_count', 0)} 组；实质不同同名 {meta.get('gd2h_distinct_same_name_group_count', 0)} 组 / {meta.get('gd2h_distinct_same_name_row_count', 0)} 行。
+- {phase_statement}
+
+### 两院区六栏目关系计数
+
+| 院区-栏目 | 详情关系 | 官方入口 |
+|---|---:|---|
+{gd2h_category_lines}
+
+### 科室树
+
+| 院区 | 栏目 | 科室 | 详情关系 |
+|---|---|---|---:|
+{gd2h_department_lines}
+
+### 581 个临床/医技详情逐 ID 对账
+
+| 详情 ID | 格式 | 目录姓名 | 详情姓名 | 院区 | 栏目 | 目录科室 → 详情科室 | 职称 | 照片状态 | 详情状态 | 来源链接 |
+|---|---|---|---|---|---|---|---|---|---|---|
+{gd2h_detail_lines}
+
+### 27 个护理栏目候选逐 ID 排除与个体身份留痕
+
+| 详情 ID | 姓名 | 列表身份 | 院区 | 个体护理身份 | 排除/甄别理由 | 来源链接 |
+|---|---|---|---|---|---|---|
+{gd2h_nursing_lines}
+
+### 同名身份聚类与主详情裁决
+
+| 姓名 | 详情 ID | 裁决 | 详情关系 | 合并科室/院区 | 院区 | 主详情 ID | 主详情来源 |
+|---|---|---|---:|---|---|---|---|
+{gd2h_identity_lines}
+
+### {run_label}照片命名、字节、魔数、SHA-256 与尺寸对照
+
+| 姓名 | 详情 ID | 科室 | 主职称 | 文件名 | 字节数 | 宽×高 | SHA-256 | 官网照片 |
+|---|---|---|---|---|---:|---:|---|---|
+{gd2h_photo_lines}
 """
         )
     adapter_specific_text = "\n\n".join(adapter_specific_sections)
@@ -12397,6 +14525,7 @@ def main() -> None:
             FAHSYSU_ADAPTER_ID,
             GDGH_ADAPTER_ID,
             GDMCH_ADAPTER_ID,
+            GD2H_ADAPTER_ID,
         }
         and not args.trial_only
         and not args.single_output
@@ -12435,6 +14564,13 @@ def main() -> None:
         )
     elif target.adapter_id == GDMCH_ADAPTER_ID:
         payload = collect_gdmch(
+            target,
+            args.today,
+            max_doctors=max_doctors,
+            full_mode=not args.trial_only,
+        )
+    elif target.adapter_id == GD2H_ADAPTER_ID:
+        payload = collect_gd2h(
             target,
             args.today,
             max_doctors=max_doctors,
@@ -12484,6 +14620,8 @@ def main() -> None:
     covered_departments = (
         gdmch_covered_department_names(payload["rows"])
         if target.adapter_id == GDMCH_ADAPTER_ID
+        else gd2h_covered_department_names(payload["rows"])
+        if target.adapter_id == GD2H_ADAPTER_ID
         else covered_department_names(payload["rows"])
     )
     payload["meta"]["department_coverage_count"] = len(covered_departments)
@@ -12504,10 +14642,14 @@ def main() -> None:
         validate_gdgh_trial(payload, expected_rows=max_doctors or 10)
     if target.adapter_id == GDMCH_ADAPTER_ID and args.trial_only:
         validate_gdmch_trial(payload, expected_rows=max_doctors or 10)
+    if target.adapter_id == GD2H_ADAPTER_ID and args.trial_only:
+        validate_gd2h_trial(payload, expected_rows=max_doctors or 10)
     if target.adapter_id == GDGH_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_gdgh_full_append(payload)
     if target.adapter_id == GDMCH_ADAPTER_ID and not args.trial_only:
         validate_gdmch_full_append(payload)
+    if target.adapter_id == GD2H_ADAPTER_ID and not args.trial_only:
+        validate_gd2h_full_append(payload)
 
     if target.adapter_id == FAHSYSU_ADAPTER_ID and not args.trial_only and not args.single_output:
         validate_fahsysu_full_append(payload)
