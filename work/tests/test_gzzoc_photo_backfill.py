@@ -12,15 +12,25 @@ if str(WORK_DIR) not in sys.path:
     sys.path.insert(0, str(WORK_DIR))
 
 from gzzoc_photo_backfill import (  # noqa: E402
+    EXPECTED_SCOPE_COUNT,
+    FULL_WARNING_BY_STATE,
     HOSPITAL,
+    append_failure_warning,
     atomic_department,
+    collect_full_row_diffs,
     detail_id,
     image_dimensions,
+    insert_profile_photo_block,
+    insert_profile_photo_block_bytes,
+    inspect_portrait_reference,
     magic_extension,
     page_referenced_photo_url,
     parse_portrait_reference,
     primary_title,
     select_trial_rows,
+    validate_full_payload,
+    validate_profile_photo_only,
+    validate_profile_photo_only_bytes,
     validate_trial,
 )
 
@@ -93,6 +103,23 @@ class GzzocPhotoBackfillTests(unittest.TestCase):
             )
         with self.assertRaisesRegex(RuntimeError, "结构"):
             parse_portrait_reference("<main>无职业照容器</main>", detail, "易珍")
+
+    def test_full_portrait_inspection_classifies_missing_and_placeholder(self) -> None:
+        detail = "http://www.gzzoc.org.cn/node/12767"
+        state, portrait = inspect_portrait_reference(
+            '<div class="showcase-5-0"><h2>易珍</h2></div>', detail, "易珍"
+        )
+        self.assertEqual(state, "无照片元素")
+        self.assertIsNone(portrait)
+        state, portrait = inspect_portrait_reference(
+            '<div class="showcase-5-0"><div class="showcase-media">'
+            '<img src="/sites/zoc.live1.sysucloud2.sysu.edu.cn/files/default-avatar.jpg">'
+            "</div><h2>易珍</h2></div>",
+            detail,
+            "易珍",
+        )
+        self.assertEqual(state, "占位图")
+        self.assertIsNone(portrait)
 
     def test_page_referenced_original_is_recorded_without_construction(self) -> None:
         detail = "https://www.gzzoc.org.cn/node/1"
@@ -214,6 +241,136 @@ class GzzocPhotoBackfillTests(unittest.TestCase):
         }
         with self.assertRaisesRegex(RuntimeError, "原图路径探测"):
             validate_trial(payload)
+
+    def test_full_helpers_preserve_warning_and_photo_only_profile_change(self) -> None:
+        warning = append_failure_warning("既有提示", "无照片元素")
+        self.assertEqual(warning, f"既有提示；{FULL_WARNING_BY_STATE['无照片元素']}")
+        self.assertEqual(append_failure_warning(warning, "无照片元素"), warning)
+        before = "# 医生甲\n\n## 基础信息\n\n| 字段 | 内容 |\n"
+        after = (
+            "# 医生甲\n\n## 基础信息\n\n"
+            "![医生甲](照片/医生甲.jpg)\n\n| 字段 | 内容 |\n"
+        )
+        validate_profile_photo_only(
+            before,
+            after,
+            "医生甲",
+            f"01_试点医院/{HOSPITAL}/照片/医生甲.jpg",
+        )
+        with self.assertRaisesRegex(RuntimeError, "区块以外"):
+            validate_profile_photo_only(
+                before,
+                after.replace("| 字段 |", "| 改动 |"),
+                "医生甲",
+                f"01_试点医院/{HOSPITAL}/照片/医生甲.jpg",
+            )
+        self.assertEqual(
+            insert_profile_photo_block(
+                before,
+                "医生甲",
+                f"01_试点医院/{HOSPITAL}/照片/医生甲.jpg",
+            ),
+            after,
+        )
+
+    def test_surgical_profile_insert_preserves_crlf_bom_and_all_other_bytes(self) -> None:
+        before = (
+            b"\xef\xbb\xbf"
+            + "# 医生甲\r\n\r\n## 基础信息\r\n\r\n| 字段 | 内容 |\r\n".encode(
+                "utf-8"
+            )
+        )
+        photo_file = f"01_试点医院/{HOSPITAL}/照片/医生甲.jpg"
+        after = insert_profile_photo_block_bytes(before, "医生甲", photo_file)
+        expected_block = "![医生甲](照片/医生甲.jpg)\r\n\r\n".encode("utf-8")
+        self.assertTrue(after.startswith(b"\xef\xbb\xbf"))
+        self.assertEqual(after.replace(expected_block, b"", 1), before)
+        validate_profile_photo_only_bytes(before, after, "医生甲", photo_file)
+        with self.assertRaisesRegex(RuntimeError, "已存在照片嵌入区块"):
+            insert_profile_photo_block_bytes(after, "医生甲", photo_file)
+
+    def test_full_row_diff_rejects_scope_or_column_drift(self) -> None:
+        source = "http://www.gzzoc.org.cn/node/1"
+        before = [{"来源链接": source, "照片链接": "", "照片文件": "", "姓名": "甲"}]
+        after = [{**before[0], "照片链接": "http://www.gzzoc.org.cn/files/a.jpg"}]
+        diffs = collect_full_row_diffs(before, after, {source})
+        self.assertEqual([item["列名"] for item in diffs], ["照片链接"])
+        drift = [{**before[0], "姓名": "乙"}]
+        with self.assertRaisesRegex(RuntimeError, "范围外字段"):
+            collect_full_row_diffs(before, drift, {source})
+
+    def test_full_validator_closes_205_rows_and_three_failure_states(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            content = png_bytes(960, 1280)
+            digest = hashlib.sha256(content).hexdigest()
+            rows = []
+            photos = []
+            reconciliation = []
+            failure_states = ["详情不可达", "无照片元素", "占位图"]
+            for index in range(EXPECTED_SCOPE_COUNT):
+                source = f"http://www.gzzoc.org.cn/node/{1000 + index}"
+                name = f"医生{index}"
+                if index < len(failure_states):
+                    state = failure_states[index]
+                    rows.append(
+                        {
+                            "姓名": name,
+                            "来源链接": source,
+                            "照片链接": "",
+                            "照片文件": "",
+                            "异常提示": FULL_WARNING_BY_STATE[state],
+                        }
+                    )
+                    reconciliation.append(
+                        {"姓名": name, "来源链接": source, "状态": "失败", "失败三态": state}
+                    )
+                    continue
+                filename = f"{name}.png"
+                (root / filename).write_bytes(content)
+                photo_file = f"01_试点医院/{HOSPITAL}/照片/{filename}"
+                photo_url = f"http://www.gzzoc.org.cn/files/{filename}"
+                rows.append(
+                    {
+                        "姓名": name,
+                        "来源链接": source,
+                        "照片链接": photo_url,
+                        "照片文件": photo_file,
+                        "异常提示": "",
+                    }
+                )
+                photos.append(
+                    {
+                        "source_link": source,
+                        "filename": filename,
+                        "bytes": len(content),
+                        "sha256": digest,
+                        "width": 960,
+                        "height": 1280,
+                    }
+                )
+                reconciliation.append(
+                    {"姓名": name, "来源链接": source, "状态": "实采", "失败三态": ""}
+                )
+            downloaded = len(photos)
+            total_bytes = downloaded * len(content)
+            payload = {
+                "meta": {
+                    "expected_count": EXPECTED_SCOPE_COUNT,
+                    "downloaded_count": downloaded,
+                    "failed_count": len(failure_states),
+                    "blank_count": len(failure_states),
+                    "failure_state_counts": {state: 1 for state in failure_states},
+                    "detail_unreachable_count": 1,
+                    "photo_total_bytes": total_bytes,
+                    "photo_max_bytes": len(content),
+                    "over_5mib_count": 0,
+                },
+                "rows": rows,
+                "photo_samples": photos,
+                "reconciliation": reconciliation,
+            }
+            validate_full_payload(payload, root)
 
 
 if __name__ == "__main__":

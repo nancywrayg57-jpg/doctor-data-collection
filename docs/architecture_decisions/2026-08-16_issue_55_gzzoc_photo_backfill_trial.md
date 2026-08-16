@@ -3,8 +3,8 @@
 > 日期：2026-08-16
 > GitHub Issue：<https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/55>
 > 分支：`codex/mhrj/issue-55-photo-backfill-gzzoc`
-> Phase：`TRIAL_READY_FOR_OWNER_AUDIT`
-> 照片政策：`WAITING_OWNER_DERIVATIVE_OR_ORIGINAL_DECISION`
+> Phase：`FULL_READY_FOR_FINAL_OWNER_AUDIT`
+> 照片政策：`OWNER_APPROVED_PAGE_REFERENCED_LARGE_960_DERIVATIVE`
 
 ## 1. 目标与边界
 
@@ -122,39 +122,85 @@ TRIAL 前后四份受保护资产 SHA-256 完全一致：
 3. 页面未引用的原图请求计数必须恒为 0；validator 发现非零立即失败。
 4. TRIAL 和 FULL 分离；无 owner 大图裁决时所有非 `--trial-only` 命令硬熔断。
 
-## 8. 当前停止点
+## 8. FULL 授权与两次失败熔断
 
-TRIAL 工件已完成本地验收。下一步只允许提交并通过非强制 Git Data API 推送原分支、创建关联 Issue #55 的 PR，然后等待 owner 对 TRIAL 给出明确“通过”或“有条件通过”并裁决大图路径。未切换到 FULL 指令前，不得写入总底表、刷新正式画像、下载其余 195 行照片、合并 PR 或关闭 Issue。
+Owner 于 2026-08-16T07:00:16Z 在 PR #56 明确给出 TRIAL“通过”，批准 FULL 使用页面实际引用且保留 `itok` 的 `large_960_x_auto_` 派生图，并下发 205 行 `FULL_APPEND_AND_OBSIDIAN` 指令。
+
+正式落盘前连续两次验证均被事务门禁安全阻断：
+
+1. 首次 FULL 的临时 XLSX 读取句柄未及时关闭，Windows 文件锁使临时工作簿无法替换；正式资产零变化。修正为使用会关闭句柄的基础 XLSX 读取路径。
+2. 第二次 FULL 调用当前画像生成器刷新旧模板画像，除照片块外还会整体改写 YAML、章节和正文，被“仅照片块变化”门禁阻断；正式资产仍零变化。
+
+按 `Agent.md` 连续两次失败熔断后停止修改。管理员随后明确选择“外科式照片块插入”：保留旧画像全文，只在唯一 `## 基础信息` 标题后的空行插入 `![姓名](照片/文件名)`，不再调用全量画像生成器。
+
+防复发门禁：
+
+1. 画像以原始 UTF-8 字节处理，保留 BOM 与 LF/CRLF；删除新增照片块后必须与原画像逐字节一致。
+2. 全院 Markdown 文件集合不变，发生字节变化的相对路径集合必须恰好等于成功实采画像集合；失败留空画像和 `_索引.md` 必须逐字节不变。
+3. 已存在照片块、基础信息插入点缺失或不唯一、画像文件映射变化均立即停止。
+4. 总底表前后逐单元格比较只允许目标 205 行的 `照片链接`、`照片文件`；只有失败行才允许追加 `异常提示`。
+
+## 9. FULL 正式结果
+
+- 应采 / 实采 / 失败 / 留空：`205 / 205 / 0 / 0`。
+- 失败三态：详情不可达 0、无照片元素 0、占位图 0；不可达率 0%。
+- 照片：205 张，合计 `167,098,636` bytes（约 159.36 MiB），最大单张 `1,929,832` bytes，超过 5 MiB 为 0。
+- 页面引用原图计数 0；构造或探测原图请求 0；全部保存页面引用派生图的原始响应字节，未压缩。
+- 总底表保持 9,222 行；目标 205 行三载体一致，恰好 410 个单元格变化：`照片链接` 205、`照片文件` 205，其他单元格零变化。
+- 画像：205/205 各新增一个照片嵌入块；205 个文件 `git numstat` 均为 `+2/-0`，删除照片块后与旧文件逐字节一致。
+- `_索引.md` SHA-256 保持 `0F8E475385158A63B222200882E757D2B978C9026EE5B3223902C67BA16D7F98`。
+- 入口台账 SHA-256 保持 `D6B08B3F284654024FAD0EEAC3377B095025DC294732DB030E8CC5B81655B782`。
+- 总底表更新报告 SHA-256 保持 `CD6FFF06B933F4A765838281F52F06F3E1228FCEA37E5D3B4A9441BD8120D96A`。
+
+FULL 后三载体哈希：
+
+| 资产 | SHA-256 |
+|---|---|
+| 总底表 payload | `E7D366F45693E21E7912C0CFD6CB7E26E8C26C94E5174D9F5C7C39F9DB790DE8` |
+| 总底表 CSV | `7F8FBFE8AC1772852BDCE8EA5237E4593411BA54FBEF010B8E7169335F86413F` |
+| 总底表 XLSX | `283217C4F74595B409B89933A2DA8FAF2046CA7D51810FAC369DF3A533F90B22` |
+
+## 10. 验证与当前停止点
+
+- `py_compile`：通过。
+- Issue #55 专项 unittest：13/13 通过。
+- 全量 unittest：186/186 通过。
+- FULL payload validator：205 行四数、失败三态、逐图字节/SHA-256/魔数/尺寸、单张大小和磁盘集合全部通过。
+- 总底表 payload/CSV/XLSX：9,222 行逐字段一致。
+- Artifact-tool：六个工作表公式错误扫描 0；六表最终渲染检查通过，保持既有版式。
+- `git diff --check`：通过。
+
+当前只允许更新原 PR #56 并等待 owner 最终画像审计。不得自行合并 PR、关闭 Issue 或领取其他 Issue；自动化在提交并成功推送、进入等待审计状态前保持 PAUSED。
 
 <Handoff_State>
-Target: Issue #55 中山大学中山眼科中心存量照片补录 TRIAL
+Target: Issue #55 中山大学中山眼科中心存量照片补录 FULL
 AgentConstitution: D:\workspace\信息收集整理\Agent.md
 RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/55
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/56
 Branch: codex/mhrj/issue-55-photo-backfill-gzzoc
-Phase: TRIAL_READY_FOR_OWNER_AUDIT
+Phase: FULL_READY_FOR_FINAL_OWNER_AUDIT
 Completed:
-- 核验 205 行照片补录固定范围与 205 个唯一官网数字 node
-- 完成 10 位/10 科室详情与职业照 TRIAL，10 图全部下载和四重校验通过
-- 完成 10 图联系表人工视觉复核，未发现患者、儿童、合影、占位图或通用图
-- 完成页面派生图实测与 205 行容量估算；原图引用 0、原图探测 0
-- 完成专项测试、FULL 负向熔断和受保护资产零变更验证
+- Owner 已通过 TRIAL 并批准使用页面实际引用的 large_960_x_auto_ 派生图
+- 完成 205/205 正式照片补录；失败与留空均为 0
+- 完成 payload/CSV/XLSX 三载体 205 行照片两列回填与逐字段一致性验证
+- 完成 205 份旧模板画像的外科式照片块插入；索引和画像其余字节不变
+- 完成 13 项专项测试、186 项全量测试和六表 artifact-tool 渲染验收
 Next:
-- 提交并通过非强制 Git Data API 推送原分支，创建关联 Issue #55 的 PR
-- 等待 owner TRIAL 审计与派生图/原图裁决
-- 只有 owner 明确通过并切换 FULL 后才能处理剩余范围、写总底表和刷新画像
+- 提交并在推送前再次核验 xtzhou247 身份
+- 仅通过非强制 Git Data API 更新原分支和 PR #56
+- 等待 nancywrayg57-jpg 最终画像审计、CI、合并和 Issue 关闭
 Constraints:
 - 只使用既有来源链接详情页自身引用的官方本人职业照
 - 禁止构造或探测页面未引用原图；禁止患者/儿童影像、占位图、通用图
-- TRIAL 不写总底表 payload/CSV/XLSX，不刷新正式画像
-- 不自行 approve/merge PR，不关闭 Issue，不领取其他 Issue
+- 不自行 approve/merge/close，不领取其他 Issue
 Artifacts:
 - D:\workspace\信息收集整理\work\gzzoc_photo_backfill.py
 - D:\workspace\信息收集整理\work\tests\test_gzzoc_photo_backfill.py
-- D:\workspace\信息收集整理\work\中山大学中山眼科中心_photo_backfill_trial_payload.json
-- D:\workspace\信息收集整理\work\中山大学中山眼科中心_photo_backfill_trial_doctors.csv
-- D:\workspace\信息收集整理\work\中山大学中山眼科中心_photo_backfill_trial_report.md
-- D:\workspace\信息收集整理\work\中山大学中山眼科中心_photo_backfill_trial_contact_sheet.jpg
+- D:\workspace\信息收集整理\work\中山大学中山眼科中心_photo_backfill_full_payload.json
+- D:\workspace\信息收集整理\work\中山大学中山眼科中心_photo_backfill_full_reconciliation.csv
+- D:\workspace\信息收集整理\work\中山大学中山眼科中心_photo_backfill_full_report.md
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
 - D:\workspace\信息收集整理\医生画像仓库\01_试点医院\中山大学中山眼科中心\照片
 </Handoff_State>
