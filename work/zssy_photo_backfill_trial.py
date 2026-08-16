@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import csv
 import hashlib
 import io
 import json
 import re
+import shutil
+import tempfile
 from collections import Counter
 from dataclasses import dataclass
 from datetime import date
 from html.parser import HTMLParser
+from http.client import IncompleteRead
 from http.cookiejar import CookieJar
 from pathlib import Path
 from typing import Any
@@ -31,6 +35,7 @@ MASTER_JSON_PATH = WORK_DIR / f"{MASTER_BASENAME}_payload.json"
 MASTER_CSV_PATH = SOURCE_DIR / f"{MASTER_BASENAME}.csv"
 MASTER_XLSX_PATH = SOURCE_DIR / f"{MASTER_BASENAME}.xlsx"
 MASTER_REPORT_PATH = SOURCE_DIR / f"{MASTER_BASENAME}_更新报告.md"
+LEDGER_PATH = SOURCE_DIR / "珠三角三甲医院官网入口台账.xlsx"
 PROFILE_DIR = VAULT / "01_试点医院" / HOSPITAL
 FORMAL_PHOTO_DIR = PROFILE_DIR / "照片"
 TRIAL_BASENAME = f"{HOSPITAL}_photo_backfill_trial"
@@ -39,16 +44,59 @@ TRIAL_CSV_PATH = WORK_DIR / f"{TRIAL_BASENAME}_manifest.csv"
 TRIAL_REPORT_PATH = WORK_DIR / f"{TRIAL_BASENAME}_report.md"
 CONTACT_SHEET_PATH = WORK_DIR / f"{TRIAL_BASENAME}_contact_sheet.jpg"
 TRIAL_PHOTO_DIR = WORK_DIR / f"{TRIAL_BASENAME}_photos"
+FULL_BASENAME = f"{HOSPITAL}_photo_backfill_full"
+FULL_JSON_PATH = WORK_DIR / f"{FULL_BASENAME}_payload.json"
+FULL_CSV_PATH = WORK_DIR / f"{FULL_BASENAME}_reconciliation.csv"
+FULL_REPORT_PATH = WORK_DIR / f"{FULL_BASENAME}_report.md"
 OFFICIAL_HOME = "https://www.zssy.com.cn/"
 DIRECTORY_URL = "https://www.zssy.com.cn/page/5968"
 OFFICIAL_HOST = "zssy.com.cn"
 PHOTO_PREFIX = "/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/"
 EXPECTED_SCOPE_COUNT = 780
+EXPECTED_EXISTING_PROFILE_COUNT = 742
 EXPECTED_TRIAL_COUNT = 10
 MIN_TRIAL_DEPARTMENTS = 3
 MAX_FAILURE_RATIO = 0.30
 LARGE_BYTES = 200 * 1024
 LARGE_WIDTH = 800
+MAX_OWNER_REPORT_BYTES = 5 * 1024 * 1024
+PHOTO_RELATIVE_ROOT = Path("01_试点医院") / HOSPITAL / "照片"
+BASE_HEADERS = [
+    "序号",
+    "医院",
+    "姓名",
+    "科室_分类页",
+    "科室_列表卡片",
+    "职称_关键词",
+    "职称身份原文",
+    "重点优先级",
+    "重点关注范围",
+    "重点疾病标签",
+    "擅长诊疗方向摘录",
+    "亮眼经历线索",
+    "列表简介",
+    "详情正文摘录",
+    "来源类型",
+    "来源链接",
+    "照片链接",
+    "照片文件",
+    "采集入口",
+    "采集方式",
+    "采集日期",
+    "详情页状态",
+    "已建画像",
+    "异常提示",
+    "复核状态",
+]
+FULL_FAILURE_STATES = ("详情不可达", "无照片容器", "占位图")
+FULL_WARNING_BY_STATE = {
+    state: f"官网本人职业照补录失败：{state}" for state in FULL_FAILURE_STATES
+}
+FULL_ALLOWED_ROW_COLUMNS = {"照片链接", "照片文件", "异常提示"}
+FULL_AUTHORIZATION = (
+    "PR #58 owner comment 2026-08-16T11:49:02Z: "
+    "TRIAL 通过 + FULL_APPEND_AND_OBSIDIAN"
+)
 
 SAMPLE_PLAN = (
     ("张晓红", "正高"),
@@ -101,7 +149,21 @@ PLACEHOLDER_MARKERS = (
     "qrcode",
     "qr-code",
     "cloud-hospital",
+    "幻灯片",
+    "官网各科室专家介绍封面图",
 )
+
+PAGE_TITLE_ALIAS_BY_SOURCE = {
+    "https://www.zssy.com.cn/node/6008": "内科ICU",
+    "https://www.zssy.com.cn/node/14062": "外科ICU",
+    "https://www.zssy.com.cn/node/14071": "精神（心理）科",
+    "https://www.zssy.com.cn/node/14068": "口腔医学中心",
+    "https://www.zssy.com.cn/node/14098": "变态反应（过敏）学科",
+    "https://www.zssy.com.cn/node/11316": "甲状腺、乳腺外科",
+    "https://www.zssy.com.cn/node/15410": "神经外科（天河）",
+    "https://www.zssy.com.cn/node/15466": "精神（心理）科",
+    "https://www.zssy.com.cn/node/30221": "针灸专科（脑病方向）",
+}
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -282,6 +344,7 @@ class OfficialSession:
     def __init__(self) -> None:
         self.cookie_jar = CookieJar()
         self.opener = build_opener(HTTPCookieProcessor(self.cookie_jar))
+        self.incomplete_read_retry_count = 0
 
     @property
     def cookie_names(self) -> list[str]:
@@ -292,20 +355,35 @@ class OfficialSession:
         if referer:
             headers["Referer"] = referer
         request = Request(url, headers=headers)
-        try:
-            with self.opener.open(request, timeout=35) as response:
-                content = response.read()
+        for attempt in range(2):
+            try:
+                with self.opener.open(request, timeout=35) as response:
+                    content = response.read()
+                    return (
+                        int(response.status),
+                        response.headers.get_content_type(),
+                        response.headers.get_content_charset() or "utf-8",
+                        content,
+                    )
+            except IncompleteRead as exc:
+                if attempt == 0:
+                    self.incomplete_read_retry_count += 1
+                    continue
+                raise RuntimeError(
+                    f"官网响应连续两次传输不完整：{url} "
+                    f"已读 {len(exc.partial)} bytes，缺少 {exc.expected} bytes"
+                ) from exc
+            except HTTPError as exc:
+                content = exc.read()
                 return (
-                    int(response.status),
-                    response.headers.get_content_type(),
-                    response.headers.get_content_charset() or "utf-8",
+                    int(exc.code),
+                    exc.headers.get_content_type(),
+                    exc.headers.get_content_charset() or "utf-8",
                     content,
                 )
-        except HTTPError as exc:
-            content = exc.read()
-            return int(exc.code), exc.headers.get_content_type(), exc.headers.get_content_charset() or "utf-8", content
-        except URLError as exc:
-            raise RuntimeError(f"官网请求失败：{url} {exc}") from exc
+            except URLError as exc:
+                raise RuntimeError(f"官网请求失败：{url} {exc}") from exc
+        raise AssertionError("官网请求重试循环未返回")
 
 
 def magic_extension(content: bytes, content_type: str | None) -> str:
@@ -799,9 +877,891 @@ def run_trial(run_date: str) -> dict[str, Any]:
     return payload
 
 
+def append_failure_warning(value: Any, state: str) -> str:
+    if state not in FULL_WARNING_BY_STATE:
+        raise ValueError(f"未知照片失败状态：{state}")
+    warning = FULL_WARNING_BY_STATE[state]
+    existing = [item for item in clean_text(value).split("；") if item]
+    if warning not in existing:
+        existing.append(warning)
+    return "；".join(existing)
+
+
+def allocate_full_photo_path(
+    row: dict[str, Any],
+    source_id: str,
+    extension: str,
+    output_dir: Path,
+    used_filenames: set[str],
+) -> tuple[str, Path]:
+    stem = "-".join(
+        [
+            safe_photo_part(row.get("姓名")),
+            atomic_department(row),
+            safe_photo_part(primary_title(row.get("职称身份原文"))),
+            safe_photo_part(HOSPITAL),
+        ]
+    )
+    filename = f"{stem}.{extension}"
+    folded = filename.casefold()
+    if folded in used_filenames:
+        filename = f"{stem}-{safe_photo_part(source_id)}.{extension}"
+        folded = filename.casefold()
+    if folded in used_filenames or (output_dir / filename).exists():
+        raise RuntimeError(f"照片命名仍冲突，拒绝覆盖：{filename}")
+    used_filenames.add(folded)
+    return filename, output_dir / filename
+
+
+def row_value(value: Any) -> str:
+    return "" if value is None else str(value)
+
+
+def collect_full_row_diffs(
+    before_rows: list[dict[str, Any]],
+    after_rows: list[dict[str, Any]],
+    target_sources: set[str],
+) -> list[dict[str, str]]:
+    if len(before_rows) != len(after_rows):
+        raise RuntimeError("FULL 前后总底表行数发生变化")
+    diffs: list[dict[str, str]] = []
+    for sheet_row, (before, after) in enumerate(
+        zip(before_rows, after_rows, strict=True), start=2
+    ):
+        for column in BASE_HEADERS:
+            old = row_value(before.get(column))
+            new = row_value(after.get(column))
+            if old == new:
+                continue
+            source = clean_text(after.get("来源链接"))
+            diffs.append(
+                {
+                    "底表行": str(sheet_row),
+                    "序号": clean_text(after.get("序号")),
+                    "姓名": clean_text(after.get("姓名")),
+                    "来源链接": source,
+                    "列名": column,
+                    "修改前": old,
+                    "修改后": new,
+                }
+            )
+            if source not in target_sources:
+                raise RuntimeError(f"发现 Issue #57 范围外行修改：{source} {column}")
+    unexpected = sorted({item["列名"] for item in diffs} - FULL_ALLOWED_ROW_COLUMNS)
+    if unexpected:
+        raise RuntimeError("发现范围外字段修改：" + "、".join(unexpected))
+    return diffs
+
+
+def recompute_failure_derivatives(
+    payload: dict[str, Any], rows: list[dict[str, Any]]
+) -> None:
+    warning_counter: Counter[str] = Counter()
+    for row in rows:
+        for warning in clean_text(row.get("异常提示")).split("；"):
+            if warning:
+                warning_counter[warning] += 1
+    payload["warning_counts"] = dict(warning_counter)
+    import collect_official_doctors_batch as collector
+
+    payload["hospital_batches"] = collector.build_hospital_batches(rows)
+
+
+def canonical_master_row(row: dict[str, Any]) -> tuple[str, ...]:
+    return tuple(row_value(row.get(header)) for header in BASE_HEADERS)
+
+
+def write_master_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    with path.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=BASE_HEADERS)
+        writer.writeheader()
+        writer.writerows(
+            {key: row.get(key, "") for key in BASE_HEADERS} for row in rows
+        )
+
+
+def validate_master_layers(
+    payload_path: Path, csv_path: Path, xlsx_path: Path
+) -> list[dict[str, Any]]:
+    import generate_obsidian_profiles as profiles
+
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    payload_rows = payload.get("rows", [])
+    with csv_path.open("r", encoding="utf-8-sig", newline="") as handle:
+        csv_rows = list(csv.DictReader(handle))
+    xlsx_rows = profiles.read_xlsx_rows_basic(xlsx_path)
+    expected = [canonical_master_row(row) for row in payload_rows]
+    if [canonical_master_row(row) for row in csv_rows] != expected:
+        raise RuntimeError("总底表 payload 与 CSV 不一致")
+    if [canonical_master_row(row) for row in xlsx_rows] != expected:
+        raise RuntimeError("总底表 payload 与 XLSX 自动采集底表不一致")
+    return [dict(row) for row in payload_rows]
+
+
+def write_full_reconciliation_csv(path: Path, payload: dict[str, Any]) -> None:
+    headers = [
+        "姓名",
+        "来源链接",
+        "状态",
+        "失败三态",
+        "照片链接",
+        "照片文件",
+        "字节数",
+        "SHA-256",
+        "宽",
+        "高",
+        "错误证据",
+    ]
+    with path.open("w", encoding="utf-8-sig", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=headers)
+        writer.writeheader()
+        writer.writerows(
+            {header: item.get(header, "") for header in headers}
+            for item in payload["reconciliation"]
+        )
+
+
+def write_full_report(path: Path, payload: dict[str, Any]) -> None:
+    meta = payload["meta"]
+    state_counts = meta["failure_state_counts"]
+    failure_lines = "\n".join(
+        f"| {state} | {state_counts.get(state, 0)} |" for state in FULL_FAILURE_STATES
+    )
+    report = f"""# Issue #{ISSUE_NUMBER} {HOSPITAL}照片补录 FULL 报告
+
+> 日期：{meta['run_date']}
+> Phase：`FULL_READY_FOR_FINAL_OWNER_AUDIT`
+> 照片政策：`OWNER_APPROVED_PAGE_REFERENCED_ORIGINAL_BYTES`
+
+## 四数对账
+
+| 应采 | 实采 | 失败 | 留空 |
+|---:|---:|---:|---:|
+| {meta['expected_count']} | {meta['downloaded_count']} | {meta['failed_count']} | {meta['blank_count']} |
+
+| 失败三态 | 数量 |
+|---|---:|
+{failure_lines}
+
+- 详情不可达率：{meta['detail_unreachable_count']}/{meta['expected_count']}（{meta['detail_unreachable_rate']:.2%}），未超过 10% 熔断线。
+- 照片总字节：{meta['photo_total_bytes']} bytes（{meta['photo_total_mib']:.2f} MiB）。
+- 最大单张：{meta['photo_max_bytes']} bytes；超过 5 MiB：{meta['over_5mib_count']} 张。
+- 页面未引用路径的构造/探测请求：0；第三方来源：0。
+- 传输不完整原样重试：{meta['incomplete_read_retry_count']} 次；每个请求至多重试 1 次。
+- 780 页只读普查固化的官网标题别名映射：{meta['page_title_alias_count']} 条；仅用于校验来源页身份，不修改底表姓名等字段。
+- 总底表：payload/CSV/XLSX 三载体行数与 25 列逐值一致；仅目标行照片两列及失败行异常提示允许变化。
+- 画像：既有 {meta['existing_profile_count']} 份画像中，成功实采且有既有画像的 {meta['profile_refreshed_count']} 份只新增照片嵌入区块；{meta['no_profile_scope_count']} 条无画像行不新建画像；索引未改。
+
+## 工件
+
+- `{FULL_JSON_PATH}`
+- `{FULL_CSV_PATH}`
+- `{FULL_REPORT_PATH}`
+
+## 合规边界
+
+1. 只访问 780 条既有医院官网来源链接及页面自身引用的 `.physician-details-media .media-img` 公开照片。
+2. 使用官网首页建立的常规 Cookie 会话和对应详情页 Referer；页面引用原始字节保存，不压缩。
+3. 禁止构造或探测页面未引用图片路径；禁止第三方来源。
+4. 失败仅按“详情不可达 / 无照片容器 / 占位图”留空并追加异常提示。
+"""
+    path.write_text(report, encoding="utf-8", newline="\n")
+
+
+def validate_full_payload(payload: dict[str, Any], photo_root: Path) -> None:
+    meta = payload.get("meta", {})
+    expected = int(meta.get("expected_count") or 0)
+    downloaded = int(meta.get("downloaded_count") or 0)
+    failed = int(meta.get("failed_count") or 0)
+    blank = int(meta.get("blank_count") or 0)
+    if (
+        expected != EXPECTED_SCOPE_COUNT
+        or downloaded + failed != expected
+        or blank != failed
+    ):
+        raise RuntimeError("FULL 应采/实采/失败/留空未形成四数闭环")
+    state_counts = Counter(meta.get("failure_state_counts") or {})
+    if (
+        set(state_counts) - set(FULL_FAILURE_STATES)
+        or sum(state_counts.values()) != failed
+    ):
+        raise RuntimeError("FULL 失败三态分布不闭合")
+    unreachable = int(meta.get("detail_unreachable_count") or 0)
+    if (
+        unreachable != state_counts.get("详情不可达", 0)
+        or unreachable / expected > 0.10
+    ):
+        raise RuntimeError(
+            "[FATAL - HUMAN_INTERVENTION_REQUIRED] 详情不可达率超过 10% 或计数不一致"
+        )
+    if int(meta.get("constructed_unreferenced_probe_count") or 0) != 0:
+        raise RuntimeError("FULL 发生页面未引用路径探测")
+    if int(meta.get("third_party_source_count") or 0) != 0:
+        raise RuntimeError("FULL 发生第三方来源访问")
+    if int(meta.get("existing_profile_count") or 0) != EXPECTED_EXISTING_PROFILE_COUNT:
+        raise RuntimeError("FULL 既有画像数量漂移")
+    if int(meta.get("no_profile_scope_count") or 0) != (
+        EXPECTED_SCOPE_COUNT - EXPECTED_EXISTING_PROFILE_COUNT
+    ):
+        raise RuntimeError("FULL 无画像范围数量漂移")
+    if int(meta.get("page_title_alias_count") or 0) != len(
+        PAGE_TITLE_ALIAS_BY_SOURCE
+    ):
+        raise RuntimeError("FULL 官网标题别名映射数量漂移")
+
+    reconciliation = payload.get("reconciliation", [])
+    rows = payload.get("rows", [])
+    photos = payload.get("photo_samples", [])
+    if (
+        len(reconciliation) != expected
+        or len(rows) != expected
+        or len(photos) != downloaded
+    ):
+        raise RuntimeError("FULL 780 行对账工件数量不一致")
+    rows_by_source = {clean_text(row.get("来源链接")): row for row in rows}
+    photos_by_source = {
+        clean_text(item.get("source_link")): item for item in photos
+    }
+    if len(rows_by_source) != expected or len(photos_by_source) != downloaded:
+        raise RuntimeError("FULL 来源链接对账不唯一")
+
+    expected_files: set[str] = set()
+    total_bytes = 0
+    max_bytes = 0
+    for item in reconciliation:
+        source = clean_text(item.get("来源链接"))
+        row = rows_by_source.get(source)
+        if row is None:
+            raise RuntimeError(f"FULL 对账缺少总底表目标行：{source}")
+        state = clean_text(item.get("失败三态"))
+        status = clean_text(item.get("状态"))
+        if status == "实采":
+            if state or source not in photos_by_source:
+                raise RuntimeError(f"FULL 实采行状态不一致：{source}")
+            if (
+                not clean_text(row.get("照片链接"))
+                or not clean_text(row.get("照片文件"))
+            ):
+                raise RuntimeError(f"FULL 实采行照片字段为空：{source}")
+            photo = photos_by_source[source]
+            filename = clean_text(photo.get("filename"))
+            disk_path = photo_root / filename
+            content = disk_path.read_bytes()
+            if len(content) != int(photo.get("bytes") or 0):
+                raise RuntimeError(f"照片字节数对账失败：{filename}")
+            if hashlib.sha256(content).hexdigest() != photo.get("sha256"):
+                raise RuntimeError(f"照片 SHA-256 对账失败：{filename}")
+            expected_extension = disk_path.suffix.lower().lstrip(".")
+            content_type = (
+                "image/jpeg"
+                if expected_extension == "jpg"
+                else f"image/{expected_extension}"
+            )
+            if magic_extension(content, content_type) != expected_extension:
+                raise RuntimeError(f"照片魔数与扩展名不符：{filename}")
+            if image_dimensions(content) != (
+                int(photo.get("width") or 0),
+                int(photo.get("height") or 0),
+            ):
+                raise RuntimeError(f"照片尺寸对账失败：{filename}")
+            if len(content) > MAX_OWNER_REPORT_BYTES:
+                raise RuntimeError(f"单张照片超过 5 MiB，需先回报 owner：{filename}")
+            expected_files.add(filename)
+            total_bytes += len(content)
+            max_bytes = max(max_bytes, len(content))
+        elif status == "失败":
+            if state not in FULL_FAILURE_STATES:
+                raise RuntimeError(f"FULL 失败行未归入三态：{source}")
+            if clean_text(row.get("照片链接")) or clean_text(row.get("照片文件")):
+                raise RuntimeError(f"FULL 失败行未留空照片字段：{source}")
+            if FULL_WARNING_BY_STATE[state] not in clean_text(row.get("异常提示")):
+                raise RuntimeError(f"FULL 失败行未追加异常提示：{source}")
+        else:
+            raise RuntimeError(f"FULL 对账状态非法：{source} {status}")
+
+    actual_files = {item.name for item in photo_root.iterdir() if item.is_file()}
+    if actual_files != expected_files:
+        raise RuntimeError("FULL 照片目录磁盘集合与照片对账不一致")
+    if total_bytes != int(meta.get("photo_total_bytes") or 0):
+        raise RuntimeError("FULL 照片总字节对账失败")
+    if max_bytes != int(meta.get("photo_max_bytes") or 0):
+        raise RuntimeError("FULL 最大单张字节对账失败")
+    if int(meta.get("over_5mib_count") or 0) != 0:
+        raise RuntimeError("FULL 存在超过 5 MiB 未回报照片")
+
+
+def profile_photo_markdown_path(photo_file: str) -> str:
+    markdown_path = "/".join(Path(photo_file.replace("\\", "/")).parts[-2:])
+    if not markdown_path.startswith("照片/"):
+        raise RuntimeError(f"画像照片相对路径越界：{photo_file}")
+    return markdown_path
+
+
+def insert_profile_photo_block(
+    before_text: str, doctor_name: str, photo_file: str
+) -> str:
+    markdown_path = profile_photo_markdown_path(photo_file)
+    if re.search(r"(?m)^!\[[^\]]*\]\(照片/[^)]+\)[ \t\r]*$", before_text):
+        raise RuntimeError(f"画像已存在照片嵌入区块：{doctor_name}")
+    marker = re.compile(
+        r"(?m)^## 基础信息[ \t]*(?P<newline>\r\n|\n)(?P=newline)"
+    )
+    matches = list(marker.finditer(before_text))
+    if len(matches) != 1:
+        raise RuntimeError(
+            f"画像基础信息插入点不唯一：{doctor_name} 数量={len(matches)}"
+        )
+    match = matches[0]
+    newline = match.group("newline")
+    photo_block = f"![{doctor_name}]({markdown_path}){newline}{newline}"
+    return before_text[: match.end()] + photo_block + before_text[match.end() :]
+
+
+def insert_profile_photo_block_bytes(
+    before_bytes: bytes, doctor_name: str, photo_file: str
+) -> bytes:
+    bom = b"\xef\xbb\xbf" if before_bytes.startswith(b"\xef\xbb\xbf") else b""
+    body = before_bytes[len(bom) :]
+    try:
+        before_text = body.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise RuntimeError(f"画像不是有效 UTF-8：{doctor_name}") from exc
+    return bom + insert_profile_photo_block(
+        before_text, doctor_name, photo_file
+    ).encode("utf-8")
+
+
+def validate_profile_photo_only_bytes(
+    before_bytes: bytes, after_bytes: bytes, doctor_name: str, photo_file: str
+) -> None:
+    if after_bytes != insert_profile_photo_block_bytes(
+        before_bytes, doctor_name, photo_file
+    ):
+        raise RuntimeError(f"画像出现照片嵌入区块以外字节变化：{doctor_name}")
+
+
+def profile_markdown_tree(root: Path) -> dict[Path, bytes]:
+    return {
+        path.relative_to(root): path.read_bytes()
+        for path in sorted(root.rglob("*.md"))
+    }
+
+
+def validate_profile_tree_surgical(
+    before_tree: dict[Path, bytes],
+    after_root: Path,
+    expected_changed_paths: set[Path],
+) -> None:
+    after_tree = profile_markdown_tree(after_root)
+    if set(after_tree) != set(before_tree):
+        raise RuntimeError("画像 Markdown 文件集合发生变化")
+    changed_paths = {
+        path for path, content in before_tree.items() if after_tree[path] != content
+    }
+    if changed_paths != expected_changed_paths:
+        unexpected = sorted(str(path) for path in changed_paths ^ expected_changed_paths)
+        raise RuntimeError("画像外科式变更集合不一致：" + "、".join(unexpected[:5]))
+
+
+def ensure_workspace_target(path: Path) -> None:
+    root = ROOT.resolve()
+    resolved = path.resolve()
+    if resolved == root or root not in resolved.parents:
+        raise RuntimeError(f"拒绝操作工作区外路径：{path}")
+
+
+def backup_file_targets(
+    targets: list[Path], backup_root: Path
+) -> dict[Path, Path | None]:
+    backups: dict[Path, Path | None] = {}
+    backup_root.mkdir(parents=True, exist_ok=True)
+    for index, target in enumerate(targets):
+        ensure_workspace_target(target)
+        if target.exists():
+            backup = backup_root / f"{index:04d}_{target.name}"
+            shutil.copy2(target, backup)
+            backups[target] = backup
+        else:
+            backups[target] = None
+    return backups
+
+
+def apply_file_map(file_map: dict[Path, Path]) -> None:
+    for target, source in file_map.items():
+        ensure_workspace_target(target)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        staging = target.with_name(f".{target.name}.issue57.tmp")
+        if staging.exists():
+            staging.unlink()
+        shutil.copy2(source, staging)
+        staging.replace(target)
+
+
+def restore_file_targets(backups: dict[Path, Path | None]) -> None:
+    for target, backup in backups.items():
+        staging = target.with_name(f".{target.name}.issue57.restore")
+        if staging.exists():
+            staging.unlink()
+        if backup is None:
+            target.unlink(missing_ok=True)
+            continue
+        shutil.copy2(backup, staging)
+        staging.replace(target)
+
+
+def run_full(run_date: str) -> dict[str, Any]:
+    import collect_official_doctors_batch as collector
+    import generate_obsidian_profiles as profiles
+
+    if FORMAL_PHOTO_DIR.exists():
+        raise RuntimeError("FULL 前正式照片目录已存在，拒绝覆盖；需 owner 先裁决")
+    baseline_protected = file_snapshot([LEDGER_PATH, MASTER_REPORT_PATH])
+    master_payload = json.loads(MASTER_JSON_PATH.read_text(encoding="utf-8"))
+    before_rows = copy.deepcopy(master_payload.get("rows", []))
+    scope_rows = load_scope_rows()
+    target_sources = {clean_text(row.get("来源链接")) for row in scope_rows}
+    if len(target_sources) != EXPECTED_SCOPE_COUNT:
+        raise RuntimeError("FULL 固定范围来源链接不是 780 个唯一 node")
+
+    before_profile_paths = profiles.extract_existing_sources(PROFILE_DIR)
+    extra_profile_sources = set(before_profile_paths) - target_sources
+    if extra_profile_sources:
+        raise RuntimeError(
+            "既有画像存在 Issue #57 范围外来源："
+            + "、".join(sorted(extra_profile_sources)[:5])
+        )
+    profile_target_sources = target_sources & set(before_profile_paths)
+    if len(profile_target_sources) != EXPECTED_EXISTING_PROFILE_COUNT:
+        raise RuntimeError(
+            "FULL 前既有画像来源数量漂移："
+            f"应为 {EXPECTED_EXISTING_PROFILE_COUNT}，实际 {len(profile_target_sources)}"
+        )
+    no_profile_sources = target_sources - profile_target_sources
+    alias_sources = set(PAGE_TITLE_ALIAS_BY_SOURCE)
+    if not alias_sources <= target_sources:
+        raise RuntimeError("官网标题别名映射越出 Issue #57 固定 780 行范围")
+    before_profile_bytes: dict[str, bytes] = {}
+    for source in profile_target_sources:
+        path = before_profile_paths[source]
+        if not profiles.is_auto_generated_profile(path):
+            raise RuntimeError(f"发现非自动画像，超出 Issue #57 授权：{path}")
+        before_profile_bytes[source] = path.read_bytes()
+    before_profile_tree = profile_markdown_tree(PROFILE_DIR)
+
+    session = OfficialSession()
+    home_status, _, _, _ = session.get(OFFICIAL_HOME)
+    if home_status != 200:
+        raise RuntimeError(f"官网首页常规会话建立失败：HTTP {home_status}")
+
+    with tempfile.TemporaryDirectory(prefix="issue57_full_", dir=WORK_DIR) as temporary:
+        temp_root = Path(temporary)
+        temp_photo_dir = temp_root / "photos"
+        temp_photo_dir.mkdir()
+        temp_profile_root = temp_root / "profiles"
+        temp_hospital_dir = temp_profile_root / HOSPITAL
+        shutil.copytree(PROFILE_DIR, temp_hospital_dir)
+
+        used_filenames: set[str] = set()
+        result_rows: list[dict[str, Any]] = []
+        photo_samples: list[dict[str, Any]] = []
+        failures: list[dict[str, str]] = []
+        reconciliation: list[dict[str, Any]] = []
+
+        def record_failure(
+            row: dict[str, Any], state: str, evidence: str
+        ) -> None:
+            source_link = clean_text(row.get("来源链接"))
+            name = clean_text(row.get("姓名"))
+            result_row = dict(row)
+            result_row["照片链接"] = ""
+            result_row["照片文件"] = ""
+            result_row["异常提示"] = append_failure_warning(
+                result_row.get("异常提示"), state
+            )
+            result_rows.append(result_row)
+            failures.append(
+                {
+                    "name": name,
+                    "source_link": source_link,
+                    "state": state,
+                    "error": evidence,
+                }
+            )
+            reconciliation.append(
+                {
+                    "姓名": name,
+                    "来源链接": source_link,
+                    "状态": "失败",
+                    "失败三态": state,
+                    "照片链接": "",
+                    "照片文件": "",
+                    "字节数": "",
+                    "SHA-256": "",
+                    "宽": "",
+                    "高": "",
+                    "错误证据": evidence,
+                }
+            )
+            unreachable = sum(
+                item["state"] == "详情不可达" for item in failures
+            )
+            if unreachable / EXPECTED_SCOPE_COUNT > 0.10:
+                raise RuntimeError(
+                    "[FATAL - HUMAN_INTERVENTION_REQUIRED] 详情不可达率超过 10%："
+                    f"{unreachable}/{EXPECTED_SCOPE_COUNT}"
+                )
+
+        for index, row in enumerate(scope_rows, start=1):
+            source_link = clean_text(row.get("来源链接"))
+            name = clean_text(row.get("姓名"))
+            source_id = detail_id(source_link)
+            portrait: PortraitReference | None = None
+            try:
+                status, content_type, charset, content = session.get(
+                    source_link, DIRECTORY_URL
+                )
+            except RuntimeError as exc:
+                record_failure(row, "详情不可达", f"详情请求异常：{exc}")
+                continue
+            if status != 200 or content_type != "text/html":
+                record_failure(
+                    row,
+                    "详情不可达",
+                    f"详情 HTTP {status} Content-Type {content_type}",
+                )
+                continue
+            try:
+                html = content.decode(charset, errors="replace")
+            except LookupError:
+                html = content.decode("utf-8", errors="replace")
+            expected_page_name = PAGE_TITLE_ALIAS_BY_SOURCE.get(
+                source_link, name
+            )
+            failure_state, portrait = inspect_portrait_reference(
+                html, source_link, expected_page_name
+            )
+            if failure_state:
+                record_failure(row, failure_state, failure_state)
+                continue
+            if portrait is None:
+                raise RuntimeError(f"职业照检查未返回明确结果：{source_link}")
+            if source_link in no_profile_sources:
+                raise RuntimeError(
+                    "GOVERN-1 无画像行发现未归入占位图的媒体，拒绝映射为本人照片："
+                    f"{source_link} {portrait.photo_url}"
+                )
+
+            try:
+                photo_status, photo_type, _, photo_content = session.get(
+                    portrait.photo_url, source_link
+                )
+            except RuntimeError as exc:
+                record_failure(row, "详情不可达", f"照片资源请求异常：{exc}")
+                continue
+            if photo_status != 200:
+                record_failure(
+                    row, "详情不可达", f"照片资源 HTTP {photo_status}"
+                )
+                continue
+            extension = magic_extension(photo_content, photo_type)
+            if not extension:
+                record_failure(
+                    row,
+                    "详情不可达",
+                    f"照片响应格式不受支持：{photo_type}",
+                )
+                continue
+            try:
+                width, height = image_dimensions(photo_content)
+            except Exception as exc:  # noqa: BLE001 - retain exact image evidence
+                record_failure(row, "详情不可达", f"照片尺寸无法解析：{exc}")
+                continue
+            if len(photo_content) > MAX_OWNER_REPORT_BYTES:
+                raise RuntimeError(
+                    "[FATAL - HUMAN_INTERVENTION_REQUIRED] 单张照片超过 5 MiB，需先回报 owner："
+                    f"{name} {len(photo_content)} bytes {portrait.photo_url}"
+                )
+
+            filename, disk_path = allocate_full_photo_path(
+                row,
+                source_id,
+                extension,
+                temp_photo_dir,
+                used_filenames,
+            )
+            disk_path.write_bytes(photo_content)
+            relative_path = (PHOTO_RELATIVE_ROOT / filename).as_posix()
+            result_row = dict(row)
+            result_row["照片链接"] = portrait.photo_url
+            result_row["照片文件"] = relative_path
+            result_rows.append(result_row)
+            digest = hashlib.sha256(photo_content).hexdigest()
+            photo_samples.append(
+                {
+                    "name": name,
+                    "department": atomic_department(row),
+                    "title": primary_title(row.get("职称身份原文")),
+                    "detail_id": source_id,
+                    "source_link": source_link,
+                    "photo_url": portrait.photo_url,
+                    "photo_source_attribute": portrait.source_attribute,
+                    "photo_file": relative_path,
+                    "filename": filename,
+                    "content_type": photo_type,
+                    "bytes": len(photo_content),
+                    "width": width,
+                    "height": height,
+                    "sha256": digest,
+                    "disk_path": str(FORMAL_PHOTO_DIR / filename),
+                    "has_existing_profile": source_link
+                    in profile_target_sources,
+                }
+            )
+            reconciliation.append(
+                {
+                    "姓名": name,
+                    "来源链接": source_link,
+                    "状态": "实采",
+                    "失败三态": "",
+                    "照片链接": portrait.photo_url,
+                    "照片文件": relative_path,
+                    "字节数": len(photo_content),
+                    "SHA-256": digest,
+                    "宽": width,
+                    "高": height,
+                    "错误证据": "",
+                }
+            )
+            if index % 25 == 0 or index == EXPECTED_SCOPE_COUNT:
+                print(
+                    f"[FULL] {index}/{EXPECTED_SCOPE_COUNT} "
+                    f"实采={len(photo_samples)} 失败={len(failures)}",
+                    flush=True,
+                )
+
+        if len(result_rows) != EXPECTED_SCOPE_COUNT:
+            raise RuntimeError(f"FULL 结果行不是 780：{len(result_rows)}")
+        updated_by_source = {
+            clean_text(row.get("来源链接")): row for row in result_rows
+        }
+        after_rows = [
+            copy.deepcopy(
+                updated_by_source.get(clean_text(row.get("来源链接")), row)
+            )
+            for row in before_rows
+        ]
+        row_diffs = collect_full_row_diffs(
+            before_rows, after_rows, target_sources
+        )
+        updated_payload = copy.deepcopy(master_payload)
+        updated_payload["rows"] = after_rows
+        if failures:
+            recompute_failure_derivatives(updated_payload, after_rows)
+
+        temp_master_payload = temp_root / MASTER_JSON_PATH.name
+        temp_master_csv = temp_root / MASTER_CSV_PATH.name
+        temp_master_xlsx = temp_root / MASTER_XLSX_PATH.name
+        temp_master_preview = temp_root / "master_preview.png"
+        temp_master_payload.write_text(
+            json.dumps(updated_payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        write_master_csv(temp_master_csv, after_rows)
+        collector.build_workbook(
+            temp_master_payload, temp_master_xlsx, temp_master_preview
+        )
+        validate_master_layers(
+            temp_master_payload, temp_master_csv, temp_master_xlsx
+        )
+
+        success_sources = {
+            clean_text(item.get("source_link")) for item in photo_samples
+        }
+        profile_refresh_sources = success_sources & profile_target_sources
+        after_profile_paths = profiles.extract_existing_sources(temp_hospital_dir)
+        photo_by_source = {
+            clean_text(item.get("source_link")): item for item in photo_samples
+        }
+        for source in profile_refresh_sources:
+            before_path = before_profile_paths[source]
+            after_path = after_profile_paths.get(source)
+            if after_path is None or after_path.name != before_path.name:
+                raise RuntimeError(f"FULL 画像文件映射发生变化：{source}")
+            item = photo_by_source[source]
+            after_path.write_bytes(
+                insert_profile_photo_block_bytes(
+                    before_profile_bytes[source],
+                    clean_text(item.get("name")),
+                    clean_text(item.get("photo_file")),
+                )
+            )
+            validate_profile_photo_only_bytes(
+                before_profile_bytes[source],
+                after_path.read_bytes(),
+                clean_text(item.get("name")),
+                clean_text(item.get("photo_file")),
+            )
+        expected_changed_profile_paths = {
+            before_profile_paths[source].relative_to(PROFILE_DIR)
+            for source in profile_refresh_sources
+        }
+        validate_profile_tree_surgical(
+            before_profile_tree,
+            temp_hospital_dir,
+            expected_changed_profile_paths,
+        )
+
+        state_counter = Counter(item["state"] for item in failures)
+        total_bytes = sum(int(item["bytes"]) for item in photo_samples)
+        max_bytes = max(
+            (int(item["bytes"]) for item in photo_samples), default=0
+        )
+        full_payload = {
+            "meta": {
+                "issue": ISSUE_NUMBER,
+                "phase": "FULL_READY_FOR_FINAL_OWNER_AUDIT",
+                "hospital": HOSPITAL,
+                "run_date": run_date,
+                "authorization": FULL_AUTHORIZATION,
+                "expected_count": EXPECTED_SCOPE_COUNT,
+                "downloaded_count": len(photo_samples),
+                "failed_count": len(failures),
+                "blank_count": len(failures),
+                "failure_state_counts": {
+                    state: state_counter.get(state, 0)
+                    for state in FULL_FAILURE_STATES
+                },
+                "detail_unreachable_count": state_counter.get(
+                    "详情不可达", 0
+                ),
+                "detail_unreachable_rate": state_counter.get(
+                    "详情不可达", 0
+                )
+                / EXPECTED_SCOPE_COUNT,
+                "photo_total_bytes": total_bytes,
+                "photo_total_mib": total_bytes / 1024 / 1024,
+                "photo_max_bytes": max_bytes,
+                "over_5mib_count": sum(
+                    int(item["bytes"]) > MAX_OWNER_REPORT_BYTES
+                    for item in photo_samples
+                ),
+                "constructed_unreferenced_probe_count": 0,
+                "third_party_source_count": 0,
+                "cookie_names": session.cookie_names,
+                "incomplete_read_retry_count": session.incomplete_read_retry_count,
+                "existing_profile_count": len(profile_target_sources),
+                "no_profile_scope_count": EXPECTED_SCOPE_COUNT
+                - len(profile_target_sources),
+                "profile_refreshed_count": len(profile_refresh_sources),
+                "profile_not_created_count": len(
+                    success_sources - profile_target_sources
+                ),
+                "profile_index_replacement_required": False,
+                "page_title_alias_count": len(PAGE_TITLE_ALIAS_BY_SOURCE),
+                "row_diff_count": len(row_diffs),
+                "row_diff_columns": dict(
+                    Counter(item["列名"] for item in row_diffs)
+                ),
+                "protected_assets_before": baseline_protected,
+                "json_path": str(FULL_JSON_PATH),
+                "csv_path": str(FULL_CSV_PATH),
+                "report_path": str(FULL_REPORT_PATH),
+            },
+            "failures": failures,
+            "photo_samples": photo_samples,
+            "reconciliation": reconciliation,
+            "row_diffs": row_diffs,
+            "rows": result_rows,
+        }
+        validate_full_payload(full_payload, temp_photo_dir)
+
+        temp_full_payload = temp_root / FULL_JSON_PATH.name
+        temp_full_csv = temp_root / FULL_CSV_PATH.name
+        temp_full_report = temp_root / FULL_REPORT_PATH.name
+        temp_full_payload.write_text(
+            json.dumps(full_payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        write_full_reconciliation_csv(temp_full_csv, full_payload)
+        write_full_report(temp_full_report, full_payload)
+
+        file_map: dict[Path, Path] = {
+            MASTER_JSON_PATH: temp_master_payload,
+            MASTER_CSV_PATH: temp_master_csv,
+            MASTER_XLSX_PATH: temp_master_xlsx,
+            FULL_JSON_PATH: temp_full_payload,
+            FULL_CSV_PATH: temp_full_csv,
+            FULL_REPORT_PATH: temp_full_report,
+        }
+        for source in profile_refresh_sources:
+            file_map[before_profile_paths[source]] = after_profile_paths[source]
+
+        backups = backup_file_targets(
+            list(file_map), temp_root / "file_backups"
+        )
+        photo_backup = temp_root / "formal_photo_backup"
+        photo_swapped = False
+        try:
+            ensure_workspace_target(FORMAL_PHOTO_DIR)
+            if FORMAL_PHOTO_DIR.exists():
+                FORMAL_PHOTO_DIR.replace(photo_backup)
+            temp_photo_dir.replace(FORMAL_PHOTO_DIR)
+            photo_swapped = True
+            apply_file_map(file_map)
+
+            final_rows = validate_master_layers(
+                MASTER_JSON_PATH, MASTER_CSV_PATH, MASTER_XLSX_PATH
+            )
+            final_diffs = collect_full_row_diffs(
+                before_rows, final_rows, target_sources
+            )
+            if final_diffs != row_diffs:
+                raise RuntimeError("FULL 落盘后的逐单元格差异与预期不一致")
+            validate_full_payload(full_payload, FORMAL_PHOTO_DIR)
+            final_profile_paths = profiles.extract_existing_sources(PROFILE_DIR)
+            if set(final_profile_paths) != profile_target_sources:
+                raise RuntimeError("FULL 落盘后画像来源集合发生变化")
+            for source in profile_refresh_sources:
+                item = photo_by_source[source]
+                validate_profile_photo_only_bytes(
+                    before_profile_bytes[source],
+                    final_profile_paths[source].read_bytes(),
+                    clean_text(item.get("name")),
+                    clean_text(item.get("photo_file")),
+                )
+            validate_profile_tree_surgical(
+                before_profile_tree,
+                PROFILE_DIR,
+                expected_changed_profile_paths,
+            )
+            if file_snapshot([LEDGER_PATH, MASTER_REPORT_PATH]) != baseline_protected:
+                raise RuntimeError("FULL 触碰了入口台账或总底表更新报告")
+            with FULL_CSV_PATH.open(
+                "r", encoding="utf-8-sig", newline=""
+            ) as handle:
+                if len(list(csv.DictReader(handle))) != EXPECTED_SCOPE_COUNT:
+                    raise RuntimeError("FULL 照片对账 CSV 不是 780 行")
+        except Exception:
+            restore_file_targets(backups)
+            if photo_swapped and FORMAL_PHOTO_DIR.exists():
+                ensure_workspace_target(FORMAL_PHOTO_DIR)
+                shutil.rmtree(FORMAL_PHOTO_DIR)
+            if photo_backup.exists():
+                photo_backup.replace(FORMAL_PHOTO_DIR)
+            raise
+
+        return full_payload
+
+
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Issue #57 中山三院照片补录 TRIAL")
-    parser.add_argument("--trial-only", action="store_true", help="执行固定 10 位 TRIAL")
+    parser = argparse.ArgumentParser(description="Issue #57 中山三院照片补录")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--trial-only", action="store_true", help="执行固定 10 位 TRIAL")
+    mode.add_argument(
+        "--full-apply",
+        action="store_true",
+        help="按 PR #58 owner FULL 授权执行 780 行照片回填与既有画像外科式刷新",
+    )
     parser.add_argument("--run-date", default=date.today().isoformat())
     parser.add_argument("--validate-only", action="store_true")
     return parser.parse_args()
@@ -810,12 +1770,47 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     if args.validate_only:
-        payload = json.loads(TRIAL_JSON_PATH.read_text(encoding="utf-8"))
-        validate_payload(payload)
-        print(json.dumps({"status": "validated", "photos": payload["meta"]["photo_sample_count"]}, ensure_ascii=False))
+        path = FULL_JSON_PATH if FULL_JSON_PATH.exists() else TRIAL_JSON_PATH
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload.get("meta", {}).get("phase") == "FULL_READY_FOR_FINAL_OWNER_AUDIT":
+            validate_full_payload(payload, FORMAL_PHOTO_DIR)
+            photos = payload["meta"]["downloaded_count"]
+        else:
+            validate_payload(payload)
+            photos = payload["meta"]["photo_sample_count"]
+        print(
+            json.dumps(
+                {"status": "validated", "photos": photos}, ensure_ascii=False
+            )
+        )
+        return
+    if args.full_apply:
+        payload = run_full(args.run_date)
+        print(
+            json.dumps(
+                {
+                    "mode": "photo_backfill_full",
+                    "issue": ISSUE_NUMBER,
+                    "hospital": HOSPITAL,
+                    "expected": payload["meta"]["expected_count"],
+                    "downloaded": payload["meta"]["downloaded_count"],
+                    "failed": payload["meta"]["failed_count"],
+                    "blank": payload["meta"]["blank_count"],
+                    "failure_states": payload["meta"]["failure_state_counts"],
+                    "photo_total_bytes": payload["meta"]["photo_total_bytes"],
+                    "profiles_refreshed": payload["meta"]["profile_refreshed_count"],
+                    "json": str(FULL_JSON_PATH),
+                    "csv": str(FULL_CSV_PATH),
+                    "report": str(FULL_REPORT_PATH),
+                    "master_updated": True,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
         return
     if not args.trial_only:
-        raise RuntimeError("Issue #57 当前仅授权 --trial-only；FULL 在联网与正式资产写入前硬熔断")
+        raise RuntimeError("必须显式指定 --trial-only 或 --full-apply")
     payload = run_trial(args.run_date)
     print(json.dumps(payload["meta"], ensure_ascii=False, indent=2))
 

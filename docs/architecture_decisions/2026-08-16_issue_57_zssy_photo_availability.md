@@ -3,7 +3,7 @@
 > 日期：2026-08-16
 > GitHub Issue：<https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/57>
 > 分支：`codex/mhrj/issue-57-photo-availability-zssy`
-> Phase：`TRIAL_READY_FOR_OWNER_AUDIT`
+> Phase：`FULL_READY_FOR_FINAL_OWNER_AUDIT`
 
 ## 1. 目标与门禁
 
@@ -90,14 +90,71 @@ TRIAL 工件：
 - `work/中山大学附属第三医院_photo_backfill_trial_contact_sheet.jpg`
 - `work/中山大学附属第三医院_photo_backfill_trial_photos/`
 
-当前停止等待 owner 审计样本、大图分布与容量估算。未取得 owner 明确 `FULL_APPEND_AND_OBSIDIAN` 前，不回填三载体、不刷新画像、不写正式照片目录。
+## 9. FULL 前 780 页标题与媒体结构只读普查
+
+Owner 于 2026-08-16T11:49:02Z 在 PR #58 明确给出 TRIAL `通过`、批准页面引用原图原始字节且不压缩，并下发 `FULL_APPEND_AND_OBSIDIAN`。FULL 首轮因官网标题与底表姓名不一致停止；用户随后明确授权“只读普查全部 780 页标题并一次性固化所有别名后继续 FULL”。
+
+只读普查使用同一常规 Cookie 会话逐页访问 780 条既有官网来源链接，只读取详情 HTML，不下载或写入正式照片、底表和画像。结果：
+
+- 范围：780/780；请求失败 0；标题后缀/媒体 DOM 结构异常 0；传输不完整重试 0。
+- 媒体结构：本人照片候选 737、无照片容器 38、占位图 5，与后续 FULL 四数轨迹一致。
+- 标题不一致共 9 条，完整固化如下；映射只用于来源页身份校验，不修改底表姓名或其他业务字段。
+
+| 来源链接 | 底表姓名 | 官网标题主体 |
+|---|---|---|
+| <https://www.zssy.com.cn/node/6008> | 内科 | 内科ICU |
+| <https://www.zssy.com.cn/node/14062> | 外科 | 外科ICU |
+| <https://www.zssy.com.cn/node/14071> | 精神 | 精神（心理）科 |
+| <https://www.zssy.com.cn/node/14068> | 口腔科 | 口腔医学中心 |
+| <https://www.zssy.com.cn/node/14098> | 变态反应 | 变态反应（过敏）学科 |
+| <https://www.zssy.com.cn/node/11316> | 甲状腺 | 甲状腺、乳腺外科 |
+| <https://www.zssy.com.cn/node/15410> | 神经外科 | 神经外科（天河） |
+| <https://www.zssy.com.cn/node/15466> | 精神 | 精神（心理）科 |
+| <https://www.zssy.com.cn/node/30221> | 脑病方向 | 针灸专科（脑病方向） |
+
+根因：原实现只在 FULL 顺序执行时按遇到的第一条未知标题停止，导致别名逐条暴露；同时把“标题别名仅存在于 GOVERN-1 无画像行”当成不成立的前提。完整普查证明新增 3 条别名均属于已有画像来源，但其媒体分别为无照片容器或占位图，因此不会产生错误照片刷新。
+
+防复发：`PAGE_TITLE_ALIAS_BY_SOURCE` 固定完整 9 条；专项测试逐键逐值断言完整映射；别名来源只允许落在 Issue #57 固定 780 行中，不再错误限定为 38 条无画像来源。任一未来未固化标题仍由详情标题强校验停止，而不会静默映射。
+
+## 10. FULL 事务结果
+
+- 四数对账：应采 780、实采 737、失败 43、留空 43。
+- 失败三态：详情不可达 0、无照片容器 38、占位图 5；详情不可达率 0%，未触发 10% 熔断。
+- 照片总字节 274,074,265（261.38 MiB）；最大单张 2,063,418 bytes；超过 5 MiB 为 0。
+- 网络仅使用页面自身引用 URL、常规 Cookie 与对应详情页 Referer；页面未引用路径构造/探测 0，第三方来源 0；发生 1 次 `IncompleteRead`，按完全相同请求原样重试一次后成功。
+- 总底表 payload/CSV/XLSX 仍为 9,222 行、25 列逐值一致。允许变更 1,517 个单元格：照片链接 737、照片文件 737、失败行异常提示 43；其余字段零修改。
+- 既有画像来源 742 份；其中 737 份只插入照片 Markdown 块，5 份失败来源保持不变；38 条无画像治理行不新建画像；`_索引.md` 未修改。
+- 正式照片目录共 737 个文件，磁盘总字节与 FULL payload 对账一致；全部逐文件核验字节数、SHA-256、魔数、扩展名与尺寸。
+- 事务先在 `issue57_full_*` 临时目录完成三载体、照片和画像全量验证，再统一替换；成功后临时目录自动清理。
+
+入口台账与更新报告保持受保护基线不变：
+
+- 入口台账 SHA-256：`D6B08B3F284654024FAD0EEAC3377B095025DC294732DB030E8CC5B81655B782`
+- 更新报告 SHA-256：`CD6FFF06B933F4A765838281F52F06F3E1228FCEA37E5D3B4A9441BD8120D96A`
+
+## 11. FULL 验证与审计工件
+
+- FULL payload validator 通过；专项 unittest 16/16、完整 unittest 202/202、`py_compile` 与 `git diff --check` 通过。
+- artifact-tool 对最终 XLSX 六个工作表执行了关键区域检查、公式错误扫描与逐表视觉渲染；0 个公式错误，样式、表头、行高、冻结窗格和现有布局保持一致。
+- 从 737 张正式照片按序等距抽取 20 张做视觉复核，均为单人成人职业照，未发现患者、儿童、合影、二维码、通用图或占位图。
+
+FULL 工件：
+
+- `work/中山大学附属第三医院_photo_backfill_full_payload.json`
+- `work/中山大学附属第三医院_photo_backfill_full_reconciliation.csv`
+- `work/中山大学附属第三医院_photo_backfill_full_report.md`
+- `医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv`
+- `医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx`
+- `医生画像仓库/01_试点医院/中山大学附属第三医院/照片/`
+
+当前已到达 `FULL_READY_FOR_FINAL_OWNER_AUDIT` 停止点；等待 owner 最终画像审计、PR 合并与 Issue 关闭，不自行进入下一 Issue。
 
 <Handoff_State>
-Target: Issue #57 中山大学附属第三医院照片可得性核验
+Target: Issue #57 中山大学附属第三医院照片补录 FULL
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/57
 Branch: codex/mhrj/issue-57-photo-availability-zssy
 PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/58
-Phase: TRIAL_READY_FOR_OWNER_AUDIT
+Phase: FULL_READY_FOR_FINAL_OWNER_AUDIT
 Completed:
 - 在首个 owner 预检样本 /node/11100 发现 CSS 背景本人职业照
 - 完成浏览器 DOM、普通公开会话、图片响应、SHA-256、魔数和视觉复核
@@ -105,13 +162,20 @@ Completed:
 - Owner 已采纳可得性结论并切换常规 TRIAL
 - 完成 10 位、10 科室、四职称层级照片 TRIAL；10/10 实图成功，熔断三态为 0
 - 完成逐图字节/SHA-256/魔数/尺寸、容量估算、联系表视觉复核与正式资产零变更对账
+- Owner 明确 TRIAL 通过并下发 FULL_APPEND_AND_OBSIDIAN
+- 只读普查 780/780 页并一次性固化完整 9 条标题别名；请求失败和结构异常均为 0
+- FULL 四数闭环为 780/737/43/43；失败三态为 0/38/5，正式照片 274,074,265 bytes
+- 总底表三载体 9,222 行、25 列逐值一致；仅照片两列和 43 条失败异常提示变化
+- 外科式刷新 737/742 份既有画像；38 条无画像行不新建，索引不变
+- 完成逐图哈希/魔数/尺寸、全量测试、六工作表视觉检查与受保护资产哈希核验
 Next:
 - 提交并通过非强制 Git Data API 更新原分支与 PR #58
-- 等待 owner 审计 TRIAL，并明确是否下发 FULL_APPEND_AND_OBSIDIAN
+- 在 PR #58 留下 `FULL_READY_FOR_FINAL_OWNER_AUDIT` 审计信标
+- 等待 owner 最终画像审计、PR 合并与 Issue 关闭
 Constraints:
 - 只使用详情页自身引用的官方本人职业照
 - 不构造或探测页面未引用图片路径
-- 未获 FULL 授权前不写总底表、画像或正式照片目录
+- 不自行合并 PR、关闭 Issue 或处理下一 Issue
 Artifacts:
 - D:\workspace\信息收集整理\work\中山大学附属第三医院_photo_availability_verify_report.md
 - D:\workspace\信息收集整理\work\zssy_photo_backfill_trial.py
@@ -121,5 +185,11 @@ Artifacts:
 - D:\workspace\信息收集整理\work\中山大学附属第三医院_photo_backfill_trial_report.md
 - D:\workspace\信息收集整理\work\中山大学附属第三医院_photo_backfill_trial_contact_sheet.jpg
 - D:\workspace\信息收集整理\work\中山大学附属第三医院_photo_backfill_trial_photos
+- D:\workspace\信息收集整理\work\中山大学附属第三医院_photo_backfill_full_payload.json
+- D:\workspace\信息收集整理\work\中山大学附属第三医院_photo_backfill_full_reconciliation.csv
+- D:\workspace\信息收集整理\work\中山大学附属第三医院_photo_backfill_full_report.md
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.csv
+- D:\workspace\信息收集整理\医生画像仓库\99_资料来源\珠三角三甲医院_医生画像自动采集总底表.xlsx
+- D:\workspace\信息收集整理\医生画像仓库\01_试点医院\中山大学附属第三医院\照片
 - D:\workspace\信息收集整理\docs\architecture_decisions\2026-08-16_issue_57_zssy_photo_availability.md
 </Handoff_State>
