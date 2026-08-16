@@ -15,6 +15,33 @@ import governance_cleanup_issue_53 as governance  # noqa: E402
 
 
 class Issue53GovernanceCleanupTests(unittest.TestCase):
+    def test_manifest_hash_excludes_index_from_marker_filtered_profiles(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            hospital = governance.TARGET_HOSPITALS[0]
+            hospital_dir = root / hospital
+            hospital_dir.mkdir(parents=True)
+            (hospital_dir / "_索引.md").write_text("# 初始索引\n", encoding="utf-8")
+            (hospital_dir / "人工画像.md").write_text("人工精修内容\n", encoding="utf-8")
+            (hospital_dir / "自动画像.md").write_text(
+                f"{governance.profiles.AUTO_MARKER}\n自动内容\n",
+                encoding="utf-8",
+            )
+
+            all_before = governance.manifest_hash(root, [hospital])
+            manual_before = governance.manifest_hash(root, [hospital], marker_filter=False)
+            auto_before = governance.manifest_hash(root, [hospital], marker_filter=True)
+            (hospital_dir / "_索引.md").write_text("# 重建后的索引\n", encoding="utf-8")
+
+            self.assertEqual(all_before["files"], 3)
+            self.assertEqual(manual_before["files"], 1)
+            self.assertEqual(auto_before["files"], 1)
+            self.assertNotEqual(all_before, governance.manifest_hash(root, [hospital]))
+            self.assertEqual(
+                manual_before,
+                governance.manifest_hash(root, [hospital], marker_filter=False),
+            )
+
     def test_navigation_cleanup_changes_only_allowed_fields(self) -> None:
         row = {
             "序号": 1,

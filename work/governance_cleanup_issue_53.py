@@ -72,6 +72,8 @@ def manifest_hash(
         if not hospital_dir.exists():
             continue
         for path in sorted(hospital_dir.rglob("*.md")):
+            if marker_filter is not None and path.name == "_索引.md":
+                continue
             text = path.read_text(encoding="utf-8", errors="ignore")
             is_auto = profiles.AUTO_MARKER in text
             if marker_filter is not None and is_auto != marker_filter:
