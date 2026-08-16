@@ -1,0 +1,10 @@
+工作表,单元格,序号,字段,修改前,修改后
+入口台账,K11,10,医生目录入口_候选,https://www.smukqyy.cn/section/364,https://www.smukqyy.cn/section/341\nhttps://www.smukqyy.cn/section/342\nhttps://www.smukqyy.cn/section/434\nhttps://www.smukqyy.cn/section/343\nhttps://www.smukqyy.cn/section/385\nhttps://www.smukqyy.cn/section/384\nhttps://www.smukqyy.cn/section/386\nhttps://www.smukqyy.cn/section/431\nhttps://www.smukqyy.cn/section/504
+入口台账,W11,10,人工备注,（空）,2026-08-11 owner PR #6 范围裁决：原 /section/364 属总院单科室，已更正为海珠广场院区 9 个官方科室入口；范围不含其他院区。
+入口台账,X11,10,更新时间,2026-08-09,2026-08-16
+入口台账,K13,12,医生目录入口_候选,https://www.gdskin.com/Showclass.aspx?id=901,https://www.gdskin.com/Showclass.aspx?id=901\nhttps://www.gdskin.com/Showclass.aspx?id=902\nhttps://www.gdskin.com/Showclass.aspx?id=906\nhttps://www.gdskin.com/Showclass.aspx?id=910\nhttps://www.gdskin.com/Showclass.aspx?id=913\nhttps://www.gdskin.com/Showclass.aspx?id=915\nhttps://www.gdskin.com/Showclass.aspx?id=917\nhttps://www.gdskin.com/Showclass.aspx?id=921\nhttps://www.gdskin.com/ShowClass.aspx?id=922\nhttps://www.gdskin.com/ShowClass.aspx?id=924
+入口台账,W13,12,人工备注,（空）,2026-08-11 owner Issue #7 / PR #8 核验：原单入口 901 为专家团队导航入口，已更正为 10 个官方分类入口；924 零记录保留留痕。
+入口台账,X13,12,更新时间,2026-08-09,2026-08-16
+入口台账,V28,27,人工复核结果,确认可采集,跳过-入口不可达/已废弃
+入口台账,W28,27,人工备注,（空）,2026-08-15 owner PR #52 裁决：官网首页现场 404→403、指定医生目录两次 404；请求无重定向、未绕过、未采集未写总表。管理员补充有效官方入口后可复排。
+入口台账,X28,27,更新时间,2026-08-09,2026-08-16

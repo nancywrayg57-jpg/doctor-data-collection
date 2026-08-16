@@ -1564,10 +1564,39 @@ def compact_visible_text(element: Any, max_len: int = 1200) -> str:
     return clip(clean_text(element.get_text(" ", strip=True)), max_len)
 
 
+def strip_slash_breadcrumb_text(value: str | None) -> str:
+    """Remove a flattened ``面包屑 首页 / ...`` run without dropping page body text."""
+
+    text = clean_text(value)
+    marker = re.search(r"面包屑\s*首页\s*", text)
+    if not marker:
+        return text
+
+    prefix = clean_text(text[: marker.start()])
+    suffix = clean_text(text[marker.end() :])
+    parts = [clean_text(part) for part in re.split(r"\s+(?:/|>|＞|»|›|→)\s+", suffix)]
+    if len(parts) < 2:
+        return clean_text(f"{prefix} {suffix}")
+
+    remainder = parts[-1]
+    prefix_words = prefix.split()
+    for count in range(len(prefix_words), 0, -1):
+        leaf = " ".join(prefix_words[-count:])
+        if len(leaf) < 4 or not remainder.startswith(leaf):
+            continue
+        prefix = clean_text(" ".join(prefix_words[:-count]))
+        remainder = clean_text(remainder[len(leaf) :])
+        break
+
+    return clean_text(f"{prefix} {remainder}")
+
+
 def strip_profile_navigation_text(value: str | None) -> str:
     text = clean_text(value)
     if not text:
         return ""
+
+    text = strip_slash_breadcrumb_text(text)
 
     separator = r"(?:/|>|＞|»|›|→)"
     label = r"(?:姓名|科室|所在科室|职称|职务|专业擅长|擅长|专长|简介|个人简介|一、|二、)"

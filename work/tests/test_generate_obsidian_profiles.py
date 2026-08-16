@@ -145,6 +145,45 @@ class ProfileFactSectionTests(unittest.TestCase):
             self.assertIn("异常提示：同名待甄别", auto_path.read_text(encoding="utf-8"))
             self.assertEqual(manual_path.read_text(encoding="utf-8"), "人工内容\n来源链接: https://example.com/manual\n")
 
+    def test_refresh_auto_generated_can_limit_refresh_to_selected_sources(self) -> None:
+        rows = [
+            {
+                "医院": "测试医院",
+                "姓名": "医生甲",
+                "科室_分类页": "测试科",
+                "来源链接": "https://example.com/a",
+                "异常提示": "亮眼经历含导航文本，已清洗",
+            },
+            {
+                "医院": "测试医院",
+                "姓名": "医生乙",
+                "科室_分类页": "测试科",
+                "来源链接": "https://example.com/b",
+            },
+        ]
+        marker = "<!-- AUTO-GENERATED-BY: work/generate_obsidian_profiles.py -->\n"
+        with tempfile.TemporaryDirectory() as directory:
+            hospital_dir = Path(directory) / "测试医院"
+            hospital_dir.mkdir()
+            selected_path = hospital_dir / "医生甲.md"
+            selected_path.write_text(marker + "来源链接: https://example.com/a\n", encoding="utf-8")
+            protected_path = hospital_dir / "医生乙.md"
+            protected_text = marker + "原内容保持不变\n来源链接: https://example.com/b\n"
+            protected_path.write_text(protected_text, encoding="utf-8")
+
+            result = generate_missing_profiles(
+                rows=rows,
+                output_root=Path(directory),
+                skip_hospitals=set(),
+                report_path=Path(directory) / "report.md",
+                refresh_auto_generated=True,
+                refresh_sources={"https://example.com/a"},
+            )
+
+            self.assertEqual(result["refreshed_auto_generated_profiles"], 1)
+            self.assertIn("亮眼经历含导航文本，已清洗", selected_path.read_text(encoding="utf-8"))
+            self.assertEqual(protected_path.read_text(encoding="utf-8"), protected_text)
+
     def test_unlabeled_specialty_does_not_fall_back_to_list_title_or_biography(self) -> None:
         profile = build_profile(
             {

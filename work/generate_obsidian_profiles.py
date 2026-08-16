@@ -1178,6 +1178,7 @@ def generate_missing_profiles(
     skip_hospitals: set[str],
     report_path: Path,
     refresh_auto_generated: bool = False,
+    refresh_sources: set[str] | None = None,
 ) -> dict[str, object]:
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     rows_by_hospital: dict[str, list[dict[str, str]]] = defaultdict(list)
@@ -1210,7 +1211,8 @@ def generate_missing_profiles(
             source = clean(row.get("来源链接"))
             if source in existing_sources:
                 existing_path = existing_sources[source]
-                if refresh_auto_generated and is_auto_generated_profile(existing_path):
+                source_selected = refresh_sources is None or source in refresh_sources
+                if refresh_auto_generated and source_selected and is_auto_generated_profile(existing_path):
                     row["_profile_seq"] = str(len(generated_rows) + len(refreshed_paths) + 1)
                     existing_path.write_text(build_profile(row, generated_at), encoding="utf-8", newline="\n")
                     refreshed_paths.append(existing_path)

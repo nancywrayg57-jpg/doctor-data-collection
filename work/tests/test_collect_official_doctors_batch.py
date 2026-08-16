@@ -65,6 +65,7 @@ from collect_official_doctors_batch import (  # noqa: E402
     parse_gyfyyy_detail,
     strip_gyfyyy_schedule_text,
     strip_gzsys_schedule_text,
+    strip_profile_navigation_text,
     looks_like_person_name,
     matches_generic_directory_detail_url,
     merge_rows_for_master,
@@ -215,6 +216,29 @@ class GenericDetailNoiseFilteringTests(unittest.TestCase):
         )
 
         self.assertEqual(extract_clean_highlights(raw), "")
+
+    def test_flattened_slash_breadcrumb_is_removed_without_losing_doctor_body(self) -> None:
+        raw = (
+            "副主任医师 临床专家 面包屑 首页 / 临床科室 / 内科系列 / 中医科 / "
+            "临床专家 丘惠娟 职称：副主任医师 专长 肿瘤中西医结合治疗。"
+        )
+
+        cleaned = strip_profile_navigation_text(raw)
+
+        self.assertEqual(
+            cleaned,
+            "副主任医师 丘惠娟 职称：副主任医师 专长 肿瘤中西医结合治疗。",
+        )
+        for navigation in ["面包屑", "首页 /", "临床科室 /", "内科系列 /", "中医科 /"]:
+            self.assertNotIn(navigation, cleaned)
+
+    def test_flattened_non_doctor_breadcrumb_removes_repeated_leaf_label(self) -> None:
+        raw = (
+            "住院医师规范化培训 面包屑 首页 / 医学教育 / 住院医师规范化培训 "
+            "医学教育 教学动态 招收简章。"
+        )
+
+        self.assertEqual(strip_profile_navigation_text(raw), "医学教育 教学动态 招收简章。")
 
 
 class GykqyyPublicDoctorApiTests(unittest.TestCase):
