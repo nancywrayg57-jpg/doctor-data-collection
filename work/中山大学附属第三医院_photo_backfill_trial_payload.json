@@ -1,0 +1,428 @@
+{
+  "meta": {
+    "issue": 57,
+    "phase": "TRIAL_READY_FOR_OWNER_AUDIT",
+    "hospital": "中山大学附属第三医院",
+    "run_date": "2026-08-16",
+    "scope_count": 780,
+    "scope_unique_source_count": 780,
+    "trial_detail_count": 10,
+    "department_coverage_count": 10,
+    "covered_departments": [
+      "不育与性医学科",
+      "产科",
+      "介入科",
+      "儿科",
+      "全科医学科",
+      "内科ICU",
+      "感染性疾病科",
+      "核医学科",
+      "脊柱侧弯中心",
+      "脑血管外科"
+    ],
+    "title_level_counts": {
+      "正高": 3,
+      "副高": 2,
+      "中级": 2,
+      "初级": 3
+    },
+    "home_http_status": 200,
+    "cookie_names": [
+      "3c6e856e6a804d4b9f597865f16e91e0",
+      "CT6T",
+      "CT6TS"
+    ],
+    "detail_http_200_count": 10,
+    "no_photo_container_count": 0,
+    "placeholder_count": 0,
+    "structure_mismatch_count": 0,
+    "detail_error_count": 0,
+    "photo_error_count": 0,
+    "photo_sample_count": 10,
+    "fuse_problem_count": 0,
+    "fuse_problem_ratio": 0.0,
+    "photo_total_bytes": 4953604,
+    "photo_average_bytes": 495360,
+    "estimated_full_count": 780,
+    "estimated_full_bytes": 386380800,
+    "estimated_full_mib": 368.4814453125,
+    "over_200kb_count": 4,
+    "over_800px_count": 6,
+    "constructed_unreferenced_probe_count": 0,
+    "third_party_source_count": 0,
+    "visual_review_status": "PASS_10_OF_10_SINGLE_ADULT_PROFESSIONAL_PORTRAITS",
+    "protected_assets_before": {
+      "master_assets": {
+        "D:\\workspace\\信息收集整理\\work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24006242,
+          "sha256": "e7d366f45693e21e7912c0cfd6cb7e26e8c26c94e5174d9f5c7c39f9db790de8"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 17409562,
+          "sha256": "7f8fbfe8ac1772852bdce8ea5237e4593411ba54fbef010b8e7169335f86413f"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 4723935,
+          "sha256": "283217c4f74595b409b89933a2da8faf2046ca7d51810fac369df3a533f90b22"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_tree": {
+        "exists": true,
+        "file_count": 743,
+        "bytes": 2400787,
+        "sha256": "9242708b2a268afd40aea54e60b73d04af97c3c3655b5ecd1415c31e59974d4e"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "protected_assets_after": {
+      "master_assets": {
+        "D:\\workspace\\信息收集整理\\work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24006242,
+          "sha256": "e7d366f45693e21e7912c0cfd6cb7e26e8c26c94e5174d9f5c7c39f9db790de8"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 17409562,
+          "sha256": "7f8fbfe8ac1772852bdce8ea5237e4593411ba54fbef010b8e7169335f86413f"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 4723935,
+          "sha256": "283217c4f74595b409b89933a2da8faf2046ca7d51810fac369df3a533f90b22"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_tree": {
+        "exists": true,
+        "file_count": 743,
+        "bytes": 2400787,
+        "sha256": "9242708b2a268afd40aea54e60b73d04af97c3c3655b5ecd1415c31e59974d4e"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "trial_photo_dir": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos",
+    "json_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_payload.json",
+    "csv_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_manifest.csv",
+    "report_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_report.md",
+    "contact_sheet_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_contact_sheet.jpg"
+  },
+  "detail_errors": [],
+  "structure_mismatches": [],
+  "failure_states": [],
+  "photo_errors": [],
+  "photo_samples": [
+    {
+      "name": "张晓红",
+      "department": "感染性疾病科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "11100",
+      "source_link": "https://www.zssy.com.cn/node/11100",
+      "detail_http_status": 200,
+      "photo_url": "https://www.zssy.com.cn/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/2014021909275728200283.jpg",
+      "photo_source_attribute": "data-image-url",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "张晓红-感染性疾病科-主任医师-中山大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos\\张晓红-感染性疾病科-主任医师-中山大学附属第三医院.jpg",
+      "bytes": 189270,
+      "sha256": "35249fdb9c9a2ee3d48fa4e899837607d36b44822175b3253461413c828c7fbd",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 500,
+      "height": 702,
+      "large_reasons": []
+    },
+    {
+      "name": "张炎",
+      "department": "不育与性医学科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "11266",
+      "source_link": "https://www.zssy.com.cn/node/11266",
+      "detail_http_status": 200,
+      "photo_url": "https://www.zssy.com.cn/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/2014031122491698609594.jpg",
+      "photo_source_attribute": "data-image-url",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "张炎-不育与性医学科-主任医师-中山大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos\\张炎-不育与性医学科-主任医师-中山大学附属第三医院.jpg",
+      "bytes": 129963,
+      "sha256": "7141704879cda58dbac5bd2df50ef6e8d344fcde557ad354751b08b395304fa5",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 521,
+      "height": 694,
+      "large_reasons": []
+    },
+    {
+      "name": "吴玲玲",
+      "department": "产科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "14151",
+      "source_link": "https://www.zssy.com.cn/node/14151",
+      "detail_http_status": 200,
+      "photo_url": "https://www.zssy.com.cn/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/f428bd0cdf91c5f705f7880f664a018.png",
+      "photo_source_attribute": "data-image-url",
+      "photo_http_status": 200,
+      "content_type": "image/png",
+      "filename": "吴玲玲-产科-主任医师-中山大学附属第三医院.png",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos\\吴玲玲-产科-主任医师-中山大学附属第三医院.png",
+      "bytes": 1792350,
+      "sha256": "63480558e9a2e05e5925a53370a72a90abfcc6965daa4b68cbeb92ed684d8244",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 2480,
+      "height": 1949,
+      "large_reasons": [
+        ">200KB",
+        "宽>800px"
+      ]
+    },
+    {
+      "name": "李名安",
+      "department": "介入科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "15372",
+      "source_link": "https://www.zssy.com.cn/node/15372",
+      "detail_http_status": 200,
+      "photo_url": "https://www.zssy.com.cn/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/%E6%9D%8E%E5%90%8D%E5%AE%89.jpg",
+      "photo_source_attribute": "data-image-url",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "李名安-介入科-副主任医师-中山大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos\\李名安-介入科-副主任医师-中山大学附属第三医院.jpg",
+      "bytes": 762255,
+      "sha256": "60b88cda2d1276f0aae049ca5d9ee144bb782c63abfb77b50ec7d842e4352339",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 2022,
+      "height": 2172,
+      "large_reasons": [
+        ">200KB",
+        "宽>800px"
+      ]
+    },
+    {
+      "name": "唐新意",
+      "department": "儿科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "11202",
+      "source_link": "https://www.zssy.com.cn/node/11202",
+      "detail_http_status": 200,
+      "photo_url": "https://www.zssy.com.cn/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/2019031312012796557340.jpg",
+      "photo_source_attribute": "data-image-url",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "唐新意-儿科-副主任医师-中山大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos\\唐新意-儿科-副主任医师-中山大学附属第三医院.jpg",
+      "bytes": 122750,
+      "sha256": "e60bb5b46393650db6e19fe9a30b176d3ae7f4e462a585814a9a443b3e73c40e",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 390,
+      "height": 567,
+      "large_reasons": []
+    },
+    {
+      "name": "巴俊慧",
+      "department": "内科ICU",
+      "title_level": "中级",
+      "title": "主治医师",
+      "detail_id": "15335",
+      "source_link": "https://www.zssy.com.cn/node/15335",
+      "detail_http_status": 200,
+      "photo_url": "https://www.zssy.com.cn/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/%E5%B7%B4%E5%B7%B4%E8%AF%81%E4%BB%B6%E7%85%A7.jpg",
+      "photo_source_attribute": "data-image-url",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "巴俊慧-内科ICU-主治医师-中山大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos\\巴俊慧-内科ICU-主治医师-中山大学附属第三医院.jpg",
+      "bytes": 169165,
+      "sha256": "9a76d854133d1483952b45ac5338b518ee0715c6ebc855981de00064dd4638a9",
+      "magic_hex": "FFD8FFE100F8457869660000",
+      "width": 851,
+      "height": 1179,
+      "large_reasons": [
+        "宽>800px"
+      ]
+    },
+    {
+      "name": "杨婷",
+      "department": "核医学科",
+      "title_level": "中级",
+      "title": "主治医师",
+      "detail_id": "29795",
+      "source_link": "https://www.zssy.com.cn/node/29795",
+      "detail_http_status": 200,
+      "photo_url": "https://www.zssy.com.cn/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/%E6%9D%A8%E5%A9%B71.png",
+      "photo_source_attribute": "data-image-url",
+      "photo_http_status": 200,
+      "content_type": "image/png",
+      "filename": "杨婷-核医学科-主治医师-中山大学附属第三医院.png",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos\\杨婷-核医学科-主治医师-中山大学附属第三医院.png",
+      "bytes": 1256240,
+      "sha256": "eb2b3a074a9da970f205e6a9c750e789a6e857c454879a30fdf118ab75bd6c87",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 1280,
+      "height": 1642,
+      "large_reasons": [
+        ">200KB",
+        "宽>800px"
+      ]
+    },
+    {
+      "name": "周攀",
+      "department": "脊柱侧弯中心",
+      "title_level": "初级",
+      "title": "医师",
+      "detail_id": "29985",
+      "source_link": "https://www.zssy.com.cn/node/29985",
+      "detail_http_status": 200,
+      "photo_url": "https://www.zssy.com.cn/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/1_18.jpg",
+      "photo_source_attribute": "data-image-url",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "周攀-脊柱侧弯中心-医师-中山大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos\\周攀-脊柱侧弯中心-医师-中山大学附属第三医院.jpg",
+      "bytes": 362675,
+      "sha256": "b576d1ce4a9fd253e69de069986b433158aa572797b89778906d5cf50024a17b",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 1879,
+      "height": 2334,
+      "large_reasons": [
+        ">200KB",
+        "宽>800px"
+      ]
+    },
+    {
+      "name": "黄晓飞",
+      "department": "脑血管外科",
+      "title_level": "初级",
+      "title": "医师",
+      "detail_id": "23590",
+      "source_link": "https://www.zssy.com.cn/node/23590",
+      "detail_http_status": 200,
+      "photo_url": "https://www.zssy.com.cn/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/%E5%9B%BE%E7%89%872_4.png",
+      "photo_source_attribute": "data-image-url",
+      "photo_http_status": 200,
+      "content_type": "image/png",
+      "filename": "黄晓飞-脑血管外科-医师-中山大学附属第三医院.png",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos\\黄晓飞-脑血管外科-医师-中山大学附属第三医院.png",
+      "bytes": 88362,
+      "sha256": "ee91b257b0f14039d4e6fbbb313416465a944cc83f95c4ace37ef4309a87898c",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 295,
+      "height": 441,
+      "large_reasons": []
+    },
+    {
+      "name": "李舣婷",
+      "department": "全科医学科",
+      "title_level": "初级",
+      "title": "住院医师",
+      "detail_id": "15243",
+      "source_link": "https://www.zssy.com.cn/node/15243",
+      "detail_http_status": 200,
+      "photo_url": "https://www.zssy.com.cn/sites/zssy.prod.sysucloud1.sysu.edu.cn/files/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20210827182004.jpg",
+      "photo_source_attribute": "data-image-url",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "李舣婷-全科医学科-住院医师-中山大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第三医院_photo_backfill_trial_photos\\李舣婷-全科医学科-住院医师-中山大学附属第三医院.jpg",
+      "bytes": 80574,
+      "sha256": "2167fb32b99ecfc1f292b9c1240952ca706f6377a934c3c24d48b52047d014d7",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 1080,
+      "height": 1571,
+      "large_reasons": [
+        "宽>800px"
+      ]
+    }
+  ],
+  "selected_rows": [
+    {
+      "姓名": "张晓红",
+      "科室": "感染性疾病科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.zssy.com.cn/node/11100"
+    },
+    {
+      "姓名": "张炎",
+      "科室": "不育与性医学科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.zssy.com.cn/node/11266"
+    },
+    {
+      "姓名": "吴玲玲",
+      "科室": "产科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.zssy.com.cn/node/14151"
+    },
+    {
+      "姓名": "李名安",
+      "科室": "介入科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.zssy.com.cn/node/15372"
+    },
+    {
+      "姓名": "唐新意",
+      "科室": "儿科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.zssy.com.cn/node/11202"
+    },
+    {
+      "姓名": "巴俊慧",
+      "科室": "内科ICU",
+      "职称层级": "中级",
+      "主职称": "主治医师",
+      "来源链接": "https://www.zssy.com.cn/node/15335"
+    },
+    {
+      "姓名": "杨婷",
+      "科室": "核医学科",
+      "职称层级": "中级",
+      "主职称": "主治医师",
+      "来源链接": "https://www.zssy.com.cn/node/29795"
+    },
+    {
+      "姓名": "周攀",
+      "科室": "脊柱侧弯中心",
+      "职称层级": "初级",
+      "主职称": "医师",
+      "来源链接": "https://www.zssy.com.cn/node/29985"
+    },
+    {
+      "姓名": "黄晓飞",
+      "科室": "脑血管外科",
+      "职称层级": "初级",
+      "主职称": "医师",
+      "来源链接": "https://www.zssy.com.cn/node/23590"
+    },
+    {
+      "姓名": "李舣婷",
+      "科室": "全科医学科",
+      "职称层级": "初级",
+      "主职称": "住院医师",
+      "来源链接": "https://www.zssy.com.cn/node/15243"
+    }
+  ]
+}
