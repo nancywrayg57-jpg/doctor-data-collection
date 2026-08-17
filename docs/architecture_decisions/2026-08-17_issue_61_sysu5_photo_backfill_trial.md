@@ -47,40 +47,55 @@
 - `work/中山大学附属第五医院_photo_backfill_trial_contact_sheet.jpg`
 - `work/中山大学附属第五医院_photo_backfill_trial_photos/`
 
-## 裁决依据缺口
+## FULL 授权与实现
 
-Issue 正文引用的 `docs/中山五院照片嵌入方式裁决单.md` 在本次 `origin/main` 基线中不存在。Issue 正文已完整写明方案 A，但 TRIAL 不修改画像，因此本阶段可以完成；在 FULL 前应由 owner 确保该裁决依据可追溯。若后续授权 FULL，仍只能按当前 Issue/PR 的明确指令执行，不得仅凭本 ADR 推进。
+- Owner 在 PR #62 评论 <https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/62#issuecomment-5311539010> 明确给出 `TRIAL 通过`，并将 Phase 切换为 `FULL_APPEND_AND_OBSIDIAN`。
+- `work/sysu5_photo_backfill_trial.py` 已增加 `--full` 与 `--validate-full`：413 行全量、失败三态、30% 总问题熔断、单张超过 5 MiB 立即停止、payload/CSV/XLSX 三载体逐值验证、照片逐图字节/SHA-256/魔数/尺寸验证、方案 A 画像字节级最小插入和事务回滚。
+- FULL 前置普查再次确认：413 行、413 个唯一详情 URL、413 份既有画像、413/413 唯一 `## 基础信息` 锚点、零既有图片引用；`_索引.md` 哈希已固化。
+- Owner fenced Markdown 已原样写入 `docs/中山五院照片嵌入方式裁决单.md`，逐字符比对长度 1238、结果完全一致，裁决依据缺口已解决。
+
+## FULL 首次执行停止证据
+
+- 2026-08-17 只执行一次 `--full`；在事务临时区推进到进度信标 225/413 时，累计实采 223、失败 2，随后命中大图熔断。
+- 熔断照片为页面照片容器直接引用的 `styles/watermark` 派生图：<https://www.sysu5.cn/sites/default/files/styles/watermark/public/2024-07/20240208173237537.jpg?itok=RSFCQ8E7>。
+- 响应原始字节：`6,649,475` bytes（约 6.34 MiB），超过 Owner 明确的 5 MiB 上限；脚本抛出 `[FATAL - HUMAN_INTERVENTION_REQUIRED]` 并停止。
+- 因熔断发生在事务落盘前，未生成 FULL payload/CSV/report，正式照片目录仍不存在；总底表 payload/CSV/XLSX、入口台账、更新报告、413 份画像及 `_索引.md` 均零修改。
+- 未继续请求、未重试 FULL、未压缩或改写该图片，等待 Owner 对该单张 >5 MiB 页面引用派生图给出明确裁决。
 
 ## 验证
 
 - `python -m py_compile work/sysu5_photo_backfill_trial.py work/tests/test_sysu5_photo_backfill_trial.py`
-- `python -m unittest work.tests.test_sysu5_photo_backfill_trial -v`：11/11 通过。
-- 通过仓库外既有临时依赖目录做 `requests/bs4/openpyxl` 导入探针后，`python -m unittest discover -s work/tests -p 'test_*.py' -v`：231/231 通过；未安装全局依赖、未修改系统 PATH 或仓库依赖配置。
+- `python -m unittest work.tests.test_sysu5_photo_backfill_trial -v`：17/17 通过。
+- 通过仓库外既有临时依赖目录做 `requests/bs4/openpyxl` 导入探针后，`python -m unittest discover -s work/tests -p 'test_*.py' -v`：237/237 通过；未安装全局依赖、未修改系统 PATH 或仓库依赖配置。
+- 项目指定 XLSX writer `@oai/artifact-tool` 最小 ESM import 探针通过；未改用 openpyxl/COM/LibreOffice/OOXML 写入。
 - `python work/sysu5_photo_backfill_trial.py --validate`：通过。
 - 联系表已使用原始分辨率视图人工核验并固化 `MANUAL_CONTACT_SHEET_REVIEW_PASSED`。
 - 工件逐图字节/SHA-256 闭环、正式资产前后快照、`git diff --check` 与 `git fsck --no-progress` 均通过；`git fsck` 仅报告仓库既有 dangling 对象，无对象损坏。
 
 ## 当前停止点
 
-提交并创建关联 Issue #61 的 PR 后，停止在 owner TRIAL 审计门禁。不得自行进入 FULL，不得合并 PR、关闭 Issue或处理下一 Issue。
+保持自动化 `PAUSED`，停止在单张照片超过 5 MiB 的 Owner 裁决门禁。取得当前 PR 中 Owner 明确裁决前，不得再次执行 FULL、不得压缩或跳过该图片、不得合并 PR、关闭 Issue或处理下一 Issue。
 
 <Handoff_State>
-Target: Issue #61 中山大学附属第五医院照片补录 TRIAL 审计
+Target: Issue #61 中山大学附属第五医院照片补录 FULL 大图裁决
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/61
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/62
 Branch: codex/mhrj/issue-61-sysu5-photo-backfill-trial
 Completed:
 - 413 行范围与照片空字段门禁通过
 - 10 人跨 10 科室、正高/副高/其他分层 TRIAL 完成
 - 10/10 页面引用派生图下载与三重核验完成
 - 联系表人工视觉核验通过
-- 正式资产前后快照一致
+- Owner 已明确 TRIAL 通过并切换 FULL_APPEND_AND_OBSIDIAN
+- FULL 事务化实现、方案 A 字节级保护与裁决单已完成；专项 17/17、全量 237/237
+- FULL 首次执行命中 6,649,475 bytes 页面引用派生图，按 >5 MiB 门禁停止
+- 正式资产零修改，未生成 FULL 工件
 RequiredArtifacts:
-- work/中山大学附属第五医院_photo_backfill_trial_payload.json
-- work/中山大学附属第五医院_photo_backfill_trial_manifest.csv
-- work/中山大学附属第五医院_photo_backfill_trial_report.md
-- work/中山大学附属第五医院_photo_backfill_trial_contact_sheet.jpg
-- work/中山大学附属第五医院_photo_backfill_trial_photos/
+- docs/中山五院照片嵌入方式裁决单.md
+- work/sysu5_photo_backfill_trial.py
+- work/tests/test_sysu5_photo_backfill_trial.py
 ContextInjection:
-- 当前只能审计 TRIAL；owner 未明确切换 FULL_APPEND_AND_OBSIDIAN 前禁止正式写入
-- Issue 引用的 docs/中山五院照片嵌入方式裁决单.md 在基线缺失，FULL 前需确保裁决依据可追溯
+- 阻塞 URL：https://www.sysu5.cn/sites/default/files/styles/watermark/public/2024-07/20240208173237537.jpg?itok=RSFCQ8E7
+- 阻塞字节：6,649,475；超过 Owner 5 MiB 上限
+- 只能等待 Owner 对该大图给出明确裁决；不得自行压缩、跳过或重跑 FULL
 </Handoff_State>

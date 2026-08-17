@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import hashlib
 import sys
 import tempfile
 import unittest
@@ -189,6 +190,207 @@ class Sysu5PhotoBackfillTrialTests(unittest.TestCase):
         self.assertEqual(target.size_bucket(target.LARGE_BYTES), "200KiB-1MiB")
         self.assertEqual(target.size_bucket(2 * 1024 * 1024), "1-5MiB")
         self.assertEqual(target.size_bucket(6 * 1024 * 1024), ">5MiB")
+
+    def test_full_authorization_and_warning_are_explicit_and_idempotent(self) -> None:
+        self.assertIn("PR #62", target.FULL_AUTHORIZATION)
+        self.assertIn("FULL_APPEND_AND_OBSIDIAN", target.FULL_AUTHORIZATION)
+        self.assertIn("方案 A", target.FULL_AUTHORIZATION)
+        warning = target.append_failure_warning("既有提示", "无照片容器")
+        self.assertEqual(
+            warning,
+            f"既有提示；{target.FULL_WARNING_BY_STATE['无照片容器']}",
+        )
+        self.assertEqual(
+            target.append_failure_warning(warning, "无照片容器"), warning
+        )
+
+    def test_full_row_diff_allows_only_authorized_target_columns(self) -> None:
+        source = "https://www.sysu5.cn/medical-service/department-expert/doctor/10285"
+        before = [
+            {
+                "来源链接": source,
+                "照片链接": "",
+                "照片文件": "",
+                "异常提示": "",
+                "姓名": "丁立",
+            }
+        ]
+        after = [{**before[0], "照片链接": "https://www.sysu5.cn/photo.jpg"}]
+        diffs = target.collect_full_row_diffs(before, after, {source})
+        self.assertEqual([item["列名"] for item in diffs], ["照片链接"])
+        with self.assertRaisesRegex(RuntimeError, "范围外行"):
+            target.collect_full_row_diffs(before, after, set())
+        with self.assertRaisesRegex(RuntimeError, "范围外字段"):
+            target.collect_full_row_diffs(
+                before, [{**before[0], "姓名": "错误"}], {source}
+            )
+
+    def test_allocate_full_photo_uses_detail_id_only_for_collision(self) -> None:
+        first = {
+            "姓名": "同名",
+            "科室_分类页": "内科",
+            "职称身份原文": "主任医师",
+        }
+        second = dict(first)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            used: set[str] = set()
+            first_name, _ = target.allocate_full_photo_path(
+                first, "100", "jpg", root, used
+            )
+            second_name, _ = target.allocate_full_photo_path(
+                second, "101", "jpg", root, used
+            )
+        self.assertEqual(
+            first_name, "同名-内科-主任医师-中山大学附属第五医院.jpg"
+        )
+        self.assertEqual(
+            second_name, "同名-内科-主任医师-中山大学附属第五医院-101.jpg"
+        )
+
+    def test_scheme_a_insert_preserves_bom_newlines_and_other_bytes(self) -> None:
+        before = (
+            b"\xef\xbb\xbf---\r\nprotected: true\r\n---\r\n\r\n# Doctor\r\n\r\n"
+            + "## 基础信息\r\n\r\n".encode("utf-8")
+            + b"| field | value |\r\n|---|---|\r\n| x | y |\r\n"
+        )
+        photo_file = (
+            "01_试点医院/中山大学附属第五医院/照片/"
+            "丁立-感染病防治中心-主任医师-中山大学附属第五医院.jpg"
+        )
+        after = target.insert_profile_photo_block_bytes(before, "丁立", photo_file)
+        expected_block = (
+            "![丁立](照片/丁立-感染病防治中心-主任医师-中山大学附属第五医院.jpg)"
+            "\r\n\r\n"
+        ).encode("utf-8")
+        self.assertTrue(after.startswith(b"\xef\xbb\xbf"))
+        self.assertEqual(after, before.replace(
+            "## 基础信息\r\n\r\n".encode("utf-8"),
+            "## 基础信息\r\n\r\n".encode("utf-8") + expected_block,
+        ))
+        target.validate_profile_photo_only_bytes(before, after, "丁立", photo_file)
+        with self.assertRaisesRegex(RuntimeError, "已存在照片"):
+            target.insert_profile_photo_block_bytes(after, "丁立", photo_file)
+
+    def test_profile_tree_validator_forbids_file_set_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            profile = root / "医生.md"
+            index = root / "_索引.md"
+            profile.write_text("before", encoding="utf-8")
+            index.write_text("index", encoding="utf-8")
+            before = target.profile_markdown_tree(root)
+            profile.write_text("after", encoding="utf-8")
+            target.validate_profile_tree_surgical(
+                before, root, {Path("医生.md")}
+            )
+            (root / "新增.md").write_text("new", encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "文件集合"):
+                target.validate_profile_tree_surgical(
+                    before, root, {Path("医生.md")}
+                )
+
+    def test_full_validator_closes_413_rows_below_fuse_ratio(self) -> None:
+        buffer = io.BytesIO()
+        Image.new("RGB", (8, 9), "blue").save(buffer, format="JPEG")
+        content = buffer.getvalue()
+        digest = hashlib.sha256(content).hexdigest()
+        success_count = 300
+        failed_count = target.EXPECTED_SCOPE_COUNT - success_count
+        rows = []
+        reconciliation = []
+        photos = []
+        with tempfile.TemporaryDirectory() as directory:
+            photo_root = Path(directory)
+            for index in range(target.EXPECTED_SCOPE_COUNT):
+                source = (
+                    "https://www.sysu5.cn/medical-service/department-expert/doctor/"
+                    f"{10000 + index}"
+                )
+                if index < success_count:
+                    filename = f"医生{index}.jpg"
+                    photo_url = (
+                        "https://www.sysu5.cn/sites/default/files/styles/"
+                        f"watermark/public/{filename}?itok=x{index}"
+                    )
+                    photo_file = (
+                        f"01_试点医院/{target.HOSPITAL}/照片/{filename}"
+                    )
+                    (photo_root / filename).write_bytes(content)
+                    rows.append(
+                        {
+                            "姓名": f"医生{index}",
+                            "来源链接": source,
+                            "照片链接": photo_url,
+                            "照片文件": photo_file,
+                            "异常提示": "",
+                        }
+                    )
+                    reconciliation.append(
+                        {
+                            "姓名": f"医生{index}",
+                            "来源链接": source,
+                            "状态": "实采",
+                            "失败三态": "",
+                        }
+                    )
+                    photos.append(
+                        {
+                            "source_link": source,
+                            "photo_url": photo_url,
+                            "photo_file": photo_file,
+                            "filename": filename,
+                            "bytes": len(content),
+                            "sha256": digest,
+                            "magic_hex": content[:12].hex().upper(),
+                            "width": 8,
+                            "height": 9,
+                        }
+                    )
+                else:
+                    warning = target.FULL_WARNING_BY_STATE["无照片容器"]
+                    rows.append(
+                        {
+                            "姓名": f"医生{index}",
+                            "来源链接": source,
+                            "照片链接": "",
+                            "照片文件": "",
+                            "异常提示": warning,
+                        }
+                    )
+                    reconciliation.append(
+                        {
+                            "姓名": f"医生{index}",
+                            "来源链接": source,
+                            "状态": "失败",
+                            "失败三态": "无照片容器",
+                        }
+                    )
+            payload = {
+                "meta": {
+                    "expected_count": target.EXPECTED_SCOPE_COUNT,
+                    "downloaded_count": success_count,
+                    "failed_count": failed_count,
+                    "blank_count": failed_count,
+                    "failure_state_counts": {
+                        "详情不可达": 0,
+                        "无照片容器": failed_count,
+                        "占位图": 0,
+                    },
+                    "constructed_unreferenced_probe_count": 0,
+                    "third_party_source_count": 0,
+                    "existing_profile_count": target.EXPECTED_PROFILE_COUNT,
+                    "no_profile_scope_count": 0,
+                    "profile_refreshed_count": success_count,
+                    "photo_total_bytes": len(content) * success_count,
+                    "photo_max_bytes": len(content),
+                    "over_5mib_count": 0,
+                },
+                "rows": rows,
+                "reconciliation": reconciliation,
+                "photo_samples": photos,
+            }
+            target.validate_full_payload(payload, photo_root)
 
 
 if __name__ == "__main__":
