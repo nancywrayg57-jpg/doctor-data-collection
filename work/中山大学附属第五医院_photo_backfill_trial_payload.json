@@ -1,0 +1,495 @@
+{
+  "meta": {
+    "issue": 61,
+    "phase": "TRIAL_READY_FOR_OWNER_AUDIT",
+    "hospital": "中山大学附属第五医院",
+    "run_date": "2026-08-17",
+    "scope_count": 413,
+    "scope_unique_source_count": 413,
+    "scope_blank_photo_row_count": 413,
+    "trial_detail_count": 10,
+    "department_coverage_count": 10,
+    "covered_departments": [
+      "中医科",
+      "临床营养科",
+      "乳腺肿瘤内科",
+      "产科",
+      "分子影像中心",
+      "创面修复与烧伤外科",
+      "口腔科",
+      "康复医学科",
+      "心血管内科",
+      "感染病防治中心"
+    ],
+    "title_level_counts": {
+      "正高": 3,
+      "副高": 3,
+      "其他": 4
+    },
+    "home_http_status": 200,
+    "directory_http_status": 200,
+    "cookie_names": [],
+    "incomplete_read_retry_count": 0,
+    "detail_http_200_count": 10,
+    "no_photo_container_count": 0,
+    "placeholder_count": 0,
+    "structure_mismatch_count": 0,
+    "detail_error_count": 0,
+    "photo_error_count": 0,
+    "photo_sample_count": 10,
+    "fuse_problem_count": 0,
+    "fuse_problem_ratio": 0.0,
+    "photo_total_bytes": 3570848,
+    "photo_min_bytes": 74834,
+    "photo_median_bytes": 325595,
+    "photo_average_bytes": 357084,
+    "photo_max_bytes": 1109955,
+    "size_bucket_counts": {
+      "200KiB-1MiB": 5,
+      "<200KiB": 4,
+      "1-5MiB": 1
+    },
+    "over_200kb_count": 6,
+    "over_5mib_count": 0,
+    "estimated_full_count": 413,
+    "estimated_full_bytes": 147475692,
+    "estimated_full_mib": 140.64377975463867,
+    "derivative_reference_count": 10,
+    "derivative_style_counts": {
+      "watermark": 10
+    },
+    "constructed_unreferenced_probe_count": 0,
+    "third_party_source_count": 0,
+    "visual_review_status": "MANUAL_CONTACT_SHEET_REVIEW_PASSED",
+    "missing_embedding_ruling_doc": "D:\\workspace\\信息收集整理\\docs\\中山五院照片嵌入方式裁决单.md",
+    "missing_embedding_ruling_doc_exists": false,
+    "protected_assets_before": {
+      "formal_files": {
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
+          "bytes": 40025,
+          "sha256": "d6b08b3f284654024fad0eeac3377b095025dc294732db030e8cc5b81655b782"
+        },
+        "D:\\workspace\\信息收集整理\\work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24074769,
+          "sha256": "bed5ba6d1b24aacc853f3471879d99abc88d52d57a8b63dc024bb9438a793bd9"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 17722159,
+          "sha256": "8a20ae4f0c2e79ff034a73bc84cea3d004f6a4e578aa2219c057060a7e0e6508"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 4839414,
+          "sha256": "96802c97c8b010e29bcfc32bc3e33300426ab1fdd0e685a643ef5daadcf11c7e"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_markdown_tree": {
+        "exists": true,
+        "file_count": 414,
+        "bytes": 1440774,
+        "sha256": "aa29b1260d6a0a88ebb3940516f158625e31db88378fe612138a00932d2dc14f"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": ""
+      }
+    },
+    "protected_assets_after": {
+      "formal_files": {
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
+          "bytes": 40025,
+          "sha256": "d6b08b3f284654024fad0eeac3377b095025dc294732db030e8cc5b81655b782"
+        },
+        "D:\\workspace\\信息收集整理\\work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24074769,
+          "sha256": "bed5ba6d1b24aacc853f3471879d99abc88d52d57a8b63dc024bb9438a793bd9"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 17722159,
+          "sha256": "8a20ae4f0c2e79ff034a73bc84cea3d004f6a4e578aa2219c057060a7e0e6508"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 4839414,
+          "sha256": "96802c97c8b010e29bcfc32bc3e33300426ab1fdd0e685a643ef5daadcf11c7e"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_markdown_tree": {
+        "exists": true,
+        "file_count": 414,
+        "bytes": 1440774,
+        "sha256": "aa29b1260d6a0a88ebb3940516f158625e31db88378fe612138a00932d2dc14f"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": ""
+      }
+    },
+    "trial_photo_dir": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos",
+    "json_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_payload.json",
+    "csv_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_manifest.csv",
+    "report_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_report.md",
+    "contact_sheet_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_contact_sheet.jpg",
+    "visual_review_date": "2026-08-17"
+  },
+  "detail_errors": [],
+  "structure_mismatches": [],
+  "failure_states": [],
+  "photo_errors": [],
+  "photo_samples": [
+    {
+      "name": "丁立",
+      "department": "感染病防治中心",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "10285",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/10285",
+      "detail_http_status": 200,
+      "page_title": "丁立 | 中山大学附属第五医院",
+      "template_signature": "body.page-node-type-doctor .field.field-featured-media.field-item img",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/styles/watermark/public/2026-01/%E4%B8%81%E7%AB%8B20260114.jpg?itok=05NNMaX8",
+      "photo_source_attribute": "src",
+      "reference_kind": "派生图",
+      "derivative_style": "watermark",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "丁立-感染病防治中心-主任医师-中山大学附属第五医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos\\丁立-感染病防治中心-主任医师-中山大学附属第五医院.jpg",
+      "bytes": 337311,
+      "sha256": "0dce45a0cc4a0f362ebd62f4d7fe0b29b2c43981a068f8364316ba6eca3f64cc",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 800,
+      "height": 1173,
+      "size_bucket": "200KiB-1MiB",
+      "large_reasons": [
+        ">200KiB"
+      ]
+    },
+    {
+      "name": "王莉",
+      "department": "产科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "9108",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/9108",
+      "detail_http_status": 200,
+      "page_title": "王莉 | 中山大学附属第五医院",
+      "template_signature": "body.page-node-type-doctor .field.field-featured-media.field-item img",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/styles/watermark/public/2024-07/1612726913074176486.jpg?itok=XaiKihUC",
+      "photo_source_attribute": "src",
+      "reference_kind": "派生图",
+      "derivative_style": "watermark",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "王莉-产科-主任医师-中山大学附属第五医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos\\王莉-产科-主任医师-中山大学附属第五医院.jpg",
+      "bytes": 91058,
+      "sha256": "325c685b5ce081eb403c2e98ab1b845f23bb3d5251a6881ee9647e98e664b11e",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 390,
+      "height": 538,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "何欢欢",
+      "department": "分子影像中心",
+      "title_level": "正高",
+      "title": "研究员",
+      "detail_id": "10860",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/10860",
+      "detail_http_status": 200,
+      "page_title": "何欢欢 | 中山大学附属第五医院",
+      "template_signature": "body.page-node-type-doctor .field.field-featured-media.field-item img",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/styles/watermark/public/2024-07/1532281060787269620.png?itok=d7SsoPuq",
+      "photo_source_attribute": "src",
+      "reference_kind": "派生图",
+      "derivative_style": "watermark",
+      "photo_http_status": 200,
+      "content_type": "image/png",
+      "filename": "何欢欢-分子影像中心-研究员-中山大学附属第五医院.png",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos\\何欢欢-分子影像中心-研究员-中山大学附属第五医院.png",
+      "bytes": 139452,
+      "sha256": "4d04102ad969a66c7a98545c98b4718f1001890bf51843c37f618d090c177619",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 358,
+      "height": 441,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "韩宗萍",
+      "department": "临床营养科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "10837",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/10837",
+      "detail_http_status": 200,
+      "page_title": "韩宗萍 | 中山大学附属第五医院",
+      "template_signature": "body.page-node-type-doctor .field.field-featured-media.field-item img",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/styles/watermark/public/2024-11/20240723170705207.jpg?itok=t8sBWUQb",
+      "photo_source_attribute": "src",
+      "reference_kind": "派生图",
+      "derivative_style": "watermark",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "韩宗萍-临床营养科-副主任医师-中山大学附属第五医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos\\韩宗萍-临床营养科-副主任医师-中山大学附属第五医院.jpg",
+      "bytes": 327433,
+      "sha256": "d88fa95e914fd179b077f382f566e1c5d25a0b15a9b0df16f738327276ab7e8b",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 1181,
+      "height": 1656,
+      "size_bucket": "200KiB-1MiB",
+      "large_reasons": [
+        ">200KiB"
+      ]
+    },
+    {
+      "name": "孙一",
+      "department": "口腔科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "12229",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/12229",
+      "detail_http_status": 200,
+      "page_title": "孙一 | 中山大学附属第五医院",
+      "template_signature": "body.page-node-type-doctor .field.field-featured-media.field-item img",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/styles/watermark/public/2025-04/20250410162834341.jpg?itok=9Xhx2D7i",
+      "photo_source_attribute": "src",
+      "reference_kind": "派生图",
+      "derivative_style": "watermark",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "孙一-口腔科-副主任医师-中山大学附属第五医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos\\孙一-口腔科-副主任医师-中山大学附属第五医院.jpg",
+      "bytes": 1109955,
+      "sha256": "f4465894450ce933dd084255637206e47862434cac34d819927d0a7fcc8e063b",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 1906,
+      "height": 2668,
+      "size_bucket": "1-5MiB",
+      "large_reasons": [
+        ">200KiB"
+      ]
+    },
+    {
+      "name": "林子玲",
+      "department": "康复医学科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "10767",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/10767",
+      "detail_http_status": 200,
+      "page_title": "林子玲 | 中山大学附属第五医院",
+      "template_signature": "body.page-node-type-doctor .field.field-featured-media.field-item img",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/styles/watermark/public/2024-07/1595378134940594203.jpg?itok=gqJkBoGL",
+      "photo_source_attribute": "src",
+      "reference_kind": "派生图",
+      "derivative_style": "watermark",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "林子玲-康复医学科-副主任医师-中山大学附属第五医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos\\林子玲-康复医学科-副主任医师-中山大学附属第五医院.jpg",
+      "bytes": 74834,
+      "sha256": "71eddf34ed89eed8dd632721d7061a8ac8251a16bb0f475f8ad70e26f7bbd088",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 390,
+      "height": 567,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "张玉龙",
+      "department": "中医科",
+      "title_level": "其他",
+      "title": "医师",
+      "detail_id": "10710",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/10710",
+      "detail_http_status": 200,
+      "page_title": "张玉龙 | 中山大学附属第五医院",
+      "template_signature": "body.page-node-type-doctor .field.field-featured-media.field-item img",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/styles/watermark/public/2024-07/20231227153436028.jpg?itok=1QiSP_cz",
+      "photo_source_attribute": "src",
+      "reference_kind": "派生图",
+      "derivative_style": "watermark",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "张玉龙-中医科-医师-中山大学附属第五医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos\\张玉龙-中医科-医师-中山大学附属第五医院.jpg",
+      "bytes": 386158,
+      "sha256": "e530a3bed5244e4cbdbe9dde37d8221aa39e1bc073d902ff3bc0e305f562bbd1",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 896,
+      "height": 1228,
+      "size_bucket": "200KiB-1MiB",
+      "large_reasons": [
+        ">200KiB"
+      ]
+    },
+    {
+      "name": "徐晓露",
+      "department": "乳腺肿瘤内科",
+      "title_level": "其他",
+      "title": "医师",
+      "detail_id": "14096",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/14096",
+      "detail_http_status": 200,
+      "page_title": "徐晓露 | 中山大学附属第五医院",
+      "template_signature": "body.page-node-type-doctor .field.field-featured-media.field-item img",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/styles/watermark/public/2026-07/%E5%BE%90%E6%99%93%E9%9C%B2%EF%BC%88185284%EF%BC%8920260708.jpg?itok=Qo_g9Y4Z",
+      "photo_source_attribute": "src",
+      "reference_kind": "派生图",
+      "derivative_style": "watermark",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "徐晓露-乳腺肿瘤内科-医师-中山大学附属第五医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos\\徐晓露-乳腺肿瘤内科-医师-中山大学附属第五医院.jpg",
+      "bytes": 591199,
+      "sha256": "898784303439634a2270c6494bf738400ef5b459633ec31dc75e0f1491b880bc",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 1000,
+      "height": 1500,
+      "size_bucket": "200KiB-1MiB",
+      "large_reasons": [
+        ">200KiB"
+      ]
+    },
+    {
+      "name": "余圆圆",
+      "department": "创面修复与烧伤外科",
+      "title_level": "其他",
+      "title": "主治医师",
+      "detail_id": "10904",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/10904",
+      "detail_http_status": 200,
+      "page_title": "余圆圆 | 中山大学附属第五医院",
+      "template_signature": "body.page-node-type-doctor .field.field-featured-media.field-item img",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/styles/watermark/public/2024-07/20240521151603060.png?itok=Qwzp8mrZ",
+      "photo_source_attribute": "src",
+      "reference_kind": "派生图",
+      "derivative_style": "watermark",
+      "photo_http_status": 200,
+      "content_type": "image/png",
+      "filename": "余圆圆-创面修复与烧伤外科-主治医师-中山大学附属第五医院.png",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos\\余圆圆-创面修复与烧伤外科-主治医师-中山大学附属第五医院.png",
+      "bytes": 323758,
+      "sha256": "6f75f49372bf191dfa3c04d93843445f7fb1a75695fccc1402103541b675f442",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 424,
+      "height": 591,
+      "size_bucket": "200KiB-1MiB",
+      "large_reasons": [
+        ">200KiB"
+      ]
+    },
+    {
+      "name": "刘天民",
+      "department": "心血管内科",
+      "title_level": "其他",
+      "title": "主治医师",
+      "detail_id": "2241",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/2241",
+      "detail_http_status": 200,
+      "page_title": "刘天民 | 中山大学附属第五医院",
+      "template_signature": "body.page-node-type-doctor .field.field-featured-media.field-item img",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/styles/watermark/public/2024-07/1594578235279441829.jpg?itok=C85Egj3W",
+      "photo_source_attribute": "src",
+      "reference_kind": "派生图",
+      "derivative_style": "watermark",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "刘天民-心血管内科-主治医师-中山大学附属第五医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_trial_photos\\刘天民-心血管内科-主治医师-中山大学附属第五医院.jpg",
+      "bytes": 189690,
+      "sha256": "e609d34849e2364e0609ba126d739f3e96c966867597329a0b66be6ea46613bb",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 593,
+      "height": 756,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    }
+  ],
+  "selected_rows": [
+    {
+      "姓名": "丁立",
+      "科室": "感染病防治中心",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/10285"
+    },
+    {
+      "姓名": "王莉",
+      "科室": "产科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/9108"
+    },
+    {
+      "姓名": "何欢欢",
+      "科室": "分子影像中心",
+      "职称层级": "正高",
+      "主职称": "研究员",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/10860"
+    },
+    {
+      "姓名": "韩宗萍",
+      "科室": "临床营养科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/10837"
+    },
+    {
+      "姓名": "孙一",
+      "科室": "口腔科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/12229"
+    },
+    {
+      "姓名": "林子玲",
+      "科室": "康复医学科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/10767"
+    },
+    {
+      "姓名": "张玉龙",
+      "科室": "中医科",
+      "职称层级": "其他",
+      "主职称": "医师",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/10710"
+    },
+    {
+      "姓名": "徐晓露",
+      "科室": "乳腺肿瘤内科",
+      "职称层级": "其他",
+      "主职称": "医师",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/14096"
+    },
+    {
+      "姓名": "余圆圆",
+      "科室": "创面修复与烧伤外科",
+      "职称层级": "其他",
+      "主职称": "主治医师",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/10904"
+    },
+    {
+      "姓名": "刘天民",
+      "科室": "心血管内科",
+      "职称层级": "其他",
+      "主职称": "主治医师",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/2241"
+    }
+  ]
+}
