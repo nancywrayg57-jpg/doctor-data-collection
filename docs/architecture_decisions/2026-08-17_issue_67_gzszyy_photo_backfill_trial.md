@@ -73,9 +73,10 @@
 ## 验证与停止点
 
 - `py_compile`：通过。
-- 专项测试：11/11 通过。
-- 全仓测试：293/293 通过；仅通过仓库外临时 `PYTHONPATH` 提供既有测试所需的 `requests` 与 `beautifulsoup4`，未修改全局 Python、系统 PATH 或仓库依赖配置。
+- 专项测试：17/17 通过。
+- 全仓测试：299/299 通过；仅通过仓库外临时 `PYTHONPATH` 提供既有测试所需的 `requests` 与 `beautifulsoup4`，未修改全局 Python、系统 PATH 或仓库依赖配置。
 - TRIAL `--validate`：通过。
 - FULL `--validate-full`：通过；415 张照片的 SHA-256、魔数、扩展名、字节数和尺寸全量对账通过。
 - XLSX 六工作表完成可视化复核；公式错误扫描 0。
-- 下一步只允许完成全仓测试、以非强制 Git Data API 更新 Issue #67 原分支，并在 PR #68 回报 `FULL_READY_FOR_FINAL_OWNER_AUDIT`；不得合并 PR、关闭 Issue 或领取下一任务。
+- FULL 资产已通过非强制 Git Data API 发布到 Issue #67 原分支：提交 `f44ccdccc14e55c78879d9fc2d6434c29445d94a`，tree `354b3f6ba6e54ba6e7f99ca435ca154807715758`。
+- 下一步只允许在 PR #68 回报 `FULL_READY_FOR_FINAL_OWNER_AUDIT` 并等待 owner 最终审计；不得合并 PR、关闭 Issue 或领取下一任务。
