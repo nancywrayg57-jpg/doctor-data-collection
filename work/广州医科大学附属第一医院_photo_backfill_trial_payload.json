@@ -1,0 +1,473 @@
+{
+  "meta": {
+    "issue": 63,
+    "phase": "TRIAL_READY_FOR_OWNER_AUDIT",
+    "hospital": "广州医科大学附属第一医院",
+    "run_date": "2026-08-17",
+    "scope_count": 616,
+    "scope_unique_source_count": 616,
+    "scope_blank_photo_row_count": 616,
+    "trial_detail_count": 10,
+    "department_coverage_count": 8,
+    "covered_departments": [
+      "呼吸与危重症医学科",
+      "心血管内科",
+      "感染内科",
+      "肾内科",
+      "胸外科",
+      "药学部",
+      "营养科",
+      "针灸专业组"
+    ],
+    "title_level_counts": {
+      "正高": 3,
+      "副高": 3,
+      "其他": 4
+    },
+    "home_http_status": 200,
+    "directory_http_status": 200,
+    "cookie_names": [
+      "ASP.NET_SessionId"
+    ],
+    "incomplete_read_retry_count": 0,
+    "detail_http_200_count": 10,
+    "no_photo_container_count": 0,
+    "placeholder_count": 0,
+    "structure_mismatch_count": 0,
+    "detail_error_count": 0,
+    "photo_error_count": 0,
+    "photo_sample_count": 10,
+    "fuse_problem_count": 0,
+    "fuse_problem_ratio": 0.0,
+    "photo_total_bytes": 1949147,
+    "photo_min_bytes": 3547,
+    "photo_median_bytes": 40699,
+    "photo_average_bytes": 194914,
+    "photo_max_bytes": 1031569,
+    "size_bucket_counts": {
+      "<200KiB": 8,
+      "200KiB-1MiB": 2
+    },
+    "over_200kb_count": 2,
+    "over_5mib_count": 0,
+    "estimated_full_count": 616,
+    "estimated_full_bytes": 120067024,
+    "estimated_full_mib": 114.50483703613281,
+    "reference_kind_counts": {
+      "Upload原图": 4,
+      "doctor原图": 6
+    },
+    "constructed_unreferenced_probe_count": 0,
+    "third_party_source_count": 0,
+    "visual_review_status": "PASSED_SINGLE_ADULT_PROFESSIONAL_PORTRAITS_10_OF_10",
+    "protected_assets_before": {
+      "formal_files": {
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
+          "bytes": 40025,
+          "sha256": "d6b08b3f284654024fad0eeac3377b095025dc294732db030e8cc5b81655b782"
+        },
+        "D:\\workspace\\信息收集整理\\work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24173400,
+          "sha256": "43e1a5ae729145c35dae0640077bfb5a6528434bfd4e9ceeb83926e417fa087c"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 17820790,
+          "sha256": "e41bc67b25c7ce5daba537d2b07eebc251ed3b33b1b33d5056f19fa47eb2b394"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 4858499,
+          "sha256": "f294857a29874048a780675b7dbc67a0ae705da459e618da42c0feecf7fb389e"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_markdown_tree": {
+        "exists": true,
+        "file_count": 617,
+        "bytes": 1690527,
+        "sha256": "0cdf9e07bbab31b019dbe7f127ab0ea5e5a1f1c434d3fa50c550d7066bd8fcef"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": ""
+      }
+    },
+    "protected_assets_after": {
+      "formal_files": {
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
+          "bytes": 40025,
+          "sha256": "d6b08b3f284654024fad0eeac3377b095025dc294732db030e8cc5b81655b782"
+        },
+        "D:\\workspace\\信息收集整理\\work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24173400,
+          "sha256": "43e1a5ae729145c35dae0640077bfb5a6528434bfd4e9ceeb83926e417fa087c"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 17820790,
+          "sha256": "e41bc67b25c7ce5daba537d2b07eebc251ed3b33b1b33d5056f19fa47eb2b394"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 4858499,
+          "sha256": "f294857a29874048a780675b7dbc67a0ae705da459e618da42c0feecf7fb389e"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_markdown_tree": {
+        "exists": true,
+        "file_count": 617,
+        "bytes": 1690527,
+        "sha256": "0cdf9e07bbab31b019dbe7f127ab0ea5e5a1f1c434d3fa50c550d7066bd8fcef"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": ""
+      }
+    },
+    "trial_photo_dir": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos",
+    "json_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_payload.json",
+    "csv_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_manifest.csv",
+    "report_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_report.md",
+    "contact_sheet_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_contact_sheet.jpg"
+  },
+  "detail_errors": [],
+  "structure_mismatches": [],
+  "failure_states": [],
+  "photo_errors": [],
+  "photo_samples": [
+    {
+      "name": "钟南山",
+      "department": "呼吸与危重症医学科",
+      "title_level": "正高",
+      "title": "教授",
+      "detail_id": "1",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_1.html",
+      "detail_http_status": 200,
+      "page_title": "钟南山_呼吸与危重症医学科_广州医科大学附属第一医院官方网站www.gyfyy.com",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gyfyyy.cn/Upload/202112/637750146771733237.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "钟南山-呼吸与危重症医学科-教授-广州医科大学附属第一医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos\\钟南山-呼吸与危重症医学科-教授-广州医科大学附属第一医院.jpg",
+      "bytes": 72435,
+      "sha256": "b28a3690894c9010557a38b0d022fbc7ca6c0873274dd760bb34b8764dfc2eaa",
+      "magic_hex": "FFD8FFDB0084000101010101",
+      "width": 325,
+      "height": 400,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "黄铮",
+      "department": "心血管内科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "36",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/xxgnk/doctor_36.html",
+      "detail_http_status": 200,
+      "page_title": "黄铮_心血管内科_广州医科大学附属第一医院官方网站www.gyfyy.com",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gyfyyy.cn/images/doctor/HUANGZHENG.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "doctor原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "黄铮-心血管内科-主任医师-广州医科大学附属第一医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos\\黄铮-心血管内科-主任医师-广州医科大学附属第一医院.jpg",
+      "bytes": 37477,
+      "sha256": "a32a9814527d458c7d1551b9543d6f7957d1559795b71130a2355eed30571286",
+      "magic_hex": "FFD8FFDB0084000101010101",
+      "width": 325,
+      "height": 400,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "赖克方",
+      "department": "呼吸与危重症医学科",
+      "title_level": "正高",
+      "title": "教授",
+      "detail_id": "9",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_9.html",
+      "detail_http_status": 200,
+      "page_title": "赖克方_呼吸与危重症医学科_广州医科大学附属第一医院官方网站www.gyfyy.com",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gyfyyy.cn/images/doctor/LAIKEFANG.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "doctor原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "赖克方-呼吸与危重症医学科-教授-广州医科大学附属第一医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos\\赖克方-呼吸与危重症医学科-教授-广州医科大学附属第一医院.jpg",
+      "bytes": 40650,
+      "sha256": "a650b59bcbf78120b8ac50ac3f0a95dc504229678dfb22159721802f32f022e0",
+      "magic_hex": "FFD8FFDB0084000101010101",
+      "width": 325,
+      "height": 400,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "欧阳铭",
+      "department": "呼吸与危重症医学科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "13",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_13.html",
+      "detail_http_status": 200,
+      "page_title": "欧阳铭_呼吸与危重症医学科_广州医科大学附属第一医院官方网站www.gyfyy.com",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gyfyyy.cn/Upload/202410/638658855425722392.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "欧阳铭-呼吸与危重症医学科-副主任医师-广州医科大学附属第一医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos\\欧阳铭-呼吸与危重症医学科-副主任医师-广州医科大学附属第一医院.jpg",
+      "bytes": 1031569,
+      "sha256": "24ddd364315b37328df698eb61b1608eee8509e4bc6c433bdba2386d4e171224",
+      "magic_hex": "FFD8FFE11074457869660000",
+      "width": 325,
+      "height": 400,
+      "size_bucket": "200KiB-1MiB",
+      "large_reasons": [
+        ">200KiB"
+      ]
+    },
+    {
+      "name": "梁增伟",
+      "department": "感染内科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "71",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/grnk/doctor_71.html",
+      "detail_http_status": 200,
+      "page_title": "梁增伟_感染内科_广州医科大学附属第一医院官方网站www.gyfyy.com",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gyfyyy.cn/Upload/202411/638664968880753569.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "梁增伟-感染内科-副主任医师-广州医科大学附属第一医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos\\梁增伟-感染内科-副主任医师-广州医科大学附属第一医院.jpg",
+      "bytes": 3547,
+      "sha256": "99e69f0cb71236659d67a0b0bf2dd90d88feadb31cab90a5394d80b63a95adde",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 100,
+      "height": 145,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "韦兵",
+      "department": "胸外科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "109",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/wk/xwk/doctor_109.html",
+      "detail_http_status": 200,
+      "page_title": "韦兵_胸外科_广州医科大学附属第一医院官方网站www.gyfyy.com",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gyfyyy.cn/images/doctor/WEIBING.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "doctor原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "韦兵-胸外科-副主任医师-广州医科大学附属第一医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos\\韦兵-胸外科-副主任医师-广州医科大学附属第一医院.jpg",
+      "bytes": 39079,
+      "sha256": "b4602253cccc3784e20cf071e6128698a950c353907afeca4f70721f3e7923a9",
+      "magic_hex": "FFD8FFDB0084000101010101",
+      "width": 325,
+      "height": 400,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "何颖",
+      "department": "针灸专业组",
+      "title_level": "其他",
+      "title": "主治医师",
+      "detail_id": "287",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/zyk/zjzyz/doctor_287.html",
+      "detail_http_status": 200,
+      "page_title": "何颖_针灸专业组_广州医科大学附属第一医院官方网站www.gyfyy.com",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gyfyyy.cn/images/doctor/HEYIN.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "doctor原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "何颖-针灸专业组-主治医师-广州医科大学附属第一医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos\\何颖-针灸专业组-主治医师-广州医科大学附属第一医院.jpg",
+      "bytes": 81318,
+      "sha256": "20f5dbe8ce6ff9c1ee2b567c3c0ae193a17f351e07e840c1f11dd4ee0f54fad4",
+      "magic_hex": "FFD8FFDB0084000101010101",
+      "width": 325,
+      "height": 400,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "黄泳璋",
+      "department": "肾内科",
+      "title_level": "其他",
+      "title": "主治医师",
+      "detail_id": "55",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/nk/snk/doctor_55.html",
+      "detail_http_status": 200,
+      "page_title": "黄泳璋_肾内科_广州医科大学附属第一医院官方网站www.gyfyy.com",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gyfyyy.cn/images/doctor/HUANGYONGZHANG.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "doctor原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "黄泳璋-肾内科-主治医师-广州医科大学附属第一医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos\\黄泳璋-肾内科-主治医师-广州医科大学附属第一医院.jpg",
+      "bytes": 40749,
+      "sha256": "6823d1d084f986d34abc228a8493ad896ab42d87634e4b6fc8fa737c3d31a333",
+      "magic_hex": "FFD8FFDB0084000101010101",
+      "width": 325,
+      "height": 400,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "林婷婷",
+      "department": "营养科",
+      "title_level": "其他",
+      "title": "主治医师",
+      "detail_id": "323",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/yj/yyk/doctor_323.html",
+      "detail_http_status": 200,
+      "page_title": "林婷婷_营养科_广州医科大学附属第一医院官方网站www.gyfyy.com",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gyfyyy.cn/images/doctor/LINTINGTING.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "doctor原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "林婷婷-营养科-主治医师-广州医科大学附属第一医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos\\林婷婷-营养科-主治医师-广州医科大学附属第一医院.jpg",
+      "bytes": 39484,
+      "sha256": "b66256c269193a8552a2c0306ba59030862ea9a40cf2565a76f1c8297a8cf495",
+      "magic_hex": "FFD8FFDB0084000101010101",
+      "width": 325,
+      "height": 400,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "孟冬梅",
+      "department": "药学部",
+      "title_level": "其他",
+      "title": "主管药师",
+      "detail_id": "325",
+      "source_link": "https://www.gyfyyy.cn/cn/ks/yj/yxb/doctor_325.html",
+      "detail_http_status": 200,
+      "page_title": "孟冬梅_药学部_广州医科大学附属第一医院官方网站www.gyfyy.com",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gyfyyy.cn/Upload/202411/638672803796004099.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "孟冬梅-药学部-主管药师-广州医科大学附属第一医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第一医院_photo_backfill_trial_photos\\孟冬梅-药学部-主管药师-广州医科大学附属第一医院.jpg",
+      "bytes": 562839,
+      "sha256": "88eb32848f8b9f84fd40b03819fcdb57fed6bf202780737c6e5beb96cc85fcfe",
+      "magic_hex": "FFD8FFE10360457869660000",
+      "width": 682,
+      "height": 1024,
+      "size_bucket": "200KiB-1MiB",
+      "large_reasons": [
+        ">200KiB"
+      ]
+    }
+  ],
+  "selected_rows": [
+    {
+      "姓名": "钟南山",
+      "科室": "呼吸与危重症医学科",
+      "职称层级": "正高",
+      "主职称": "教授",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_1.html"
+    },
+    {
+      "姓名": "黄铮",
+      "科室": "心血管内科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/xxgnk/doctor_36.html"
+    },
+    {
+      "姓名": "赖克方",
+      "科室": "呼吸与危重症医学科",
+      "职称层级": "正高",
+      "主职称": "教授",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_9.html"
+    },
+    {
+      "姓名": "欧阳铭",
+      "科室": "呼吸与危重症医学科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/hxnk/doctor_13.html"
+    },
+    {
+      "姓名": "梁增伟",
+      "科室": "感染内科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/grnk/doctor_71.html"
+    },
+    {
+      "姓名": "韦兵",
+      "科室": "胸外科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/wk/xwk/doctor_109.html"
+    },
+    {
+      "姓名": "何颖",
+      "科室": "针灸专业组",
+      "职称层级": "其他",
+      "主职称": "主治医师",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/zyk/zjzyz/doctor_287.html"
+    },
+    {
+      "姓名": "黄泳璋",
+      "科室": "肾内科",
+      "职称层级": "其他",
+      "主职称": "主治医师",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/nk/snk/doctor_55.html"
+    },
+    {
+      "姓名": "林婷婷",
+      "科室": "营养科",
+      "职称层级": "其他",
+      "主职称": "主治医师",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/yj/yyk/doctor_323.html"
+    },
+    {
+      "姓名": "孟冬梅",
+      "科室": "药学部",
+      "职称层级": "其他",
+      "主职称": "主管药师",
+      "来源链接": "https://www.gyfyyy.cn/cn/ks/yj/yxb/doctor_325.html"
+    }
+  ]
+}
