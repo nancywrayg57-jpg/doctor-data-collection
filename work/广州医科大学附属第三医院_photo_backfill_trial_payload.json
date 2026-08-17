@@ -1,0 +1,477 @@
+{
+  "meta": {
+    "issue": 65,
+    "phase": "TRIAL_READY_FOR_OWNER_AUDIT",
+    "hospital": "广州医科大学附属第三医院",
+    "run_date": "2026-08-17",
+    "scope_count": 422,
+    "scope_unique_source_count": 422,
+    "scope_blank_photo_row_count": 422,
+    "trial_detail_count": 10,
+    "department_coverage_count": 10,
+    "covered_departments": [
+      "荔湾院区中医科",
+      "荔湾院区心血管内科",
+      "荔湾院区放射科",
+      "荔湾院区法医物证司法鉴定所",
+      "荔湾院区消化内科",
+      "荔湾院区神经内科",
+      "荔湾院区风湿免疫科",
+      "荔湾院区麻醉科",
+      "黄埔院区生殖医学中心",
+      "黄埔院区药学部"
+    ],
+    "title_level_counts": {
+      "正高": 3,
+      "副高": 3,
+      "其他": 4
+    },
+    "home_http_status": 200,
+    "home_content_type": "text/plain",
+    "directory_http_status": 200,
+    "directory_content_type": "text/plain",
+    "known_unreachable_scope": [
+      {
+        "name": "李文杰",
+        "detail_id": "6"
+      }
+    ],
+    "cookie_names": [
+      "ASP.NET_SessionId"
+    ],
+    "incomplete_read_retry_count": 0,
+    "detail_http_200_count": 10,
+    "no_photo_container_count": 0,
+    "placeholder_count": 0,
+    "structure_mismatch_count": 0,
+    "detail_error_count": 0,
+    "photo_error_count": 0,
+    "photo_sample_count": 10,
+    "fuse_problem_count": 0,
+    "fuse_problem_ratio": 0.0,
+    "photo_total_bytes": 616386,
+    "photo_min_bytes": 31518,
+    "photo_median_bytes": 44252,
+    "photo_average_bytes": 61638,
+    "photo_max_bytes": 175149,
+    "size_bucket_counts": {
+      "<200KiB": 10
+    },
+    "over_200kb_count": 0,
+    "over_5mib_count": 0,
+    "estimated_full_count": 422,
+    "estimated_full_bytes": 26011236,
+    "estimated_full_mib": 24.80624771118164,
+    "reference_kind_counts": {
+      "Upload原图": 10
+    },
+    "constructed_unreferenced_probe_count": 0,
+    "third_party_source_count": 0,
+    "visual_review_status": "PASSED_SINGLE_ADULT_PROFESSIONAL_PORTRAITS_10_OF_10",
+    "protected_assets_before": {
+      "formal_files": {
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
+          "bytes": 40088,
+          "sha256": "04273e1500e8dcb2483280fd53ed775543f0159531eca6f247a5bdf3a70a8911"
+        },
+        "D:\\workspace\\信息收集整理\\work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24291089,
+          "sha256": "1187deceb9b77a9ed542f2828420d5c453fc36a37b51e69b35c0ac3e6a38f16a"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 17938479,
+          "sha256": "abd76ae79c9c5c7cd1ed0a035bd7b5bc8b037f57361711f0cebf5d71571e4fec"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 4874309,
+          "sha256": "c60f77b0233dbd2f7e86cb66e093f68e99ba31aabf8e6952252abb4d26677ace"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_markdown_tree": {
+        "exists": true,
+        "file_count": 423,
+        "bytes": 1451002,
+        "sha256": "bc02cf6b910e9658ecd960b5d2b644b928415a4aeadc37572e3559b3ca9084af"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": ""
+      }
+    },
+    "protected_assets_after": {
+      "formal_files": {
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
+          "bytes": 40088,
+          "sha256": "04273e1500e8dcb2483280fd53ed775543f0159531eca6f247a5bdf3a70a8911"
+        },
+        "D:\\workspace\\信息收集整理\\work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24291089,
+          "sha256": "1187deceb9b77a9ed542f2828420d5c453fc36a37b51e69b35c0ac3e6a38f16a"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 17938479,
+          "sha256": "abd76ae79c9c5c7cd1ed0a035bd7b5bc8b037f57361711f0cebf5d71571e4fec"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 4874309,
+          "sha256": "c60f77b0233dbd2f7e86cb66e093f68e99ba31aabf8e6952252abb4d26677ace"
+        },
+        "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_markdown_tree": {
+        "exists": true,
+        "file_count": 423,
+        "bytes": 1451002,
+        "sha256": "bc02cf6b910e9658ecd960b5d2b644b928415a4aeadc37572e3559b3ca9084af"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": ""
+      }
+    },
+    "trial_photo_dir": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos",
+    "json_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_payload.json",
+    "csv_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_manifest.csv",
+    "report_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_report.md",
+    "contact_sheet_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_contact_sheet.jpg"
+  },
+  "detail_errors": [],
+  "structure_mismatches": [],
+  "failure_states": [],
+  "photo_errors": [],
+  "photo_samples": [
+    {
+      "name": "许治强",
+      "department": "荔湾院区神经内科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "10",
+      "source_link": "https://www.gy3y.cn/ks/nkxt/sjnk/doctor_10.html",
+      "detail_http_status": 200,
+      "page_title": "许治强_神经内科_广州医科大学附属第三医院",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gy3y.cn/Upload/201411/6355096692500301506902433.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "许治强-荔湾院区神经内科-主任医师-广州医科大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos\\许治强-荔湾院区神经内科-主任医师-广州医科大学附属第三医院.jpg",
+      "bytes": 32173,
+      "sha256": "d33bffb2fc99f314f937b73e965bde23f35dfa1d45ac1bf9691de2efcd83c6b5",
+      "magic_hex": "FFD8FFE112DB457869660000",
+      "width": 200,
+      "height": 266,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "张建瑜",
+      "department": "荔湾院区风湿免疫科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "32",
+      "source_link": "https://www.gy3y.cn/ks/nkxt/fsmyk/doctor_32.html",
+      "detail_http_status": 200,
+      "page_title": "张建瑜_风湿免疫科_广州医科大学附属第三医院",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gy3y.cn/Upload/202506/638850746379947612.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "张建瑜-荔湾院区风湿免疫科-主任医师-广州医科大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos\\张建瑜-荔湾院区风湿免疫科-主任医师-广州医科大学附属第三医院.jpg",
+      "bytes": 33368,
+      "sha256": "9d299885e66d86f70396ca96f07c7648154b19cea1962ef1fcddf546b9b9f229",
+      "magic_hex": "FFD8FFE11657457869660000",
+      "width": 200,
+      "height": 266,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "谭湘萍",
+      "department": "黄埔院区药学部",
+      "title_level": "正高",
+      "title": "主任药师",
+      "detail_id": "377",
+      "source_link": "https://www.gy3y.cn/ks/hp/yjbm/yxb/doctor_377.html",
+      "detail_http_status": 200,
+      "page_title": "谭湘萍_药学部_广州医科大学附属第三医院",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gy3y.cn/Upload/202301/638094796783505034.png",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/png",
+      "filename": "谭湘萍-黄埔院区药学部-主任药师-广州医科大学附属第三医院.png",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos\\谭湘萍-黄埔院区药学部-主任药师-广州医科大学附属第三医院.png",
+      "bytes": 55136,
+      "sha256": "cb516f8d3f847d199e90f24cd65998f07dbe6a2203e061f01d8ce36c752355d0",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 200,
+      "height": 266,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "关国晟",
+      "department": "荔湾院区心血管内科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "4",
+      "source_link": "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_4.html",
+      "detail_http_status": 200,
+      "page_title": "关国晟_心血管内科_广州医科大学附属第三医院",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gy3y.cn/Upload/201411/6355095587733094009570010.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "关国晟-荔湾院区心血管内科-副主任医师-广州医科大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos\\关国晟-荔湾院区心血管内科-副主任医师-广州医科大学附属第三医院.jpg",
+      "bytes": 33338,
+      "sha256": "9af9bc7f88127198c0a63ff1b72cf67123667ee2206a3ff835867e027ddda7b3",
+      "magic_hex": "FFD8FFE113B8457869660000",
+      "width": 200,
+      "height": 266,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "谭慧珍",
+      "department": "荔湾院区消化内科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "29",
+      "source_link": "https://www.gy3y.cn/ks/nkxt/xhnk/doctor_29.html",
+      "detail_http_status": 200,
+      "page_title": "谭慧珍_消化内科_广州医科大学附属第三医院",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gy3y.cn/Upload/201411/6355104519241647794246558.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "谭慧珍-荔湾院区消化内科-副主任医师-广州医科大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos\\谭慧珍-荔湾院区消化内科-副主任医师-广州医科大学附属第三医院.jpg",
+      "bytes": 33186,
+      "sha256": "e7c187a279626eb3a4079c933a6f07cdddd98bb0c699ef14944c3e945a035abc",
+      "magic_hex": "FFD8FFE11407457869660000",
+      "width": 200,
+      "height": 266,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "黎经兰",
+      "department": "荔湾院区中医科",
+      "title_level": "副高",
+      "title": "副主任中医师",
+      "detail_id": "157",
+      "source_link": "https://www.gy3y.cn/ks/zyk/zyk1/doctor_157.html",
+      "detail_http_status": 200,
+      "page_title": "黎经兰_中医科_广州医科大学附属第三医院",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gy3y.cn/Upload/201410/6354908621180625033762984.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "黎经兰-荔湾院区中医科-副主任中医师-广州医科大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos\\黎经兰-荔湾院区中医科-副主任中医师-广州医科大学附属第三医院.jpg",
+      "bytes": 87705,
+      "sha256": "d9affbc9d5f04b4c377cbdaa7256f5633f7369dea4f521e108a36fd0b67fdf49",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 496,
+      "height": 661,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "詹鸿",
+      "department": "荔湾院区麻醉科",
+      "title_level": "其他",
+      "title": "未标注",
+      "detail_id": "78",
+      "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_78.html",
+      "detail_http_status": 200,
+      "page_title": "詹鸿_麻醉科_广州医科大学附属第三医院",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gy3y.cn/Upload/202301/638094732310691276.png",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/png",
+      "filename": "詹鸿-荔湾院区麻醉科-未标注-广州医科大学附属第三医院.png",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos\\詹鸿-荔湾院区麻醉科-未标注-广州医科大学附属第三医院.png",
+      "bytes": 63913,
+      "sha256": "140c08086ed5a52c35c6809c91edb3f495c7f655412ece80338885e5e1a04240",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 229,
+      "height": 314,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "麦伟文",
+      "department": "荔湾院区放射科",
+      "title_level": "其他",
+      "title": "未标注",
+      "detail_id": "190",
+      "source_link": "https://www.gy3y.cn/ks/yjbm/fsk/doctor_190.html",
+      "detail_http_status": 200,
+      "page_title": "麦伟文_放射科_广州医科大学附属第三医院",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gy3y.cn/Upload/201411/6355138800016877744774233.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "麦伟文-荔湾院区放射科-未标注-广州医科大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos\\麦伟文-荔湾院区放射科-未标注-广州医科大学附属第三医院.jpg",
+      "bytes": 31518,
+      "sha256": "bdfb4a6b90dd46fe40ef119ace9c89afc761a0add7ee15662cb775504f1a8349",
+      "magic_hex": "FFD8FFE11224457869660000",
+      "width": 200,
+      "height": 266,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "马晓燕",
+      "department": "荔湾院区法医物证司法鉴定所",
+      "title_level": "其他",
+      "title": "医师",
+      "detail_id": "271",
+      "source_link": "https://www.gy3y.cn/ks/fckyjs/fywzsfjds/doctor_271.html",
+      "detail_http_status": 200,
+      "page_title": "马晓燕_法医物证司法鉴定所_广州医科大学附属第三医院",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gy3y.cn/Upload/201803/6365739166306561053598522.jpg",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "马晓燕-荔湾院区法医物证司法鉴定所-医师-广州医科大学附属第三医院.jpg",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos\\马晓燕-荔湾院区法医物证司法鉴定所-医师-广州医科大学附属第三医院.jpg",
+      "bytes": 175149,
+      "sha256": "f1e8288d5afe76c53995fbb8df9dd8a238cd9b35c2baf9d085e191af952d3d43",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 1450,
+      "height": 1900,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    },
+    {
+      "name": "彭天文",
+      "department": "黄埔院区生殖医学中心",
+      "title_level": "其他",
+      "title": "医师",
+      "detail_id": "370",
+      "source_link": "https://www.gy3y.cn/ks/hp/fck/szyxzx/doctor_370.html",
+      "detail_http_status": 200,
+      "page_title": "彭天文_生殖医学中心_广州医科大学附属第三医院",
+      "template_signature": "div.photo img",
+      "photo_url": "https://www.gy3y.cn/Upload/202301/638094771812017103.png",
+      "photo_source_attribute": "src",
+      "reference_kind": "Upload原图",
+      "photo_http_status": 200,
+      "content_type": "image/png",
+      "filename": "彭天文-黄埔院区生殖医学中心-医师-广州医科大学附属第三医院.png",
+      "disk_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_trial_photos\\彭天文-黄埔院区生殖医学中心-医师-广州医科大学附属第三医院.png",
+      "bytes": 70900,
+      "sha256": "0ad779d251de49199ae012f9f9a2a0a30ae7dd4247d9ca717525ce767a83505a",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 200,
+      "height": 266,
+      "size_bucket": "<200KiB",
+      "large_reasons": []
+    }
+  ],
+  "selected_rows": [
+    {
+      "姓名": "许治强",
+      "科室": "荔湾院区神经内科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.gy3y.cn/ks/nkxt/sjnk/doctor_10.html"
+    },
+    {
+      "姓名": "张建瑜",
+      "科室": "荔湾院区风湿免疫科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.gy3y.cn/ks/nkxt/fsmyk/doctor_32.html"
+    },
+    {
+      "姓名": "谭湘萍",
+      "科室": "黄埔院区药学部",
+      "职称层级": "正高",
+      "主职称": "主任药师",
+      "来源链接": "https://www.gy3y.cn/ks/hp/yjbm/yxb/doctor_377.html"
+    },
+    {
+      "姓名": "关国晟",
+      "科室": "荔湾院区心血管内科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_4.html"
+    },
+    {
+      "姓名": "谭慧珍",
+      "科室": "荔湾院区消化内科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.gy3y.cn/ks/nkxt/xhnk/doctor_29.html"
+    },
+    {
+      "姓名": "黎经兰",
+      "科室": "荔湾院区中医科",
+      "职称层级": "副高",
+      "主职称": "副主任中医师",
+      "来源链接": "https://www.gy3y.cn/ks/zyk/zyk1/doctor_157.html"
+    },
+    {
+      "姓名": "詹鸿",
+      "科室": "荔湾院区麻醉科",
+      "职称层级": "其他",
+      "主职称": "未标注",
+      "来源链接": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_78.html"
+    },
+    {
+      "姓名": "麦伟文",
+      "科室": "荔湾院区放射科",
+      "职称层级": "其他",
+      "主职称": "未标注",
+      "来源链接": "https://www.gy3y.cn/ks/yjbm/fsk/doctor_190.html"
+    },
+    {
+      "姓名": "马晓燕",
+      "科室": "荔湾院区法医物证司法鉴定所",
+      "职称层级": "其他",
+      "主职称": "医师",
+      "来源链接": "https://www.gy3y.cn/ks/fckyjs/fywzsfjds/doctor_271.html"
+    },
+    {
+      "姓名": "彭天文",
+      "科室": "黄埔院区生殖医学中心",
+      "职称层级": "其他",
+      "主职称": "医师",
+      "来源链接": "https://www.gy3y.cn/ks/hp/fck/szyxzx/doctor_370.html"
+    }
+  ]
+}
