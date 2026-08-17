@@ -4,32 +4,32 @@
     "phase": "FULL_READY_FOR_FINAL_OWNER_AUDIT",
     "hospital": "广州医科大学附属第三医院",
     "run_date": "2026-08-17",
-    "authorization": "PR #66 owner comment 2026-08-17T08:45:04Z: TRIAL 通过 + FULL_APPEND_AND_OBSIDIAN + 422 行全量 + 失败三态留空并追加异常提示 + 页面引用原始字节授权；>5 MiB 单列终审，>20 MiB 或异常格式熔断；管理员确认 /html/images/doctor.jpg 为占位图",
+    "authorization": "PR #66 owner comment 2026-08-17T08:45:04Z: TRIAL 通过 + FULL_APPEND_AND_OBSIDIAN + 422 行全量 + 失败三态留空并追加异常提示 + 页面引用原始字节授权；>5 MiB 单列终审，>20 MiB 或异常格式熔断；PR #66 owner comment 2026-08-17T11:10:48Z: 撤销固定集合，改为 66 条详情不可达来源执行 5 轮聚合探测且轮间隔至少 60 秒，任一轮有效照片当场保存且后续不覆盖；/html/images/doctor.jpg 按既定占位政策判定并经 owner 终审核验",
     "scope_count": 422,
     "expected_count": 422,
-    "downloaded_count": 348,
-    "failed_count": 74,
-    "blank_count": 74,
-    "failure_ratio": 0.17535545023696683,
+    "downloaded_count": 356,
+    "failed_count": 66,
+    "blank_count": 66,
+    "failure_ratio": 0.15639810426540285,
     "failure_state_counts": {
-      "详情不可达": 66,
+      "详情不可达": 58,
       "无照片容器": 0,
       "占位图": 8
     },
-    "detail_unreachable_count": 66,
+    "detail_unreachable_count": 58,
     "no_photo_container_count": 0,
     "placeholder_count": 8,
-    "photo_total_bytes": 73953601,
-    "photo_total_mib": 70.52764987945557,
+    "photo_total_bytes": 79081002,
+    "photo_total_mib": 75.41752052307129,
     "photo_max_bytes": 6055447,
     "size_bucket_counts": {
-      "<200KiB": 272,
-      "200KiB-1MiB": 62,
-      "1-5MiB": 13,
+      "<200KiB": 275,
+      "200KiB-1MiB": 65,
+      "1-5MiB": 15,
       "5-20MiB": 1
     },
     "reference_kind_counts": {
-      "Upload原图": 348
+      "Upload原图": 356
     },
     "over_5mib_count": 1,
     "over_20mib_count": 0,
@@ -41,15 +41,15 @@
     "incomplete_read_retry_count": 0,
     "existing_profile_count": 422,
     "no_profile_scope_count": 0,
-    "profile_refreshed_count": 348,
+    "profile_refreshed_count": 356,
     "profile_not_created_count": 0,
     "profile_index_replacement_required": false,
     "profile_index_before_sha256": "70a8160b9fb69d9ffee8010bb5e86302f227fc56747525016a31d04a2c9cd590",
-    "row_diff_count": 770,
+    "row_diff_count": 778,
     "row_diff_columns": {
-      "照片链接": 348,
-      "照片文件": 348,
-      "异常提示": 74
+      "照片链接": 356,
+      "照片文件": 356,
+      "异常提示": 66
     },
     "protected_assets_before": {
       "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
@@ -71,404 +71,503 @@
     },
     "json_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_full_payload.json",
     "csv_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_full_reconciliation.csv",
-    "report_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_full_report.md"
+    "report_path": "D:\\workspace\\信息收集整理\\work\\广州医科大学附属第三医院_photo_backfill_full_report.md",
+    "detail_probe_policy": "原 66 条详情不可达来源执行 5 轮全量聚合探测；相邻轮开始间隔至少 60 秒；任一轮有效照片原始字节当轮冻结，后续轮继续探测但不覆盖；未实采时按占位图、无照片容器、详情不可达优先级归入失败三态",
+    "detail_probe_sources": [
+      "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_6.html",
+      "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_9.html",
+      "https://www.gy3y.cn/ks/nkxt/sjnk/doctor_11.html",
+      "https://www.gy3y.cn/ks/nkxt/jsyxk/doctor_12.html",
+      "https://www.gy3y.cn/ks/nkxt/sjnk/doctor_13.html",
+      "https://www.gy3y.cn/ks/nkxt/sjnk/doctor_16.html",
+      "https://www.gy3y.cn/ks/nkxt/hxnk/doctor_20.html",
+      "https://www.gy3y.cn/ks/nkxt/hxnk/doctor_22.html",
+      "https://www.gy3y.cn/ks/nkxt/njzx/doctor_27.html",
+      "https://www.gy3y.cn/ks/nkxt/xhnk/doctor_28.html",
+      "https://www.gy3y.cn/ks/nkxt/xyk/doctor_31.html",
+      "https://www.gy3y.cn/ks/nkxt/nfmk/doctor_33.html",
+      "https://www.gy3y.cn/ks/nkxt/nfmk/doctor_36.html",
+      "https://www.gy3y.cn/ks/nkxt/nfmk/doctor_37.html",
+      "https://www.gy3y.cn/ks/wkxt/csgk/doctor_77.html",
+      "https://www.gy3y.cn/ks/wkxt/mzk/doctor_78.html",
+      "https://www.gy3y.cn/ks/wkxt/mnwk/doctor_94.html",
+      "https://www.gy3y.cn/ks/fckyjs/fys/doctor_111.html",
+      "https://www.gy3y.cn/ks/fckyjs/ck/doctor_112.html",
+      "https://www.gy3y.cn/ks/fckyjs/fys/doctor_113.html",
+      "https://www.gy3y.cn/ks/fckyjs/fys/doctor_143.html",
+      "https://www.gy3y.cn/ks/fckyjs/fys/doctor_144.html",
+      "https://www.gy3y.cn/ks/fckyjs/fywzsfjds/doctor_146.html",
+      "https://www.gy3y.cn/ks/fckyjs/fk/doctor_147.html",
+      "https://www.gy3y.cn/ks/yjbm/fsk/doctor_190.html",
+      "https://www.gy3y.cn/ks/wkxt/mzk/doctor_210.html",
+      "https://www.gy3y.cn/ks/fckyjs/fys/doctor_211.html",
+      "https://www.gy3y.cn/ks/fckyjs/fys/doctor_223.html",
+      "https://www.gy3y.cn/ks/wkxt/mzk/doctor_224.html",
+      "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_236.html",
+      "https://www.gy3y.cn/ks/mjz/qk/doctor_248.html",
+      "https://www.gy3y.cn/ks/nkxt/grjbk/doctor_249.html",
+      "https://www.gy3y.cn/ks/fckyjs/ck/doctor_252.html",
+      "https://www.gy3y.cn/ks/yjbm/blk/doctor_266.html",
+      "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_278.html",
+      "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_280.html",
+      "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_288.html",
+      "https://www.gy3y.cn/ks/wkxt/xxwk/doctor_291.html",
+      "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_294.html",
+      "https://www.gy3y.cn/ks/wkxt/gkeq/doctor_310.html",
+      "https://www.gy3y.cn/ks/ek/xewk/doctor_326.html",
+      "https://www.gy3y.cn/ks/fckyjs/ck/doctor_343.html",
+      "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_346.html",
+      "https://www.gy3y.cn/ks/wkxt/ttk/doctor_348.html",
+      "https://www.gy3y.cn/ks/nkxt/nfmk/doctor_350.html",
+      "https://www.gy3y.cn/ks/fckyjs/pdzzzx/doctor_373.html",
+      "https://www.gy3y.cn/ks/fckyjs/pdzzzx/doctor_374.html",
+      "https://www.gy3y.cn/ks/wkxt/wcwk/doctor_401.html",
+      "https://www.gy3y.cn/ks/hp/ek/etbjk/doctor_411.html",
+      "https://www.gy3y.cn/ks/nkxt/hxnk/doctor_422.html",
+      "https://www.gy3y.cn/ks/mjz/lcyyk/doctor_426.html",
+      "https://www.gy3y.cn/ks/mjz/lcyyk/doctor_427.html",
+      "https://www.gy3y.cn/ks/wkxt/wcwk/doctor_437.html",
+      "https://www.gy3y.cn/ks/wkxt/rxwk/doctor_438.html",
+      "https://www.gy3y.cn/ks/yjbm/blk/doctor_445.html",
+      "https://www.gy3y.cn/ks/yjbm/blk/doctor_446.html",
+      "https://www.gy3y.cn/ks/hp/nk/hxywzzyxk/doctor_451.html",
+      "https://www.gy3y.cn/ks/wkxt/wcwk/doctor_452.html",
+      "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_459.html",
+      "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_460.html",
+      "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_461.html",
+      "https://www.gy3y.cn/ks/mjz/qk/doctor_463.html",
+      "https://www.gy3y.cn/ks/wkxt/mzk/doctor_469.html",
+      "https://www.gy3y.cn/ks/wkxt/pwyq/doctor_473.html",
+      "https://www.gy3y.cn/ks/hp/fck/ck/doctor_480.html",
+      "https://www.gy3y.cn/ks/hp/nk/hxywzzyxk/doctor_481.html"
+    ],
+    "detail_probe_source_count": 66,
+    "detail_probe_round_count": 5,
+    "detail_probe_total_requests": 330,
+    "detail_probe_round_start_utc": [
+      "2026-08-17T11:32:40Z",
+      "2026-08-17T11:33:40Z",
+      "2026-08-17T11:34:40Z",
+      "2026-08-17T11:35:40Z",
+      "2026-08-17T11:36:40Z"
+    ],
+    "detail_probe_round_intervals_seconds": [
+      60.01500000001397,
+      60.0,
+      60.0,
+      60.0
+    ],
+    "detail_probe_home_evidence": [
+      "第 1 轮首页 HTTP 200@2026-08-17T11:32:40Z",
+      "第 2 轮首页 HTTP 200@2026-08-17T11:33:40Z",
+      "第 3 轮首页 HTTP 200@2026-08-17T11:34:40Z",
+      "第 4 轮首页 HTTP 200@2026-08-17T11:35:40Z",
+      "第 5 轮首页 HTTP 200@2026-08-17T11:36:40Z"
+    ],
+    "owner_three_round_union_comparison": [
+      {
+        "detail_id": "12",
+        "source_link": "https://www.gy3y.cn/ks/nkxt/jsyxk/doctor_12.html",
+        "result": "详情不可达",
+        "captured_round": null
+      },
+      {
+        "detail_id": "31",
+        "source_link": "https://www.gy3y.cn/ks/nkxt/xyk/doctor_31.html",
+        "result": "详情不可达",
+        "captured_round": null
+      },
+      {
+        "detail_id": "190",
+        "source_link": "https://www.gy3y.cn/ks/yjbm/fsk/doctor_190.html",
+        "result": "详情不可达",
+        "captured_round": null
+      },
+      {
+        "detail_id": "224",
+        "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_224.html",
+        "result": "实采",
+        "captured_round": 1
+      },
+      {
+        "detail_id": "266",
+        "source_link": "https://www.gy3y.cn/ks/yjbm/blk/doctor_266.html",
+        "result": "实采",
+        "captured_round": 1
+      },
+      {
+        "detail_id": "310",
+        "source_link": "https://www.gy3y.cn/ks/wkxt/gkeq/doctor_310.html",
+        "result": "详情不可达",
+        "captured_round": null
+      },
+      {
+        "detail_id": "326",
+        "source_link": "https://www.gy3y.cn/ks/ek/xewk/doctor_326.html",
+        "result": "详情不可达",
+        "captured_round": null
+      }
+    ],
+    "owner_audit_recovered_source_ids": [
+      "78",
+      "112",
+      "224",
+      "266",
+      "343",
+      "459",
+      "460",
+      "461"
+    ],
+    "owner_audit_recovered_count": 8
   },
   "failures": [
     {
       "name": "李文杰",
       "source_link": "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_6.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "蔡玉宇",
       "source_link": "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_9.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "梁燕玲",
       "source_link": "https://www.gy3y.cn/ks/nkxt/sjnk/doctor_11.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "周伯荣",
       "source_link": "https://www.gy3y.cn/ks/nkxt/jsyxk/doctor_12.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "刘子凡",
       "source_link": "https://www.gy3y.cn/ks/nkxt/sjnk/doctor_13.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "刘宇明",
       "source_link": "https://www.gy3y.cn/ks/nkxt/sjnk/doctor_16.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "喻延",
       "source_link": "https://www.gy3y.cn/ks/nkxt/hxnk/doctor_20.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "梁贤球",
       "source_link": "https://www.gy3y.cn/ks/nkxt/hxnk/doctor_22.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "周鹏志",
       "source_link": "https://www.gy3y.cn/ks/nkxt/njzx/doctor_27.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "黄越前",
       "source_link": "https://www.gy3y.cn/ks/nkxt/xhnk/doctor_28.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "罗冰",
       "source_link": "https://www.gy3y.cn/ks/nkxt/xyk/doctor_31.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "张莹",
       "source_link": "https://www.gy3y.cn/ks/nkxt/nfmk/doctor_33.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "林榕",
       "source_link": "https://www.gy3y.cn/ks/nkxt/nfmk/doctor_36.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "陈慧",
       "source_link": "https://www.gy3y.cn/ks/nkxt/nfmk/doctor_37.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "范震波",
       "source_link": "https://www.gy3y.cn/ks/wkxt/csgk/doctor_77.html",
       "state": "详情不可达",
-      "error": "详情不可达"
-    },
-    {
-      "name": "詹鸿",
-      "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_78.html",
-      "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "李育斌",
       "source_link": "https://www.gy3y.cn/ks/wkxt/mnwk/doctor_94.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "李映桃",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/fys/doctor_111.html",
       "state": "详情不可达",
-      "error": "详情不可达"
-    },
-    {
-      "name": "苏春宏",
-      "source_link": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_112.html",
-      "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "生秀杰",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/fys/doctor_113.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "陈敦金",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/fys/doctor_143.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "陈敏",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/fys/doctor_144.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "黎青",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/fywzsfjds/doctor_146.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "刘娟",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/fk/doctor_147.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "麦伟文",
       "source_link": "https://www.gy3y.cn/ks/yjbm/fsk/doctor_190.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "王寿平",
       "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_210.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "孙筱放",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/fys/doctor_211.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "贺芳",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/fys/doctor_223.html",
       "state": "详情不可达",
-      "error": "详情不可达"
-    },
-    {
-      "name": "苏志源",
-      "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_224.html",
-      "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "陈友权",
       "source_link": "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_236.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "陈德雄",
       "source_link": "https://www.gy3y.cn/ks/mjz/qk/doctor_248.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "潘兴飞",
       "source_link": "https://www.gy3y.cn/ks/nkxt/grjbk/doctor_249.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "麦凤鸣",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_252.html",
       "state": "详情不可达",
-      "error": "详情不可达"
-    },
-    {
-      "name": "熊汉真",
-      "source_link": "https://www.gy3y.cn/ks/yjbm/blk/doctor_266.html",
-      "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "马莉",
       "source_link": "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_278.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "戴文军",
       "source_link": "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_280.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "王世祥",
       "source_link": "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_288.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "刘盛华",
       "source_link": "https://www.gy3y.cn/ks/wkxt/xxwk/doctor_291.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "黄兆琦",
       "source_link": "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_294.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "王钊",
       "source_link": "https://www.gy3y.cn/ks/wkxt/gkeq/doctor_310.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "闫宪刚",
       "source_link": "https://www.gy3y.cn/ks/ek/xewk/doctor_326.html",
       "state": "详情不可达",
-      "error": "详情不可达"
-    },
-    {
-      "name": "陈艳红",
-      "source_link": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_343.html",
-      "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "陆志锋",
       "source_link": "https://www.gy3y.cn/ks/nkxt/xxgnk/doctor_346.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "李舜",
       "source_link": "https://www.gy3y.cn/ks/wkxt/ttk/doctor_348.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "李任远",
       "source_link": "https://www.gy3y.cn/ks/nkxt/nfmk/doctor_350.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "周星楠",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/pdzzzx/doctor_373.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "马媛媛",
       "source_link": "https://www.gy3y.cn/ks/fckyjs/pdzzzx/doctor_374.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "周军",
       "source_link": "https://www.gy3y.cn/ks/wkxt/wcwk/doctor_401.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "冯帼",
       "source_link": "https://www.gy3y.cn/ks/hp/ek/etbjk/doctor_411.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "高元妹",
       "source_link": "https://www.gy3y.cn/ks/nkxt/hxnk/doctor_422.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "刘佳",
       "source_link": "https://www.gy3y.cn/ks/mjz/lcyyk/doctor_426.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "李林艳",
       "source_link": "https://www.gy3y.cn/ks/mjz/lcyyk/doctor_427.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "徐学虎",
       "source_link": "https://www.gy3y.cn/ks/wkxt/wcwk/doctor_437.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "唐毅",
       "source_link": "https://www.gy3y.cn/ks/wkxt/rxwk/doctor_438.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "熊中堂",
       "source_link": "https://www.gy3y.cn/ks/yjbm/blk/doctor_445.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "王娜",
       "source_link": "https://www.gy3y.cn/ks/yjbm/blk/doctor_446.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "徐文婷",
       "source_link": "https://www.gy3y.cn/ks/hp/nk/hxywzzyxk/doctor_451.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "陈戎",
       "source_link": "https://www.gy3y.cn/ks/wkxt/wcwk/doctor_452.html",
       "state": "详情不可达",
-      "error": "详情不可达"
-    },
-    {
-      "name": "周咪咪",
-      "source_link": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_459.html",
-      "state": "详情不可达",
-      "error": "详情不可达"
-    },
-    {
-      "name": "沈华伟",
-      "source_link": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_460.html",
-      "state": "详情不可达",
-      "error": "详情不可达"
-    },
-    {
-      "name": "龙文",
-      "source_link": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_461.html",
-      "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "刘树基",
       "source_link": "https://www.gy3y.cn/ks/mjz/qk/doctor_463.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "张文华",
       "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_469.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "王明俊",
       "source_link": "https://www.gy3y.cn/ks/wkxt/pwyq/doctor_473.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "梁桂玲",
       "source_link": "https://www.gy3y.cn/ks/hp/fck/ck/doctor_480.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "张园",
       "source_link": "https://www.gy3y.cn/ks/hp/nk/hxywzzyxk/doctor_481.html",
       "state": "详情不可达",
-      "error": "详情不可达"
+      "error": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "name": "﻿王军伟",
@@ -1181,6 +1280,29 @@
       "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\曾勉东-荔湾院区关节外科-主任医师-广州医科大学附属第三医院.jpg"
     },
     {
+      "name": "詹鸿",
+      "department": "荔湾院区麻醉科",
+      "title": "未标注",
+      "detail_id": "78",
+      "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_78.html",
+      "photo_url": "https://www.gy3y.cn/Upload/202301/638094732310691276.png",
+      "photo_source_attribute": "src",
+      "template_signature": "div.photo img",
+      "reference_kind": "Upload原图",
+      "photo_file": "01_试点医院/广州医科大学附属第三医院/照片/詹鸿-荔湾院区麻醉科-未标注-广州医科大学附属第三医院.png",
+      "filename": "詹鸿-荔湾院区麻醉科-未标注-广州医科大学附属第三医院.png",
+      "content_type": "image/png",
+      "bytes": 63913,
+      "sha256": "140c08086ed5a52c35c6809c91edb3f495c7f655412ece80338885e5e1a04240",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 229,
+      "height": 314,
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\詹鸿-荔湾院区麻醉科-未标注-广州医科大学附属第三医院.png",
+      "detail_probe_evidence": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094732310691276.png；照片 HTTP 200@2026-08-17T11:35:40Z；原始字节=63913；尺寸=229x314；SHA-256=140c08086ed5a52c35c6809c91edb3f495c7f655412ece80338885e5e1a04240；当轮冻结；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094732310691276.png；已冻结第 4 轮原始照片，后续轮不覆盖",
+      "detail_probe_round_count": 5,
+      "captured_round": 4
+    },
+    {
       "name": "吴涯雯",
       "department": "荔湾院区麻醉科",
       "title": "主任医师",
@@ -1479,6 +1601,29 @@
       "width": 200,
       "height": 266,
       "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\赖永通-荔湾院区器官移植科-副主任医师-广州医科大学附属第三医院.jpg"
+    },
+    {
+      "name": "苏春宏",
+      "department": "荔湾院区产 科（广州重症孕产妇救治中心）",
+      "title": "未标注",
+      "detail_id": "112",
+      "source_link": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_112.html",
+      "photo_url": "https://www.gy3y.cn/Upload/202506/638847148819828341.png",
+      "photo_source_attribute": "src",
+      "template_signature": "div.photo img",
+      "reference_kind": "Upload原图",
+      "photo_file": "01_试点医院/广州医科大学附属第三医院/照片/苏春宏-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png",
+      "filename": "苏春宏-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png",
+      "content_type": "image/png",
+      "bytes": 188375,
+      "sha256": "e28eaff366df1195f4fc7c5472556622ff18c0186ac3448d85de5b02863300c0",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 390,
+      "height": 567,
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\苏春宏-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png",
+      "detail_probe_evidence": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202506/638847148819828341.png；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=188375；尺寸=390x567；SHA-256=e28eaff366df1195f4fc7c5472556622ff18c0186ac3448d85de5b02863300c0；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202506/638847148819828341.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202506/638847148819828341.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202506/638847148819828341.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202506/638847148819828341.png；已冻结第 1 轮原始照片，后续轮不覆盖",
+      "detail_probe_round_count": 5,
+      "captured_round": 1
     },
     {
       "name": "李维枢",
@@ -2681,6 +2826,29 @@
       "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\张 文-荔湾院区男科-副主任医师-广州医科大学附属第三医院.jpg"
     },
     {
+      "name": "苏志源",
+      "department": "荔湾院区麻醉科",
+      "title": "副主任医师",
+      "detail_id": "224",
+      "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_224.html",
+      "photo_url": "https://www.gy3y.cn/Upload/202301/638094731505220855.png",
+      "photo_source_attribute": "src",
+      "template_signature": "div.photo img",
+      "reference_kind": "Upload原图",
+      "photo_file": "01_试点医院/广州医科大学附属第三医院/照片/苏志源-荔湾院区麻醉科-副主任医师-广州医科大学附属第三医院.png",
+      "filename": "苏志源-荔湾院区麻醉科-副主任医师-广州医科大学附属第三医院.png",
+      "content_type": "image/png",
+      "bytes": 46526,
+      "sha256": "9c6ace70892bd2f928aad5d4ab7743bd400bbe31b07469cdcb51996b6c5c5d74",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 191,
+      "height": 260,
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\苏志源-荔湾院区麻醉科-副主任医师-广州医科大学附属第三医院.png",
+      "detail_probe_evidence": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094731505220855.png；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=46526；尺寸=191x260；SHA-256=9c6ace70892bd2f928aad5d4ab7743bd400bbe31b07469cdcb51996b6c5c5d74；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094731505220855.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094731505220855.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094731505220855.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094731505220855.png；已冻结第 1 轮原始照片，后续轮不覆盖",
+      "detail_probe_round_count": 5,
+      "captured_round": 1
+    },
+    {
       "name": "谭秀华",
       "department": "荔湾院区麻醉科",
       "title": "副主任医师",
@@ -3259,6 +3427,29 @@
       "width": 2429,
       "height": 3637,
       "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\江庆萍-荔湾院区病理科-主任医师-广州医科大学附属第三医院.jpg"
+    },
+    {
+      "name": "熊汉真",
+      "department": "荔湾院区病理科",
+      "title": "副主任医师",
+      "detail_id": "266",
+      "source_link": "https://www.gy3y.cn/ks/yjbm/blk/doctor_266.html",
+      "photo_url": "https://www.gy3y.cn/Upload/202306/638217245113061978.jpg",
+      "photo_source_attribute": "src",
+      "template_signature": "div.photo img",
+      "reference_kind": "Upload原图",
+      "photo_file": "01_试点医院/广州医科大学附属第三医院/照片/熊汉真-荔湾院区病理科-副主任医师-广州医科大学附属第三医院.jpg",
+      "filename": "熊汉真-荔湾院区病理科-副主任医师-广州医科大学附属第三医院.jpg",
+      "content_type": "image/jpeg",
+      "bytes": 1229278,
+      "sha256": "012c9bcef862c537eebbf00fbde0ca5361c55c09a5be87fb821f41732f92ba1a",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 2529,
+      "height": 3641,
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\熊汉真-荔湾院区病理科-副主任医师-广州医科大学附属第三医院.jpg",
+      "detail_probe_evidence": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202306/638217245113061978.jpg；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=1229278；尺寸=2529x3641；SHA-256=012c9bcef862c537eebbf00fbde0ca5361c55c09a5be87fb821f41732f92ba1a；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202306/638217245113061978.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202306/638217245113061978.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202306/638217245113061978.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202306/638217245113061978.jpg；已冻结第 1 轮原始照片，后续轮不覆盖",
+      "detail_probe_round_count": 5,
+      "captured_round": 1
     },
     {
       "name": "彭娟",
@@ -4441,6 +4632,29 @@
       "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\刘震-荔湾院区康复医学科-主任医师-广州医科大学附属第三医院.png"
     },
     {
+      "name": "陈艳红",
+      "department": "荔湾院区产 科（广州重症孕产妇救治中心）",
+      "title": "未标注",
+      "detail_id": "343",
+      "source_link": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_343.html",
+      "photo_url": "https://www.gy3y.cn/Upload/202201/637771528013676941.png",
+      "photo_source_attribute": "src",
+      "template_signature": "div.photo img",
+      "reference_kind": "Upload原图",
+      "photo_file": "01_试点医院/广州医科大学附属第三医院/照片/陈艳红-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png",
+      "filename": "陈艳红-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png",
+      "content_type": "image/png",
+      "bytes": 1358049,
+      "sha256": "bf09f4d314c75f38b55b535ead2ec4ffad702ac9f0561148b21aa6c53e52fad0",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 1335,
+      "height": 1766,
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\陈艳红-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png",
+      "detail_probe_evidence": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202201/637771528013676941.png；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=1358049；尺寸=1335x1766；SHA-256=bf09f4d314c75f38b55b535ead2ec4ffad702ac9f0561148b21aa6c53e52fad0；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202201/637771528013676941.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202201/637771528013676941.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202201/637771528013676941.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202201/637771528013676941.png；已冻结第 1 轮原始照片，后续轮不覆盖",
+      "detail_probe_round_count": 5,
+      "captured_round": 1
+    },
+    {
       "name": "李晓辉",
       "department": "荔湾院区皮肤科",
       "title": "副主任医师",
@@ -5199,6 +5413,75 @@
       "width": 1871,
       "height": 2402,
       "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\刘诗琪-荔湾院区皮肤科-住院医师-广州医科大学附属第三医院.jpg"
+    },
+    {
+      "name": "周咪咪",
+      "department": "荔湾院区介入放射",
+      "title": "未标注",
+      "detail_id": "459",
+      "source_link": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_459.html",
+      "photo_url": "https://www.gy3y.cn/Upload/202310/638340002015663181.jpg",
+      "photo_source_attribute": "src",
+      "template_signature": "div.photo img",
+      "reference_kind": "Upload原图",
+      "photo_file": "01_试点医院/广州医科大学附属第三医院/照片/周咪咪-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "filename": "周咪咪-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "content_type": "image/jpeg",
+      "bytes": 1000444,
+      "sha256": "8ecd04d80f04d4967cee54e4337c297a0041deb893f36ee5a677c195d02000c9",
+      "magic_hex": "FFD8FFE112DF457869660000",
+      "width": 1344,
+      "height": 1788,
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\周咪咪-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "detail_probe_evidence": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002015663181.jpg；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=1000444；尺寸=1344x1788；SHA-256=8ecd04d80f04d4967cee54e4337c297a0041deb893f36ee5a677c195d02000c9；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002015663181.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002015663181.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002015663181.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002015663181.jpg；已冻结第 1 轮原始照片，后续轮不覆盖",
+      "detail_probe_round_count": 5,
+      "captured_round": 1
+    },
+    {
+      "name": "沈华伟",
+      "department": "荔湾院区介入放射",
+      "title": "未标注",
+      "detail_id": "460",
+      "source_link": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_460.html",
+      "photo_url": "https://www.gy3y.cn/Upload/202310/638340002635408436.jpg",
+      "photo_source_attribute": "src",
+      "template_signature": "div.photo img",
+      "reference_kind": "Upload原图",
+      "photo_file": "01_试点医院/广州医科大学附属第三医院/照片/沈华伟-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "filename": "沈华伟-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "content_type": "image/jpeg",
+      "bytes": 574058,
+      "sha256": "64399d25cc0d7db010e177cc42ca7823c49b4d784903b124bfe90d3f8c12f1aa",
+      "magic_hex": "FFD8FFE111E3457869660000",
+      "width": 1344,
+      "height": 1788,
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\沈华伟-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "detail_probe_evidence": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002635408436.jpg；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=574058；尺寸=1344x1788；SHA-256=64399d25cc0d7db010e177cc42ca7823c49b4d784903b124bfe90d3f8c12f1aa；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002635408436.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002635408436.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002635408436.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002635408436.jpg；已冻结第 1 轮原始照片，后续轮不覆盖",
+      "detail_probe_round_count": 5,
+      "captured_round": 1
+    },
+    {
+      "name": "龙文",
+      "department": "荔湾院区介入放射",
+      "title": "未标注",
+      "detail_id": "461",
+      "source_link": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_461.html",
+      "photo_url": "https://www.gy3y.cn/Upload/202310/638340002950765244.jpg",
+      "photo_source_attribute": "src",
+      "template_signature": "div.photo img",
+      "reference_kind": "Upload原图",
+      "photo_file": "01_试点医院/广州医科大学附属第三医院/照片/龙文-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "filename": "龙文-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "content_type": "image/jpeg",
+      "bytes": 666758,
+      "sha256": "cc5c95e41c7de8effff80196f7d4e9092c5995e196115e69647d2da2c4fcc303",
+      "magic_hex": "FFD8FFE1143F457869660000",
+      "width": 1344,
+      "height": 1788,
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\广州医科大学附属第三医院\\照片\\龙文-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "detail_probe_evidence": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002950765244.jpg；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=666758；尺寸=1344x1788；SHA-256=cc5c95e41c7de8effff80196f7d4e9092c5995e196115e69647d2da2c4fcc303；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002950765244.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002950765244.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002950765244.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002950765244.jpg；已冻结第 1 轮原始照片，后续轮不覆盖",
+      "detail_probe_round_count": 5,
+      "captured_round": 1
     },
     {
       "name": "朱慧儿",
@@ -7525,7 +7808,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "黄寰",
@@ -7570,7 +7853,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "许治强",
@@ -7600,7 +7883,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "周伯荣",
@@ -7615,7 +7898,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "刘子凡",
@@ -7630,7 +7913,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "匡永锋",
@@ -7675,7 +7958,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "沈兰",
@@ -7720,7 +8003,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "张世叶",
@@ -7750,7 +8033,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "林敏",
@@ -7825,7 +8108,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "黄越前",
@@ -7840,7 +8123,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "谭慧珍",
@@ -7885,7 +8168,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "张建瑜",
@@ -7915,7 +8198,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "林榕",
@@ -7930,7 +8213,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "陈慧",
@@ -7945,7 +8228,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "黄东健",
@@ -8200,22 +8483,22 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "詹鸿",
       "来源链接": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_78.html",
-      "状态": "失败",
-      "失败三态": "详情不可达",
-      "照片链接": "",
-      "照片文件": "",
-      "字节数": "",
-      "SHA-256": "",
-      "魔数": "",
-      "宽": "",
-      "高": "",
-      "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "状态": "实采",
+      "失败三态": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202301/638094732310691276.png",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/詹鸿-荔湾院区麻醉科-未标注-广州医科大学附属第三医院.png",
+      "字节数": 63913,
+      "SHA-256": "140c08086ed5a52c35c6809c91edb3f495c7f655412ece80338885e5e1a04240",
+      "魔数": "89504E470D0A1A0A0000000D",
+      "宽": 229,
+      "高": 314,
+      "引用路径风格": "Upload原图",
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094732310691276.png；照片 HTTP 200@2026-08-17T11:35:40Z；原始字节=63913；尺寸=229x314；SHA-256=140c08086ed5a52c35c6809c91edb3f495c7f655412ece80338885e5e1a04240；当轮冻结；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094732310691276.png；已冻结第 4 轮原始照片，后续轮不覆盖"
     },
     {
       "姓名": "吴涯雯",
@@ -8350,7 +8633,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "王智坚",
@@ -8470,22 +8753,22 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "苏春宏",
       "来源链接": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_112.html",
-      "状态": "失败",
-      "失败三态": "详情不可达",
-      "照片链接": "",
-      "照片文件": "",
-      "字节数": "",
-      "SHA-256": "",
-      "魔数": "",
-      "宽": "",
-      "高": "",
-      "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "状态": "实采",
+      "失败三态": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202506/638847148819828341.png",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/苏春宏-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png",
+      "字节数": 188375,
+      "SHA-256": "e28eaff366df1195f4fc7c5472556622ff18c0186ac3448d85de5b02863300c0",
+      "魔数": "89504E470D0A1A0A0000000D",
+      "宽": 390,
+      "高": 567,
+      "引用路径风格": "Upload原图",
+      "错误证据": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202506/638847148819828341.png；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=188375；尺寸=390x567；SHA-256=e28eaff366df1195f4fc7c5472556622ff18c0186ac3448d85de5b02863300c0；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202506/638847148819828341.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202506/638847148819828341.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202506/638847148819828341.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202506/638847148819828341.png；已冻结第 1 轮原始照片，后续轮不覆盖"
     },
     {
       "姓名": "生秀杰",
@@ -8500,7 +8783,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "李维枢",
@@ -8695,7 +8978,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "陈敏",
@@ -8710,7 +8993,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "李志华",
@@ -8740,7 +9023,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "刘娟",
@@ -8755,7 +9038,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "崔其亮",
@@ -9115,7 +9398,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "梁伟翔",
@@ -9355,7 +9638,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "孙筱放",
@@ -9370,7 +9653,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "谢毅娟",
@@ -9520,22 +9803,22 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "苏志源",
       "来源链接": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_224.html",
-      "状态": "失败",
-      "失败三态": "详情不可达",
-      "照片链接": "",
-      "照片文件": "",
-      "字节数": "",
-      "SHA-256": "",
-      "魔数": "",
-      "宽": "",
-      "高": "",
-      "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "状态": "实采",
+      "失败三态": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202301/638094731505220855.png",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/苏志源-荔湾院区麻醉科-副主任医师-广州医科大学附属第三医院.png",
+      "字节数": 46526,
+      "SHA-256": "9c6ace70892bd2f928aad5d4ab7743bd400bbe31b07469cdcb51996b6c5c5d74",
+      "魔数": "89504E470D0A1A0A0000000D",
+      "宽": 191,
+      "高": 260,
+      "引用路径风格": "Upload原图",
+      "错误证据": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094731505220855.png；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=46526；尺寸=191x260；SHA-256=9c6ace70892bd2f928aad5d4ab7743bd400bbe31b07469cdcb51996b6c5c5d74；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094731505220855.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094731505220855.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094731505220855.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202301/638094731505220855.png；已冻结第 1 轮原始照片，后续轮不覆盖"
     },
     {
       "姓名": "谭秀华",
@@ -9700,7 +9983,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "丛鹏",
@@ -9850,7 +10133,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "潘兴飞",
@@ -9865,7 +10148,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "安庚",
@@ -9925,7 +10208,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "黄蓓",
@@ -10035,17 +10318,17 @@
     {
       "姓名": "熊汉真",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/blk/doctor_266.html",
-      "状态": "失败",
-      "失败三态": "详情不可达",
-      "照片链接": "",
-      "照片文件": "",
-      "字节数": "",
-      "SHA-256": "",
-      "魔数": "",
-      "宽": "",
-      "高": "",
-      "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "状态": "实采",
+      "失败三态": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202306/638217245113061978.jpg",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/熊汉真-荔湾院区病理科-副主任医师-广州医科大学附属第三医院.jpg",
+      "字节数": 1229278,
+      "SHA-256": "012c9bcef862c537eebbf00fbde0ca5361c55c09a5be87fb821f41732f92ba1a",
+      "魔数": "FFD8FFE000104A4649460001",
+      "宽": 2529,
+      "高": 3641,
+      "引用路径风格": "Upload原图",
+      "错误证据": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202306/638217245113061978.jpg；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=1229278；尺寸=2529x3641；SHA-256=012c9bcef862c537eebbf00fbde0ca5361c55c09a5be87fb821f41732f92ba1a；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202306/638217245113061978.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202306/638217245113061978.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202306/638217245113061978.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202306/638217245113061978.jpg；已冻结第 1 轮原始照片，后续轮不覆盖"
     },
     {
       "姓名": "彭娟",
@@ -10195,7 +10478,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "张弛",
@@ -10225,7 +10508,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "洪宏海",
@@ -10330,7 +10613,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "全天一",
@@ -10360,7 +10643,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "翦薇",
@@ -10405,7 +10688,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "陈文裕",
@@ -10645,7 +10928,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "闻毅颐",
@@ -10840,7 +11123,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "秦军建",
@@ -11040,17 +11323,17 @@
     {
       "姓名": "陈艳红",
       "来源链接": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_343.html",
-      "状态": "失败",
-      "失败三态": "详情不可达",
-      "照片链接": "",
-      "照片文件": "",
-      "字节数": "",
-      "SHA-256": "",
-      "魔数": "",
-      "宽": "",
-      "高": "",
-      "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "状态": "实采",
+      "失败三态": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202201/637771528013676941.png",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/陈艳红-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png",
+      "字节数": 1358049,
+      "SHA-256": "bf09f4d314c75f38b55b535ead2ec4ffad702ac9f0561148b21aa6c53e52fad0",
+      "魔数": "89504E470D0A1A0A0000000D",
+      "宽": 1335,
+      "高": 1766,
+      "引用路径风格": "Upload原图",
+      "错误证据": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202201/637771528013676941.png；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=1358049；尺寸=1335x1766；SHA-256=bf09f4d314c75f38b55b535ead2ec4ffad702ac9f0561148b21aa6c53e52fad0；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202201/637771528013676941.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202201/637771528013676941.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202201/637771528013676941.png；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202201/637771528013676941.png；已冻结第 1 轮原始照片，后续轮不覆盖"
     },
     {
       "姓名": "李晓辉",
@@ -11080,7 +11363,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "薛森新",
@@ -11110,7 +11393,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "何雨",
@@ -11140,7 +11423,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "崔英",
@@ -11320,7 +11603,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "马媛媛",
@@ -11335,7 +11618,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "谭湘萍",
@@ -11425,7 +11708,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "王晓怡",
@@ -11530,7 +11813,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "伦浩",
@@ -11560,7 +11843,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "温戈",
@@ -11590,7 +11873,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "李林艳",
@@ -11605,7 +11888,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "徐学虎",
@@ -11620,7 +11903,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "唐毅",
@@ -11635,7 +11918,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "徐鋆耀",
@@ -11665,7 +11948,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "王娜",
@@ -11680,7 +11963,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "易爱文",
@@ -11755,7 +12038,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "陈戎",
@@ -11770,7 +12053,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "张颖",
@@ -11865,47 +12148,47 @@
     {
       "姓名": "周咪咪",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_459.html",
-      "状态": "失败",
-      "失败三态": "详情不可达",
-      "照片链接": "",
-      "照片文件": "",
-      "字节数": "",
-      "SHA-256": "",
-      "魔数": "",
-      "宽": "",
-      "高": "",
-      "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "状态": "实采",
+      "失败三态": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202310/638340002015663181.jpg",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/周咪咪-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "字节数": 1000444,
+      "SHA-256": "8ecd04d80f04d4967cee54e4337c297a0041deb893f36ee5a677c195d02000c9",
+      "魔数": "FFD8FFE112DF457869660000",
+      "宽": 1344,
+      "高": 1788,
+      "引用路径风格": "Upload原图",
+      "错误证据": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002015663181.jpg；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=1000444；尺寸=1344x1788；SHA-256=8ecd04d80f04d4967cee54e4337c297a0041deb893f36ee5a677c195d02000c9；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002015663181.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002015663181.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002015663181.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002015663181.jpg；已冻结第 1 轮原始照片，后续轮不覆盖"
     },
     {
       "姓名": "沈华伟",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_460.html",
-      "状态": "失败",
-      "失败三态": "详情不可达",
-      "照片链接": "",
-      "照片文件": "",
-      "字节数": "",
-      "SHA-256": "",
-      "魔数": "",
-      "宽": "",
-      "高": "",
-      "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "状态": "实采",
+      "失败三态": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202310/638340002635408436.jpg",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/沈华伟-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "字节数": 574058,
+      "SHA-256": "64399d25cc0d7db010e177cc42ca7823c49b4d784903b124bfe90d3f8c12f1aa",
+      "魔数": "FFD8FFE111E3457869660000",
+      "宽": 1344,
+      "高": 1788,
+      "引用路径风格": "Upload原图",
+      "错误证据": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002635408436.jpg；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=574058；尺寸=1344x1788；SHA-256=64399d25cc0d7db010e177cc42ca7823c49b4d784903b124bfe90d3f8c12f1aa；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002635408436.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002635408436.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002635408436.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002635408436.jpg；已冻结第 1 轮原始照片，后续轮不覆盖"
     },
     {
       "姓名": "龙文",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_461.html",
-      "状态": "失败",
-      "失败三态": "详情不可达",
-      "照片链接": "",
-      "照片文件": "",
-      "字节数": "",
-      "SHA-256": "",
-      "魔数": "",
-      "宽": "",
-      "高": "",
-      "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "状态": "实采",
+      "失败三态": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202310/638340002950765244.jpg",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/龙文-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
+      "字节数": 666758,
+      "SHA-256": "cc5c95e41c7de8effff80196f7d4e9092c5995e196115e69647d2da2c4fcc303",
+      "魔数": "FFD8FFE1143F457869660000",
+      "宽": 1344,
+      "高": 1788,
+      "引用路径风格": "Upload原图",
+      "错误证据": "第 1 轮 HTTP 200@2026-08-17T11:32:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002950765244.jpg；照片 HTTP 200@2026-08-17T11:32:40Z；原始字节=666758；尺寸=1344x1788；SHA-256=cc5c95e41c7de8effff80196f7d4e9092c5995e196115e69647d2da2c4fcc303；当轮冻结；第 2 轮 HTTP 200@2026-08-17T11:33:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002950765244.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 3 轮 HTTP 200@2026-08-17T11:34:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002950765244.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 4 轮 HTTP 200@2026-08-17T11:35:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002950765244.jpg；已冻结第 1 轮原始照片，后续轮不覆盖；第 5 轮 HTTP 200@2026-08-17T11:36:40Z Content-Type text/plain；页面可达；照片引用=https://www.gy3y.cn/Upload/202310/638340002950765244.jpg；已冻结第 1 轮原始照片，后续轮不覆盖"
     },
     {
       "姓名": "刘树基",
@@ -11920,7 +12203,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "朱慧儿",
@@ -12010,7 +12293,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "王志坚",
@@ -12070,7 +12353,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "罗恒聪",
@@ -12175,7 +12458,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "张园",
@@ -12190,7 +12473,7 @@
       "宽": "",
       "高": "",
       "引用路径风格": "",
-      "错误证据": "详情不可达"
+      "错误证据": "第 1 轮 HTTP 302→200@2026-08-17T11:32:40Z Content-Type text/plain；页面标题 404；第 2 轮 HTTP 302→200@2026-08-17T11:33:40Z Content-Type text/plain；页面标题 404；第 3 轮 HTTP 302→200@2026-08-17T11:34:40Z Content-Type text/plain；页面标题 404；第 4 轮 HTTP 302→200@2026-08-17T11:35:40Z Content-Type text/plain；页面标题 404；第 5 轮 HTTP 302→200@2026-08-17T11:36:40Z Content-Type text/plain；页面标题 404"
     },
     {
       "姓名": "林琳",
@@ -14548,9 +14831,18 @@
       "序号": "3603",
       "姓名": "詹鸿",
       "来源链接": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_78.html",
-      "列名": "异常提示",
-      "修改前": "职称/身份需人工复核；详情正文为空或未识别",
-      "修改后": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达"
+      "列名": "照片链接",
+      "修改前": "",
+      "修改后": "https://www.gy3y.cn/Upload/202301/638094732310691276.png"
+    },
+    {
+      "底表行": "3604",
+      "序号": "3603",
+      "姓名": "詹鸿",
+      "来源链接": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_78.html",
+      "列名": "照片文件",
+      "修改前": "",
+      "修改后": "01_试点医院/广州医科大学附属第三医院/照片/詹鸿-荔湾院区麻醉科-未标注-广州医科大学附属第三医院.png"
     },
     {
       "底表行": "3605",
@@ -14845,9 +15137,18 @@
       "序号": "3621",
       "姓名": "苏春宏",
       "来源链接": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_112.html",
-      "列名": "异常提示",
-      "修改前": "职称/身份需人工复核；详情正文为空或未识别",
-      "修改后": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达"
+      "列名": "照片链接",
+      "修改前": "",
+      "修改后": "https://www.gy3y.cn/Upload/202506/638847148819828341.png"
+    },
+    {
+      "底表行": "3622",
+      "序号": "3621",
+      "姓名": "苏春宏",
+      "来源链接": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_112.html",
+      "列名": "照片文件",
+      "修改前": "",
+      "修改后": "01_试点医院/广州医科大学附属第三医院/照片/苏春宏-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png"
     },
     {
       "底表行": "3623",
@@ -16015,9 +16316,18 @@
       "序号": "3691",
       "姓名": "苏志源",
       "来源链接": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_224.html",
-      "列名": "异常提示",
+      "列名": "照片链接",
       "修改前": "",
-      "修改后": "官网本人职业照补录失败：详情不可达"
+      "修改后": "https://www.gy3y.cn/Upload/202301/638094731505220855.png"
+    },
+    {
+      "底表行": "3692",
+      "序号": "3691",
+      "姓名": "苏志源",
+      "来源链接": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_224.html",
+      "列名": "照片文件",
+      "修改前": "",
+      "修改后": "01_试点医院/广州医科大学附属第三医院/照片/苏志源-荔湾院区麻醉科-副主任医师-广州医科大学附属第三医院.png"
     },
     {
       "底表行": "3693",
@@ -16582,9 +16892,18 @@
       "序号": "3725",
       "姓名": "熊汉真",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/blk/doctor_266.html",
-      "列名": "异常提示",
+      "列名": "照片链接",
       "修改前": "",
-      "修改后": "官网本人职业照补录失败：详情不可达"
+      "修改后": "https://www.gy3y.cn/Upload/202306/638217245113061978.jpg"
+    },
+    {
+      "底表行": "3726",
+      "序号": "3725",
+      "姓名": "熊汉真",
+      "来源链接": "https://www.gy3y.cn/ks/yjbm/blk/doctor_266.html",
+      "列名": "照片文件",
+      "修改前": "",
+      "修改后": "01_试点医院/广州医科大学附属第三医院/照片/熊汉真-荔湾院区病理科-副主任医师-广州医科大学附属第三医院.jpg"
     },
     {
       "底表行": "3727",
@@ -17716,9 +18035,18 @@
       "序号": "3792",
       "姓名": "陈艳红",
       "来源链接": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_343.html",
-      "列名": "异常提示",
-      "修改前": "职称/身份需人工复核；详情正文为空或未识别",
-      "修改后": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达"
+      "列名": "照片链接",
+      "修改前": "",
+      "修改后": "https://www.gy3y.cn/Upload/202201/637771528013676941.png"
+    },
+    {
+      "底表行": "3793",
+      "序号": "3792",
+      "姓名": "陈艳红",
+      "来源链接": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_343.html",
+      "列名": "照片文件",
+      "修改前": "",
+      "修改后": "01_试点医院/广州医科大学附属第三医院/照片/陈艳红-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png"
     },
     {
       "底表行": "3794",
@@ -18553,27 +18881,54 @@
       "序号": "3847",
       "姓名": "周咪咪",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_459.html",
-      "列名": "异常提示",
-      "修改前": "职称/身份需人工复核；详情正文为空或未识别",
-      "修改后": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达"
+      "列名": "照片链接",
+      "修改前": "",
+      "修改后": "https://www.gy3y.cn/Upload/202310/638340002015663181.jpg"
+    },
+    {
+      "底表行": "3848",
+      "序号": "3847",
+      "姓名": "周咪咪",
+      "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_459.html",
+      "列名": "照片文件",
+      "修改前": "",
+      "修改后": "01_试点医院/广州医科大学附属第三医院/照片/周咪咪-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg"
     },
     {
       "底表行": "3849",
       "序号": "3848",
       "姓名": "沈华伟",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_460.html",
-      "列名": "异常提示",
-      "修改前": "职称/身份需人工复核；详情正文为空或未识别",
-      "修改后": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达"
+      "列名": "照片链接",
+      "修改前": "",
+      "修改后": "https://www.gy3y.cn/Upload/202310/638340002635408436.jpg"
+    },
+    {
+      "底表行": "3849",
+      "序号": "3848",
+      "姓名": "沈华伟",
+      "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_460.html",
+      "列名": "照片文件",
+      "修改前": "",
+      "修改后": "01_试点医院/广州医科大学附属第三医院/照片/沈华伟-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg"
     },
     {
       "底表行": "3850",
       "序号": "3849",
       "姓名": "龙文",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_461.html",
-      "列名": "异常提示",
-      "修改前": "职称/身份需人工复核；详情正文为空或未识别",
-      "修改后": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达"
+      "列名": "照片链接",
+      "修改前": "",
+      "修改后": "https://www.gy3y.cn/Upload/202310/638340002950765244.jpg"
+    },
+    {
+      "底表行": "3850",
+      "序号": "3849",
+      "姓名": "龙文",
+      "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_461.html",
+      "列名": "照片文件",
+      "修改前": "",
+      "修改后": "01_试点医院/广州医科大学附属第三医院/照片/龙文-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg"
     },
     {
       "底表行": "3851",
@@ -22059,14 +22414,14 @@
       "详情正文摘录": "",
       "来源类型": "医院官网",
       "来源链接": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_78.html",
-      "照片链接": "",
-      "照片文件": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202301/638094732310691276.png",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/詹鸿-荔湾院区麻醉科-未标注-广州医科大学附属第三医院.png",
       "采集入口": "https://www.gy3y.cn/ks/team.html",
       "采集方式": "官网静态两院区总目录+同院区科室路径静态医生详情页",
       "采集日期": "2026-08-13",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达",
+      "异常提示": "职称/身份需人工复核；详情正文为空或未识别",
       "复核状态": "待人工复核"
     },
     {
@@ -22545,14 +22900,14 @@
       "详情正文摘录": "",
       "来源类型": "医院官网",
       "来源链接": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_112.html",
-      "照片链接": "",
-      "照片文件": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202506/638847148819828341.png",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/苏春宏-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png",
       "采集入口": "https://www.gy3y.cn/ks/team.html",
       "采集方式": "官网静态两院区总目录+同院区科室路径静态医生详情页",
       "采集日期": "2026-08-13",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达",
+      "异常提示": "职称/身份需人工复核；详情正文为空或未识别",
       "复核状态": "待人工复核"
     },
     {
@@ -24435,14 +24790,14 @@
       "详情正文摘录": "苏志源，中共党员、副主任医师、麻醉学博士。现任广州医科大学附属妇女儿童医院（广州医科大学附属第三医院黄埔院区）麻醉科副主任，2000年本科毕业于中山医科大学，2015年获得南方医科大学博士学位。广东省医学会麻醉学分会委员，广州市医学会血液保护学分会常委，广州市医师协会麻醉学分会委员。2019年“柔性援疆”医疗专家，多次参与疑难危重病例麻醉，擅长危重产科、老年患者麻醉及心脏体外循环麻醉等。",
       "来源类型": "医院官网",
       "来源链接": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_224.html",
-      "照片链接": "",
-      "照片文件": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202301/638094731505220855.png",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/苏志源-荔湾院区麻醉科-副主任医师-广州医科大学附属第三医院.png",
       "采集入口": "https://www.gy3y.cn/ks/team.html",
       "采集方式": "官网静态两院区总目录+同院区科室路径静态医生详情页",
       "采集日期": "2026-08-13",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "官网本人职业照补录失败：详情不可达",
+      "异常提示": "",
       "复核状态": "待人工复核"
     },
     {
@@ -25353,14 +25708,14 @@
       "详情正文摘录": "熊汉真 副主任医师，博士，副教授，病理科行政副主任。 广医三院第三层次精英人才培养对象。从事临床病理及研究18年，擅长：妇产科病理，皮肤病理，细胞学病理。曾在北京协和医院和广东省皮肤病医院进修专科病理培训；发表SCI论文十余篇，主持省级及市级课题各一项； 现任广东省医学会病理学分会青年委员会委员、广东省医师协会病理科医师分会皮肤病理专业组组员、广州市医学会病理学分会第九届委员会委员及第十届分会秘书，广州市医师协会常委，广东省基层医药学会细胞病理与分子诊断专委会委员。",
       "来源类型": "医院官网",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/blk/doctor_266.html",
-      "照片链接": "",
-      "照片文件": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202306/638217245113061978.jpg",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/熊汉真-荔湾院区病理科-副主任医师-广州医科大学附属第三医院.jpg",
       "采集入口": "https://www.gy3y.cn/ks/team.html",
       "采集方式": "官网静态两院区总目录+同院区科室路径静态医生详情页",
       "采集日期": "2026-08-13",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "官网本人职业照补录失败：详情不可达",
+      "异常提示": "",
       "复核状态": "待人工复核"
     },
     {
@@ -27162,14 +27517,14 @@
       "详情正文摘录": "",
       "来源类型": "医院官网",
       "来源链接": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_343.html",
-      "照片链接": "",
-      "照片文件": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202201/637771528013676941.png",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/陈艳红-荔湾院区产 科（广州重症孕产妇救治中心）-未标注-广州医科大学附属第三医院.png",
       "采集入口": "https://www.gy3y.cn/ks/team.html",
       "采集方式": "官网静态两院区总目录+同院区科室路径静态医生详情页",
       "采集日期": "2026-08-13",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达",
+      "异常提示": "职称/身份需人工复核；详情正文为空或未识别",
       "复核状态": "待人工复核"
     },
     {
@@ -28647,14 +29002,14 @@
       "详情正文摘录": "",
       "来源类型": "医院官网",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_459.html",
-      "照片链接": "",
-      "照片文件": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202310/638340002015663181.jpg",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/周咪咪-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
       "采集入口": "https://www.gy3y.cn/ks/team.html",
       "采集方式": "官网静态两院区总目录+同院区科室路径静态医生详情页",
       "采集日期": "2026-08-13",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达",
+      "异常提示": "职称/身份需人工复核；详情正文为空或未识别",
       "复核状态": "待人工复核"
     },
     {
@@ -28674,14 +29029,14 @@
       "详情正文摘录": "",
       "来源类型": "医院官网",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_460.html",
-      "照片链接": "",
-      "照片文件": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202310/638340002635408436.jpg",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/沈华伟-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
       "采集入口": "https://www.gy3y.cn/ks/team.html",
       "采集方式": "官网静态两院区总目录+同院区科室路径静态医生详情页",
       "采集日期": "2026-08-13",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达",
+      "异常提示": "职称/身份需人工复核；详情正文为空或未识别",
       "复核状态": "待人工复核"
     },
     {
@@ -28701,14 +29056,14 @@
       "详情正文摘录": "",
       "来源类型": "医院官网",
       "来源链接": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_461.html",
-      "照片链接": "",
-      "照片文件": "",
+      "照片链接": "https://www.gy3y.cn/Upload/202310/638340002950765244.jpg",
+      "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/龙文-荔湾院区介入放射-未标注-广州医科大学附属第三医院.jpg",
       "采集入口": "https://www.gy3y.cn/ks/team.html",
       "采集方式": "官网静态两院区总目录+同院区科室路径静态医生详情页",
       "采集日期": "2026-08-13",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "职称/身份需人工复核；详情正文为空或未识别；官网本人职业照补录失败：详情不可达",
+      "异常提示": "职称/身份需人工复核；详情正文为空或未识别",
       "复核状态": "待人工复核"
     },
     {
@@ -32236,9 +32591,9 @@
     {
       "source_link": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_112.html",
       "path": "苏春宏.md",
-      "changed": false,
+      "changed": true,
       "before_sha256": "b381bf5ed74ff3057915b398a90729817f6e666daefc5a3c3982e1ddd0c17abd",
-      "after_sha256": "b381bf5ed74ff3057915b398a90729817f6e666daefc5a3c3982e1ddd0c17abd"
+      "after_sha256": "a3eb4ec5244519c8fc64195506bf221d5b867fc3b79f849f20646ec94df406c8"
     },
     {
       "source_link": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_215.html",
@@ -32285,9 +32640,9 @@
     {
       "source_link": "https://www.gy3y.cn/ks/fckyjs/ck/doctor_343.html",
       "path": "陈艳红.md",
-      "changed": false,
+      "changed": true,
       "before_sha256": "91511070b68692e7ed5a7cdfc07e44d12feee6777bd4f6786a5f3743f9372890",
-      "after_sha256": "91511070b68692e7ed5a7cdfc07e44d12feee6777bd4f6786a5f3743f9372890"
+      "after_sha256": "f314bb748580243e658ac97718e10195bbec190c3d2118091dd74d891acb2f65"
     },
     {
       "source_link": "https://www.gy3y.cn/ks/fckyjs/cqzdk/doctor_145.html",
@@ -34371,9 +34726,9 @@
     {
       "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_224.html",
       "path": "苏志源.md",
-      "changed": false,
+      "changed": true,
       "before_sha256": "05d98aea6152593f2ef7d04a985a753185c85f757dd100a4f15b1d00a3bdf1a3",
-      "after_sha256": "05d98aea6152593f2ef7d04a985a753185c85f757dd100a4f15b1d00a3bdf1a3"
+      "after_sha256": "5ebd9e2dcb02f52db797590ee837cfc980cbe60dd0444710a5a82383b436abc0"
     },
     {
       "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_225.html",
@@ -34420,9 +34775,9 @@
     {
       "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_78.html",
       "path": "詹鸿.md",
-      "changed": false,
+      "changed": true,
       "before_sha256": "01754d7b481ef0c81afe81665533444d0508a5ee712f033a4fc3fe209a729b35",
-      "after_sha256": "01754d7b481ef0c81afe81665533444d0508a5ee712f033a4fc3fe209a729b35"
+      "after_sha256": "eda0d0fa21f182da86085008c385d856ee7f98d0f2407abd0a11ac30a18c8192"
     },
     {
       "source_link": "https://www.gy3y.cn/ks/wkxt/mzk/doctor_81.html",
@@ -34735,9 +35090,9 @@
     {
       "source_link": "https://www.gy3y.cn/ks/yjbm/blk/doctor_266.html",
       "path": "熊汉真.md",
-      "changed": false,
+      "changed": true,
       "before_sha256": "7f332ae0228b65e71279b5ae17c6d11f8d286a2f87e40daf6fc837fb3143d16a",
-      "after_sha256": "7f332ae0228b65e71279b5ae17c6d11f8d286a2f87e40daf6fc837fb3143d16a"
+      "after_sha256": "08a799644330ae1393ff91c5fcab182a13e17296d179ceee564bcf64460e76f0"
     },
     {
       "source_link": "https://www.gy3y.cn/ks/yjbm/blk/doctor_267.html",
@@ -34889,23 +35244,23 @@
     {
       "source_link": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_459.html",
       "path": "周咪咪.md",
-      "changed": false,
+      "changed": true,
       "before_sha256": "fdc94265c20683c344abece059758d054f9910e02b2654b7091529e4c9a0dc6f",
-      "after_sha256": "fdc94265c20683c344abece059758d054f9910e02b2654b7091529e4c9a0dc6f"
+      "after_sha256": "9bc11b7721b28d330c47c4ea3ca5af3342dab17199ae1bc50608a1acde3949fe"
     },
     {
       "source_link": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_460.html",
       "path": "沈华伟.md",
-      "changed": false,
+      "changed": true,
       "before_sha256": "ee0346ea51926ddf29a4024ffed981d452a6151798bf48e5d03cd7133d563712",
-      "after_sha256": "ee0346ea51926ddf29a4024ffed981d452a6151798bf48e5d03cd7133d563712"
+      "after_sha256": "beea03155db9c01744ecaf44a503bbf7a8016839bf83f3a35d7e6fa2f8bd4b75"
     },
     {
       "source_link": "https://www.gy3y.cn/ks/yjbm/jrfs/doctor_461.html",
       "path": "龙文.md",
-      "changed": false,
+      "changed": true,
       "before_sha256": "7cf86b1c8594a9030e1970108adb19595e49d9e74e1767983f8a55fae9f418eb",
-      "after_sha256": "7cf86b1c8594a9030e1970108adb19595e49d9e74e1767983f8a55fae9f418eb"
+      "after_sha256": "f9cb9b566b9b16903d28c73437f717ccf5ae30622884d3d86d80e5e7379e64fd"
     },
     {
       "source_link": "https://www.gy3y.cn/ks/yjbm/jyk/doctor_196.html",

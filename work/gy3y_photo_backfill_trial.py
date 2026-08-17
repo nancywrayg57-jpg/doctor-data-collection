@@ -9,18 +9,19 @@ import json
 import re
 import shutil
 import tempfile
+import time
 from collections import Counter
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timezone
 from html.parser import HTMLParser
 from http.client import IncompleteRead
 from http.cookiejar import CookieJar
 from pathlib import Path
 from statistics import median
-from typing import Any
+from typing import Any, Callable
 from urllib.error import HTTPError, URLError
 from urllib.parse import unquote, urljoin, urlparse
-from urllib.request import HTTPCookieProcessor, Request, build_opener
+from urllib.request import HTTPRedirectHandler, HTTPCookieProcessor, Request, build_opener
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
@@ -89,7 +90,10 @@ FULL_AUTHORIZATION = (
     "PR #66 owner comment 2026-08-17T08:45:04Z: TRIAL 通过 + "
     "FULL_APPEND_AND_OBSIDIAN + 422 行全量 + 失败三态留空并追加异常提示 + "
     "页面引用原始字节授权；>5 MiB 单列终审，>20 MiB 或异常格式熔断；"
-    "管理员确认 /html/images/doctor.jpg 为占位图"
+    "PR #66 owner comment 2026-08-17T11:10:48Z: 撤销固定集合，改为 "
+    "66 条详情不可达来源执行 5 轮聚合探测且轮间隔至少 60 秒，"
+    "任一轮有效照片当场保存且后续不覆盖；"
+    "/html/images/doctor.jpg 按既定占位政策判定并经 owner 终审核验"
 )
 FULL_PROTECTED_FILES = [
     MASTER_REPORT_PATH,
@@ -106,7 +110,12 @@ PHOTO_PATH_PATTERNS = {
         re.IGNORECASE,
     ),
 }
-CONFIRMED_PLACEHOLDER_PHOTO_PATH = "/html/images/doctor.jpg"
+EXACT_PLACEHOLDER_PHOTO_PATH = "/html/images/doctor.jpg"
+DETAIL_PROBE_ROUNDS = 5
+DETAIL_ROUND_INTERVAL_SECONDS = 60.0
+OWNER_THREE_ROUND_UNION_SOURCE_IDS = frozenset(
+    {"12", "31", "190", "224", "266", "310", "326"}
+)
 SAMPLE_PLAN = (
     ("许治强", "正高", "10"),
     ("张建瑜", "正高", "32"),
@@ -249,8 +258,8 @@ def page_referenced_photo_url(value: Any, base_url: str) -> tuple[str, str]:
         or parsed.fragment
     ):
         return "", ""
-    if parsed.path == CONFIRMED_PLACEHOLDER_PHOTO_PATH:
-        return absolute, "管理员确认占位图"
+    if parsed.path == EXACT_PLACEHOLDER_PHOTO_PATH:
+        return absolute, "精确路径占位图"
     for style, pattern in PHOTO_PATH_PATTERNS.items():
         if pattern.fullmatch(parsed.path):
             return absolute, style
@@ -327,6 +336,8 @@ def inspect_portrait_reference(
         raise RuntimeError(
             f"详情 div.photo 容器不唯一：{source_link} 数量={parser.photo_container_count}"
         )
+    if len(parser.photo_images) == 0:
+        return "无照片容器", None
     if len(parser.photo_images) != 1:
         raise RuntimeError(
             f"详情 div.photo 内 img 不唯一：{source_link} 数量={len(parser.photo_images)}"
@@ -353,7 +364,7 @@ def inspect_portrait_reference(
     if len(unique) != 1:
         raise RuntimeError(f"页面照片容器多属性 URL 不一致：{source_link}")
     photo_url, reference_kind = next(iter(unique))
-    if reference_kind == "管理员确认占位图":
+    if reference_kind == "精确路径占位图":
         return "占位图", None
     return "", PortraitReference(
         page_title=parser.title,
@@ -364,11 +375,36 @@ def inspect_portrait_reference(
     )
 
 
+class RecordingRedirectHandler(HTTPRedirectHandler):
+    def __init__(self) -> None:
+        super().__init__()
+        self.status_codes: list[int] = []
+
+    def reset(self) -> None:
+        self.status_codes.clear()
+
+    def redirect_request(
+        self,
+        req: Request,
+        fp: Any,
+        code: int,
+        msg: str,
+        headers: Any,
+        newurl: str,
+    ) -> Request | None:
+        self.status_codes.append(int(code))
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 class OfficialSession:
     def __init__(self) -> None:
         self.cookie_jar = CookieJar()
-        self.opener = build_opener(HTTPCookieProcessor(self.cookie_jar))
+        self.redirect_handler = RecordingRedirectHandler()
+        self.opener = build_opener(
+            HTTPCookieProcessor(self.cookie_jar), self.redirect_handler
+        )
         self.incomplete_read_retry_count = 0
+        self.last_status_trace: tuple[int, ...] = ()
 
     @property
     def cookie_names(self) -> list[str]:
@@ -380,10 +416,16 @@ class OfficialSession:
             headers["Referer"] = referer
         request = Request(url, headers=headers)
         for attempt in range(2):
+            self.redirect_handler.reset()
+            self.last_status_trace = ()
             try:
                 with self.opener.open(request, timeout=35) as response:
+                    status = int(response.status)
+                    self.last_status_trace = tuple(
+                        [*self.redirect_handler.status_codes, status]
+                    )
                     return (
-                        int(response.status),
+                        status,
                         response.headers.get_content_type(),
                         response.headers.get_content_charset() or "utf-8",
                         response.read(),
@@ -396,6 +438,9 @@ class OfficialSession:
                     f"官网响应连续两次传输不完整：{url} 已读 {len(exc.partial)} bytes，缺少 {exc.expected} bytes"
                 ) from exc
             except HTTPError as exc:
+                self.last_status_trace = tuple(
+                    [*self.redirect_handler.status_codes, int(exc.code)]
+                )
                 return (
                     int(exc.code),
                     exc.headers.get_content_type(),
@@ -405,6 +450,292 @@ class OfficialSession:
             except URLError as exc:
                 raise RuntimeError(f"官网请求失败：{url} {exc}") from exc
         raise AssertionError("官网请求重试循环未返回")
+
+
+@dataclass(frozen=True)
+class DetailProbe:
+    state: str
+    portrait: PortraitReference | None
+    evidence: str
+
+
+@dataclass(frozen=True)
+class CapturedPhoto:
+    portrait: PortraitReference
+    content_type: str
+    content: bytes
+    extension: str
+    width: int
+    height: int
+    captured_round: int
+
+
+@dataclass(frozen=True)
+class DetailProbeAggregate:
+    by_source: dict[str, dict[str, Any]]
+    round_start_utc: list[str]
+    round_intervals_seconds: list[float]
+    total_detail_probes: int
+    incomplete_read_retry_count: int
+    home_evidence: list[str]
+
+
+def utc_evidence_timestamp(value: datetime) -> str:
+    if value.tzinfo is None:
+        raise ValueError("UTC 证据时间必须包含时区")
+    return (
+        value.astimezone(timezone.utc)
+        .isoformat(timespec="seconds")
+        .replace("+00:00", "Z")
+    )
+
+
+def session_http_trace(session: Any, final_status: int) -> str:
+    trace = tuple(int(item) for item in getattr(session, "last_status_trace", ()) or ())
+    if not trace:
+        trace = (int(final_status),)
+    elif trace[-1] != int(final_status):
+        trace = (*trace, int(final_status))
+    return "→".join(str(item) for item in trace)
+
+
+def probe_detail_once(
+    session: OfficialSession,
+    row: dict[str, Any],
+    round_number: int,
+    timestamp_utc: str,
+) -> DetailProbe:
+    source_link = clean_text(row.get("来源链接"))
+    name = clean_text(row.get("姓名"))
+    try:
+        status, content_type, charset, content = session.get(source_link, DIRECTORY_URL)
+    except RuntimeError as exc:
+        return DetailProbe(
+            state="详情不可达",
+            portrait=None,
+            evidence=(
+                f"第 {round_number} 轮 HTTP 未取得@{timestamp_utc}；请求异常 {exc}"
+            ),
+        )
+    evidence = (
+        f"第 {round_number} 轮 HTTP {session_http_trace(session, status)}@"
+        f"{timestamp_utc} Content-Type {content_type}"
+    )
+    if status != 200 or not is_html_document(content_type, content):
+        return DetailProbe(state="详情不可达", portrait=None, evidence=evidence)
+    try:
+        html = content.decode(charset, errors="replace")
+    except LookupError:
+        html = content.decode("utf-8", errors="replace")
+    state, portrait = inspect_portrait_reference(html, source_link, name)
+    if state == "详情不可达":
+        return DetailProbe(
+            state=state,
+            portrait=None,
+            evidence=f"{evidence}；页面标题 404",
+        )
+    if state:
+        return DetailProbe(
+            state=state,
+            portrait=None,
+            evidence=f"{evidence}；页面可达；判定={state}",
+        )
+    if portrait is None:
+        raise RuntimeError(f"职业照检查未返回明确结果：{source_link}")
+    return DetailProbe(
+        state="",
+        portrait=portrait,
+        evidence=f"{evidence}；页面可达；照片引用={portrait.photo_url}",
+    )
+
+
+def capture_round_photo(
+    session: OfficialSession,
+    row: dict[str, Any],
+    portrait: PortraitReference,
+    round_number: int,
+    timestamp_utc: str,
+) -> tuple[CapturedPhoto | None, str, str]:
+    source_link = clean_text(row.get("来源链接"))
+    name = clean_text(row.get("姓名"))
+    try:
+        status, content_type, _, content = session.get(
+            portrait.photo_url, source_link
+        )
+    except RuntimeError as exc:
+        return (
+            None,
+            "详情不可达",
+            f"照片 HTTP 未取得@{timestamp_utc}；请求异常 {exc}",
+        )
+    trace = session_http_trace(session, status)
+    if status != 200:
+        return (
+            None,
+            "详情不可达",
+            f"照片 HTTP {trace}@{timestamp_utc}",
+        )
+    extension = magic_extension(content, content_type)
+    enforce_photo_policy(name, portrait.photo_url, extension, len(content))
+    placeholder_reason = downloaded_placeholder_reason(
+        portrait.photo_url, content, extension
+    )
+    if placeholder_reason:
+        return (
+            None,
+            "占位图",
+            f"照片 HTTP {trace}@{timestamp_utc}；判定=占位图；{placeholder_reason}",
+        )
+    width, height = image_dimensions(content)
+    return (
+        CapturedPhoto(
+            portrait=portrait,
+            content_type=content_type,
+            content=content,
+            extension=extension,
+            width=width,
+            height=height,
+            captured_round=round_number,
+        ),
+        "",
+        (
+            f"照片 HTTP {trace}@{timestamp_utc}；原始字节={len(content)}；"
+            f"尺寸={width}x{height}；SHA-256={hashlib.sha256(content).hexdigest()}；"
+            "当轮冻结"
+        ),
+    )
+
+
+def collect_detail_retry_results(
+    rows: list[dict[str, Any]],
+    *,
+    rounds: int = DETAIL_PROBE_ROUNDS,
+    round_interval_seconds: float = DETAIL_ROUND_INTERVAL_SECONDS,
+    session_factory: Callable[[], OfficialSession] = OfficialSession,
+    sleeper: Callable[[float], None] = time.sleep,
+    monotonic: Callable[[], float] = time.monotonic,
+    utcnow: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
+) -> DetailProbeAggregate:
+    if rounds != DETAIL_PROBE_ROUNDS:
+        raise ValueError(f"详情聚合探测必须恰为 {DETAIL_PROBE_ROUNDS} 轮")
+    if round_interval_seconds < DETAIL_ROUND_INTERVAL_SECONDS:
+        raise ValueError("详情聚合轮间隔不得少于 60 秒")
+    rows_by_source = {clean_text(row.get("来源链接")): row for row in rows}
+    if len(rows_by_source) != len(rows) or "" in rows_by_source:
+        raise RuntimeError("详情聚合探测来源链接为空或不唯一")
+    evidence_by_source: dict[str, list[str]] = {source: [] for source in rows_by_source}
+    observed_states: dict[str, list[str]] = {source: [] for source in rows_by_source}
+    captured_by_source: dict[str, CapturedPhoto] = {}
+    last_portrait_by_source: dict[str, PortraitReference] = {}
+    round_start_monotonic: list[float] = []
+    round_start_utc: list[str] = []
+    home_evidence: list[str] = []
+    incomplete_read_retry_count = 0
+    total_detail_probes = 0
+
+    for round_number in range(1, rounds + 1):
+        if round_start_monotonic:
+            remaining = round_interval_seconds - (
+                monotonic() - round_start_monotonic[-1]
+            )
+            if remaining > 0:
+                sleeper(remaining)
+        started_monotonic = monotonic()
+        timestamp_utc = utc_evidence_timestamp(utcnow())
+        round_start_monotonic.append(started_monotonic)
+        round_start_utc.append(timestamp_utc)
+
+        session = session_factory()
+        home_status, _, _, _ = session.get(OFFICIAL_HOME)
+        home_trace = session_http_trace(session, home_status)
+        home_evidence.append(
+            f"第 {round_number} 轮首页 HTTP {home_trace}@{timestamp_utc}"
+        )
+        if home_status != 200:
+            raise RuntimeError(
+                f"详情聚合第 {round_number} 轮官网首页会话失败：HTTP {home_trace}"
+            )
+        for source in rows_by_source:
+            probe = probe_detail_once(
+                session,
+                rows_by_source[source],
+                round_number,
+                timestamp_utc,
+            )
+            total_detail_probes += 1
+            evidence = probe.evidence
+            if probe.portrait is not None:
+                last_portrait_by_source[source] = probe.portrait
+            if probe.state:
+                observed_states[source].append(probe.state)
+            elif source in captured_by_source:
+                frozen_round = captured_by_source[source].captured_round
+                evidence += f"；已冻结第 {frozen_round} 轮原始照片，后续轮不覆盖"
+            else:
+                if probe.portrait is None:
+                    raise RuntimeError(f"详情聚合有效页未返回照片引用：{source}")
+                captured, photo_state, photo_evidence = capture_round_photo(
+                    session,
+                    rows_by_source[source],
+                    probe.portrait,
+                    round_number,
+                    timestamp_utc,
+                )
+                evidence += f"；{photo_evidence}"
+                if captured is not None:
+                    captured_by_source[source] = captured
+                elif photo_state:
+                    observed_states[source].append(photo_state)
+            evidence_by_source[source].append(evidence)
+        incomplete_read_retry_count += int(
+            getattr(session, "incomplete_read_retry_count", 0) or 0
+        )
+
+    round_intervals = [
+        round_start_monotonic[index] - round_start_monotonic[index - 1]
+        for index in range(1, len(round_start_monotonic))
+    ]
+    if any(value < round_interval_seconds for value in round_intervals):
+        raise RuntimeError("详情聚合探测轮间隔证据不足 60 秒")
+    expected_total = len(rows_by_source) * rounds
+    if total_detail_probes != expected_total:
+        raise RuntimeError(
+            f"详情聚合探测次数不闭合：{total_detail_probes}!={expected_total}"
+        )
+
+    by_source: dict[str, dict[str, Any]] = {}
+    for source in rows_by_source:
+        captured = captured_by_source.get(source)
+        states = observed_states[source]
+        if captured is not None:
+            final_state = ""
+            portrait = captured.portrait
+        elif "占位图" in states:
+            final_state = "占位图"
+            portrait = None
+        elif "无照片容器" in states:
+            final_state = "无照片容器"
+            portrait = None
+        else:
+            final_state = "详情不可达"
+            portrait = None
+        by_source[source] = {
+            "state": final_state,
+            "portrait": portrait,
+            "captured_photo": captured,
+            "evidence": "；".join(evidence_by_source[source]),
+            "round_count": len(evidence_by_source[source]),
+            "captured_round": captured.captured_round if captured else None,
+            "observed_states": list(states),
+        }
+    return DetailProbeAggregate(
+        by_source=by_source,
+        round_start_utc=round_start_utc,
+        round_intervals_seconds=round_intervals,
+        total_detail_probes=total_detail_probes,
+        incomplete_read_retry_count=incomplete_read_retry_count,
+        home_evidence=home_evidence,
+    )
 
 
 def magic_extension(content: bytes, content_type: str | None) -> str:
@@ -1157,6 +1488,56 @@ def append_failure_warning(value: Any, state: str) -> str:
     if warning not in existing:
         existing.append(warning)
     return "；".join(existing)
+
+
+def replace_failure_warning(value: Any, old_state: str, new_state: str = "") -> str:
+    if old_state not in FULL_WARNING_BY_STATE:
+        raise ValueError(f"未知旧照片失败状态：{old_state}")
+    if new_state and new_state not in FULL_WARNING_BY_STATE:
+        raise ValueError(f"未知新照片失败状态：{new_state}")
+    old_warning = FULL_WARNING_BY_STATE[old_state]
+    existing = [
+        item
+        for item in clean_text(value).split("；")
+        if item and item != old_warning
+    ]
+    if new_state:
+        new_warning = FULL_WARNING_BY_STATE[new_state]
+        if new_warning not in existing:
+            existing.append(new_warning)
+    return "；".join(existing)
+
+
+def reconstruct_pre_full_rows(
+    installed_rows: list[dict[str, Any]],
+    payload: dict[str, Any],
+    target_sources: set[str],
+) -> list[dict[str, Any]]:
+    before_rows = copy.deepcopy(installed_rows)
+    index_by_source = {
+        clean_text(row.get("来源链接")): index
+        for index, row in enumerate(installed_rows)
+        if clean_text(row.get("来源链接")) in target_sources
+    }
+    if set(index_by_source) != target_sources:
+        raise RuntimeError("FULL 原始基线重建时目标来源集合不一致")
+    seen: set[tuple[str, str]] = set()
+    for item in payload.get("row_diffs", []):
+        source = clean_text(item.get("来源链接"))
+        column = clean_text(item.get("列名"))
+        key = (source, column)
+        if source not in target_sources or column not in FULL_ALLOWED_ROW_COLUMNS:
+            raise RuntimeError(f"FULL 原始基线差异越界：{source} {column}")
+        if key in seen:
+            raise RuntimeError(f"FULL 原始基线差异重复：{source} {column}")
+        seen.add(key)
+        index = index_by_source[source]
+        if row_value(installed_rows[index].get(column)) != row_value(item.get("修改后")):
+            raise RuntimeError(f"FULL 已安装值与差异证据不一致：{source} {column}")
+        before_rows[index][column] = row_value(item.get("修改前"))
+    return before_rows
+
+
 def allocate_full_photo_path(
     row: dict[str, Any],
     source_id: str,
@@ -1233,7 +1614,9 @@ def canonical_master_row(row: dict[str, Any]) -> tuple[str, ...]:
     return tuple(row_value(row.get(header)) for header in BASE_HEADERS)
 def write_master_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=BASE_HEADERS)
+        writer = csv.DictWriter(
+            handle, fieldnames=BASE_HEADERS, lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(
             {key: row.get(key, "") for key in BASE_HEADERS} for row in rows
@@ -1271,7 +1654,7 @@ def write_full_reconciliation_csv(path: Path, payload: dict[str, Any]) -> None:
         "错误证据",
     ]
     with path.open("w", encoding="utf-8-sig", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=headers)
+        writer = csv.DictWriter(handle, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
         writer.writerows(
             {header: item.get(header, "") for header in headers}
@@ -1305,6 +1688,7 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
     )
     if not large_photo_lines:
         large_photo_lines = "| 无 | — | 0 | — |"
+    probe_policy = clean_text(meta.get("detail_probe_policy")) or "未启用返修聚合探测"
     report = f"""# Issue #{ISSUE_NUMBER} {HOSPITAL}照片补录 FULL 报告
 
 > 日期：{meta['run_date']}
@@ -1333,6 +1717,8 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
 - 路径风格：`Upload原图` {meta['reference_kind_counts'].get('Upload原图', 0)}；`doctor原图` {meta['reference_kind_counts'].get('doctor原图', 0)}。
 - 页面未引用路径的构造/探测请求：0；第三方来源：0。
 - 传输不完整原样重试：{meta['incomplete_read_retry_count']} 次；每个请求至多重试 1 次。
+- 详情不可达返修策略：{probe_policy}；聚合来源 {int(meta.get('detail_probe_source_count') or 0)} 条，轮次 {int(meta.get('detail_probe_round_count') or 0)}，详情探测 {int(meta.get('detail_probe_total_requests') or 0)} 次。
+- Owner 三轮并集仅作对照：`doctor_12/31/190/224/266/310/326`；不作为固定恢复集合或门禁。
 - 总底表：payload/CSV/XLSX 三载体行数与 25 列逐值一致；仅本院 422 行的照片两列及失败行异常提示允许变化。
 - 画像：既有 {meta['existing_profile_count']} 份 AUTO-GENERATED 画像中，实采成功的 {meta['profile_refreshed_count']} 份仅新增常规照片引用行；失败留空画像零触碰；不新建画像；`_索引.md` 零修改。
 
@@ -1355,10 +1741,12 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
 2. 使用官网首页建立的常规 Cookie 会话和对应详情页 Referer；页面引用原始响应字节保存，不压缩。
 3. 禁止构造或探测页面未引用图片路径；禁止第三方来源；排除正文叙事图与 floatcard。
 4. 失败仅按“详情不可达 / 无照片容器 / 占位图”留空并追加异常提示。
+5. `/html/images/doctor.jpg` 仅按既定占位政策在该精确路径判定，并经 owner 终审核验；不表述为管理员事前确认。
 """
     path.write_text(report, encoding="utf-8", newline="\n")
 def validate_full_payload(payload: dict[str, Any], photo_root: Path) -> None:
     meta = payload.get("meta", {})
+    probe_policy_active = bool(clean_text(meta.get("detail_probe_policy")))
     expected = int(meta.get("expected_count") or 0)
     downloaded = int(meta.get("downloaded_count") or 0)
     failed = int(meta.get("failed_count") or 0)
@@ -1393,6 +1781,72 @@ def validate_full_payload(payload: dict[str, Any], photo_root: Path) -> None:
     photos_by_source = {clean_text(item.get("source_link")): item for item in photos}
     if len(rows_by_source) != expected or len(photos_by_source) != downloaded:
         raise RuntimeError("FULL 来源链接对账不唯一")
+
+    reconciliation_by_source = {
+        clean_text(item.get("来源链接")): item for item in reconciliation
+    }
+    if probe_policy_active:
+        probe_sources = [clean_text(item) for item in meta.get("detail_probe_sources", [])]
+        if len(probe_sources) != 66 or len(set(probe_sources)) != 66:
+            raise RuntimeError("FULL 五轮聚合探测来源不是 66 个唯一 URL")
+        if not set(probe_sources).issubset(reconciliation_by_source):
+            raise RuntimeError("FULL 五轮聚合探测来源未完全进入对账工件")
+        if int(meta.get("detail_probe_source_count") or 0) != 66:
+            raise RuntimeError("FULL 五轮聚合探测来源计数不是 66")
+        if int(meta.get("detail_probe_round_count") or 0) != DETAIL_PROBE_ROUNDS:
+            raise RuntimeError("FULL 聚合探测轮次不是 5")
+        if int(meta.get("detail_probe_total_requests") or 0) != 66 * DETAIL_PROBE_ROUNDS:
+            raise RuntimeError("FULL 聚合详情探测未形成 66×5=330 闭环")
+        intervals = [float(item) for item in meta.get("detail_probe_round_intervals_seconds", [])]
+        if len(intervals) != DETAIL_PROBE_ROUNDS - 1 or any(
+            item < DETAIL_ROUND_INTERVAL_SECONDS for item in intervals
+        ):
+            raise RuntimeError("FULL 聚合探测相邻轮开始间隔不足 60 秒")
+        round_starts = [clean_text(item) for item in meta.get("detail_probe_round_start_utc", [])]
+        utc_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"
+        if len(round_starts) != DETAIL_PROBE_ROUNDS or any(
+            re.fullmatch(utc_pattern, item) is None for item in round_starts
+        ):
+            raise RuntimeError("FULL 聚合探测 UTC 轮次时间戳不完整")
+        home_evidence = [clean_text(item) for item in meta.get("detail_probe_home_evidence", [])]
+        if len(home_evidence) != DETAIL_PROBE_ROUNDS or any(
+            f"第 {round_number} 轮首页 HTTP " not in home_evidence[round_number - 1]
+            for round_number in range(1, DETAIL_PROBE_ROUNDS + 1)
+        ):
+            raise RuntimeError("FULL 聚合探测首页会话证据不完整")
+        union_comparison = meta.get("owner_three_round_union_comparison", [])
+        comparison_by_id = {
+            clean_text(item.get("detail_id")): item
+            for item in union_comparison
+            if isinstance(item, dict)
+        }
+        comparison_ids = set(comparison_by_id)
+        if comparison_ids != OWNER_THREE_ROUND_UNION_SOURCE_IDS:
+            raise RuntimeError("FULL Owner 三轮并集 7 ID 对照不完整")
+        for source_id, item in comparison_by_id.items():
+            source = clean_text(item.get("source_link"))
+            if source not in probe_sources or detail_id(source) != source_id:
+                raise RuntimeError(
+                    f"FULL Owner 三轮并集对照来源不匹配：doctor_{source_id}"
+                )
+        for source in probe_sources:
+            evidence = clean_text(
+                reconciliation_by_source[source].get("错误证据")
+            )
+            for round_number in range(1, DETAIL_PROBE_ROUNDS + 1):
+                marker = f"第 {round_number} 轮 HTTP "
+                if evidence.count(marker) != 1:
+                    raise RuntimeError(
+                        f"FULL 聚合来源第 {round_number} 轮标记不唯一：{source}"
+                    )
+                pattern = (
+                    rf"第 {round_number} 轮 HTTP "
+                    rf"(?:未取得|\d{{3}}(?:→\d{{3}})*)@{utc_pattern}"
+                )
+                if re.search(pattern, evidence) is None:
+                    raise RuntimeError(
+                        f"FULL 聚合来源第 {round_number} 轮 HTTP/UTC 证据不完整：{source}"
+                    )
 
     expected_files: set[str] = set()
     total_bytes = 0
@@ -1450,6 +1904,15 @@ def validate_full_payload(payload: dict[str, Any], photo_root: Path) -> None:
             )
             if reference_kind != clean_text(photo.get("reference_kind")):
                 raise RuntimeError(f"照片路径风格对账失败：{photo_url}")
+            if probe_policy_active and source in probe_sources:
+                if int(photo.get("detail_probe_round_count") or 0) != DETAIL_PROBE_ROUNDS:
+                    raise RuntimeError(f"FULL 动态实采照片缺少 5 轮探测标记：{source}")
+                if not 1 <= int(photo.get("captured_round") or 0) <= DETAIL_PROBE_ROUNDS:
+                    raise RuntimeError(f"FULL 动态实采照片冻结轮次非法：{source}")
+                if clean_text(photo.get("detail_probe_evidence")) != clean_text(
+                    reconciliation_by_source[source].get("错误证据")
+                ):
+                    raise RuntimeError(f"FULL 动态实采照片证据与对账不一致：{source}")
             expected_files.add(filename)
             total_bytes += len(content)
             max_bytes = max(max_bytes, len(content))
@@ -1869,6 +2332,7 @@ def run_full(run_date: str) -> dict[str, Any]:
         temp_master_payload.write_text(
             json.dumps(updated_payload, ensure_ascii=False, indent=2),
             encoding="utf-8",
+            newline="\n",
         )
         write_master_csv(temp_master_csv, after_rows)
         collector.build_workbook(
@@ -1995,6 +2459,7 @@ def run_full(run_date: str) -> dict[str, Any]:
         temp_full_payload.write_text(
             json.dumps(full_payload, ensure_ascii=False, indent=2),
             encoding="utf-8",
+            newline="\n",
         )
         write_full_reconciliation_csv(temp_full_csv, full_payload)
         write_full_report(temp_full_report, full_payload)
@@ -2059,6 +2524,472 @@ def run_full(run_date: str) -> dict[str, Any]:
         return full_payload
 
 
+def run_owner_audit_repair(run_date: str) -> dict[str, Any]:
+    import collect_official_doctors_batch as collector
+
+    if not FULL_JSON_PATH.is_file() or not FORMAL_PHOTO_DIR.is_dir():
+        raise RuntimeError("Owner 终审返修要求已安装的 FULL payload 与正式照片目录")
+    installed_payload = json.loads(FULL_JSON_PATH.read_text(encoding="utf-8"))
+    validate_full_installation(installed_payload)
+    installed_meta = installed_payload.get("meta", {})
+    expected_pre_repair = {
+        "downloaded_count": 348,
+        "failed_count": 74,
+        "detail_unreachable_count": 66,
+        "no_photo_container_count": 0,
+        "placeholder_count": 8,
+    }
+    for key, expected in expected_pre_repair.items():
+        if int(installed_meta.get(key) or 0) != expected:
+            raise RuntimeError(
+                f"Owner 终审返修前置计数漂移：{key}="
+                f"{installed_meta.get(key)}，应为 {expected}"
+            )
+
+    baseline_protected = file_snapshot(FULL_PROTECTED_FILES)
+    if baseline_protected != installed_meta.get("protected_assets_before"):
+        raise RuntimeError("Owner 终审返修前受保护资产已漂移")
+    installed_master_payload = json.loads(MASTER_JSON_PATH.read_text(encoding="utf-8"))
+    installed_all_rows = validate_master_layers(
+        MASTER_JSON_PATH, MASTER_CSV_PATH, MASTER_XLSX_PATH
+    )
+    target_rows = [
+        dict(row)
+        for row in installed_payload.get("rows", [])
+    ]
+    target_sources = {clean_text(row.get("来源链接")) for row in target_rows}
+    if len(target_rows) != EXPECTED_SCOPE_COUNT or len(target_sources) != EXPECTED_SCOPE_COUNT:
+        raise RuntimeError("Owner 终审返修目标范围不是 422 个唯一来源")
+    rows_by_source = {clean_text(row.get("来源链接")): row for row in target_rows}
+    original_all_rows = reconstruct_pre_full_rows(
+        installed_all_rows, installed_payload, target_sources
+    )
+
+    reconciliation_by_source = {
+        clean_text(item.get("来源链接")): item
+        for item in installed_payload.get("reconciliation", [])
+    }
+    retry_sources = [
+        clean_text(item.get("来源链接"))
+        for item in installed_payload.get("reconciliation", [])
+        if clean_text(item.get("失败三态")) == "详情不可达"
+    ]
+    if len(retry_sources) != 66 or len(set(retry_sources)) != 66:
+        raise RuntimeError("Owner 终审返修要求原 66 条详情不可达来源唯一")
+    retry_source_by_id = {detail_id(source): source for source in retry_sources}
+    if not OWNER_THREE_ROUND_UNION_SOURCE_IDS.issubset(retry_source_by_id):
+        raise RuntimeError("Owner 三轮并集 7 ID 不全在原 66 条聚合范围内")
+    retry_rows = [rows_by_source[source] for source in retry_sources]
+
+    probe_aggregate = collect_detail_retry_results(retry_rows)
+    retry_results = probe_aggregate.by_source
+    if set(retry_results) != set(retry_sources):
+        raise RuntimeError("Owner 终审返修 66 条聚合结果来源漂移")
+    if any(
+        int(result.get("round_count") or 0) != DETAIL_PROBE_ROUNDS
+        for result in retry_results.values()
+    ):
+        raise RuntimeError("Owner 终审返修存在未完成 5 轮的聚合来源")
+
+    index_path = PROFILE_DIR / "_索引.md"
+    index_before_sha256 = hashlib.sha256(index_path.read_bytes()).hexdigest()
+    if index_before_sha256 != clean_text(installed_meta.get("profile_index_before_sha256")):
+        raise RuntimeError("Owner 终审返修前 _索引.md 已漂移")
+    profile_paths = target_profile_paths(PROFILE_DIR, target_sources)
+    before_profile_tree = profile_markdown_tree(PROFILE_DIR)
+    existing_photo_hashes = {
+        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in FORMAL_PHOTO_DIR.iterdir()
+        if path.is_file()
+    }
+    if len(existing_photo_hashes) != 348:
+        raise RuntimeError("Owner 终审返修前正式照片不是 348 张")
+
+    with tempfile.TemporaryDirectory(prefix="issue65_owner_repair_", dir=WORK_DIR) as temporary:
+        temp_root = Path(temporary)
+        temp_photo_dir = temp_root / "photos"
+        shutil.copytree(FORMAL_PHOTO_DIR, temp_photo_dir)
+        temp_profile_root = temp_root / "profiles"
+        temp_hospital_dir = temp_profile_root / HOSPITAL
+        shutil.copytree(PROFILE_DIR, temp_hospital_dir)
+        temp_profile_paths = target_profile_paths(temp_hospital_dir, target_sources)
+        used_filenames = {name.casefold() for name in existing_photo_hashes}
+
+        updated_rows_by_source = {source: dict(row) for source, row in rows_by_source.items()}
+        new_photo_samples: dict[str, dict[str, Any]] = {}
+        replacement_reconciliation: dict[str, dict[str, Any]] = {}
+        expected_changed_profile_paths: set[Path] = set()
+
+        for source in retry_sources:
+            row = updated_rows_by_source[source]
+            name = clean_text(row.get("姓名"))
+            source_id = detail_id(source)
+            result = retry_results[source]
+            state = clean_text(result.get("state"))
+            evidence = clean_text(result.get("evidence"))
+            if state == "详情不可达":
+                replacement_reconciliation[source] = {
+                    **dict(reconciliation_by_source[source]),
+                    "错误证据": evidence,
+                }
+                continue
+            if state:
+                row["照片链接"] = ""
+                row["照片文件"] = ""
+                row["异常提示"] = replace_failure_warning(
+                    row.get("异常提示"), "详情不可达", state
+                )
+                replacement_reconciliation[source] = {
+                    "姓名": name,
+                    "来源链接": source,
+                    "状态": "失败",
+                    "失败三态": state,
+                    "照片链接": "",
+                    "照片文件": "",
+                    "字节数": "",
+                    "SHA-256": "",
+                    "魔数": "",
+                    "宽": "",
+                    "高": "",
+                    "引用路径风格": "",
+                    "错误证据": evidence,
+                }
+                continue
+
+            captured = result.get("captured_photo")
+            if not isinstance(captured, CapturedPhoto):
+                raise RuntimeError(f"Owner 终审返修有效照片原始字节未当轮冻结：{source}")
+            portrait = captured.portrait
+            photo_type = captured.content_type
+            photo_content = captured.content
+            extension = captured.extension
+            width, height = captured.width, captured.height
+            enforce_photo_policy(name, portrait.photo_url, extension, len(photo_content))
+            if downloaded_placeholder_reason(
+                portrait.photo_url, photo_content, extension
+            ):
+                raise RuntimeError(f"Owner 终审返修冻结照片复核为占位图：{name}")
+            filename, disk_path = allocate_full_photo_path(
+                row, source_id, extension, temp_photo_dir, used_filenames
+            )
+            disk_path.write_bytes(photo_content)
+            relative_path = (PHOTO_RELATIVE_ROOT / filename).as_posix()
+            row["照片链接"] = portrait.photo_url
+            row["照片文件"] = relative_path
+            row["异常提示"] = replace_failure_warning(
+                row.get("异常提示"), "详情不可达"
+            )
+            digest = hashlib.sha256(photo_content).hexdigest()
+            sample = {
+                "name": name,
+                "department": atomic_department(row),
+                "title": primary_title(row.get("职称身份原文")),
+                "detail_id": source_id,
+                "source_link": source,
+                "photo_url": portrait.photo_url,
+                "photo_source_attribute": portrait.source_attribute,
+                "template_signature": portrait.template_signature,
+                "reference_kind": portrait.reference_kind,
+                "photo_file": relative_path,
+                "filename": filename,
+                "content_type": photo_type,
+                "bytes": len(photo_content),
+                "sha256": digest,
+                "magic_hex": photo_content[:12].hex().upper(),
+                "width": width,
+                "height": height,
+                "disk_path": str(FORMAL_PHOTO_DIR / filename),
+                "detail_probe_evidence": evidence,
+                "detail_probe_round_count": int(result.get("round_count") or 0),
+                "captured_round": int(result.get("captured_round") or 0),
+            }
+            new_photo_samples[source] = sample
+            replacement_reconciliation[source] = {
+                "姓名": name,
+                "来源链接": source,
+                "状态": "实采",
+                "失败三态": "",
+                "照片链接": portrait.photo_url,
+                "照片文件": relative_path,
+                "字节数": len(photo_content),
+                "SHA-256": digest,
+                "魔数": sample["magic_hex"],
+                "宽": width,
+                "高": height,
+                "引用路径风格": portrait.reference_kind,
+                "错误证据": evidence,
+            }
+            before_bytes = profile_paths[source].read_bytes()
+            after_path = temp_profile_paths[source]
+            after_path.write_bytes(
+                insert_profile_photo_block_bytes(before_bytes, name, relative_path)
+            )
+            validate_profile_photo_only_bytes(
+                before_bytes, after_path.read_bytes(), name, relative_path
+            )
+            expected_changed_profile_paths.add(
+                profile_paths[source].relative_to(PROFILE_DIR)
+            )
+
+        dynamically_recovered = {
+            source
+            for source, result in retry_results.items()
+            if clean_text(result.get("state")) == ""
+        }
+        if set(new_photo_samples) != dynamically_recovered:
+            raise RuntimeError("Owner 终审返修动态实采集合与聚合结果不一致")
+        validate_profile_tree_surgical(
+            before_profile_tree, temp_hospital_dir, expected_changed_profile_paths
+        )
+
+        result_rows = [
+            updated_rows_by_source[clean_text(row.get("来源链接"))]
+            for row in target_rows
+        ]
+        updated_all_rows = [
+            copy.deepcopy(
+                updated_rows_by_source.get(clean_text(row.get("来源链接")), row)
+            )
+            for row in installed_all_rows
+        ]
+        row_diffs = collect_full_row_diffs(
+            original_all_rows, updated_all_rows, target_sources
+        )
+        updated_master_payload = copy.deepcopy(installed_master_payload)
+        updated_master_payload["rows"] = updated_all_rows
+        recompute_failure_derivatives(updated_master_payload, updated_all_rows)
+
+        reconciliation = [
+            replacement_reconciliation.get(
+                clean_text(item.get("来源链接")), dict(item)
+            )
+            for item in installed_payload.get("reconciliation", [])
+        ]
+        failures = [
+            {
+                "name": clean_text(item.get("姓名")),
+                "source_link": clean_text(item.get("来源链接")),
+                "state": clean_text(item.get("失败三态")),
+                "error": clean_text(item.get("错误证据")),
+            }
+            for item in reconciliation
+            if clean_text(item.get("状态")) == "失败"
+        ]
+        installed_photo_by_source = {
+            clean_text(item.get("source_link")): dict(item)
+            for item in installed_payload.get("photo_samples", [])
+        }
+        installed_photo_by_source.update(new_photo_samples)
+        photo_samples = [
+            installed_photo_by_source[clean_text(row.get("来源链接"))]
+            for row in result_rows
+            if clean_text(row.get("来源链接")) in installed_photo_by_source
+        ]
+        if len(photo_samples) != 348 + len(new_photo_samples):
+            raise RuntimeError("Owner 终审返修实采数未在既有 348 张上动态闭合")
+        if len(photo_samples) + len(failures) != EXPECTED_SCOPE_COUNT:
+            raise RuntimeError("Owner 终审返修未形成动态 422 四数闭环")
+
+        old_integrity = {
+            clean_text(item.get("source_link")): dict(item)
+            for item in installed_payload.get("profile_integrity", [])
+        }
+        profile_integrity = []
+        for source in sorted(target_sources):
+            old_item = old_integrity[source]
+            after_content = temp_profile_paths[source].read_bytes()
+            if source not in new_photo_samples:
+                if hashlib.sha256(after_content).hexdigest() != clean_text(
+                    old_item.get("after_sha256")
+                ):
+                    raise RuntimeError(f"Owner 终审返修触碰非目标画像：{source}")
+            profile_integrity.append(
+                {
+                    "source_link": source,
+                    "path": profile_paths[source].relative_to(PROFILE_DIR).as_posix(),
+                    "changed": bool(old_item.get("changed")) or source in new_photo_samples,
+                    "before_sha256": clean_text(old_item.get("before_sha256")),
+                    "after_sha256": hashlib.sha256(after_content).hexdigest(),
+                }
+            )
+
+        state_counter = Counter(item["state"] for item in failures)
+        total_bytes = sum(int(item["bytes"]) for item in photo_samples)
+        max_bytes = max(int(item["bytes"]) for item in photo_samples)
+        size_counter = Counter(size_bucket(int(item["bytes"])) for item in photo_samples)
+        reference_counter = Counter(
+            clean_text(item.get("reference_kind")) for item in photo_samples
+        )
+        full_payload = copy.deepcopy(installed_payload)
+        full_payload.update(
+            {
+                "failures": failures,
+                "photo_samples": photo_samples,
+                "reconciliation": reconciliation,
+                "row_diffs": row_diffs,
+                "rows": result_rows,
+                "profile_integrity": profile_integrity,
+            }
+        )
+        full_payload["meta"].update(
+            {
+                "run_date": run_date,
+                "authorization": FULL_AUTHORIZATION,
+                "downloaded_count": len(photo_samples),
+                "failed_count": len(failures),
+                "blank_count": len(failures),
+                "failure_ratio": len(failures) / EXPECTED_SCOPE_COUNT,
+                "failure_state_counts": {
+                    state: state_counter.get(state, 0) for state in FULL_FAILURE_STATES
+                },
+                "detail_unreachable_count": state_counter.get("详情不可达", 0),
+                "no_photo_container_count": state_counter.get("无照片容器", 0),
+                "placeholder_count": state_counter.get("占位图", 0),
+                "photo_total_bytes": total_bytes,
+                "photo_total_mib": total_bytes / 1024 / 1024,
+                "photo_max_bytes": max_bytes,
+                "size_bucket_counts": dict(size_counter),
+                "reference_kind_counts": dict(reference_counter),
+                "over_5mib_count": sum(
+                    int(item["bytes"]) > OWNER_REPORT_BYTES for item in photo_samples
+                ),
+                "over_20mib_count": sum(
+                    int(item["bytes"]) > FULL_FUSE_BYTES for item in photo_samples
+                ),
+                "incomplete_read_retry_count": int(
+                    installed_meta.get("incomplete_read_retry_count") or 0
+                )
+                + probe_aggregate.incomplete_read_retry_count,
+                "profile_refreshed_count": len(photo_samples),
+                "profile_index_before_sha256": index_before_sha256,
+                "row_diff_count": len(row_diffs),
+                "row_diff_columns": dict(Counter(item["列名"] for item in row_diffs)),
+                "protected_assets_before": baseline_protected,
+                "detail_probe_policy": (
+                    "原 66 条详情不可达来源执行 5 轮全量聚合探测；"
+                    "相邻轮开始间隔至少 60 秒；任一轮有效照片原始字节当轮冻结，"
+                    "后续轮继续探测但不覆盖；未实采时按占位图、无照片容器、"
+                    "详情不可达优先级归入失败三态"
+                ),
+                "detail_probe_sources": list(retry_sources),
+                "detail_probe_source_count": len(retry_sources),
+                "detail_probe_round_count": DETAIL_PROBE_ROUNDS,
+                "detail_probe_total_requests": probe_aggregate.total_detail_probes,
+                "detail_probe_round_start_utc": probe_aggregate.round_start_utc,
+                "detail_probe_round_intervals_seconds": (
+                    probe_aggregate.round_intervals_seconds
+                ),
+                "detail_probe_home_evidence": probe_aggregate.home_evidence,
+                "owner_three_round_union_comparison": [
+                    {
+                        "detail_id": source_id,
+                        "source_link": retry_source_by_id[source_id],
+                        "result": (
+                            "实采"
+                            if not clean_text(
+                                retry_results[retry_source_by_id[source_id]].get("state")
+                            )
+                            else clean_text(
+                                retry_results[retry_source_by_id[source_id]].get("state")
+                            )
+                        ),
+                        "captured_round": (
+                            retry_results[retry_source_by_id[source_id]].get(
+                                "captured_round"
+                            )
+                        ),
+                    }
+                    for source_id in sorted(
+                        OWNER_THREE_ROUND_UNION_SOURCE_IDS, key=int
+                    )
+                ],
+                "owner_audit_recovered_source_ids": sorted(
+                    (detail_id(source) for source in new_photo_samples), key=int
+                ),
+                "owner_audit_recovered_count": len(new_photo_samples),
+            }
+        )
+        validate_full_payload(full_payload, temp_photo_dir)
+
+        temp_master_payload = temp_root / MASTER_JSON_PATH.name
+        temp_master_csv = temp_root / MASTER_CSV_PATH.name
+        temp_master_xlsx = temp_root / MASTER_XLSX_PATH.name
+        temp_master_preview = temp_root / "master_preview.png"
+        temp_master_payload.write_text(
+            json.dumps(updated_master_payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+            newline="\n",
+        )
+        write_master_csv(temp_master_csv, updated_all_rows)
+        collector.build_workbook(
+            temp_master_payload, temp_master_xlsx, temp_master_preview
+        )
+        validate_master_layers(temp_master_payload, temp_master_csv, temp_master_xlsx)
+
+        temp_full_payload = temp_root / FULL_JSON_PATH.name
+        temp_full_csv = temp_root / FULL_CSV_PATH.name
+        temp_full_report = temp_root / FULL_REPORT_PATH.name
+        temp_full_payload.write_text(
+            json.dumps(full_payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+            newline="\n",
+        )
+        write_full_reconciliation_csv(temp_full_csv, full_payload)
+        write_full_report(temp_full_report, full_payload)
+
+        file_map: dict[Path, Path] = {
+            MASTER_JSON_PATH: temp_master_payload,
+            MASTER_CSV_PATH: temp_master_csv,
+            MASTER_XLSX_PATH: temp_master_xlsx,
+            FULL_JSON_PATH: temp_full_payload,
+            FULL_CSV_PATH: temp_full_csv,
+            FULL_REPORT_PATH: temp_full_report,
+        }
+        for source in new_photo_samples:
+            file_map[profile_paths[source]] = temp_profile_paths[source]
+        backups = backup_file_targets(list(file_map), temp_root / "file_backups")
+        photo_backup = temp_root / "formal_photo_backup"
+        photo_swapped = False
+        try:
+            ensure_workspace_target(FORMAL_PHOTO_DIR)
+            FORMAL_PHOTO_DIR.replace(photo_backup)
+            temp_photo_dir.replace(FORMAL_PHOTO_DIR)
+            photo_swapped = True
+            apply_file_map(file_map)
+
+            final_rows = validate_master_layers(
+                MASTER_JSON_PATH, MASTER_CSV_PATH, MASTER_XLSX_PATH
+            )
+            final_diffs = collect_full_row_diffs(
+                original_all_rows, final_rows, target_sources
+            )
+            if final_diffs != row_diffs:
+                raise RuntimeError("Owner 终审返修落盘差异与预期不一致")
+            validate_full_payload(full_payload, FORMAL_PHOTO_DIR)
+            validate_full_installation(full_payload)
+            for filename, digest in existing_photo_hashes.items():
+                if hashlib.sha256(
+                    (FORMAL_PHOTO_DIR / filename).read_bytes()
+                ).hexdigest() != digest:
+                    raise RuntimeError(f"Owner 终审返修改动既有照片：{filename}")
+            validate_profile_tree_surgical(
+                before_profile_tree, PROFILE_DIR, expected_changed_profile_paths
+            )
+            if hashlib.sha256(index_path.read_bytes()).hexdigest() != index_before_sha256:
+                raise RuntimeError("Owner 终审返修改动 _索引.md")
+            if file_snapshot(FULL_PROTECTED_FILES) != baseline_protected:
+                raise RuntimeError("Owner 终审返修改动受保护资产")
+        except Exception:
+            restore_file_targets(backups)
+            if photo_swapped and FORMAL_PHOTO_DIR.exists():
+                failed_photo_dir = temp_root / "failed_formal_photo_dir"
+                FORMAL_PHOTO_DIR.replace(failed_photo_dir)
+            if photo_backup.exists():
+                photo_backup.replace(FORMAL_PHOTO_DIR)
+            raise
+        return full_payload
+
+
 def mark_visual_pass() -> dict[str, Any]:
     if not TRIAL_JSON_PATH.is_file():
         raise RuntimeError("TRIAL payload 不存在，不能标记视觉复核")
@@ -2097,13 +3028,20 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="校验已落盘 FULL payload、三载体、受保护资产、照片与画像完整性",
     )
+    mode.add_argument(
+        "--repair-owner-audit",
+        action="store_true",
+        help="按 PR #66 owner FULL 终审意见复核 66 条详情不可达并最小返修",
+    )
     parser.add_argument("--today", default=date.today().isoformat(), help="报告日期 YYYY-MM-DD")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    if args.full:
+    if args.repair_owner_audit:
+        payload = run_owner_audit_repair(args.today)
+    elif args.full:
         payload = run_full(args.today)
     elif args.validate_full:
         if not FULL_JSON_PATH.is_file():

@@ -5,6 +5,7 @@ import io
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -67,13 +68,13 @@ class Gy3yPhotoBackfillTrialTests(unittest.TestCase):
             "",
         )
 
-    def test_admin_confirmed_exact_placeholder_path_is_left_blank(self) -> None:
+    def test_exact_placeholder_path_is_left_blank_without_admin_claim(self) -> None:
         source = "https://www.gy3y.cn/ks/wkxt/pwyq/doctor_495.html"
         self.assertEqual(
             trial.page_referenced_photo_url("/html/images/doctor.jpg", source),
             (
                 "https://www.gy3y.cn/html/images/doctor.jpg",
-                "管理员确认占位图",
+                "精确路径占位图",
             ),
         )
         state, portrait = trial.inspect_portrait_reference(
@@ -90,6 +91,135 @@ class Gy3yPhotoBackfillTrialTests(unittest.TestCase):
             trial.page_referenced_photo_url("/html/images/doctor-2.jpg", source),
             ("", ""),
         )
+
+    def test_five_round_aggregate_probes_all_sources_and_freezes_first_photo(self) -> None:
+        unreachable = "https://www.gy3y.cn/ks/nkxt/jsyxk/doctor_12.html"
+        recovered = "https://www.gy3y.cn/ks/wkxt/gkeq/doctor_310.html"
+        empty = "https://www.gy3y.cn/ks/nkxt/jsyxk/doctor_190.html"
+        photo_a = "https://www.gy3y.cn/Upload/202003/6371942997440786323463805.jpg"
+        photo_b = "https://www.gy3y.cn/Upload/202003/6371942997440786323463806.jpg"
+        not_found_html = b"<html><head><title>404</title></head><body></body></html>"
+        recovered_html_a = (
+            "<html><head><title>王钊_骨科二区_广州医科大学附属第三医院</title></head>"
+            '<body><div class="photo"><img src="/Upload/202003/6371942997440786323463805.jpg"></div></body></html>'
+        ).encode("utf-8")
+        recovered_html_b = recovered_html_a.replace(
+            b"6371942997440786323463805.jpg",
+            b"6371942997440786323463806.jpg",
+        )
+        empty_html = (
+            "<html><head><title>麦伟文_神经内科_广州医科大学附属第三医院</title></head>"
+            '<body><div class="photo"></div></body></html>'
+        ).encode("utf-8")
+        first_photo_buffer = io.BytesIO()
+        Image.new("RGB", (19, 23), "navy").save(first_photo_buffer, format="JPEG")
+        first_photo = first_photo_buffer.getvalue()
+        sessions: list[FakeSession] = []
+
+        class FakeSession:
+            def __init__(self, round_index: int) -> None:
+                self.round_index = round_index
+                self.calls: list[str] = []
+                self.last_status_trace: tuple[int, ...] = ()
+                self.incomplete_read_retry_count = 0
+
+            def get(self, url: str, referer: str = "") -> tuple[int, str, str, bytes]:
+                self.calls.append(url)
+                if url == trial.OFFICIAL_HOME:
+                    self.last_status_trace = (200,)
+                    return 200, "text/html", "utf-8", b"<html></html>"
+                if url == unreachable:
+                    self.last_status_trace = (302, 404)
+                    return 404, "text/html", "utf-8", not_found_html
+                if url == empty:
+                    if self.round_index == 0:
+                        self.last_status_trace = (200,)
+                        return 200, "text/html", "utf-8", empty_html
+                    self.last_status_trace = (302, 404)
+                    return 404, "text/html", "utf-8", not_found_html
+                if url == recovered:
+                    if self.round_index == 0:
+                        self.last_status_trace = (302, 404)
+                        return 404, "text/html", "utf-8", not_found_html
+                    self.last_status_trace = (302, 200)
+                    content = recovered_html_a if self.round_index == 1 else recovered_html_b
+                    return 200, "text/html", "utf-8", content
+                if url == photo_a:
+                    self.last_status_trace = (200,)
+                    return 200, "image/jpeg", "utf-8", first_photo
+                if url == photo_b:
+                    raise AssertionError("后续轮不得下载或覆盖已冻结照片")
+                raise AssertionError(f"unexpected URL {url}")
+
+        now = [0.0]
+
+        def sleeper(seconds: float) -> None:
+            now[0] += seconds
+
+        def session_factory() -> FakeSession:
+            session = FakeSession(len(sessions))
+            sessions.append(session)
+            return session
+
+        started = datetime(2026, 8, 17, 11, 20, tzinfo=timezone.utc)
+        aggregate = trial.collect_detail_retry_results(
+            [
+                {"姓名": "周伯荣", "来源链接": unreachable},
+                {"姓名": "王钊", "来源链接": recovered},
+                {"姓名": "麦伟文", "来源链接": empty},
+            ],
+            session_factory=session_factory,  # type: ignore[arg-type]
+            sleeper=sleeper,
+            monotonic=lambda: now[0],
+            utcnow=lambda: started + timedelta(seconds=now[0]),
+        )
+        results = aggregate.by_source
+        self.assertEqual(results[unreachable]["state"], "详情不可达")
+        self.assertEqual(results[unreachable]["round_count"], 5)
+        self.assertEqual(results[unreachable]["evidence"].count("HTTP 302→404@"), 5)
+        self.assertEqual(results[recovered]["state"], "")
+        self.assertEqual(results[recovered]["round_count"], 5)
+        self.assertEqual(results[recovered]["captured_round"], 2)
+        captured = results[recovered]["captured_photo"]
+        self.assertIsInstance(captured, trial.CapturedPhoto)
+        self.assertEqual(captured.content, first_photo)
+        self.assertEqual(captured.portrait.photo_url, photo_a)
+        self.assertIn("后续轮不覆盖", results[recovered]["evidence"])
+        self.assertEqual(results[empty]["state"], "无照片容器")
+        self.assertEqual(len(sessions), 5)
+        self.assertTrue(all(trial.OFFICIAL_HOME in item.calls for item in sessions))
+        self.assertTrue(all(unreachable in item.calls for item in sessions))
+        self.assertTrue(all(recovered in item.calls for item in sessions))
+        self.assertTrue(all(empty in item.calls for item in sessions))
+        self.assertEqual(sum(item.calls.count(photo_a) for item in sessions), 1)
+        self.assertEqual(sum(item.calls.count(photo_b) for item in sessions), 0)
+        self.assertEqual(aggregate.total_detail_probes, 15)
+        self.assertEqual(aggregate.round_intervals_seconds, [60.0] * 4)
+        self.assertEqual(
+            aggregate.round_start_utc,
+            [
+                "2026-08-17T11:20:00Z",
+                "2026-08-17T11:21:00Z",
+                "2026-08-17T11:22:00Z",
+                "2026-08-17T11:23:00Z",
+                "2026-08-17T11:24:00Z",
+            ],
+        )
+
+    def test_recording_redirect_handler_retains_original_status(self) -> None:
+        from urllib.request import Request
+
+        handler = trial.RecordingRedirectHandler()
+        redirected = handler.redirect_request(
+            Request("https://www.gy3y.cn/original"),
+            None,
+            302,
+            "Found",
+            {},
+            "https://www.gy3y.cn/final",
+        )
+        self.assertIsNotNone(redirected)
+        self.assertEqual(handler.status_codes, [302])
 
     def test_parser_uses_only_unique_photo_container(self) -> None:
         source = "https://www.gy3y.cn/ks/nk/hxnk/doctor_1.html"
@@ -241,6 +371,7 @@ class Gy3yPhotoBackfillTrialTests(unittest.TestCase):
         self.assertIn("PR #66", trial.FULL_AUTHORIZATION)
         self.assertIn("FULL_APPEND_AND_OBSIDIAN", trial.FULL_AUTHORIZATION)
         self.assertIn("422 行全量", trial.FULL_AUTHORIZATION)
+        self.assertNotIn("管理员确认", trial.FULL_AUTHORIZATION)
         self.assertFalse(hasattr(trial, "stage_ledger_assets"))
         self.assertEqual(len(trial.FULL_PROTECTED_FILES), 4)
         warning = trial.append_failure_warning("既有提示", "无照片容器")
@@ -249,6 +380,49 @@ class Gy3yPhotoBackfillTrialTests(unittest.TestCase):
             f"既有提示；{trial.FULL_WARNING_BY_STATE['无照片容器']}",
         )
         self.assertEqual(trial.append_failure_warning(warning, "无照片容器"), warning)
+        self.assertEqual(
+            trial.replace_failure_warning(
+                "既有提示；官网本人职业照补录失败：详情不可达",
+                "详情不可达",
+                "无照片容器",
+            ),
+            "既有提示；官网本人职业照补录失败：无照片容器",
+        )
+
+    def test_reconstruct_pre_full_rows_reverses_only_recorded_diffs(self) -> None:
+        source = "https://www.gy3y.cn/ks/nkxt/jsyxk/doctor_12.html"
+        installed = [
+            {
+                "来源链接": source,
+                "照片链接": "https://www.gy3y.cn/Upload/201411/example.jpg",
+                "照片文件": "01_试点医院/广州医科大学附属第三医院/照片/example.jpg",
+                "异常提示": "既有提示",
+            },
+            {"来源链接": "https://example.com/outside", "照片链接": "保持"},
+        ]
+        payload = {
+            "row_diffs": [
+                {
+                    "来源链接": source,
+                    "列名": "照片链接",
+                    "修改前": "",
+                    "修改后": installed[0]["照片链接"],
+                },
+                {
+                    "来源链接": source,
+                    "列名": "照片文件",
+                    "修改前": "",
+                    "修改后": installed[0]["照片文件"],
+                },
+            ]
+        }
+        before = trial.reconstruct_pre_full_rows(installed, payload, {source})
+        self.assertEqual(before[0]["照片链接"], "")
+        self.assertEqual(before[0]["照片文件"], "")
+        self.assertEqual(before[0]["异常提示"], "既有提示")
+        self.assertEqual(before[1], installed[1])
+        self.assertEqual(installed[0]["照片链接"], "https://www.gy3y.cn/Upload/201411/example.jpg")
+
     def test_full_row_diff_allows_only_target_photo_columns(self) -> None:
         source = "https://www.gy3y.cn/cn/ks/nk/hxnk/doctor_1.html"
         before = [
@@ -323,10 +497,18 @@ class Gy3yPhotoBackfillTrialTests(unittest.TestCase):
         photos = []
         with tempfile.TemporaryDirectory() as directory:
             photo_root = Path(directory)
+            owner_union_ids = sorted(
+                trial.OWNER_THREE_ROUND_UNION_SOURCE_IDS, key=int
+            )
             for index in range(trial.EXPECTED_SCOPE_COUNT):
+                source_id = (
+                    owner_union_ids[index]
+                    if index < len(owner_union_ids)
+                    else str(10000 + index)
+                )
                 source = (
-                    "https://www.gy3y.cn/cn/ks/nk/test/"
-                    f"doctor_{10000 + index}.html"
+                    "https://www.gy3y.cn/ks/nk/test/"
+                    f"doctor_{source_id}.html"
                 )
                 if index < success_count:
                     filename = f"医生{index}.jpg"
@@ -385,6 +567,20 @@ class Gy3yPhotoBackfillTrialTests(unittest.TestCase):
                 state: sum(item.get("失败三态") == state for item in reconciliation)
                 for state in trial.FULL_FAILURE_STATES
             }
+            probe_sources = [
+                item["来源链接"] for item in reconciliation[:66]
+            ]
+            probe_evidence = "；".join(
+                f"第 {round_number} 轮 HTTP 302→200@2026-08-17T12:0{round_number - 1}:00Z"
+                for round_number in range(1, trial.DETAIL_PROBE_ROUNDS + 1)
+            )
+            photos_by_source = {item["source_link"]: item for item in photos}
+            for item in reconciliation[:66]:
+                item["错误证据"] = probe_evidence
+                photo = photos_by_source[item["来源链接"]]
+                photo["detail_probe_evidence"] = probe_evidence
+                photo["detail_probe_round_count"] = trial.DETAIL_PROBE_ROUNDS
+                photo["captured_round"] = 1
             payload = {
                 "meta": {
                     "expected_count": trial.EXPECTED_SCOPE_COUNT,
@@ -403,6 +599,33 @@ class Gy3yPhotoBackfillTrialTests(unittest.TestCase):
                     "over_20mib_count": 0,
                     "size_bucket_counts": {trial.size_bucket(len(content)): success_count},
                     "reference_kind_counts": {"doctor原图": success_count},
+                    "detail_probe_policy": "test five-round aggregate",
+                    "detail_probe_sources": probe_sources,
+                    "detail_probe_source_count": 66,
+                    "detail_probe_round_count": trial.DETAIL_PROBE_ROUNDS,
+                    "detail_probe_total_requests": 66 * trial.DETAIL_PROBE_ROUNDS,
+                    "detail_probe_round_start_utc": [
+                        f"2026-08-17T12:0{index}:00Z"
+                        for index in range(trial.DETAIL_PROBE_ROUNDS)
+                    ],
+                    "detail_probe_round_intervals_seconds": [60.0] * 4,
+                    "detail_probe_home_evidence": [
+                        f"第 {index + 1} 轮首页 HTTP 200@2026-08-17T12:0{index}:00Z"
+                        for index in range(trial.DETAIL_PROBE_ROUNDS)
+                    ],
+                    "owner_three_round_union_comparison": [
+                        {
+                            "detail_id": source_id,
+                            "source_link": next(
+                                source
+                                for source in probe_sources
+                                if trial.detail_id(source) == source_id
+                            ),
+                            "result": "实采",
+                            "captured_round": 1,
+                        }
+                        for source_id in owner_union_ids
+                    ],
                 },
                 "rows": rows,
                 "reconciliation": reconciliation,
