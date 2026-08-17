@@ -93,7 +93,9 @@ BASE_HEADERS = [
 ]
 FULL_FAILURE_STATES = ("详情不可达", "无照片容器", "占位图")
 FULL_WARNING_BY_STATE = {
-    state: f"官网本人职业照补录失败：{state}" for state in FULL_FAILURE_STATES
+    "详情不可达": "官网本人职业照补录失败：详情不可达",
+    "无照片容器": "官网本人职业照补录失败：无照片容器",
+    "占位图": "照片为占位图（暂无图片），留空",
 }
 FULL_ALLOWED_ROW_COLUMNS = {"照片链接", "照片文件", "异常提示"}
 FULL_AUTHORIZATION = (
@@ -117,6 +119,17 @@ PAGE_TITLE_ALIAS_BY_SOURCE = {
     "https://www.sysucc.org.cn/node/6668": "刘敏",
     "https://www.sysucc.org.cn/node/1528": "郭灵",
 }
+PLACEHOLDER_REPAIR_SOURCE = "https://www.sysucc.org.cn/node/3701"
+PLACEHOLDER_REPAIR_NAME = "夏小燕"
+SMALL_GIF_PLACEHOLDER_BYTES = 40 * 1024
+SMALL_GIF_PLACEHOLDER_MARKERS = (
+    "nopic",
+    "no_pic",
+    "no-photo",
+    "noimage",
+    "no-image",
+    "placeholder",
+)
 
 SAMPLE_PLAN = (
     ("夏忠军", "副高"),
@@ -460,6 +473,34 @@ def magic_extension(content: bytes, content_type: str | None) -> str:
         return "gif"
     if len(content) >= 12 and content.startswith(b"RIFF") and content[8:12] == b"WEBP":
         return "webp"
+    return ""
+
+
+def downloaded_placeholder_reason(
+    photo_url: str, content: bytes, extension: str
+) -> str:
+    if extension != "gif" or len(content) >= SMALL_GIF_PLACEHOLDER_BYTES:
+        return ""
+    path = unquote(urlparse(photo_url).path).lower()
+    marker_hit = any(marker in path for marker in SMALL_GIF_PLACEHOLDER_MARKERS)
+    try:
+        with Image.open(io.BytesIO(content)) as image:
+            image.load()
+            rgb = image.convert("RGB")
+            colors = rgb.getcolors(maxcolors=65)
+            pixels = list(rgb.get_flattened_data())
+    except Exception as exc:
+        raise RuntimeError(f"小 GIF 占位图视觉判定失败：{photo_url} {exc}") from exc
+    neutral_light = sum(
+        max(pixel) >= 210 and max(pixel) - min(pixel) <= 24 for pixel in pixels
+    )
+    gray_ratio = neutral_light / len(pixels) if pixels else 0.0
+    gray_placeholder = colors is not None and gray_ratio >= 0.70
+    if marker_hit or gray_placeholder:
+        return (
+            "照片为占位图（暂无图片），留空；"
+            f"GIF {len(content)} bytes，灰底占比 {gray_ratio:.2%}，路径 {path}"
+        )
     return ""
 
 
@@ -1360,6 +1401,11 @@ def validate_full_payload(payload: dict[str, Any], photo_root: Path) -> None:
             )
             if magic_extension(content, content_type) != expected_extension:
                 raise RuntimeError(f"照片魔数与扩展名不符：{filename}")
+            placeholder_reason = downloaded_placeholder_reason(
+                clean_text(photo.get("photo_url")), content, expected_extension
+            )
+            if placeholder_reason:
+                raise RuntimeError(f"照片目录仍包含占位图：{filename} {placeholder_reason}")
             if image_dimensions(content) != (
                 int(photo.get("width") or 0),
                 int(photo.get("height") or 0),
@@ -1442,6 +1488,32 @@ def insert_profile_photo_block_bytes(
     return bom + insert_profile_photo_block(
         before_text, doctor_name, photo_file
     ).encode("utf-8")
+
+
+def remove_profile_photo_block_bytes(
+    before_bytes: bytes, doctor_name: str, photo_file: str
+) -> bytes:
+    bom = b"\xef\xbb\xbf" if before_bytes.startswith(b"\xef\xbb\xbf") else b""
+    body = before_bytes[len(bom) :]
+    try:
+        before_text = body.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise RuntimeError(f"画像不是有效 UTF-8：{doctor_name}") from exc
+    markdown_path = profile_photo_markdown_path(photo_file)
+    marker = re.compile(
+        re.escape(f"![{doctor_name}]({markdown_path})")
+        + r"(?P<newline>\r\n|\n)(?P=newline)"
+    )
+    matches = list(marker.finditer(before_text))
+    if len(matches) != 1:
+        raise RuntimeError(
+            f"画像待移除照片区块不唯一：{doctor_name} 数量={len(matches)}"
+        )
+    after_text = marker.sub("", before_text, count=1)
+    after_bytes = bom + after_text.encode("utf-8")
+    if insert_profile_photo_block_bytes(after_bytes, doctor_name, photo_file) != before_bytes:
+        raise RuntimeError(f"画像照片区块移除无法字节级还原：{doctor_name}")
+    return after_bytes
 
 
 def validate_profile_photo_only_bytes(
@@ -1718,6 +1790,12 @@ def run_full(run_date: str) -> dict[str, Any]:
                     "详情不可达",
                     f"照片响应格式不受支持：{photo_type}",
                 )
+                continue
+            placeholder_reason = downloaded_placeholder_reason(
+                portrait.photo_url, photo_content, extension
+            )
+            if placeholder_reason:
+                record_failure(row, "占位图", placeholder_reason)
                 continue
             try:
                 width, height = image_dimensions(photo_content)
@@ -2013,6 +2091,329 @@ def run_full(run_date: str) -> dict[str, Any]:
         return full_payload
 
 
+def reconstruct_full_baseline_rows(
+    current_rows: list[dict[str, Any]], row_diffs: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    baseline_rows = copy.deepcopy(current_rows)
+    rows_by_source = {
+        clean_text(row.get("来源链接")): row for row in baseline_rows
+    }
+    if len(rows_by_source) != len(baseline_rows):
+        raise RuntimeError("无法从当前总底表重建 FULL 前基线：来源链接不唯一")
+    for item in row_diffs:
+        source = clean_text(item.get("来源链接"))
+        column = clean_text(item.get("列名"))
+        if source not in rows_by_source or column not in FULL_ALLOWED_ROW_COLUMNS:
+            raise RuntimeError(f"FULL 基线差异非法：{source} {column}")
+        rows_by_source[source][column] = row_value(item.get("修改前"))
+    return baseline_rows
+
+
+def run_placeholder_repair(run_date: str) -> dict[str, Any]:
+    import collect_official_doctors_batch as collector
+    import generate_obsidian_profiles as profiles
+
+    baseline_protected = file_snapshot([LEDGER_PATH, MASTER_REPORT_PATH])
+    full_payload = json.loads(FULL_JSON_PATH.read_text(encoding="utf-8"))
+    master_payload = json.loads(MASTER_JSON_PATH.read_text(encoding="utf-8"))
+    current_master_rows = copy.deepcopy(master_payload.get("rows", []))
+    if (
+        int(full_payload.get("meta", {}).get("downloaded_count") or 0) != 536
+        or int(full_payload.get("meta", {}).get("failed_count") or 0) != 6
+        or int(full_payload.get("meta", {}).get("blank_count") or 0) != 7
+    ):
+        raise RuntimeError("占位图返修前 FULL 四数不是 536/6/7，拒绝重复或漂移执行")
+
+    target_samples = [
+        item
+        for item in full_payload.get("photo_samples", [])
+        if clean_text(item.get("source_link")) == PLACEHOLDER_REPAIR_SOURCE
+    ]
+    if len(target_samples) != 1:
+        raise RuntimeError(f"夏小燕待返修照片样本不唯一：{len(target_samples)}")
+    target_sample = target_samples[0]
+    if clean_text(target_sample.get("master_name")) != PLACEHOLDER_REPAIR_NAME:
+        raise RuntimeError("夏小燕待返修照片样本姓名漂移")
+    photo_file = clean_text(target_sample.get("photo_file"))
+    filename = clean_text(target_sample.get("filename"))
+    photo_path = FORMAL_PHOTO_DIR / filename
+    photo_content = photo_path.read_bytes()
+    if (
+        len(photo_content) != int(target_sample.get("bytes") or 0)
+        or hashlib.sha256(photo_content).hexdigest() != target_sample.get("sha256")
+    ):
+        raise RuntimeError("夏小燕占位图磁盘字节与 FULL payload 不一致")
+    extension = magic_extension(photo_content, clean_text(target_sample.get("content_type")))
+    placeholder_reason = downloaded_placeholder_reason(
+        clean_text(target_sample.get("photo_url")), photo_content, extension
+    )
+    if not placeholder_reason:
+        raise RuntimeError("夏小燕 GIF 未被新增占位图启发式识别")
+
+    target_sources = {
+        clean_text(row.get("来源链接")) for row in full_payload.get("rows", [])
+    }
+    if len(target_sources) != EXPECTED_SCOPE_COUNT:
+        raise RuntimeError("占位图返修前 FULL 目标来源不是 543 个")
+    baseline_master_rows = reconstruct_full_baseline_rows(
+        current_master_rows, full_payload.get("row_diffs", [])
+    )
+    current_diffs = collect_full_row_diffs(
+        baseline_master_rows, current_master_rows, target_sources
+    )
+    if current_diffs != full_payload.get("row_diffs", []):
+        raise RuntimeError("占位图返修前总底表无法精确复现 FULL 差异")
+
+    repaired_master_rows = copy.deepcopy(current_master_rows)
+    repaired_master_matches = [
+        row
+        for row in repaired_master_rows
+        if clean_text(row.get("来源链接")) == PLACEHOLDER_REPAIR_SOURCE
+    ]
+    if len(repaired_master_matches) != 1:
+        raise RuntimeError("总底表夏小燕来源行不唯一")
+    repaired_master_row = repaired_master_matches[0]
+    if (
+        clean_text(repaired_master_row.get("姓名")) != PLACEHOLDER_REPAIR_NAME
+        or clean_text(repaired_master_row.get("照片链接"))
+        != clean_text(target_sample.get("photo_url"))
+        or clean_text(repaired_master_row.get("照片文件")) != photo_file
+    ):
+        raise RuntimeError("总底表夏小燕待返修照片字段与 FULL payload 不一致")
+    repaired_master_row["照片链接"] = ""
+    repaired_master_row["照片文件"] = ""
+    repaired_master_row["异常提示"] = append_failure_warning(
+        repaired_master_row.get("异常提示"), "占位图"
+    )
+
+    repaired_payload = copy.deepcopy(full_payload)
+    repaired_payload["photo_samples"] = [
+        item
+        for item in repaired_payload.get("photo_samples", [])
+        if clean_text(item.get("source_link")) != PLACEHOLDER_REPAIR_SOURCE
+    ]
+    if any(
+        clean_text(item.get("source_link")) == PLACEHOLDER_REPAIR_SOURCE
+        for item in repaired_payload.get("failures", [])
+    ):
+        raise RuntimeError("夏小燕已存在失败记录，拒绝重复返修")
+    repaired_payload.setdefault("failures", []).append(
+        {
+            "name": PLACEHOLDER_REPAIR_NAME,
+            "source_link": PLACEHOLDER_REPAIR_SOURCE,
+            "state": "占位图",
+            "error": placeholder_reason,
+        }
+    )
+    repaired_reconciliation = [
+        item
+        for item in repaired_payload.get("reconciliation", [])
+        if clean_text(item.get("来源链接")) == PLACEHOLDER_REPAIR_SOURCE
+    ]
+    if len(repaired_reconciliation) != 1:
+        raise RuntimeError("夏小燕 FULL 对账行不唯一")
+    repaired_reconciliation[0].update(
+        {
+            "状态": "失败",
+            "失败三态": "占位图",
+            "照片链接": "",
+            "照片文件": "",
+            "字节数": "",
+            "SHA-256": "",
+            "宽": "",
+            "高": "",
+            "错误证据": placeholder_reason,
+        }
+    )
+    repaired_full_rows = [
+        row
+        for row in repaired_payload.get("rows", [])
+        if clean_text(row.get("来源链接")) == PLACEHOLDER_REPAIR_SOURCE
+    ]
+    if len(repaired_full_rows) != 1:
+        raise RuntimeError("夏小燕 FULL payload 行不唯一")
+    repaired_full_rows[0]["照片链接"] = ""
+    repaired_full_rows[0]["照片文件"] = ""
+    repaired_full_rows[0]["异常提示"] = append_failure_warning(
+        repaired_full_rows[0].get("异常提示"), "占位图"
+    )
+
+    repaired_master_payload = copy.deepcopy(master_payload)
+    repaired_master_payload["rows"] = repaired_master_rows
+    recompute_failure_derivatives(repaired_master_payload, repaired_master_rows)
+    repaired_diffs = collect_full_row_diffs(
+        baseline_master_rows, repaired_master_rows, target_sources
+    )
+    repaired_payload["row_diffs"] = repaired_diffs
+    state_counter = Counter(
+        clean_text(item.get("state")) for item in repaired_payload["failures"]
+    )
+    total_bytes = sum(int(item["bytes"]) for item in repaired_payload["photo_samples"])
+    max_bytes = max(
+        (int(item["bytes"]) for item in repaired_payload["photo_samples"]),
+        default=0,
+    )
+    meta = repaired_payload["meta"]
+    meta.update(
+        {
+            "downloaded_count": len(repaired_payload["photo_samples"]),
+            "failed_count": len(repaired_payload["failures"]),
+            "blank_count": len(repaired_payload["failures"]) + 1,
+            "failure_state_counts": {
+                state: state_counter.get(state, 0) for state in FULL_FAILURE_STATES
+            },
+            "detail_unreachable_count": state_counter.get("详情不可达", 0),
+            "detail_unreachable_rate": state_counter.get("详情不可达", 0)
+            / EXPECTED_COLLECT_COUNT,
+            "photo_total_bytes": total_bytes,
+            "photo_total_mib": total_bytes / 1024 / 1024,
+            "photo_max_bytes": max_bytes,
+            "over_5mib_count": sum(
+                int(item["bytes"]) > MAX_OWNER_REPORT_BYTES
+                for item in repaired_payload["photo_samples"]
+            ),
+            "profile_refreshed_count": len(repaired_payload["photo_samples"]),
+            "row_diff_count": len(repaired_diffs),
+            "row_diff_columns": dict(
+                Counter(item["列名"] for item in repaired_diffs)
+            ),
+            "repair_date": run_date,
+            "repair_authorization": (
+                "PR #60 owner comment 2026-08-16T16:53:45Z: "
+                "FULL 终审不通过，夏小燕占位图最小返修"
+            ),
+        }
+    )
+    if (
+        meta["downloaded_count"] != 535
+        or meta["failed_count"] != 7
+        or meta["blank_count"] != 8
+        or meta["failure_state_counts"]
+        != {"详情不可达": 3, "无照片容器": 3, "占位图": 1}
+        or meta["row_diff_columns"]
+        != {"照片链接": 535, "照片文件": 535, "异常提示": 8}
+    ):
+        raise RuntimeError("占位图返修后的四数或逐列差异不符合 owner 指令")
+
+    profile_paths = profiles.extract_existing_sources(PROFILE_DIR)
+    if len(profile_paths) != EXPECTED_PROFILE_SOURCE_COUNT:
+        raise RuntimeError("占位图返修前既有画像来源数量漂移")
+    profile_path = profile_paths.get(PLACEHOLDER_REPAIR_SOURCE)
+    if profile_path is None:
+        raise RuntimeError("夏小燕既有画像缺失")
+    before_profile_bytes = profile_path.read_bytes()
+    after_profile_bytes = remove_profile_photo_block_bytes(
+        before_profile_bytes, PLACEHOLDER_REPAIR_NAME, photo_file
+    )
+    before_profile_tree = profile_markdown_tree(PROFILE_DIR)
+    profile_relative = profile_path.relative_to(PROFILE_DIR)
+
+    with tempfile.TemporaryDirectory(prefix="issue59_repair_", dir=WORK_DIR) as temporary:
+        temp_root = Path(temporary)
+        temp_photo_dir = temp_root / "photos"
+        shutil.copytree(FORMAL_PHOTO_DIR, temp_photo_dir)
+        (temp_photo_dir / filename).unlink()
+        temp_profile_root = temp_root / "profiles"
+        temp_hospital_dir = temp_profile_root / HOSPITAL
+        shutil.copytree(
+            PROFILE_DIR,
+            temp_hospital_dir,
+            ignore=shutil.ignore_patterns("照片"),
+        )
+        temp_profile_path = temp_hospital_dir / profile_relative
+        temp_profile_path.write_bytes(after_profile_bytes)
+        validate_profile_tree_surgical(
+            before_profile_tree, temp_hospital_dir, {profile_relative}
+        )
+
+        temp_master_payload = temp_root / MASTER_JSON_PATH.name
+        temp_master_csv = temp_root / MASTER_CSV_PATH.name
+        temp_master_xlsx = temp_root / MASTER_XLSX_PATH.name
+        temp_master_preview = temp_root / "master_preview.png"
+        temp_master_payload.write_text(
+            json.dumps(repaired_master_payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        write_master_csv(temp_master_csv, repaired_master_rows)
+        collector.build_workbook(
+            temp_master_payload, temp_master_xlsx, temp_master_preview
+        )
+        validate_master_layers(
+            temp_master_payload, temp_master_csv, temp_master_xlsx
+        )
+
+        temp_full_payload = temp_root / FULL_JSON_PATH.name
+        temp_full_csv = temp_root / FULL_CSV_PATH.name
+        temp_full_report = temp_root / FULL_REPORT_PATH.name
+        temp_full_payload.write_text(
+            json.dumps(repaired_payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        write_full_reconciliation_csv(temp_full_csv, repaired_payload)
+        write_full_report(temp_full_report, repaired_payload)
+        validate_full_payload(repaired_payload, temp_photo_dir)
+
+        file_map = {
+            MASTER_JSON_PATH: temp_master_payload,
+            MASTER_CSV_PATH: temp_master_csv,
+            MASTER_XLSX_PATH: temp_master_xlsx,
+            FULL_JSON_PATH: temp_full_payload,
+            FULL_CSV_PATH: temp_full_csv,
+            FULL_REPORT_PATH: temp_full_report,
+            profile_path: temp_profile_path,
+        }
+        backups = backup_file_targets(
+            list(file_map), temp_root / "file_backups"
+        )
+        photo_backup = temp_root / "formal_photo_backup"
+        photo_swapped = False
+        try:
+            ensure_workspace_target(FORMAL_PHOTO_DIR)
+            FORMAL_PHOTO_DIR.replace(photo_backup)
+            temp_photo_dir.replace(FORMAL_PHOTO_DIR)
+            photo_swapped = True
+            apply_file_map(file_map)
+
+            final_rows = validate_master_layers(
+                MASTER_JSON_PATH, MASTER_CSV_PATH, MASTER_XLSX_PATH
+            )
+            final_diffs = collect_full_row_diffs(
+                baseline_master_rows, final_rows, target_sources
+            )
+            if final_diffs != repaired_diffs:
+                raise RuntimeError("占位图返修落盘后的总底表差异不一致")
+            validate_full_payload(repaired_payload, FORMAL_PHOTO_DIR)
+            if photo_path.exists():
+                raise RuntimeError("夏小燕占位 GIF 落盘后仍存在")
+            final_profile_paths = profiles.extract_existing_sources(PROFILE_DIR)
+            if set(final_profile_paths) != set(profile_paths):
+                raise RuntimeError("占位图返修落盘后画像来源集合发生变化")
+            if (
+                insert_profile_photo_block_bytes(
+                    final_profile_paths[PLACEHOLDER_REPAIR_SOURCE].read_bytes(),
+                    PLACEHOLDER_REPAIR_NAME,
+                    photo_file,
+                )
+                != before_profile_bytes
+            ):
+                raise RuntimeError("夏小燕画像未字节级恢复到插入前状态")
+            validate_profile_tree_surgical(
+                before_profile_tree, PROFILE_DIR, {profile_relative}
+            )
+            if file_snapshot([LEDGER_PATH, MASTER_REPORT_PATH]) != baseline_protected:
+                raise RuntimeError("占位图返修触碰了入口台账或总底表更新报告")
+        except Exception:
+            restore_file_targets(backups)
+            if photo_swapped and FORMAL_PHOTO_DIR.exists():
+                ensure_workspace_target(FORMAL_PHOTO_DIR)
+                shutil.rmtree(FORMAL_PHOTO_DIR)
+            if photo_backup.exists():
+                photo_backup.replace(FORMAL_PHOTO_DIR)
+            raise
+
+    return repaired_payload
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Issue #59 中山肿瘤照片补录")
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -2021,6 +2422,11 @@ def parse_args() -> argparse.Namespace:
         "--full-apply",
         action="store_true",
         help="按 PR #60 owner FULL 授权执行 542+1 行回填与既有画像外科式刷新",
+    )
+    mode.add_argument(
+        "--repair-placeholder",
+        action="store_true",
+        help="按 PR #60 owner 终审移除夏小燕占位 GIF 并事务更新三载体/画像",
     )
     mode.add_argument("--validate", action="store_true", help="验证现有 TRIAL/FULL payload")
     mode.add_argument(
@@ -2032,6 +2438,27 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if args.repair_placeholder:
+        payload = run_placeholder_repair(args.run_date)
+        meta = payload["meta"]
+        print(
+            json.dumps(
+                {
+                    "mode": "photo_backfill_placeholder_repair",
+                    "issue": ISSUE_NUMBER,
+                    "downloaded": meta["downloaded_count"],
+                    "failed": meta["failed_count"],
+                    "blank": meta["blank_count"],
+                    "not_applicable": meta["not_applicable_count"],
+                    "failure_states": meta["failure_state_counts"],
+                    "photo_total_bytes": meta["photo_total_bytes"],
+                    "profiles_refreshed": meta["profile_refreshed_count"],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return
     if args.full_apply:
         payload = run_full(args.run_date)
         meta = payload["meta"]

@@ -176,6 +176,50 @@ class SysuccPhotoBackfillTrialTests(unittest.TestCase):
         self.assertEqual(target.magic_extension(content, "image/jpeg"), "jpg")
         self.assertEqual(target.image_dimensions(content), (37, 53))
 
+    def test_small_gif_gray_or_nopic_is_placeholder(self) -> None:
+        buffer = io.BytesIO()
+        Image.new("RGB", (400, 600), (238, 238, 238)).save(
+            buffer, format="GIF"
+        )
+        content = buffer.getvalue()
+        self.assertLess(len(content), target.SMALL_GIF_PLACEHOLDER_BYTES)
+        self.assertIn(
+            "占位图",
+            target.downloaded_placeholder_reason(
+                "https://www.sysucc.org.cn/files/import_images/nopic.gif",
+                content,
+                "gif",
+            ),
+        )
+        self.assertIn(
+            "灰底占比",
+            target.downloaded_placeholder_reason(
+                "https://www.sysucc.org.cn/files/portrait.gif",
+                content,
+                "gif",
+            ),
+        )
+
+    def test_small_colorful_gif_is_not_placeholder(self) -> None:
+        image = Image.new("RGB", (32, 32))
+        for y in range(32):
+            for x in range(32):
+                image.putpixel(
+                    (x, y),
+                    ((x * 37 + y * 13) % 256, (x * 17) % 256, (y * 29) % 256),
+                )
+        buffer = io.BytesIO()
+        image.save(buffer, format="GIF")
+        content = buffer.getvalue()
+        self.assertEqual(
+            target.downloaded_placeholder_reason(
+                "https://www.sysucc.org.cn/files/portrait.gif",
+                content,
+                "gif",
+            ),
+            "",
+        )
+
     def test_allocate_trial_name_and_no_overwrite(self) -> None:
         row = {
             "姓名": "夏忠军",
@@ -264,6 +308,10 @@ class SysuccPhotoBackfillTrialTests(unittest.TestCase):
         )
         target.validate_profile_photo_only_bytes(
             before, after, "夏忠军", photo_file
+        )
+        self.assertEqual(
+            target.remove_profile_photo_block_bytes(after, "夏忠军", photo_file),
+            before,
         )
 
     def test_full_validator_closes_542_plus_1_blank_rows(self) -> None:
