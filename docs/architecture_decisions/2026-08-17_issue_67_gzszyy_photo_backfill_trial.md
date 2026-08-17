@@ -1,4 +1,4 @@
-# Issue #67 广州市中医院照片补录 TRIAL
+# Issue #67 广州市中医院照片补录 TRIAL 与 FULL
 
 ## 目标与授权
 
@@ -6,9 +6,9 @@
 - 医院：广州市中医院。
 - 官网：<https://www.gzszyy.com/>。
 - 医生目录：<https://www.gzszyy.com/expert/>。
-- Phase：`TRIAL`；只允许 10 人照片试采，正式资产保持零修改。
+- 初始 Phase：`TRIAL`；只允许 10 人照片试采，正式资产保持零修改。
 - 工作分支：`codex/mhrj/issue-67-gzszyy-photo-backfill-trial`，基线为 Issue #65 合并后的 `origin/main` 提交 `fc845a26993d555150b52a3c67b9dea12a2b5217`。
-- 当前阶段：`TRIAL_READY_FOR_OWNER_AUDIT`。未取得关联 PR 中 `nancywrayg57-jpg` 明确审计通过并切换为 `FULL_APPEND_AND_OBSIDIAN` 前，不得执行 415 行正式回填、正式照片写入或画像刷新。
+- Owner 于 PR #68 评论 `2026-08-17T12:35:05Z` 明确审计通过并切换为 `FULL_APPEND_AND_OBSIDIAN`；FULL 已完成并进入 `FULL_READY_FOR_FINAL_OWNER_AUDIT`。
 
 ## 范围与来源边界
 
@@ -43,6 +43,25 @@
 - 本院画像为 415 份医生画像加 `_索引.md`，共 416 个 Markdown；均保留 `<!-- AUTO-GENERATED-BY: work/generate_obsidian_profiles.py -->` 标记，TRIAL 前零图片引用。
 - 本院正式照片目录在 TRIAL 前后均不存在。
 
+## FULL 执行与结果
+
+- 脚本新增 `--full` 与 `--validate-full`，FULL 先在临时事务区完成 415 行采集、三载体生成、画像最小刷新和全部验证，再一次性替换正式资产；验证失败会恢复原文件并移除新照片目录。
+- 415/415 实采成功，失败 0、留空 0；失败三态均为 0；状态闪烁 0，未触发 5 轮聚合协议。
+- 415 行 `照片链接` 与 `照片文件` 共形成 830 个允许差异；无 `异常提示` 变化，无范围外行或范围外列变化。
+- 正式照片 415 张，总字节 101,590,176（96.88 MiB），最大单张 6,193,649 bytes；分桶为 `<200KiB` 130、`200KiB-1MiB` 279、`1-5MiB` 5、`5-20MiB` 1、`>20MiB` 0。
+- 唯一超过 5 MiB 的 owner 终审项：梁依敏，脾胃科（消化内科），`https://oss.gzszyy.com/20251118/140709731.png`，6,193,649 bytes，1270×1217，SHA-256 `0618d50d178b3b6ea6a9d5d5ad03e47d49a8115301ba370871a1b0be9eb8815b`。
+- 照片全部来自详情页 `.doctor-resume div.doctor-img` 唯一引用和 `oss.gzszyy.com`；页面未引用路径探测 0、第三方来源 0、二维码/装饰图/空 src 混入 0。
+- 总底表 payload/CSV/XLSX 9222 行、25 列逐值一致；XLSX 仍沿用 `collector.build_workbook` → `@oai/artifact-tool` 生成链，六个工作表完成视觉复核，公式错误扫描 0。
+- 本院既有 415 份 AUTO 标记画像均只在“基础信息”标题后新增一行照片引用；不新建画像；`_索引.md`、入口台账三载体和总底表更新报告保持不变。
+
+## FULL 工件
+
+- `work/广州市中医院_photo_backfill_full_payload.json`
+- `work/广州市中医院_photo_backfill_full_reconciliation.csv`
+- `work/广州市中医院_photo_backfill_full_report.md`
+- `医生画像仓库/01_试点医院/广州市中医院/照片/`
+- 统一总底表 payload/CSV/XLSX 与本院 415 份既有画像最小刷新。
+
 ## 工件
 
 - `work/广州市中医院_photo_backfill_trial_payload.json`
@@ -57,4 +76,6 @@
 - 专项测试：11/11 通过。
 - 全仓测试：293/293 通过；仅通过仓库外临时 `PYTHONPATH` 提供既有测试所需的 `requests` 与 `beautifulsoup4`，未修改全局 Python、系统 PATH 或仓库依赖配置。
 - TRIAL `--validate`：通过。
-- 下一步只允许提交并更新 Issue #67 对应 PR，回报 `TRIAL_READY_FOR_OWNER_AUDIT` 后停止等待 owner 审计。
+- FULL `--validate-full`：通过；415 张照片的 SHA-256、魔数、扩展名、字节数和尺寸全量对账通过。
+- XLSX 六工作表完成可视化复核；公式错误扫描 0。
+- 下一步只允许完成全仓测试、以非强制 Git Data API 更新 Issue #67 原分支，并在 PR #68 回报 `FULL_READY_FOR_FINAL_OWNER_AUDIT`；不得合并 PR、关闭 Issue 或领取下一任务。

@@ -197,6 +197,88 @@ class GzszyyPhotoBackfillTrialTests(unittest.TestCase):
             second = trial.tree_digest(root, "*.md")
             self.assertNotEqual(first["sha256"], second["sha256"])
 
+    def test_full_failure_warning_is_idempotent(self) -> None:
+        first = trial.append_failure_warning("既有提示", "详情不可达")
+        second = trial.append_failure_warning(first, "详情不可达")
+        self.assertEqual(first, second)
+        self.assertEqual(first.count("官网本人职业照补录失败：详情不可达"), 1)
+
+    def test_full_page_reference_classifies_missing_and_accepts_unique_oss(self) -> None:
+        source = "https://www.gzszyy.com/expert/2026/w9aADOev.html"
+        missing = '<div class="doctor-resume"><h1>叶穗林</h1></div>'
+        state, photo_url, evidence = trial.inspect_full_page_reference(
+            missing, source, "叶穗林"
+        )
+        self.assertEqual((state, photo_url), ("无照片容器", ""))
+        self.assertIn("doctor-img", evidence)
+        good = '<div class="doctor-resume"><div class="doctor-img"><img src="https://oss.gzszyy.com/20200101/1.jpg"></div><h1>叶穗林</h1></div>'
+        self.assertEqual(
+            trial.inspect_full_page_reference(good, source, "叶穗林"),
+            ("", "https://oss.gzszyy.com/20200101/1.jpg", ""),
+        )
+
+    def test_retryable_get_records_three_spaced_failures(self) -> None:
+        class FakeSession:
+            def get(self, url: str, referer: str = "") -> trial.HttpResult:
+                return response(status=503, url=url)
+
+        stamps = [
+            "2026-08-17T00:00:00Z",
+            "2026-08-17T00:00:30Z",
+            "2026-08-17T00:01:00Z",
+        ]
+        with patch.object(trial, "utc_now_text", side_effect=stamps), patch.object(
+            trial.time, "sleep"
+        ) as sleep:
+            result, attempts = trial.retryable_get(
+                FakeSession(), "https://www.gzszyy.com/a", "", lambda item: item.ok
+            )
+        self.assertIsNone(result)
+        self.assertEqual(len(attempts), 3)
+        self.assertEqual(sleep.call_count, 2)
+        sleep.assert_called_with(30)
+        trial.validate_retry_attempts(attempts)
+
+    def test_retryable_get_fuses_on_status_flicker(self) -> None:
+        class FakeSession:
+            def __init__(self) -> None:
+                self.calls = 0
+
+            def get(self, url: str, referer: str = "") -> trial.HttpResult:
+                self.calls += 1
+                return response(status=503 if self.calls == 1 else 200, url=url)
+
+        stamps = ["2026-08-17T00:00:00Z", "2026-08-17T00:00:30Z"]
+        with patch.object(trial, "utc_now_text", side_effect=stamps), patch.object(
+            trial.time, "sleep"
+        ), self.assertRaisesRegex(RuntimeError, "FATAL.*状态闪烁"):
+            trial.retryable_get(
+                FakeSession(), "https://www.gzszyy.com/a", "", lambda item: item.ok
+            )
+
+    def test_profile_photo_insert_is_surgical(self) -> None:
+        before = (
+            "---\n姓名: 叶穗林\n---\n"
+            + trial.AUTO_MARKER
+            + "\n\n# 叶穗林\n\n## 基础信息\n\n| 字段 | 内容 |\n"
+        ).encode("utf-8")
+        photo_file = "01_试点医院/广州市中医院/照片/叶穗林.jpg"
+        after = trial.insert_profile_photo_block_bytes(before, "叶穗林", photo_file)
+        self.assertIn("![叶穗林](照片/叶穗林.jpg)".encode("utf-8"), after)
+        trial.validate_profile_photo_only_bytes(before, after, "叶穗林", photo_file)
+
+    def test_full_row_diff_rejects_out_of_scope_columns(self) -> None:
+        source = "https://www.gzszyy.com/expert/2026/w9aADOev.html"
+        before = [{header: "" for header in trial.BASE_HEADERS}]
+        before[0]["来源链接"] = source
+        after = [dict(before[0])]
+        after[0]["照片链接"] = "https://oss.gzszyy.com/20200101/1.jpg"
+        diffs = trial.collect_full_row_diffs(before, after, {source})
+        self.assertEqual([item["列名"] for item in diffs], ["照片链接"])
+        after[0]["姓名"] = "改名"
+        with self.assertRaisesRegex(RuntimeError, "范围外字段"):
+            trial.collect_full_row_diffs(before, after, {source})
+
 
 if __name__ == "__main__":
     unittest.main()
