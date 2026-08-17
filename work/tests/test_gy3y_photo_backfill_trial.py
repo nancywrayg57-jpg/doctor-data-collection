@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import io
 import sys
 import tempfile
@@ -66,6 +67,30 @@ class Gy3yPhotoBackfillTrialTests(unittest.TestCase):
             "",
         )
 
+    def test_admin_confirmed_exact_placeholder_path_is_left_blank(self) -> None:
+        source = "https://www.gy3y.cn/ks/wkxt/pwyq/doctor_495.html"
+        self.assertEqual(
+            trial.page_referenced_photo_url("/html/images/doctor.jpg", source),
+            (
+                "https://www.gy3y.cn/html/images/doctor.jpg",
+                "管理员确认占位图",
+            ),
+        )
+        state, portrait = trial.inspect_portrait_reference(
+            """
+            <title>王军伟_普外一区（肝胆外科）_广州医科大学附属第三医院</title>
+            <div class="photo"><img src="/html/images/doctor.jpg"></div>
+            """,
+            source,
+            "王军伟",
+        )
+        self.assertEqual(state, "占位图")
+        self.assertIsNone(portrait)
+        self.assertEqual(
+            trial.page_referenced_photo_url("/html/images/doctor-2.jpg", source),
+            ("", ""),
+        )
+
     def test_parser_uses_only_unique_photo_container(self) -> None:
         source = "https://www.gy3y.cn/ks/nk/hxnk/doctor_1.html"
         html = """
@@ -105,7 +130,7 @@ class Gy3yPhotoBackfillTrialTests(unittest.TestCase):
             )
 
     def test_scope_and_fixed_sample_plan_are_stable(self) -> None:
-        rows = trial.load_scope_rows()
+        rows = trial.load_scope_rows(require_blank_photo_fields=False)
         selected = trial.select_trial_rows(rows)
         self.assertEqual(len(rows), 422)
         self.assertEqual(len(selected), 10)
@@ -191,6 +216,199 @@ class Gy3yPhotoBackfillTrialTests(unittest.TestCase):
                 trial.FULL_FUSE_BYTES + 1,
             )
 
+
+    def test_internal_404_title_is_detail_unreachable(self) -> None:
+        source = "https://www.gy3y.cn/ks/nk/hxnk/doctor_6.html"
+        state, portrait = trial.inspect_portrait_reference(
+            "<html><head><title>404</title></head><body></body></html>",
+            source,
+            "李文杰",
+        )
+        self.assertEqual(state, "详情不可达")
+        self.assertIsNone(portrait)
+
+    def test_parser_tolerates_official_title_space_before_separator(self) -> None:
+        source = "https://www.gy3y.cn/ks/wkxt/qgyzk/doctor_307.html"
+        html = """
+        <title>赵国志 _器官移植科_广州医科大学附属第三医院</title>
+        <div class="photo"><img src="/Upload/202112/637750146771733237.jpg"></div>
+        """
+        state, portrait = trial.inspect_portrait_reference(html, source, "赵国志")
+        self.assertEqual(state, "")
+        self.assertIsNotNone(portrait)
+
+    def test_full_authorization_and_failure_warning_are_explicit(self) -> None:
+        self.assertIn("PR #66", trial.FULL_AUTHORIZATION)
+        self.assertIn("FULL_APPEND_AND_OBSIDIAN", trial.FULL_AUTHORIZATION)
+        self.assertIn("422 行全量", trial.FULL_AUTHORIZATION)
+        self.assertFalse(hasattr(trial, "stage_ledger_assets"))
+        self.assertEqual(len(trial.FULL_PROTECTED_FILES), 4)
+        warning = trial.append_failure_warning("既有提示", "无照片容器")
+        self.assertEqual(
+            warning,
+            f"既有提示；{trial.FULL_WARNING_BY_STATE['无照片容器']}",
+        )
+        self.assertEqual(trial.append_failure_warning(warning, "无照片容器"), warning)
+    def test_full_row_diff_allows_only_target_photo_columns(self) -> None:
+        source = "https://www.gy3y.cn/cn/ks/nk/hxnk/doctor_1.html"
+        before = [
+            {
+                "来源链接": source,
+                "照片链接": "",
+                "照片文件": "",
+                "异常提示": "",
+                "姓名": "钟南山",
+            }
+        ]
+        after = [{**before[0], "照片链接": "https://www.gy3y.cn/images/doctor/A.jpg"}]
+        diffs = trial.collect_full_row_diffs(before, after, {source})
+        self.assertEqual([item["列名"] for item in diffs], ["照片链接"])
+        with self.assertRaisesRegex(RuntimeError, "范围外行"):
+            trial.collect_full_row_diffs(before, after, set())
+        with self.assertRaisesRegex(RuntimeError, "范围外字段"):
+            trial.collect_full_row_diffs(
+                before, [{**before[0], "姓名": "错误"}], {source}
+            )
+    def test_full_filename_uses_detail_id_only_for_collision(self) -> None:
+        row = {
+            "姓名": "同名",
+            "科室_分类页": "内科",
+            "职称身份原文": "主任医师",
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            used: set[str] = set()
+            first, _ = trial.allocate_full_photo_path(row, "100", "jpg", root, used)
+            second, _ = trial.allocate_full_photo_path(row, "101", "jpg", root, used)
+        self.assertEqual(first, "同名-内科-主任医师-广州医科大学附属第三医院.jpg")
+        self.assertEqual(
+            second,
+            "同名-内科-主任医师-广州医科大学附属第三医院-101.jpg",
+        )
+    def test_profile_photo_insert_preserves_bom_newlines_and_other_bytes(self) -> None:
+        before = (
+            b"\xef\xbb\xbf---\r\nprotected: true\r\n---\r\n\r\n# Doctor\r\n\r\n"
+            + "## 基础信息\r\n\r\n".encode("utf-8")
+            + b"| field | value |\r\n|---|---|\r\n| x | y |\r\n"
+        )
+        photo_file = (
+            "01_试点医院/广州医科大学附属第三医院/照片/"
+            "钟南山-呼吸与危重症医学科-主任医师-广州医科大学附属第三医院.jpg"
+        )
+        after = trial.insert_profile_photo_block_bytes(before, "钟南山", photo_file)
+        expected = (
+            "![钟南山](照片/钟南山-呼吸与危重症医学科-主任医师-"
+            "广州医科大学附属第三医院.jpg)\r\n\r\n"
+        ).encode("utf-8")
+        self.assertTrue(after.startswith(b"\xef\xbb\xbf"))
+        self.assertEqual(
+            after,
+            before.replace(
+                "## 基础信息\r\n\r\n".encode("utf-8"),
+                "## 基础信息\r\n\r\n".encode("utf-8") + expected,
+            ),
+        )
+        trial.validate_profile_photo_only_bytes(before, after, "钟南山", photo_file)
+        with self.assertRaisesRegex(RuntimeError, "已存在照片"):
+            trial.insert_profile_photo_block_bytes(after, "钟南山", photo_file)
+    def test_full_validator_closes_422_rows_with_three_failure_states(self) -> None:
+        buffer = io.BytesIO()
+        Image.new("RGB", (8, 9), "blue").save(buffer, format="JPEG")
+        content = buffer.getvalue()
+        digest = hashlib.sha256(content).hexdigest()
+        success_count = trial.EXPECTED_SCOPE_COUNT - 22
+        failed_count = trial.EXPECTED_SCOPE_COUNT - success_count
+        rows = []
+        reconciliation = []
+        photos = []
+        with tempfile.TemporaryDirectory() as directory:
+            photo_root = Path(directory)
+            for index in range(trial.EXPECTED_SCOPE_COUNT):
+                source = (
+                    "https://www.gy3y.cn/cn/ks/nk/test/"
+                    f"doctor_{10000 + index}.html"
+                )
+                if index < success_count:
+                    filename = f"医生{index}.jpg"
+                    photo_url = f"https://www.gy3y.cn/images/doctor/DOCTOR{index}.jpg"
+                    photo_file = f"01_试点医院/{trial.HOSPITAL}/照片/{filename}"
+                    (photo_root / filename).write_bytes(content)
+                    rows.append(
+                        {
+                            "来源链接": source,
+                            "照片链接": photo_url,
+                            "照片文件": photo_file,
+                            "异常提示": "",
+                        }
+                    )
+                    photos.append(
+                        {
+                            "source_link": source,
+                            "photo_url": photo_url,
+                            "photo_file": photo_file,
+                            "filename": filename,
+                            "bytes": len(content),
+                            "sha256": digest,
+                            "magic_hex": content[:12].hex().upper(),
+                            "width": 8,
+                            "height": 9,
+                            "reference_kind": "doctor原图",
+                        }
+                    )
+                    reconciliation.append(
+                        {
+                            "来源链接": source,
+                            "状态": "实采",
+                            "失败三态": "",
+                        }
+                    )
+                else:
+                    state = trial.FULL_FAILURE_STATES[
+                        (index - success_count) % len(trial.FULL_FAILURE_STATES)
+                    ]
+                    rows.append(
+                        {
+                            "来源链接": source,
+                            "照片链接": "",
+                            "照片文件": "",
+                            "异常提示": trial.FULL_WARNING_BY_STATE[state],
+                        }
+                    )
+                    reconciliation.append(
+                        {
+                            "来源链接": source,
+                            "状态": "失败",
+                            "失败三态": state,
+                        }
+                    )
+            state_counts = {
+                state: sum(item.get("失败三态") == state for item in reconciliation)
+                for state in trial.FULL_FAILURE_STATES
+            }
+            payload = {
+                "meta": {
+                    "expected_count": trial.EXPECTED_SCOPE_COUNT,
+                    "downloaded_count": success_count,
+                    "failed_count": failed_count,
+                    "blank_count": failed_count,
+                    "failure_state_counts": state_counts,
+                    "constructed_unreferenced_probe_count": 0,
+                    "third_party_source_count": 0,
+                    "existing_profile_count": trial.EXPECTED_PROFILE_COUNT,
+                    "no_profile_scope_count": 0,
+                    "profile_refreshed_count": success_count,
+                    "photo_total_bytes": len(content) * success_count,
+                    "photo_max_bytes": len(content),
+                    "over_5mib_count": 0,
+                    "over_20mib_count": 0,
+                    "size_bucket_counts": {trial.size_bucket(len(content)): success_count},
+                    "reference_kind_counts": {"doctor原图": success_count},
+                },
+                "rows": rows,
+                "reconciliation": reconciliation,
+                "photo_samples": photos,
+            }
+            trial.validate_full_payload(payload, photo_root)
 
 if __name__ == "__main__":
     unittest.main()
