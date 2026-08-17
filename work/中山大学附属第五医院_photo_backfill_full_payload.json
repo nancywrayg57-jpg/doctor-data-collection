@@ -4,23 +4,23 @@
     "phase": "FULL_READY_FOR_FINAL_OWNER_AUDIT",
     "hospital": "中山大学附属第五医院",
     "run_date": "2026-08-17",
-    "authorization": "PR #62 owner comments 2026-08-17T03:49:07Z and 2026-08-17T04:27:48Z: TRIAL 通过 + FULL_APPEND_AND_OBSIDIAN + 方案 A + 5-20 MiB 原始字节授权",
+    "authorization": "PR #62 owner comments 2026-08-17T03:49:07Z, 2026-08-17T04:27:48Z, and 2026-08-17T05:11:08Z: TRIAL 通过 + FULL_APPEND_AND_OBSIDIAN + 方案 A + 5-20 MiB 原始字节授权 + 唐德钱页面直引原图最小返修",
     "scope_count": 413,
     "expected_count": 413,
-    "downloaded_count": 410,
-    "failed_count": 3,
-    "blank_count": 3,
-    "failure_ratio": 0.007263922518159807,
+    "downloaded_count": 411,
+    "failed_count": 2,
+    "blank_count": 2,
+    "failure_ratio": 0.004842615012106538,
     "failure_state_counts": {
       "详情不可达": 1,
       "无照片容器": 1,
-      "占位图": 1
+      "占位图": 0
     },
     "detail_unreachable_count": 1,
     "no_photo_container_count": 1,
-    "placeholder_count": 1,
-    "photo_total_bytes": 108888826,
-    "photo_total_mib": 103.8444766998291,
+    "placeholder_count": 0,
+    "photo_total_bytes": 109087184,
+    "photo_total_mib": 104.03364562988281,
     "photo_max_bytes": 6649475,
     "over_5mib_count": 1,
     "over_20mib_count": 0,
@@ -30,15 +30,15 @@
     "incomplete_read_retry_count": 0,
     "existing_profile_count": 413,
     "no_profile_scope_count": 0,
-    "profile_refreshed_count": 410,
+    "profile_refreshed_count": 411,
     "profile_not_created_count": 0,
     "profile_index_replacement_required": false,
     "profile_index_before_sha256": "f23ab0fcf99ec65c75db9e784a74152218139f3d99516297df61ce85062d67a9",
-    "row_diff_count": 823,
+    "row_diff_count": 824,
     "row_diff_columns": {
-      "照片链接": 410,
-      "照片文件": 410,
-      "异常提示": 3
+      "照片链接": 411,
+      "照片文件": 411,
+      "异常提示": 2
     },
     "protected_assets_before": {
       "D:\\workspace\\信息收集整理\\医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
@@ -52,15 +52,10 @@
     },
     "json_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_full_payload.json",
     "csv_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_full_reconciliation.csv",
-    "report_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_full_report.md"
+    "report_path": "D:\\workspace\\信息收集整理\\work\\中山大学附属第五医院_photo_backfill_full_report.md",
+    "owner_correction_comment": "https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/62#issuecomment-5312107744"
   },
   "failures": [
-    {
-      "name": "唐德钱",
-      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/14079",
-      "state": "占位图",
-      "error": "占位图"
-    },
     {
       "name": "刘继红",
       "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/9096",
@@ -1394,6 +1389,26 @@
       "width": 405,
       "height": 567,
       "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\中山大学附属第五医院\\照片\\于盈奕-口腔科-医师-中山大学附属第五医院.png"
+    },
+    {
+      "name": "唐德钱",
+      "department": "口腔科",
+      "title": "医师",
+      "detail_id": "14079",
+      "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/14079",
+      "photo_url": "https://www.sysu5.cn/sites/default/files/2026-07/%E5%94%90%E5%BE%B7%E9%92%B1%EF%BC%88Y24161%EF%BC%8920260701.gif",
+      "photo_source_attribute": "src",
+      "reference_kind": "原图",
+      "derivative_style": "",
+      "photo_file": "01_试点医院/中山大学附属第五医院/照片/唐德钱-口腔科-医师-中山大学附属第五医院.gif",
+      "filename": "唐德钱-口腔科-医师-中山大学附属第五医院.gif",
+      "content_type": "image/gif",
+      "bytes": 198358,
+      "sha256": "c6761035731abb8f37f4c67e9a6bf9971eb2aae48c1adb783bee2dd601a0178b",
+      "magic_hex": "474946383961BC025903F700",
+      "width": 700,
+      "height": 857,
+      "disk_path": "D:\\workspace\\信息收集整理\\医生画像仓库\\01_试点医院\\中山大学附属第五医院\\照片\\唐德钱-口腔科-医师-中山大学附属第五医院.gif"
     },
     {
       "name": "孙一",
@@ -9204,16 +9219,16 @@
     {
       "姓名": "唐德钱",
       "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/14079",
-      "状态": "失败",
-      "失败三态": "占位图",
-      "照片链接": "",
-      "照片文件": "",
-      "字节数": "",
-      "SHA-256": "",
-      "魔数": "",
-      "宽": "",
-      "高": "",
-      "错误证据": "占位图"
+      "状态": "实采",
+      "失败三态": "",
+      "照片链接": "https://www.sysu5.cn/sites/default/files/2026-07/%E5%94%90%E5%BE%B7%E9%92%B1%EF%BC%88Y24161%EF%BC%8920260701.gif",
+      "照片文件": "01_试点医院/中山大学附属第五医院/照片/唐德钱-口腔科-医师-中山大学附属第五医院.gif",
+      "字节数": 198358,
+      "SHA-256": "c6761035731abb8f37f4c67e9a6bf9971eb2aae48c1adb783bee2dd601a0178b",
+      "魔数": "474946383961BC025903F700",
+      "宽": 700,
+      "高": 857,
+      "错误证据": ""
     },
     {
       "姓名": "孙一",
@@ -15254,9 +15269,18 @@
       "序号": "67",
       "姓名": "唐德钱",
       "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/14079",
-      "列名": "异常提示",
+      "列名": "照片链接",
       "修改前": "",
-      "修改后": "官网本人职业照补录失败：占位图"
+      "修改后": "https://www.sysu5.cn/sites/default/files/2026-07/%E5%94%90%E5%BE%B7%E9%92%B1%EF%BC%88Y24161%EF%BC%8920260701.gif"
+    },
+    {
+      "底表行": "68",
+      "序号": "67",
+      "姓名": "唐德钱",
+      "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/14079",
+      "列名": "照片文件",
+      "修改前": "",
+      "修改后": "01_试点医院/中山大学附属第五医院/照片/唐德钱-口腔科-医师-中山大学附属第五医院.gif"
     },
     {
       "底表行": "69",
@@ -23269,14 +23293,14 @@
       "详情正文摘录": "医师。 擅长牙体牙髓病治疗、牙周病的基础治疗、牙体缺损的固定修复。 毕业于中山大学光华口腔医学院，临床主攻牙体牙髓病治疗、牙周病的基础治疗、牙体缺损的固定修复以及口腔常见病的诊断及治疗，擅长显微根管治疗、牙周系统治疗（龈下刮治及根面平整）、全瓷冠、嵌体修复等。科研方向聚焦牙周炎免疫调控及生物材料开发，在International Immunopharmacology、Advanced Healthcare Materials等期刊发表学术论文多篇。",
       "来源类型": "医院官网",
       "来源链接": "https://www.sysu5.cn/medical-service/department-expert/doctor/14079",
-      "照片链接": "",
-      "照片文件": "",
+      "照片链接": "https://www.sysu5.cn/sites/default/files/2026-07/%E5%94%90%E5%BE%B7%E9%92%B1%EF%BC%88Y24161%EF%BC%8920260701.gif",
+      "照片文件": "01_试点医院/中山大学附属第五医院/照片/唐德钱-口腔科-医师-中山大学附属第五医院.gif",
       "采集入口": "https://www.sysu5.cn/medical-service/department-expert/doctor/category?category_target_id=All&combine=",
       "采集方式": "官网分类页+官网医生详情页",
       "采集日期": "2026-08-08",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "官网本人职业照补录失败：占位图",
+      "异常提示": "",
       "复核状态": "待人工复核"
     },
     {
@@ -34453,9 +34477,9 @@
     {
       "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/14079",
       "path": "唐德钱.md",
-      "changed": false,
+      "changed": true,
       "before_sha256": "a4d8d0b92dd6fdcbbaf4e1d06839f506eb873764247d0cf71dea984a190ad1fe",
-      "after_sha256": "a4d8d0b92dd6fdcbbaf4e1d06839f506eb873764247d0cf71dea984a190ad1fe"
+      "after_sha256": "0868f7664f7581c3ee227685c1078bba094f052d9dfd0835ef068044443cd313"
     },
     {
       "source_link": "https://www.sysu5.cn/medical-service/department-expert/doctor/14080",

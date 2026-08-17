@@ -66,13 +66,13 @@ class Sysu5PhotoBackfillTrialTests(unittest.TestCase):
         self.assertEqual(state, "无照片容器")
         self.assertIsNone(portrait)
 
-    def test_rejects_original_or_unexpected_query_parameter(self) -> None:
+    def test_accepts_page_referenced_original_and_rejects_unexpected_paths(self) -> None:
         base = "https://www.sysu5.cn/medical-service/department-expert/doctor/10285"
         self.assertEqual(
             target.page_referenced_photo_url(
                 "/sites/default/files/2026-01/a.jpg", base
             ),
-            "",
+            "https://www.sysu5.cn/sites/default/files/2026-01/a.jpg",
         )
         self.assertEqual(
             target.page_referenced_photo_url(
@@ -86,6 +86,43 @@ class Sysu5PhotoBackfillTrialTests(unittest.TestCase):
             ),
             "https://www.sysu5.cn/sites/default/files/styles/watermark/public/a.jpg?itok=ok",
         )
+        self.assertEqual(
+            target.page_referenced_photo_url(
+                "/sites/default/files/styles/thumbnail/public/a.jpg?itok=ok", base
+            ),
+            "",
+        )
+        self.assertEqual(
+            target.page_referenced_photo_url(
+                "/sites/default/files/2026-01/a.jpg?download=1", base
+            ),
+            "",
+        )
+
+    def test_parses_tang_deqian_page_referenced_original_gif(self) -> None:
+        photo = (
+            "/sites/default/files/2026-07/"
+            "%E5%94%90%E5%BE%B7%E9%92%B1%EF%BC%88Y24161%EF%BC%8920260701.gif"
+        )
+        html = f"""
+        <html><head><title>唐德钱 | 中山大学附属第五医院</title></head>
+        <body class="page-node page-node-type-doctor">
+          <div class="field field-featured-media field-item">
+            <img width="700" height="857" src="{photo}">
+          </div>
+        </body></html>
+        """
+        state, portrait = target.inspect_portrait_reference(
+            html,
+            "https://www.sysu5.cn/medical-service/department-expert/doctor/14079",
+            "唐德钱",
+        )
+        self.assertEqual(state, "")
+        self.assertIsNotNone(portrait)
+        assert portrait is not None
+        self.assertEqual(portrait.reference_kind, "原图")
+        self.assertEqual(portrait.derivative_style, "")
+        self.assertEqual(portrait.photo_url, "https://www.sysu5.cn" + photo)
 
     def test_title_layers_and_primary_titles(self) -> None:
         self.assertEqual(target.primary_title("教授，主任医师"), "主任医师")
@@ -175,6 +212,23 @@ class Sysu5PhotoBackfillTrialTests(unittest.TestCase):
             "",
         )
 
+    def test_tang_deqian_large_gif_is_not_placeholder_by_format(self) -> None:
+        buffer = io.BytesIO()
+        Image.new("RGB", (700, 857), "blue").save(buffer, format="GIF")
+        content = buffer.getvalue()
+        content += b"\x00" * (198_358 - len(content))
+        self.assertEqual(len(content), 198_358)
+        self.assertEqual(target.magic_extension(content, "image/gif"), "gif")
+        self.assertEqual(
+            target.downloaded_placeholder_reason(
+                "https://www.sysu5.cn/sites/default/files/2026-07/"
+                "%E5%94%90%E5%BE%B7%E9%92%B1%EF%BC%88Y24161%EF%BC%8920260701.gif",
+                content,
+                "gif",
+            ),
+            "",
+        )
+
     def test_allocate_trial_name_and_no_overwrite(self) -> None:
         row = {
             "姓名": "丁立",
@@ -216,6 +270,15 @@ class Sysu5PhotoBackfillTrialTests(unittest.TestCase):
         self.assertEqual(
             target.append_failure_warning(warning, "无照片容器"), warning
         )
+        placeholder_warning = target.FULL_WARNING_BY_STATE["占位图"]
+        self.assertEqual(
+            target.remove_failure_warning(
+                f"既有提示；{placeholder_warning}", "占位图"
+            ),
+            "既有提示",
+        )
+        with self.assertRaisesRegex(RuntimeError, "不是唯一一条"):
+            target.remove_failure_warning("既有提示", "占位图")
 
     def test_full_row_diff_allows_only_authorized_target_columns(self) -> None:
         source = "https://www.sysu5.cn/medical-service/department-expert/doctor/10285"

@@ -56,6 +56,7 @@ DIRECTORY_URL = (
 )
 OFFICIAL_HOST = "sysu5.cn"
 PHOTO_PREFIX = "/sites/default/files/styles/watermark/public/"
+PHOTO_ORIGINAL_PREFIX = "/sites/default/files/"
 EXPECTED_SCOPE_COUNT = 413
 EXPECTED_TRIAL_COUNT = 10
 MIN_TRIAL_DEPARTMENTS = 8
@@ -99,8 +100,26 @@ FULL_WARNING_BY_STATE = {
 }
 FULL_ALLOWED_ROW_COLUMNS = {"照片链接", "照片文件", "异常提示"}
 FULL_AUTHORIZATION = (
-    "PR #62 owner comments 2026-08-17T03:49:07Z and 2026-08-17T04:27:48Z: "
-    "TRIAL 通过 + FULL_APPEND_AND_OBSIDIAN + 方案 A + 5-20 MiB 原始字节授权"
+    "PR #62 owner comments 2026-08-17T03:49:07Z, 2026-08-17T04:27:48Z, "
+    "and 2026-08-17T05:11:08Z: TRIAL 通过 + FULL_APPEND_AND_OBSIDIAN + "
+    "方案 A + 5-20 MiB 原始字节授权 + 唐德钱页面直引原图最小返修"
+)
+TANG_DEQIAN_NAME = "唐德钱"
+TANG_DEQIAN_SOURCE = (
+    "https://www.sysu5.cn/medical-service/department-expert/doctor/14079"
+)
+TANG_DEQIAN_PHOTO_URL = (
+    "https://www.sysu5.cn/sites/default/files/2026-07/"
+    "%E5%94%90%E5%BE%B7%E9%92%B1%EF%BC%88Y24161%EF%BC%8920260701.gif"
+)
+TANG_DEQIAN_PHOTO_BYTES = 198_358
+TANG_DEQIAN_PHOTO_SHA256 = (
+    "c6761035731abb8f37f4c67e9a6bf9971eb2aae48c1adb783bee2dd601a0178b"
+)
+TANG_DEQIAN_PHOTO_DIMENSIONS = (700, 857)
+OWNER_CORRECTION_COMMENT = (
+    "https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/62"
+    "#issuecomment-5312107744"
 )
 SMALL_GIF_PLACEHOLDER_BYTES = 40 * 1024
 SMALL_GIF_PLACEHOLDER_MARKERS = (
@@ -111,7 +130,6 @@ SMALL_GIF_PLACEHOLDER_MARKERS = (
     "no-image",
     "placeholder",
 )
-PAGE_PLACEHOLDER_MARKERS = SMALL_GIF_PLACEHOLDER_MARKERS + ("default", "avatar")
 SAMPLE_PLAN = (
     ("丁立", "正高", "10285"),
     ("王莉", "正高", "9108"),
@@ -235,11 +253,18 @@ def page_referenced_photo_url(value: Any, base_url: str) -> str:
         parsed.scheme not in {"http", "https"}
         or comparable_host(absolute) != OFFICIAL_HOST
         or parsed.fragment
-        or not parsed.path.startswith(PHOTO_PREFIX)
     ):
         return ""
-    query = parse_qsl(parsed.query, keep_blank_values=True)
-    if len(query) != 1 or query[0][0] != "itok" or not query[0][1]:
+    if parsed.path.startswith(PHOTO_PREFIX):
+        query = parse_qsl(parsed.query, keep_blank_values=True)
+        if len(query) != 1 or query[0][0] != "itok" or not query[0][1]:
+            return ""
+        return absolute
+    if (
+        not parsed.path.startswith(PHOTO_ORIGINAL_PREFIX)
+        or parsed.path.startswith(f"{PHOTO_ORIGINAL_PREFIX}styles/")
+        or parsed.query
+    ):
         return ""
     return absolute
 
@@ -334,22 +359,19 @@ def inspect_portrait_reference(
     normalized = [page_referenced_photo_url(value, source_link) for _, value in candidates]
     valid = [(attribute, url) for (attribute, _), url in zip(candidates, normalized) if url]
     if not valid:
-        raw_paths = " ".join(
-            unquote(urlparse(urljoin(source_link, value)).path).lower() for _, value in candidates
-        )
-        if any(marker in raw_paths for marker in PAGE_PLACEHOLDER_MARKERS):
-            return "占位图", None
         raise RuntimeError(f"页面引用照片 URL 越界：{source_link} {candidates}")
     unique = {url for _, url in valid}
     if len(unique) != 1:
         raise RuntimeError(f"医生照片容器多属性 URL 不一致：{source_link}")
+    photo_url = next(iter(unique))
+    is_watermark_derivative = urlparse(photo_url).path.startswith(PHOTO_PREFIX)
     return "", PortraitReference(
         page_title=parser.title,
-        photo_url=next(iter(unique)),
+        photo_url=photo_url,
         source_attribute=valid[0][0],
         template_signature="body.page-node-type-doctor .field.field-featured-media.field-item img",
-        reference_kind="派生图",
-        derivative_style="watermark",
+        reference_kind="派生图" if is_watermark_derivative else "原图",
+        derivative_style="watermark" if is_watermark_derivative else "",
     )
 
 
@@ -1118,6 +1140,16 @@ def append_failure_warning(value: Any, state: str) -> str:
     return "；".join(existing)
 
 
+def remove_failure_warning(value: Any, state: str) -> str:
+    if state not in FULL_WARNING_BY_STATE:
+        raise ValueError(f"未知照片失败状态：{state}")
+    warning = FULL_WARNING_BY_STATE[state]
+    existing = [item for item in clean_text(value).split("；") if item]
+    if existing.count(warning) != 1:
+        raise RuntimeError(f"待移除照片失败提示不是唯一一条：{state}")
+    return "；".join(item for item in existing if item != warning)
+
+
 def allocate_full_photo_path(
     row: dict[str, Any],
     source_id: str,
@@ -1280,7 +1312,7 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
 
 > 日期：{meta['run_date']}
 > Phase：`FULL_READY_FOR_FINAL_OWNER_AUDIT`
-> 照片政策：`OWNER_APPROVED_PAGE_REFERENCED_STYLES_WATERMARK_ORIGINAL_BYTES`
+> 照片政策：`OWNER_APPROVED_PAGE_REFERENCED_ORIGINAL_BYTES`
 
 ## 四数对账
 
@@ -1316,8 +1348,8 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
 
 ## 合规边界
 
-1. 只访问 413 条既有医院官网医生详情链接及页面 `.field.field-featured-media.field-item img` 容器自身引用的 `styles/watermark` 派生图。
-2. 使用官网首页建立的常规 Cookie 会话和对应详情页 Referer；保留 `itok`，按页面引用原始响应字节保存，不压缩。
+1. 只访问 413 条既有医院官网医生详情链接及页面 `.field.field-featured-media.field-item img` 容器自身引用的 `styles/watermark` 派生图或同域原图。
+2. 使用官网首页建立的常规 Cookie 会话和对应详情页 Referer；派生图保留 `itok`，按页面引用原始响应字节保存，不压缩。
 3. 禁止构造或探测页面未引用图片路径；禁止第三方来源。
 4. 失败仅按“详情不可达 / 无照片容器 / 占位图”留空并追加异常提示。
 """
@@ -1642,6 +1674,420 @@ def validate_full_installation(payload: dict[str, Any]) -> None:
     with FULL_CSV_PATH.open("r", encoding="utf-8-sig", newline="") as handle:
         if len(list(csv.DictReader(handle))) != EXPECTED_SCOPE_COUNT:
             raise RuntimeError("FULL 照片对账 CSV 不是 413 行")
+
+
+def run_tang_deqian_correction(run_date: str) -> dict[str, Any]:
+    import collect_official_doctors_batch as collector
+
+    current_full = json.loads(FULL_JSON_PATH.read_text(encoding="utf-8"))
+    validate_full_installation(current_full)
+    current_meta = current_full.get("meta", {})
+    if (
+        int(current_meta.get("downloaded_count") or 0) != 410
+        or int(current_meta.get("failed_count") or 0) != 3
+        or int(current_meta.get("placeholder_count") or 0) != 1
+    ):
+        raise RuntimeError("唐德钱返修前 FULL 基线不是 410 实采/3 失败/1 占位")
+
+    target_sources = {
+        clean_text(row.get("来源链接")) for row in current_full.get("rows", [])
+    }
+    if TANG_DEQIAN_SOURCE not in target_sources or len(target_sources) != EXPECTED_SCOPE_COUNT:
+        raise RuntimeError("唐德钱不在 Issue #61 固定 413 行范围内")
+    failures = [
+        item
+        for item in current_full.get("failures", [])
+        if clean_text(item.get("source_link")) == TANG_DEQIAN_SOURCE
+    ]
+    photos = [
+        item
+        for item in current_full.get("photo_samples", [])
+        if clean_text(item.get("source_link")) == TANG_DEQIAN_SOURCE
+    ]
+    reconciliations = [
+        item
+        for item in current_full.get("reconciliation", [])
+        if clean_text(item.get("来源链接")) == TANG_DEQIAN_SOURCE
+    ]
+    if (
+        len(failures) != 1
+        or clean_text(failures[0].get("state")) != "占位图"
+        or photos
+        or len(reconciliations) != 1
+        or clean_text(reconciliations[0].get("状态")) != "失败"
+        or clean_text(reconciliations[0].get("失败三态")) != "占位图"
+    ):
+        raise RuntimeError("唐德钱返修前 FULL 失败证据不唯一或状态漂移")
+
+    master_payload = json.loads(MASTER_JSON_PATH.read_text(encoding="utf-8"))
+    before_master_rows = copy.deepcopy(master_payload.get("rows", []))
+    matching_master_indexes = [
+        index
+        for index, row in enumerate(before_master_rows)
+        if clean_text(row.get("来源链接")) == TANG_DEQIAN_SOURCE
+    ]
+    if len(matching_master_indexes) != 1:
+        raise RuntimeError("总底表唐德钱来源行不唯一")
+    master_index = matching_master_indexes[0]
+    before_row = before_master_rows[master_index]
+    if (
+        clean_text(before_row.get("姓名")) != TANG_DEQIAN_NAME
+        or clean_text(before_row.get("照片链接"))
+        or clean_text(before_row.get("照片文件"))
+    ):
+        raise RuntimeError("总底表唐德钱返修前姓名或照片空字段漂移")
+    corrected_warning = remove_failure_warning(before_row.get("异常提示"), "占位图")
+
+    profile_paths = target_profile_paths(PROFILE_DIR, target_sources)
+    profile_path = profile_paths[TANG_DEQIAN_SOURCE]
+    profile_before = profile_path.read_bytes()
+    profile_tree_before = profile_markdown_tree(PROFILE_DIR)
+    index_path = PROFILE_DIR / "_索引.md"
+    index_before_sha256 = hashlib.sha256(index_path.read_bytes()).hexdigest()
+    protected_before = file_snapshot([LEDGER_PATH, MASTER_REPORT_PATH])
+
+    session = OfficialSession()
+    home_status, _, _, _ = session.get(OFFICIAL_HOME)
+    if home_status != 200:
+        raise RuntimeError(f"唐德钱返修官网首页常规会话建立失败：HTTP {home_status}")
+    detail_status, detail_type, charset, detail_content = session.get(
+        TANG_DEQIAN_SOURCE, DIRECTORY_URL
+    )
+    if detail_status != 200 or detail_type != "text/html":
+        raise RuntimeError(
+            f"唐德钱返修详情不可达：HTTP {detail_status} Content-Type {detail_type}"
+        )
+    try:
+        detail_html = detail_content.decode(charset, errors="replace")
+    except LookupError:
+        detail_html = detail_content.decode("utf-8", errors="replace")
+    failure_state, portrait = inspect_portrait_reference(
+        detail_html, TANG_DEQIAN_SOURCE, TANG_DEQIAN_NAME
+    )
+    if failure_state or portrait is None:
+        raise RuntimeError(f"唐德钱返修照片容器状态异常：{failure_state or '空引用'}")
+    if (
+        portrait.photo_url != TANG_DEQIAN_PHOTO_URL
+        or portrait.reference_kind != "原图"
+        or portrait.derivative_style
+    ):
+        raise RuntimeError("唐德钱返修页面直引原图证据与 Owner 裁决不一致")
+
+    photo_status, photo_type, _, photo_content = session.get(
+        portrait.photo_url, TANG_DEQIAN_SOURCE
+    )
+    extension = magic_extension(photo_content, photo_type)
+    digest = hashlib.sha256(photo_content).hexdigest()
+    dimensions = image_dimensions(photo_content)
+    if photo_status != 200:
+        raise RuntimeError(f"唐德钱返修照片 HTTP {photo_status}")
+    enforce_full_photo_policy(
+        TANG_DEQIAN_NAME, portrait.photo_url, extension, len(photo_content)
+    )
+    if downloaded_placeholder_reason(portrait.photo_url, photo_content, extension):
+        raise RuntimeError("唐德钱返修照片仍命中小 GIF 占位启发式")
+    if (
+        extension != "gif"
+        or len(photo_content) != TANG_DEQIAN_PHOTO_BYTES
+        or digest != TANG_DEQIAN_PHOTO_SHA256
+        or dimensions != TANG_DEQIAN_PHOTO_DIMENSIONS
+    ):
+        raise RuntimeError(
+            "唐德钱返修照片字节/SHA-256/魔数/尺寸与 Owner 审计基线不一致"
+        )
+
+    with tempfile.TemporaryDirectory(prefix="issue61_tang_correction_", dir=WORK_DIR) as temporary:
+        temp_root = Path(temporary)
+        temp_photo_dir = temp_root / "photos"
+        shutil.copytree(FORMAL_PHOTO_DIR, temp_photo_dir)
+        used_filenames = {
+            path.name.casefold() for path in temp_photo_dir.iterdir() if path.is_file()
+        }
+        filename, temp_photo_path = allocate_full_photo_path(
+            before_row,
+            detail_id(TANG_DEQIAN_SOURCE),
+            extension,
+            temp_photo_dir,
+            used_filenames,
+        )
+        expected_filename = "唐德钱-口腔科-医师-中山大学附属第五医院.gif"
+        if filename != expected_filename:
+            raise RuntimeError(f"唐德钱返修照片命名偏离 Owner 指令：{filename}")
+        temp_photo_path.write_bytes(photo_content)
+        photo_file = (PHOTO_RELATIVE_ROOT / filename).as_posix()
+
+        corrected_row = copy.deepcopy(before_row)
+        corrected_row["照片链接"] = portrait.photo_url
+        corrected_row["照片文件"] = photo_file
+        corrected_row["异常提示"] = corrected_warning
+        after_master_rows = copy.deepcopy(before_master_rows)
+        after_master_rows[master_index] = corrected_row
+        correction_diffs = collect_full_row_diffs(
+            before_master_rows, after_master_rows, {TANG_DEQIAN_SOURCE}
+        )
+        expected_correction = {
+            ("照片链接", "", portrait.photo_url),
+            ("照片文件", "", photo_file),
+            ("异常提示", clean_text(before_row.get("异常提示")), corrected_warning),
+        }
+        actual_correction = {
+            (item["列名"], item["修改前"], item["修改后"])
+            for item in correction_diffs
+        }
+        if actual_correction != expected_correction:
+            raise RuntimeError("唐德钱返修总底表差异不严格等于两列回填与提示移除")
+
+        updated_master = copy.deepcopy(master_payload)
+        updated_master["rows"] = after_master_rows
+        recompute_failure_derivatives(updated_master, after_master_rows)
+        temp_master_payload = temp_root / MASTER_JSON_PATH.name
+        temp_master_csv = temp_root / MASTER_CSV_PATH.name
+        temp_master_xlsx = temp_root / MASTER_XLSX_PATH.name
+        temp_master_preview = temp_root / "master_preview.png"
+        temp_master_payload.write_text(
+            json.dumps(updated_master, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        write_master_csv(temp_master_csv, after_master_rows)
+        collector.build_workbook(
+            temp_master_payload, temp_master_xlsx, temp_master_preview
+        )
+        validate_master_layers(
+            temp_master_payload, temp_master_csv, temp_master_xlsx
+        )
+
+        profile_after = insert_profile_photo_block_bytes(
+            profile_before, TANG_DEQIAN_NAME, photo_file
+        )
+        validate_profile_photo_only_bytes(
+            profile_before, profile_after, TANG_DEQIAN_NAME, photo_file
+        )
+        temp_profile = temp_root / profile_path.name
+        temp_profile.write_bytes(profile_after)
+
+        sample = {
+            "name": TANG_DEQIAN_NAME,
+            "department": atomic_department(corrected_row),
+            "title": primary_title(corrected_row.get("职称身份原文")),
+            "detail_id": detail_id(TANG_DEQIAN_SOURCE),
+            "source_link": TANG_DEQIAN_SOURCE,
+            "photo_url": portrait.photo_url,
+            "photo_source_attribute": portrait.source_attribute,
+            "reference_kind": portrait.reference_kind,
+            "derivative_style": portrait.derivative_style,
+            "photo_file": photo_file,
+            "filename": filename,
+            "content_type": photo_type,
+            "bytes": len(photo_content),
+            "sha256": digest,
+            "magic_hex": photo_content[:12].hex().upper(),
+            "width": dimensions[0],
+            "height": dimensions[1],
+            "disk_path": str(FORMAL_PHOTO_DIR / filename),
+        }
+        reconciliation = {
+            "姓名": TANG_DEQIAN_NAME,
+            "来源链接": TANG_DEQIAN_SOURCE,
+            "状态": "实采",
+            "失败三态": "",
+            "照片链接": portrait.photo_url,
+            "照片文件": photo_file,
+            "字节数": len(photo_content),
+            "SHA-256": digest,
+            "魔数": sample["magic_hex"],
+            "宽": dimensions[0],
+            "高": dimensions[1],
+            "错误证据": "",
+        }
+
+        updated_full = copy.deepcopy(current_full)
+        updated_full["failures"] = [
+            item
+            for item in updated_full.get("failures", [])
+            if clean_text(item.get("source_link")) != TANG_DEQIAN_SOURCE
+        ]
+        updated_full["photo_samples"].append(sample)
+        source_order = {
+            clean_text(row.get("来源链接")): index
+            for index, row in enumerate(updated_full.get("rows", []))
+        }
+        updated_full["photo_samples"].sort(
+            key=lambda item: source_order[clean_text(item.get("source_link"))]
+        )
+        updated_full["reconciliation"] = [
+            reconciliation
+            if clean_text(item.get("来源链接")) == TANG_DEQIAN_SOURCE
+            else item
+            for item in updated_full.get("reconciliation", [])
+        ]
+        updated_full["rows"] = [
+            corrected_row
+            if clean_text(row.get("来源链接")) == TANG_DEQIAN_SOURCE
+            else row
+            for row in updated_full.get("rows", [])
+        ]
+
+        tang_integrity = [
+            item
+            for item in updated_full.get("profile_integrity", [])
+            if clean_text(item.get("source_link")) == TANG_DEQIAN_SOURCE
+        ]
+        if (
+            len(tang_integrity) != 1
+            or tang_integrity[0].get("changed") is not False
+            or clean_text(tang_integrity[0].get("after_sha256"))
+            != hashlib.sha256(profile_before).hexdigest()
+        ):
+            raise RuntimeError("唐德钱返修前画像完整性信标漂移")
+        tang_integrity[0]["changed"] = True
+        tang_integrity[0]["after_sha256"] = hashlib.sha256(profile_after).hexdigest()
+
+        tang_row_diffs = [
+            item
+            for item in updated_full.get("row_diffs", [])
+            if clean_text(item.get("来源链接")) == TANG_DEQIAN_SOURCE
+        ]
+        if (
+            len(tang_row_diffs) != 1
+            or tang_row_diffs[0].get("列名") != "异常提示"
+            or tang_row_diffs[0].get("修改前") != corrected_warning
+        ):
+            raise RuntimeError("唐德钱返修前基线至 FULL 的逐单元格差异漂移")
+        baseline_diffs = [
+            item
+            for item in updated_full.get("row_diffs", [])
+            if clean_text(item.get("来源链接")) != TANG_DEQIAN_SOURCE
+        ]
+        base_diff = tang_row_diffs[0]
+        for column, after_value in (
+            ("照片链接", portrait.photo_url),
+            ("照片文件", photo_file),
+        ):
+            baseline_diffs.append(
+                {
+                    "底表行": base_diff["底表行"],
+                    "序号": base_diff["序号"],
+                    "姓名": TANG_DEQIAN_NAME,
+                    "来源链接": TANG_DEQIAN_SOURCE,
+                    "列名": column,
+                    "修改前": "",
+                    "修改后": after_value,
+                }
+            )
+        header_order = {header: index for index, header in enumerate(BASE_HEADERS)}
+        baseline_diffs.sort(
+            key=lambda item: (
+                int(item["底表行"]), header_order.get(item["列名"], len(BASE_HEADERS))
+            )
+        )
+        updated_full["row_diffs"] = baseline_diffs
+
+        updated_meta = updated_full["meta"]
+        updated_failures = updated_full["failures"]
+        updated_photos = updated_full["photo_samples"]
+        state_counter = Counter(item["state"] for item in updated_failures)
+        total_bytes = sum(int(item["bytes"]) for item in updated_photos)
+        updated_meta.update(
+            {
+                "run_date": run_date,
+                "authorization": FULL_AUTHORIZATION,
+                "owner_correction_comment": OWNER_CORRECTION_COMMENT,
+                "downloaded_count": len(updated_photos),
+                "failed_count": len(updated_failures),
+                "blank_count": len(updated_failures),
+                "failure_ratio": len(updated_failures) / EXPECTED_SCOPE_COUNT,
+                "failure_state_counts": {
+                    state: state_counter.get(state, 0) for state in FULL_FAILURE_STATES
+                },
+                "detail_unreachable_count": state_counter.get("详情不可达", 0),
+                "no_photo_container_count": state_counter.get("无照片容器", 0),
+                "placeholder_count": state_counter.get("占位图", 0),
+                "photo_total_bytes": total_bytes,
+                "photo_total_mib": total_bytes / 1024 / 1024,
+                "photo_max_bytes": max(int(item["bytes"]) for item in updated_photos),
+                "over_5mib_count": sum(
+                    int(item["bytes"]) > MAX_OWNER_REPORT_BYTES
+                    for item in updated_photos
+                ),
+                "over_20mib_count": sum(
+                    int(item["bytes"]) > MAX_FULL_IMAGE_BYTES
+                    for item in updated_photos
+                ),
+                "cookie_names": sorted(
+                    set(updated_meta.get("cookie_names", [])) | set(session.cookie_names)
+                ),
+                "incomplete_read_retry_count": int(
+                    updated_meta.get("incomplete_read_retry_count") or 0
+                )
+                + session.incomplete_read_retry_count,
+                "profile_refreshed_count": len(updated_photos),
+                "row_diff_count": len(baseline_diffs),
+                "row_diff_columns": dict(
+                    Counter(item["列名"] for item in baseline_diffs)
+                ),
+            }
+        )
+        validate_full_payload(updated_full, temp_photo_dir)
+
+        temp_full_payload = temp_root / FULL_JSON_PATH.name
+        temp_full_csv = temp_root / FULL_CSV_PATH.name
+        temp_full_report = temp_root / FULL_REPORT_PATH.name
+        temp_full_payload.write_text(
+            json.dumps(updated_full, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        write_full_reconciliation_csv(temp_full_csv, updated_full)
+        write_full_report(temp_full_report, updated_full)
+
+        file_map: dict[Path, Path] = {
+            MASTER_JSON_PATH: temp_master_payload,
+            MASTER_CSV_PATH: temp_master_csv,
+            MASTER_XLSX_PATH: temp_master_xlsx,
+            FULL_JSON_PATH: temp_full_payload,
+            FULL_CSV_PATH: temp_full_csv,
+            FULL_REPORT_PATH: temp_full_report,
+            profile_path: temp_profile,
+        }
+        backups = backup_file_targets(list(file_map), temp_root / "file_backups")
+        photo_backup = temp_root / "formal_photo_backup"
+        photo_swapped = False
+        try:
+            FORMAL_PHOTO_DIR.replace(photo_backup)
+            temp_photo_dir.replace(FORMAL_PHOTO_DIR)
+            photo_swapped = True
+            apply_file_map(file_map)
+
+            final_rows = validate_master_layers(
+                MASTER_JSON_PATH, MASTER_CSV_PATH, MASTER_XLSX_PATH
+            )
+            final_correction = collect_full_row_diffs(
+                before_master_rows, final_rows, {TANG_DEQIAN_SOURCE}
+            )
+            if final_correction != correction_diffs:
+                raise RuntimeError("唐德钱返修落盘后的总底表差异与预期不一致")
+            validate_profile_photo_only_bytes(
+                profile_before,
+                profile_path.read_bytes(),
+                TANG_DEQIAN_NAME,
+                photo_file,
+            )
+            validate_profile_tree_surgical(
+                profile_tree_before,
+                PROFILE_DIR,
+                {profile_path.relative_to(PROFILE_DIR)},
+            )
+            if hashlib.sha256(index_path.read_bytes()).hexdigest() != index_before_sha256:
+                raise RuntimeError("唐德钱返修修改了 _索引.md")
+            if file_snapshot([LEDGER_PATH, MASTER_REPORT_PATH]) != protected_before:
+                raise RuntimeError("唐德钱返修触碰了入口台账或总底表更新报告")
+            validate_full_installation(updated_full)
+        except Exception:
+            restore_file_targets(backups)
+            if photo_swapped and FORMAL_PHOTO_DIR.exists():
+                ensure_workspace_target(FORMAL_PHOTO_DIR)
+                shutil.rmtree(FORMAL_PHOTO_DIR)
+            if photo_backup.exists():
+                photo_backup.replace(FORMAL_PHOTO_DIR)
+            raise
+        return updated_full
 
 
 def run_full(run_date: str) -> dict[str, Any]:
@@ -2068,6 +2514,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="验证已落盘 FULL payload、三载体、照片与画像完整性",
     )
+    mode.add_argument(
+        "--repair-tang-deqian",
+        action="store_true",
+        help="按 PR #62 Owner 终审指令事务化修复唐德钱页面直引 GIF",
+    )
     parser.add_argument("--run-date", default=date.today().isoformat())
     return parser.parse_args()
 
@@ -2076,6 +2527,8 @@ def main() -> None:
     args = parse_args()
     if args.full:
         payload = run_full(args.run_date)
+    elif args.repair_tang_deqian:
+        payload = run_tang_deqian_correction(args.run_date)
     elif args.validate_full:
         payload = json.loads(FULL_JSON_PATH.read_text(encoding="utf-8"))
         validate_full_installation(payload)
