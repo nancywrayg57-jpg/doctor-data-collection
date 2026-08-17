@@ -62,6 +62,8 @@ MIN_TRIAL_DEPARTMENTS = 8
 MAX_FAILURE_RATIO = 0.30
 LARGE_BYTES = 200 * 1024
 MAX_OWNER_REPORT_BYTES = 5 * 1024 * 1024
+MAX_FULL_IMAGE_BYTES = 20 * 1024 * 1024
+SUPPORTED_PHOTO_EXTENSIONS = frozenset({"jpg", "png", "gif", "webp"})
 EXPECTED_PROFILE_COUNT = 413
 PHOTO_RELATIVE_ROOT = Path("01_试点医院") / HOSPITAL / "照片"
 BASE_HEADERS = [
@@ -97,8 +99,8 @@ FULL_WARNING_BY_STATE = {
 }
 FULL_ALLOWED_ROW_COLUMNS = {"照片链接", "照片文件", "异常提示"}
 FULL_AUTHORIZATION = (
-    "PR #62 owner comment 2026-08-17T03:49:07Z: "
-    "TRIAL 通过 + FULL_APPEND_AND_OBSIDIAN + 方案 A"
+    "PR #62 owner comments 2026-08-17T03:49:07Z and 2026-08-17T04:27:48Z: "
+    "TRIAL 通过 + FULL_APPEND_AND_OBSIDIAN + 方案 A + 5-20 MiB 原始字节授权"
 )
 SMALL_GIF_PLACEHOLDER_BYTES = 40 * 1024
 SMALL_GIF_PLACEHOLDER_MARKERS = (
@@ -407,6 +409,21 @@ def magic_extension(content: bytes, content_type: str | None) -> str:
     if len(content) >= 12 and content.startswith(b"RIFF") and content[8:12] == b"WEBP":
         return "webp"
     return ""
+
+
+def enforce_full_photo_policy(
+    name: str, photo_url: str, extension: str, byte_count: int
+) -> None:
+    if extension not in SUPPORTED_PHOTO_EXTENSIONS:
+        raise RuntimeError(
+            "[FATAL - HUMAN_INTERVENTION_REQUIRED] FULL 照片格式不受支持，"
+            f"仅允许 jpg/png/gif/webp：{name} {photo_url}"
+        )
+    if byte_count > MAX_FULL_IMAGE_BYTES:
+        raise RuntimeError(
+            "[FATAL - HUMAN_INTERVENTION_REQUIRED] FULL 单张照片超过 20 MiB："
+            f"{name} {byte_count} bytes {photo_url}"
+        )
 
 
 def downloaded_placeholder_reason(photo_url: str, content: bytes, extension: str) -> str:
@@ -1242,6 +1259,23 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
     failure_lines = "\n".join(
         f"| {state} | {state_counts.get(state, 0)} |" for state in FULL_FAILURE_STATES
     )
+    large_photos = [
+        item
+        for item in payload.get("photo_samples", [])
+        if int(item.get("bytes") or 0) > MAX_OWNER_REPORT_BYTES
+    ]
+    large_photo_lines = "\n".join(
+        "| {name} | <{url}> | {bytes_count} | {width}×{height} |".format(
+            name=clean_text(item.get("name")),
+            url=clean_text(item.get("photo_url")),
+            bytes_count=int(item.get("bytes") or 0),
+            width=int(item.get("width") or 0),
+            height=int(item.get("height") or 0),
+        )
+        for item in large_photos
+    )
+    if not large_photo_lines:
+        large_photo_lines = "| 无 | — | 0 | — |"
     report = f"""# Issue #{ISSUE_NUMBER} {HOSPITAL}照片补录 FULL 报告
 
 > 日期：{meta['run_date']}
@@ -1260,11 +1294,17 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
 
 - 总问题率：{meta['failed_count']}/{meta['expected_count']}（{meta['failure_ratio']:.2%}），未超过 30% 熔断线。
 - 照片总字节：{meta['photo_total_bytes']} bytes（{meta['photo_total_mib']:.2f} MiB）。
-- 最大单张：{meta['photo_max_bytes']} bytes；超过 5 MiB：{meta['over_5mib_count']} 张。
+- 最大单张：{meta['photo_max_bytes']} bytes；超过 5 MiB：{meta['over_5mib_count']} 张；超过 20 MiB：{meta['over_20mib_count']} 张。
 - 页面未引用路径的构造/探测请求：0；第三方来源：0。
 - 传输不完整原样重试：{meta['incomplete_read_retry_count']} 次；每个请求至多重试 1 次。
 - 总底表：payload/CSV/XLSX 三载体行数与 25 列逐值一致；仅本院 413 行的照片两列及失败行异常提示允许变化。
 - 画像：既有 {meta['existing_profile_count']} 份画像中，实采成功的 {meta['profile_refreshed_count']} 份仅新增方案 A 照片引用区块；失败留空画像零触碰；不新建画像；`_索引.md` 零修改。
+
+## >5 MiB Owner 终审清单
+
+| 姓名 | URL | 字节 | 尺寸 |
+|---|---|---:|---:|
+{large_photo_lines}
 
 ## 工件
 
@@ -1328,6 +1368,8 @@ def validate_full_payload(payload: dict[str, Any], photo_root: Path) -> None:
     expected_files: set[str] = set()
     total_bytes = 0
     max_bytes = 0
+    over_5mib_count = 0
+    over_20mib_count = 0
     for item in reconciliation:
         source = clean_text(item.get("来源链接"))
         row = rows_by_source.get(source)
@@ -1351,6 +1393,12 @@ def validate_full_payload(payload: dict[str, Any], photo_root: Path) -> None:
             if hashlib.sha256(content).hexdigest() != photo.get("sha256"):
                 raise RuntimeError(f"照片 SHA-256 对账失败：{filename}")
             expected_extension = disk_path.suffix.lower().lstrip(".")
+            enforce_full_photo_policy(
+                clean_text(row.get("姓名")),
+                clean_text(photo.get("photo_url")),
+                expected_extension,
+                len(content),
+            )
             content_type = "image/jpeg" if expected_extension == "jpg" else f"image/{expected_extension}"
             if magic_extension(content, content_type) != expected_extension:
                 raise RuntimeError(f"照片魔数与扩展名不符：{filename}")
@@ -1361,11 +1409,11 @@ def validate_full_payload(payload: dict[str, Any], photo_root: Path) -> None:
                 int(photo.get("height") or 0),
             ):
                 raise RuntimeError(f"照片尺寸对账失败：{filename}")
-            if len(content) > MAX_OWNER_REPORT_BYTES:
-                raise RuntimeError(f"单张照片超过 5 MiB，需先回报 owner：{filename}")
             expected_files.add(filename)
             total_bytes += len(content)
             max_bytes = max(max_bytes, len(content))
+            over_5mib_count += int(len(content) > MAX_OWNER_REPORT_BYTES)
+            over_20mib_count += int(len(content) > MAX_FULL_IMAGE_BYTES)
         elif status == "失败":
             if state not in FULL_FAILURE_STATES:
                 raise RuntimeError(f"FULL 失败行未归入三态：{source}")
@@ -1383,8 +1431,12 @@ def validate_full_payload(payload: dict[str, Any], photo_root: Path) -> None:
         raise RuntimeError("FULL 照片总字节对账失败")
     if max_bytes != int(meta.get("photo_max_bytes") or 0):
         raise RuntimeError("FULL 最大单张字节对账失败")
-    if int(meta.get("over_5mib_count") or 0) != 0:
-        raise RuntimeError("FULL 存在超过 5 MiB 未回报照片")
+    if int(meta.get("over_5mib_count") or 0) != over_5mib_count:
+        raise RuntimeError("FULL 超过 5 MiB 照片计数对账失败")
+    if int(meta.get("over_20mib_count") or 0) != over_20mib_count:
+        raise RuntimeError("FULL 超过 20 MiB 照片计数对账失败")
+    if over_20mib_count:
+        raise RuntimeError("FULL 存在超过 20 MiB 照片")
 
 
 def profile_photo_markdown_path(photo_file: str) -> str:
@@ -1717,13 +1769,9 @@ def run_full(run_date: str) -> dict[str, Any]:
                 record_failure(row, "详情不可达", f"照片资源 HTTP {photo_status}")
                 continue
             extension = magic_extension(photo_content, photo_type)
-            if not extension:
-                record_failure(
-                    row,
-                    "详情不可达",
-                    f"照片响应格式不受支持：{photo_type}",
-                )
-                continue
+            enforce_full_photo_policy(
+                name, portrait.photo_url, extension, len(photo_content)
+            )
             placeholder_reason = downloaded_placeholder_reason(
                 portrait.photo_url, photo_content, extension
             )
@@ -1735,12 +1783,6 @@ def run_full(run_date: str) -> dict[str, Any]:
             except Exception as exc:  # noqa: BLE001 - retain exact image evidence
                 record_failure(row, "详情不可达", f"照片尺寸无法解析：{exc}")
                 continue
-            if len(photo_content) > MAX_OWNER_REPORT_BYTES:
-                raise RuntimeError(
-                    "[FATAL - HUMAN_INTERVENTION_REQUIRED] 单张照片超过 5 MiB，需先回报 owner："
-                    f"{name} {len(photo_content)} bytes {portrait.photo_url}"
-                )
-
             filename, disk_path = allocate_full_photo_path(
                 row, source_id, extension, temp_photo_dir, used_filenames
             )
@@ -1904,6 +1946,10 @@ def run_full(run_date: str) -> dict[str, Any]:
                 "photo_max_bytes": max_bytes,
                 "over_5mib_count": sum(
                     int(item["bytes"]) > MAX_OWNER_REPORT_BYTES
+                    for item in photo_samples
+                ),
+                "over_20mib_count": sum(
+                    int(item["bytes"]) > MAX_FULL_IMAGE_BYTES
                     for item in photo_samples
                 ),
                 "constructed_unreferenced_probe_count": 0,

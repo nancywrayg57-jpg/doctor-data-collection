@@ -6,7 +6,7 @@
 - 医院：中山大学附属第五医院。
 - 官网：<https://www.sysu5.cn/>。
 - 医生目录：<https://www.sysu5.cn/medical-service/department-expert/doctor/category?category_target_id=All&combine=>。
-- 当前阶段：`TRIAL_READY_FOR_OWNER_AUDIT`。
+- 当前阶段：`FULL_READY_FOR_FINAL_OWNER_AUDIT`。
 - 本阶段只允许 10 人跨科室、跨职称照片试采；总底表、正式照片目录、413 份画像和索引必须零修改。
 - 未取得当前关联 PR 中 owner 明确 `通过` / `有条件通过` 且切换为 `FULL_APPEND_AND_OBSIDIAN` 前，禁止执行正式回填、正式照片写入或画像嵌入。
 
@@ -50,7 +50,7 @@
 ## FULL 授权与实现
 
 - Owner 在 PR #62 评论 <https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/62#issuecomment-5311539010> 明确给出 `TRIAL 通过`，并将 Phase 切换为 `FULL_APPEND_AND_OBSIDIAN`。
-- `work/sysu5_photo_backfill_trial.py` 已增加 `--full` 与 `--validate-full`：413 行全量、失败三态、30% 总问题熔断、单张超过 5 MiB 立即停止、payload/CSV/XLSX 三载体逐值验证、照片逐图字节/SHA-256/魔数/尺寸验证、方案 A 画像字节级最小插入和事务回滚。
+- `work/sysu5_photo_backfill_trial.py` 已增加 `--full` 与 `--validate-full`：413 行全量、失败三态、30% 总问题熔断、5 MiB Owner 报告线、20 MiB 单张熔断线、非 jpg/png/gif/webp 格式熔断、payload/CSV/XLSX 三载体逐值验证、照片逐图字节/SHA-256/魔数/尺寸验证、方案 A 画像字节级最小插入和事务回滚。
 - FULL 前置普查再次确认：413 行、413 个唯一详情 URL、413 份既有画像、413/413 唯一 `## 基础信息` 锚点、零既有图片引用；`_索引.md` 哈希已固化。
 - Owner fenced Markdown 已原样写入 `docs/中山五院照片嵌入方式裁决单.md`，逐字符比对长度 1238、结果完全一致，裁决依据缺口已解决。
 
@@ -72,30 +72,67 @@
 - 联系表已使用原始分辨率视图人工核验并固化 `MANUAL_CONTACT_SHEET_REVIEW_PASSED`。
 - 工件逐图字节/SHA-256 闭环、正式资产前后快照、`git diff --check` 与 `git fsck --no-progress` 均通过；`git fsck` 仅报告仓库既有 dangling 对象，无对象损坏。
 
+## Owner 大图裁决与门禁更新
+
+- Owner 在 PR #62 评论 <https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/62#issuecomment-5311804470> 独立核验阻塞图为标准单人职业照，并批准该图及本批同类页面引用派生图保留原始字节、不压缩、原样收录。
+- 5 MiB 改为 Owner 报告阈值：`>5 MiB` 继续采集，但 FULL 报告必须逐张列出姓名、URL、字节和尺寸供最终实图审计。
+- 单张 `>20 MiB` 或响应魔数不属于 jpg/png/gif/webp 时仍立即触发 `[FATAL - HUMAN_INTERVENTION_REQUIRED]`。
+- 其余 FULL 指令不变；Owner 明确要求重新执行 FULL。
+
+## FULL 重新执行结果
+
+- 2026-08-17 按新裁决重新执行一次 `--full`，事务安装成功，Phase 为 `FULL_READY_FOR_FINAL_OWNER_AUDIT`。
+- 四数闭环：范围/应采 `413`，实采 `410`，失败 `3`，留空 `3`；问题率 `0.73%`。
+- 失败三态各 1 条：唐德钱为占位图；刘继红详情页 HTTP 404；袁亚君无照片容器。三行照片字段留空并追加对应异常提示。
+- 正式照片共 410 张（JPG 306、PNG 104），总字节 `108,888,826`（103.84 MiB）；逐图磁盘字节数与 SHA-256 独立复算均零不一致。
+- 最大图为陈贤珍 `6,649,475` bytes、4831×4833、SHA-256 `6047aebc1e4098207afef36ada8eae3138e5f2325ffb3f04675ef8243f7738c2`；`>5 MiB` 共 1 张，`>20 MiB` 为 0，已写入 FULL 报告 Owner 终审清单。
+- 页面未引用路径探测为 0、第三方来源为 0、传输不完整重试为 0；图片均为详情页容器直接引用的 `styles/watermark` 派生 URL并保留 `itok`。
+
+## FULL 安装与受保护资产验证
+
+- 总底表 payload/CSV/XLSX 共 9222 行、25 列逐值一致；本院行变更共 823 个字段：照片链接 410、照片文件 410、失败异常提示 3，范围外行与其他字段零变化。
+- 410 份既有画像各只增加 2 行（方案 A 图片引用行及空行），合计新增 820 行、删除 0 行；3 份失败画像零触碰，不新建画像。
+- 正式照片目录磁盘集合与 payload 对账为 410/410；逐图字节、SHA-256、魔数、扩展名和尺寸均通过安装后验证。
+- `_索引.md`、官网入口台账、总底表更新报告均 `git diff --quiet` 返回 0，保持零修改。
+- FULL 工件：
+  - `work/中山大学附属第五医院_photo_backfill_full_payload.json`
+  - `work/中山大学附属第五医院_photo_backfill_full_reconciliation.csv`
+  - `work/中山大学附属第五医院_photo_backfill_full_report.md`
+  - `医生画像仓库/01_试点医院/中山大学附属第五医院/照片/`
+
+## 最终验证
+
+- `python -m py_compile work/sysu5_photo_backfill_trial.py work/tests/test_sysu5_photo_backfill_trial.py`：通过。
+- 专项测试：19/19 通过，覆盖 5–20 MiB 放行、`>20 MiB` 熔断、非支持格式熔断和大图报告清单。
+- 全仓测试：239/239 通过。
+- 项目指定 XLSX writer `@oai/artifact-tool` 最小 ESM import 通过；正式 XLSX 由该 writer 生成，未替换写入实现。
+- `python work/sysu5_photo_backfill_trial.py --validate-full`：通过。
+- `git diff --check`：通过；工作区变更集合严格落在 Issue #61 授权路径内。
+
 ## 当前停止点
 
-保持自动化 `PAUSED`，停止在单张照片超过 5 MiB 的 Owner 裁决门禁。取得当前 PR 中 Owner 明确裁决前，不得再次执行 FULL、不得压缩或跳过该图片、不得合并 PR、关闭 Issue或处理下一 Issue。
+本记录与 FULL 工件提交到原 Issue #61 分支后，自动化保持 `PAUSED`，在 PR #62 发布 `FULL_READY_FOR_FINAL_OWNER_AUDIT` 并等待 Owner 最终实图/画像审计。不得合并 PR、关闭 Issue或处理下一 Issue。
 
 <Handoff_State>
-Target: Issue #61 中山大学附属第五医院照片补录 FULL 大图裁决
+Target: Issue #61 中山大学附属第五医院照片补录 FULL 最终 Owner 审计
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/61
 PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/62
 Branch: codex/mhrj/issue-61-sysu5-photo-backfill-trial
 Completed:
-- 413 行范围与照片空字段门禁通过
-- 10 人跨 10 科室、正高/副高/其他分层 TRIAL 完成
-- 10/10 页面引用派生图下载与三重核验完成
-- 联系表人工视觉核验通过
-- Owner 已明确 TRIAL 通过并切换 FULL_APPEND_AND_OBSIDIAN
-- FULL 事务化实现、方案 A 字节级保护与裁决单已完成；专项 17/17、全量 237/237
-- FULL 首次执行命中 6,649,475 bytes 页面引用派生图，按 >5 MiB 门禁停止
-- 正式资产零修改，未生成 FULL 工件
+- Owner 已批准 5–20 MiB 页面引用派生图原始字节收录；20 MiB 与格式熔断已实现
+- FULL 413 行完成：410 实采、3 失败留空，三载体与失败三态闭环
+- 410 张正式照片逐图字节/SHA-256/魔数/尺寸通过
+- 410 份画像仅执行方案 A 最小插入；失败画像、索引及其他保护资产零触碰
+- 最大图陈贤珍 6,649,475 bytes 已进入 Owner 终审清单；超过 20 MiB 为 0
+- 专项 19/19、全仓 239/239、validate-full、artifact-tool import 与 diff check 通过
 RequiredArtifacts:
-- docs/中山五院照片嵌入方式裁决单.md
-- work/sysu5_photo_backfill_trial.py
-- work/tests/test_sysu5_photo_backfill_trial.py
+- work/中山大学附属第五医院_photo_backfill_full_payload.json
+- work/中山大学附属第五医院_photo_backfill_full_reconciliation.csv
+- work/中山大学附属第五医院_photo_backfill_full_report.md
+- 医生画像仓库/01_试点医院/中山大学附属第五医院/照片/
+- docs/architecture_decisions/2026-08-17_issue_61_sysu5_photo_backfill_trial.md
 ContextInjection:
-- 阻塞 URL：https://www.sysu5.cn/sites/default/files/styles/watermark/public/2024-07/20240208173237537.jpg?itok=RSFCQ8E7
-- 阻塞字节：6,649,475；超过 Owner 5 MiB 上限
-- 只能等待 Owner 对该大图给出明确裁决；不得自行压缩、跳过或重跑 FULL
+- 当前 Phase 仅为 FULL_READY_FOR_FINAL_OWNER_AUDIT；等待 nancywrayg57-jpg 最终审计
+- 自动化保持 PAUSED；不得自行合并、关闭 Issue 或领取下一 Issue
+- Owner 终审必须重点核验报告中的唯一 >5 MiB 图片和 410 份方案 A 画像变更
 </Handoff_State>

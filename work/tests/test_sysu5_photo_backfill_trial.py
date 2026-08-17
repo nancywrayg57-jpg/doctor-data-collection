@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import hashlib
+import json
 import sys
 import tempfile
 import unittest
@@ -93,7 +94,18 @@ class Sysu5PhotoBackfillTrialTests(unittest.TestCase):
         self.assertEqual(target.title_level("主治医师，医学硕士"), "其他")
 
     def test_scope_and_fixed_sample_plan_are_stable(self) -> None:
-        rows = target.load_scope_rows()
+        payload = json.loads(target.MASTER_JSON_PATH.read_text(encoding="utf-8"))
+        for row in payload.get("rows", []):
+            if target.clean_text(row.get("医院")) == target.HOSPITAL:
+                row["照片链接"] = ""
+                row["照片文件"] = ""
+        with tempfile.TemporaryDirectory() as directory:
+            trial_baseline = Path(directory) / "trial_baseline.json"
+            trial_baseline.write_text(
+                json.dumps(payload, ensure_ascii=False), encoding="utf-8"
+            )
+            with patch.object(target, "MASTER_JSON_PATH", trial_baseline):
+                rows = target.load_scope_rows()
         selected = target.select_trial_rows(rows)
         self.assertEqual(len(rows), 413)
         self.assertEqual(len(selected), 10)
@@ -195,6 +207,7 @@ class Sysu5PhotoBackfillTrialTests(unittest.TestCase):
         self.assertIn("PR #62", target.FULL_AUTHORIZATION)
         self.assertIn("FULL_APPEND_AND_OBSIDIAN", target.FULL_AUTHORIZATION)
         self.assertIn("方案 A", target.FULL_AUTHORIZATION)
+        self.assertIn("5-20 MiB", target.FULL_AUTHORIZATION)
         warning = target.append_failure_warning("既有提示", "无照片容器")
         self.assertEqual(
             warning,
@@ -224,6 +237,74 @@ class Sysu5PhotoBackfillTrialTests(unittest.TestCase):
             target.collect_full_row_diffs(
                 before, [{**before[0], "姓名": "错误"}], {source}
             )
+
+    def test_full_photo_policy_reports_5_to_20_mib_and_fuses_above_20_mib(self) -> None:
+        target.enforce_full_photo_policy(
+            "大图医生",
+            "https://www.sysu5.cn/photo.jpg",
+            "jpg",
+            target.MAX_OWNER_REPORT_BYTES + 1,
+        )
+        target.enforce_full_photo_policy(
+            "边界医生",
+            "https://www.sysu5.cn/photo.webp",
+            "webp",
+            target.MAX_FULL_IMAGE_BYTES,
+        )
+        with self.assertRaisesRegex(RuntimeError, "超过 20 MiB"):
+            target.enforce_full_photo_policy(
+                "超限医生",
+                "https://www.sysu5.cn/photo.png",
+                "png",
+                target.MAX_FULL_IMAGE_BYTES + 1,
+            )
+        with self.assertRaisesRegex(RuntimeError, "格式不受支持"):
+            target.enforce_full_photo_policy(
+                "格式医生",
+                "https://www.sysu5.cn/photo.bmp",
+                "bmp",
+                1024,
+            )
+
+    def test_full_report_lists_owner_review_large_photos(self) -> None:
+        photo_url = "https://www.sysu5.cn/photo.jpg?itok=owner-review"
+        payload = {
+            "meta": {
+                "run_date": "2026-08-17",
+                "expected_count": target.EXPECTED_SCOPE_COUNT,
+                "downloaded_count": target.EXPECTED_SCOPE_COUNT,
+                "failed_count": 0,
+                "blank_count": 0,
+                "failure_state_counts": {state: 0 for state in target.FULL_FAILURE_STATES},
+                "failure_ratio": 0.0,
+                "photo_total_bytes": target.MAX_OWNER_REPORT_BYTES + 1,
+                "photo_total_mib": (target.MAX_OWNER_REPORT_BYTES + 1) / 1024 / 1024,
+                "photo_max_bytes": target.MAX_OWNER_REPORT_BYTES + 1,
+                "over_5mib_count": 1,
+                "over_20mib_count": 0,
+                "incomplete_read_retry_count": 0,
+                "existing_profile_count": target.EXPECTED_PROFILE_COUNT,
+                "profile_refreshed_count": target.EXPECTED_PROFILE_COUNT,
+            },
+            "photo_samples": [
+                {
+                    "name": "大图医生",
+                    "photo_url": photo_url,
+                    "bytes": target.MAX_OWNER_REPORT_BYTES + 1,
+                    "width": 4831,
+                    "height": 4833,
+                }
+            ],
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            report_path = Path(directory) / "report.md"
+            target.write_full_report(report_path, payload)
+            report = report_path.read_text(encoding="utf-8")
+        self.assertIn("## >5 MiB Owner 终审清单", report)
+        self.assertIn("大图医生", report)
+        self.assertIn(photo_url, report)
+        self.assertIn(str(target.MAX_OWNER_REPORT_BYTES + 1), report)
+        self.assertIn("4831×4833", report)
 
     def test_allocate_full_photo_uses_detail_id_only_for_collision(self) -> None:
         first = {
@@ -385,6 +466,7 @@ class Sysu5PhotoBackfillTrialTests(unittest.TestCase):
                     "photo_total_bytes": len(content) * success_count,
                     "photo_max_bytes": len(content),
                     "over_5mib_count": 0,
+                    "over_20mib_count": 0,
                 },
                 "rows": rows,
                 "reconciliation": reconciliation,
