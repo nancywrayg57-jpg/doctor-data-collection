@@ -1,11 +1,11 @@
-# Issue #75 广州医科大学附属口腔医院照片补录 TRIAL
+# Issue #75 广州医科大学附属口腔医院照片补录 TRIAL 与 FULL
 
 ## 目标与授权
 
 - GitHub Issue：<https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/75>
 - GitHub PR：<https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/76>
 - 工作分支：`codex/mhrj/issue-75-gykqyy-photo-backfill-trial`
-- Phase：`TRIAL`；正式资产必须零修改。
+- 当前 Phase：`FULL_READY_FOR_FINAL_OWNER_AUDIT`。TRIAL 期间正式资产保持零修改；Owner 在 PR #76 明确通过后，FULL 按授权事务写入。
 - 固定工作集：总底表本院 297 行既有详情 URL，全部为 `https://www.gykqyy.com/list.html?category=55&id=<ID>`，TRIAL 前 `照片链接`、`照片文件` 全空。
 - 唯一允许的数据入口：医生目录页面自身调用的同站公开 `GET https://www.gykqyy.com/api/article/getZhuanjiaList?category=55`，以及响应 `image` 字段实际引用的 `/uploads/<日期>/<hash>.<格式>` 原图。
 - 禁止枚举其他 category、探测页面未声明接口、构造未引用照片路径、使用第三方来源或写入正式照片目录。
@@ -91,6 +91,43 @@ TRIAL 只在 `work/` 下生成独立照片与审计工件；没有修改总底�
 - 独立重新下载李江、张斌两张代表照片：均 HTTP 200 / `image/jpeg`，字节数与 SHA-256 分别和 TRIAL 工件完全一致。
 - 正式资产前后快照完全一致，正式照片目录仍不存在。
 
+## Owner TRIAL 审计与 FULL 授权
+
+Owner 在 PR #76 评论 <https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/76#issuecomment-5333032694> 明确给出 `TRIAL_AUDIT_PASSED → FULL_APPEND_AND_OBSIDIAN`。FULL 固定范围仍为 category=55 的 297 行，只允许使用 `getZhuanjiaList` 响应 `image` 字段实际引用的 `/uploads` 原图；TRIAL 10 张复用，其余有效照片才重新下载。
+
+## FULL 结果
+
+- 四数对账：固定目标 297 = 实采 58 + 失败留空 239；正式照片目录 58 张，零孤儿、零缺失。
+- 下载构成：复用 TRIAL 10 张，新下载有效原图 48 张；状态波动 0，其他 category 请求 0，未声明接口探测 0，构造未引用路径 0，第三方来源 0。
+- 图片校验：41 张 JPG、17 张 PNG，共 28,129,642 bytes；最大 2,202,646 bytes，超过 5 MiB 0，超过 20 MiB 0；58 张逐一通过字节数、SHA-256、魔数/扩展名与尺寸复算。
+- 失败分类：`无照片容器` 239，其中 image 空/null 231；`详情不可达`、`照片资源不可达`、`占位图` 均为 0。
+- 总底表 JSON/CSV/XLSX 三载体逐值一致；逐单元格变化 355 个，仅为 `照片链接` 58、`照片文件` 58、`异常提示` 239。
+- 画像：297 份既有 AUTO 画像一一映射；58 份成功画像严格 +2/-0，239 份失败画像零修改，`_索引.md` 零修改。
+- 受保护资产：入口台账、总底表更新报告和全部 TRIAL 工件哈希保持不变。
+- FULL 抽样拼图已目视复核：最小、最大和 8 个确定性随机样本共 10/10 均为单人医生职业照，未见占位图、二维码、公共装饰、患者、儿童或合影。
+
+## 非 uploads image 字段终审清单
+
+以下 8 条 `image` 字段原值均为 `https://www.gykqyy.com`，未请求、未构造图片路径；当前计入“无照片容器”，并保留 `OWNER_FINAL_CLASSIFICATION_REQUIRED` 等待 Owner 终审。共同观察时间为 `2026-08-18T19:45:51Z`：
+
+| ID | 姓名 | 来源链接 |
+|---:|---|---|
+| 311 | 陈璐 | `https://www.gykqyy.com/list.html?category=55&id=311` |
+| 322 | 齐佳 | `https://www.gykqyy.com/list.html?category=55&id=322` |
+| 323 | 赵稚宁 | `https://www.gykqyy.com/list.html?category=55&id=323` |
+| 324 | 朱冠雄 | `https://www.gykqyy.com/list.html?category=55&id=324` |
+| 325 | 蔡东萍 | `https://www.gykqyy.com/list.html?category=55&id=325` |
+| 326 | 闫春阳 | `https://www.gykqyy.com/list.html?category=55&id=326` |
+| 327 | 胡诗琳 | `https://www.gykqyy.com/list.html?category=55&id=327` |
+| 329 | 刘辉 | `https://www.gykqyy.com/list.html?category=55&id=329` |
+
+## FULL 验证
+
+- `work.tests.test_gykqyy_photo_backfill_full`：12/12 通过。
+- FULL 执行前全仓回归：387/387 通过。
+- `--validate`：`FULL_VALIDATED expected=297 downloaded=58 failed=239`。
+- FULL payload、reconciliation、报告、审计拼图和正式资产已完成事务内验证；失败时回滚路径未触发。
+
 ## 工件
 
 - `work/gykqyy_photo_backfill_trial.py`
@@ -100,13 +137,20 @@ TRIAL 只在 `work/` 下生成独立照片与审计工件；没有修改总底�
 - `work/广州医科大学附属口腔医院_photo_backfill_trial_report.md`
 - `work/广州医科大学附属口腔医院_photo_backfill_trial_contact_sheet.jpg`
 - `work/广州医科大学附属口腔医院_photo_backfill_trial_photos/`（10 张 API image 原图）
+- `work/gykqyy_photo_backfill_full.py`
+- `work/tests/test_gykqyy_photo_backfill_full.py`
+- `work/广州医科大学附属口腔医院_photo_backfill_full_payload.json`
+- `work/广州医科大学附属口腔医院_photo_backfill_full_reconciliation.csv`
+- `work/广州医科大学附属口腔医院_photo_backfill_full_report.md`
+- `work/广州医科大学附属口腔医院_photo_backfill_full_audit_sheet.jpg`
+- `医生画像仓库/01_试点医院/广州医科大学附属口腔医院/照片/`（58 张官网原图）
 
 ## 停止点
 
-当前为 `TRIAL_READY_FOR_OWNER_AUDIT`。工件已提交、标准 Git fast-forward 推送并创建关联 Issue #75 的 PR #76；未取得 Owner 在该 PR 的明确 `FULL_APPEND_AND_OBSIDIAN` 前，不得写正式资产。
+当前为 `FULL_READY_FOR_FINAL_OWNER_AUDIT`。FULL 已在本地完成并通过验证；提交、标准 Git fast-forward 推送并发布 `FULL_DONE` 后停止，等待 Owner 终审。不得自行合并 PR、关闭 Issue 或领取下一任务。
 
 <Handoff_State>
-Target: Issue #75 广州医科大学附属口腔医院照片补录 TRIAL
+Target: Issue #75 广州医科大学附属口腔医院照片补录 FULL
 AgentConstitution: D:\workspace\信息收集整理\Agent.md
 RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
@@ -116,23 +160,30 @@ GitHubRepo: https://github.com/nancywrayg57-jpg/doctor-data-collection.git
 Branch: codex/mhrj/issue-75-gykqyy-photo-backfill-trial
 CodexDeveloper: xtzhou247
 ClaudeOwner: nancywrayg57-jpg
-Phase: TRIAL_READY_FOR_OWNER_AUDIT
+Phase: FULL_READY_FOR_FINAL_OWNER_AUDIT
 Completed:
 - Owner 已裁决固定 category=55，改按官网科室覆盖
 - 完成 297 固定 ID 与 API/底表逐 ID 对账
 - 完成 10 科室首原子、正高 5 + 副高 5 的 10 张 API image 原始照片 TRIAL
 - 完成 manifest、payload、report、联系表、专项测试和正式资产零修改验证
+- Owner 已通过 TRIAL 并切换到 FULL_APPEND_AND_OBSIDIAN
+- FULL 完成 297=58+239、58 张正式照片、三载体更新和 58 份画像 +2/-0
+- 8 条非 uploads image 已逐条留证并标记 OWNER_FINAL_CLASSIFICATION_REQUIRED
+- FULL 抽样拼图 10/10 已目视确认为单人医生职业照
 CurrentFacts:
-- 固定范围 297；有效 /uploads 照片候选 58，正高 22、副高 36、其他 0
-- TRIAL 10 张共 5,299,759 bytes，照片响应 10/10 HTTP 200，状态波动 0
+- 固定范围 297；正式实采 58、失败留空 239、正式照片 58
+- 58 张共 28,129,642 bytes，状态波动 0，超过 5 MiB 0
 - category 唯一值 55；其他 category 请求、接口探测、路径构造与第三方来源均为 0
-- 本院画像树 298 文件；正式照片目录仍不存在；总底表和台账未变化
+- 58 份成功画像 +2/-0，239 份失败画像与 _索引.md 零修改
+- 入口台账、更新报告和 TRIAL 工件未变化
 Next:
-- 等待 Owner TRIAL 审计；仅 Owner 明确下发 FULL_APPEND_AND_OBSIDIAN 后才可写正式资产
+- 提交并标准 fast-forward 推送 PR #76，发布 FULL_DONE 和仓库 blob 证据
+- 等待 Owner 对 8 条非 uploads 分类及整体 FULL 的最终审计
 Constraints:
 - 只请求 category=55 的页面自身公开 API 与 image 字段实际引用原图
-- 禁止枚举其他 category、探测未声明接口、构造路径、第三方来源和正式资产写入
-- 自动化在 TRIAL 成功提交、推送并进入等待 Owner 审计后恢复 ACTIVE
+- 禁止枚举其他 category、探测未声明接口、构造路径或使用第三方来源
+- 不自行合并 PR、关闭 Issue 或领取下一任务
+- FULL 成功提交并推送进入等待 Owner 终审后，自动化恢复 ACTIVE
 Artifacts:
 - work/gykqyy_photo_backfill_trial.py
 - work/tests/test_gykqyy_photo_backfill_trial.py
@@ -141,5 +192,12 @@ Artifacts:
 - work/广州医科大学附属口腔医院_photo_backfill_trial_report.md
 - work/广州医科大学附属口腔医院_photo_backfill_trial_contact_sheet.jpg
 - work/广州医科大学附属口腔医院_photo_backfill_trial_photos/
+- work/gykqyy_photo_backfill_full.py
+- work/tests/test_gykqyy_photo_backfill_full.py
+- work/广州医科大学附属口腔医院_photo_backfill_full_payload.json
+- work/广州医科大学附属口腔医院_photo_backfill_full_reconciliation.csv
+- work/广州医科大学附属口腔医院_photo_backfill_full_report.md
+- work/广州医科大学附属口腔医院_photo_backfill_full_audit_sheet.jpg
+- 医生画像仓库/01_试点医院/广州医科大学附属口腔医院/照片/
 - docs/architecture_decisions/2026-08-19_issue_75_gykqyy_photo_backfill_trial.md
 </Handoff_State>
