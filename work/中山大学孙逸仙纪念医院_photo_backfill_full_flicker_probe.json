@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "issue": 69,
+    "phase": "FULL_STATUS_FLICKER_AGGREGATED",
+    "source_link": "https://www.gzsys.org.cn/node/25212",
+    "name": "万欢",
+    "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20240104170523_%E5%89%AF%E6%9C%AC.jpg",
+    "path_kind": "files-root",
+    "round_count": 5,
+    "round_intervals_seconds": [
+      60.0,
+      60.0,
+      60.01500000001397,
+      60.0
+    ],
+    "captured_round": 1,
+    "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20240104170523_%E5%89%AF%E6%9C%AC.jpg",
+    "extension": "jpg",
+    "bytes": 1974546,
+    "width": 2505,
+    "height": 3659,
+    "sha256": "d3d3f78dc0150c47af3b9d8a0333177748faab36b9e07874081003edca113011"
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "start_utc": "2026-08-18T10:42:36Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": 200,
+      "photo_state": "当轮冻结",
+      "photo_bytes": 1974546,
+      "photo_sha256": "d3d3f78dc0150c47af3b9d8a0333177748faab36b9e07874081003edca113011",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "start_utc": "2026-08-18T10:43:36Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": null,
+      "photo_state": "已冻结第 1 轮原始照片，后续轮不覆盖",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "start_utc": "2026-08-18T10:44:36Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": null,
+      "photo_state": "已冻结第 1 轮原始照片，后续轮不覆盖",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    },
+    {
+      "round": 4,
+      "start_utc": "2026-08-18T10:45:36Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": null,
+      "photo_state": "已冻结第 1 轮原始照片，后续轮不覆盖",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    },
+    {
+      "round": 5,
+      "start_utc": "2026-08-18T10:46:36Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": null,
+      "photo_state": "已冻结第 1 轮原始照片，后续轮不覆盖",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    }
+  ]
+}
