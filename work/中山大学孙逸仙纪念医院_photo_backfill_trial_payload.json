@@ -1,0 +1,507 @@
+{
+  "meta": {
+    "issue": 69,
+    "phase": "TRIAL",
+    "hospital": "中山大学孙逸仙纪念医院",
+    "official_home": "https://www.gzsys.org.cn/",
+    "doctor_directory": "https://www.gzsys.org.cn/doctor/592/search",
+    "run_date": "2026-08-18",
+    "scope_count": 658,
+    "unique_source_count": 658,
+    "baseline_photo_filled_count": 0,
+    "trial_count": 10,
+    "department_coverage_count": 10,
+    "title_level_counts": {
+      "正高": 3,
+      "副高": 4,
+      "其他": 3
+    },
+    "detail_template_counts": {
+      "node": 5,
+      "doctor": 5
+    },
+    "path_kind_counts": {
+      "doctor-subdir": 5,
+      "files-root": 5
+    },
+    "template_signature": ".other-left .other-media .media-img[data-image-url]",
+    "detail_success_count": 10,
+    "photo_success_count": 10,
+    "detail_failure_count": 0,
+    "no_photo_container_count": 0,
+    "placeholder_count": 0,
+    "photo_failure_count": 0,
+    "status_flicker_count": 0,
+    "over_5mib_count": 0,
+    "over_20mib_count": 0,
+    "total_bytes": 11933516,
+    "min_bytes": 10354,
+    "median_bytes": 1478584,
+    "average_bytes": 1193351,
+    "max_bytes": 2668268,
+    "size_buckets": {
+      "<200KiB": 3,
+      "200KiB-1MiB": 1,
+      "1-5MiB": 6,
+      "5-20MiB": 0,
+      ">20MiB": 0
+    },
+    "estimated_scope_bytes": 785224958,
+    "estimated_scope_mib": 748.8488750457764,
+    "cookie_names": [
+      "CT6T",
+      "CT6TS"
+    ],
+    "incomplete_read_retry_count": 0,
+    "trial_excluded_reference_download_count": 0,
+    "pretrial_diagnostic_excluded_request_count": 18,
+    "pretrial_diagnostic_persisted_count": 0,
+    "constructed_unreferenced_probe_count": 0,
+    "third_party_source_count": 0,
+    "visual_review_status": "PASSED_SINGLE_ADULT_PROFESSIONAL_PORTRAITS_10_OF_10",
+    "protected_assets_before": {
+      "master_assets": {
+        "work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24430388,
+          "sha256": "fa7e964c2a5a65632542912f55d740e91f3f448da9566ac945c33ce77acf5117"
+        },
+        "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 18077776,
+          "sha256": "d43e67d341de50facdc5464cb96b04c0be4b6d3e8723daf501920fffc0d82d3a"
+        },
+        "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 4922762,
+          "sha256": "a73f3c5ccddea3984a879aa2447c7e66a2581587ea84ca0914f47dfdb421a45e"
+        },
+        "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        },
+        "医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
+          "bytes": 40088,
+          "sha256": "04273e1500e8dcb2483280fd53ed775543f0159531eca6f247a5bdf3a70a8911"
+        }
+      },
+      "profile_tree": {
+        "exists": true,
+        "file_count": 659,
+        "bytes": 2055871,
+        "sha256": "91a115387c18cd96780698164a5617540c244acb97c5525b5c59ba7d711a1be4"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "protected_assets_after": {
+      "master_assets": {
+        "work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24430388,
+          "sha256": "fa7e964c2a5a65632542912f55d740e91f3f448da9566ac945c33ce77acf5117"
+        },
+        "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 18077776,
+          "sha256": "d43e67d341de50facdc5464cb96b04c0be4b6d3e8723daf501920fffc0d82d3a"
+        },
+        "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 4922762,
+          "sha256": "a73f3c5ccddea3984a879aa2447c7e66a2581587ea84ca0914f47dfdb421a45e"
+        },
+        "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        },
+        "医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
+          "bytes": 40088,
+          "sha256": "04273e1500e8dcb2483280fd53ed775543f0159531eca6f247a5bdf3a70a8911"
+        }
+      },
+      "profile_tree": {
+        "exists": true,
+        "file_count": 659,
+        "bytes": 2055871,
+        "sha256": "91a115387c18cd96780698164a5617540c244acb97c5525b5c59ba7d711a1be4"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "photo_samples": [
+    {
+      "name": "宋尔卫",
+      "department": "乳腺外科",
+      "primary_title": "主任医师",
+      "title_level": "正高",
+      "source_link": "https://www.gzsys.org.cn/node/14894",
+      "detail_template": "node",
+      "detail_status": 200,
+      "detail_final_url": "https://www.gzsys.org.cn/node/14894",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T09:41:41Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzsys.org.cn/node/14894",
+          "error": ""
+        }
+      ],
+      "page_name": "宋尔卫",
+      "page_title": "宋尔卫 | 中山大学孙逸仙纪念医院",
+      "template_signature": ".other-left .other-media .media-img[data-image-url]",
+      "excluded_reference_count": 6,
+      "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/doctor/10155.jpg",
+      "path_kind": "doctor-subdir",
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/doctor/10155.jpg",
+      "photo_redirects": [],
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "filename": "宋尔卫-乳腺外科-主任医师-中山大学孙逸仙纪念医院.jpg",
+      "disk_path": "work/中山大学孙逸仙纪念医院_photo_backfill_trial_photos/宋尔卫-乳腺外科-主任医师-中山大学孙逸仙纪念医院.jpg",
+      "bytes": 23352,
+      "sha256": "5ae0e992c91073ca0882ac0a1208a9634cff5c8104f6a56f151603398f7d9c8c",
+      "width": 247,
+      "height": 338
+    },
+    {
+      "name": "陈样新",
+      "department": "心血管内科",
+      "primary_title": "主任医师",
+      "title_level": "正高",
+      "source_link": "https://www.gzsys.org.cn/node/14820",
+      "detail_template": "node",
+      "detail_status": 200,
+      "detail_final_url": "https://www.gzsys.org.cn/node/14820",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T09:41:42Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzsys.org.cn/node/14820",
+          "error": ""
+        }
+      ],
+      "page_name": "陈样新",
+      "page_title": "陈样新 | 中山大学孙逸仙纪念医院",
+      "template_signature": ".other-left .other-media .media-img[data-image-url]",
+      "excluded_reference_count": 6,
+      "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/12822.jpg",
+      "path_kind": "files-root",
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/12822.jpg",
+      "photo_redirects": [],
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "filename": "陈样新-心血管内科-主任医师-中山大学孙逸仙纪念医院.jpg",
+      "disk_path": "work/中山大学孙逸仙纪念医院_photo_backfill_trial_photos/陈样新-心血管内科-主任医师-中山大学孙逸仙纪念医院.jpg",
+      "bytes": 1731623,
+      "sha256": "08338ee737613de07f475332030be71b55e3762f6c1d831f0aabd334c093dbd8",
+      "width": 2450,
+      "height": 3589
+    },
+    {
+      "name": "詹俊",
+      "department": "消化内科",
+      "primary_title": "主任医师",
+      "title_level": "正高",
+      "source_link": "https://www.gzsys.org.cn/doctor/14811",
+      "detail_template": "doctor",
+      "detail_status": 200,
+      "detail_final_url": "https://www.gzsys.org.cn/doctor/14811",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T09:41:42Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzsys.org.cn/doctor/14811",
+          "error": ""
+        }
+      ],
+      "page_name": "詹俊",
+      "page_title": "詹俊 | 中山大学孙逸仙纪念医院",
+      "template_signature": ".other-left .other-media .media-img[data-image-url]",
+      "excluded_reference_count": 6,
+      "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/doctor/10547.jpg",
+      "path_kind": "doctor-subdir",
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/doctor/10547.jpg",
+      "photo_redirects": [],
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "filename": "詹俊-消化内科-主任医师-中山大学孙逸仙纪念医院.jpg",
+      "disk_path": "work/中山大学孙逸仙纪念医院_photo_backfill_trial_photos/詹俊-消化内科-主任医师-中山大学孙逸仙纪念医院.jpg",
+      "bytes": 10354,
+      "sha256": "e2296a8e111de8f690f827c58ca9bf33767353d6f59de7a7df30fdc1888844e5",
+      "width": 168,
+      "height": 240
+    },
+    {
+      "name": "黄晓波",
+      "department": "乳腺放疗专科",
+      "primary_title": "副主任医师",
+      "title_level": "副高",
+      "source_link": "https://www.gzsys.org.cn/node/14863",
+      "detail_template": "node",
+      "detail_status": 200,
+      "detail_final_url": "https://www.gzsys.org.cn/node/14863",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T09:41:43Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzsys.org.cn/node/14863",
+          "error": ""
+        }
+      ],
+      "page_name": "黄晓波",
+      "page_title": "黄晓波 | 中山大学孙逸仙纪念医院",
+      "template_signature": ".other-left .other-media .media-img[data-image-url]",
+      "excluded_reference_count": 6,
+      "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/16732.jpg",
+      "path_kind": "files-root",
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/16732.jpg",
+      "photo_redirects": [],
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "filename": "黄晓波-乳腺放疗专科-副主任医师-中山大学孙逸仙纪念医院.jpg",
+      "disk_path": "work/中山大学孙逸仙纪念医院_photo_backfill_trial_photos/黄晓波-乳腺放疗专科-副主任医师-中山大学孙逸仙纪念医院.jpg",
+      "bytes": 132642,
+      "sha256": "ce52e8fa1b3369e30493e3ecd204399b539d1386cc2f702bb76fe195ab7282de",
+      "width": 413,
+      "height": 626
+    },
+    {
+      "name": "黎江",
+      "department": "乳腺肿瘤中心",
+      "primary_title": "副研究员",
+      "title_level": "副高",
+      "source_link": "https://www.gzsys.org.cn/node/24064",
+      "detail_template": "node",
+      "detail_status": 200,
+      "detail_final_url": "https://www.gzsys.org.cn/node/24064",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T09:41:43Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzsys.org.cn/node/24064",
+          "error": ""
+        }
+      ],
+      "page_name": "黎江",
+      "page_title": "黎江 | 中山大学孙逸仙纪念医院",
+      "template_signature": ".other-left .other-media .media-img[data-image-url]",
+      "excluded_reference_count": 6,
+      "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/1694406880991.png",
+      "path_kind": "files-root",
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/1694406880991.png",
+      "photo_redirects": [],
+      "content_type": "image/png",
+      "extension": "png",
+      "filename": "黎江-乳腺肿瘤中心-副研究员-中山大学孙逸仙纪念医院.png",
+      "disk_path": "work/中山大学孙逸仙纪念医院_photo_backfill_trial_photos/黎江-乳腺肿瘤中心-副研究员-中山大学孙逸仙纪念医院.png",
+      "bytes": 1454375,
+      "sha256": "159b33e2f9e81652654f9c3738d40ecad5eec0bb1dd2fb49841608ce02a20be2",
+      "width": 913,
+      "height": 862
+    },
+    {
+      "name": "常瑞明",
+      "department": "健康体检中心",
+      "primary_title": "副主任医师",
+      "title_level": "副高",
+      "source_link": "https://www.gzsys.org.cn/node/14716",
+      "detail_template": "node",
+      "detail_status": 200,
+      "detail_final_url": "https://www.gzsys.org.cn/node/14716",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T09:41:44Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzsys.org.cn/node/14716",
+          "error": ""
+        }
+      ],
+      "page_name": "常瑞明",
+      "page_title": "常瑞明 | 中山大学孙逸仙纪念医院",
+      "template_signature": ".other-left .other-media .media-img[data-image-url]",
+      "excluded_reference_count": 6,
+      "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/doctor/11997.jpg",
+      "path_kind": "doctor-subdir",
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/doctor/11997.jpg",
+      "photo_redirects": [],
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "filename": "常瑞明-健康体检中心-副主任医师-中山大学孙逸仙纪念医院.jpg",
+      "disk_path": "work/中山大学孙逸仙纪念医院_photo_backfill_trial_photos/常瑞明-健康体检中心-副主任医师-中山大学孙逸仙纪念医院.jpg",
+      "bytes": 323464,
+      "sha256": "ef84c630a561675bb2eab1868d7bbd7c099f44a0bcceda50bcd41a5b90ec690c",
+      "width": 768,
+      "height": 1024
+    },
+    {
+      "name": "马剑达",
+      "department": "风湿免疫科",
+      "primary_title": "副主任医师",
+      "title_level": "副高",
+      "source_link": "https://www.gzsys.org.cn/doctor/31850",
+      "detail_template": "doctor",
+      "detail_status": 200,
+      "detail_final_url": "https://www.gzsys.org.cn/doctor/31850",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T09:41:44Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzsys.org.cn/doctor/31850",
+          "error": ""
+        }
+      ],
+      "page_name": "马剑达",
+      "page_title": "马剑达 | 中山大学孙逸仙纪念医院",
+      "template_signature": ".other-left .other-media .media-img[data-image-url]",
+      "excluded_reference_count": 6,
+      "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/%E9%A9%AC%E5%89%91%E8%BE%BE.jpg",
+      "path_kind": "files-root",
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/%E9%A9%AC%E5%89%91%E8%BE%BE.jpg",
+      "photo_redirects": [],
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "filename": "马剑达-风湿免疫科-副主任医师-中山大学孙逸仙纪念医院.jpg",
+      "disk_path": "work/中山大学孙逸仙纪念医院_photo_backfill_trial_photos/马剑达-风湿免疫科-副主任医师-中山大学孙逸仙纪念医院.jpg",
+      "bytes": 1953463,
+      "sha256": "7cd5dc63d4f60b2bca3543cbc9844ab64b01b1c19641811971d6ef84c66b5d0e",
+      "width": 2731,
+      "height": 3740
+    },
+    {
+      "name": "黄泽坚",
+      "department": "肝胆外科",
+      "primary_title": "主治医师",
+      "title_level": "其他",
+      "source_link": "https://www.gzsys.org.cn/doctor/15361",
+      "detail_template": "doctor",
+      "detail_status": 200,
+      "detail_final_url": "https://www.gzsys.org.cn/doctor/15361",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T09:41:45Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzsys.org.cn/doctor/15361",
+          "error": ""
+        }
+      ],
+      "page_name": "黄泽坚",
+      "page_title": "黄泽坚 | 中山大学孙逸仙纪念医院",
+      "template_signature": ".other-left .other-media .media-img[data-image-url]",
+      "excluded_reference_count": 6,
+      "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/doctor/12377.JPG",
+      "path_kind": "doctor-subdir",
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/doctor/12377.JPG",
+      "photo_redirects": [],
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "filename": "黄泽坚-肝胆外科-主治医师-中山大学孙逸仙纪念医院.jpg",
+      "disk_path": "work/中山大学孙逸仙纪念医院_photo_backfill_trial_photos/黄泽坚-肝胆外科-主治医师-中山大学孙逸仙纪念医院.jpg",
+      "bytes": 2668268,
+      "sha256": "7dcce92abe4788f6ead53998745cd48ab888127b4845d5e49471bb691daa8ff4",
+      "width": 2148,
+      "height": 3223
+    },
+    {
+      "name": "曾志芬",
+      "department": "全科医学科一科",
+      "primary_title": "主治医师",
+      "title_level": "其他",
+      "source_link": "https://www.gzsys.org.cn/doctor/15413",
+      "detail_template": "doctor",
+      "detail_status": 200,
+      "detail_final_url": "https://www.gzsys.org.cn/doctor/15413",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T09:41:46Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzsys.org.cn/doctor/15413",
+          "error": ""
+        }
+      ],
+      "page_name": "曾志芬",
+      "page_title": "曾志芬 | 中山大学孙逸仙纪念医院",
+      "template_signature": ".other-left .other-media .media-img[data-image-url]",
+      "excluded_reference_count": 6,
+      "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/doctor/14316.jpg",
+      "path_kind": "doctor-subdir",
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/doctor/14316.jpg",
+      "photo_redirects": [],
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "filename": "曾志芬-全科医学科一科-主治医师-中山大学孙逸仙纪念医院.jpg",
+      "disk_path": "work/中山大学孙逸仙纪念医院_photo_backfill_trial_photos/曾志芬-全科医学科一科-主治医师-中山大学孙逸仙纪念医院.jpg",
+      "bytes": 2133181,
+      "sha256": "ca3ce66587a77d31aeaca1c8a0f8b9ed19c6e0b03a826011883ebf1162feea48",
+      "width": 2013,
+      "height": 2863
+    },
+    {
+      "name": "李卓",
+      "department": "肿瘤内科",
+      "primary_title": "主治医师",
+      "title_level": "其他",
+      "source_link": "https://www.gzsys.org.cn/doctor/29823",
+      "detail_template": "doctor",
+      "detail_status": 200,
+      "detail_final_url": "https://www.gzsys.org.cn/doctor/29823",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T09:41:46Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzsys.org.cn/doctor/29823",
+          "error": ""
+        }
+      ],
+      "page_name": "李卓",
+      "page_title": "李卓 | 中山大学孙逸仙纪念医院",
+      "template_signature": ".other-left .other-media .media-img[data-image-url]",
+      "excluded_reference_count": 6,
+      "photo_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/%E6%9D%8E%E5%8D%93-%E8%82%BF%E7%98%A4%E7%A7%91_0.jpg",
+      "path_kind": "files-root",
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzsys.org.cn/sites/syshospital.prod.sysucloud1.sysu.edu.cn/files/%E6%9D%8E%E5%8D%93-%E8%82%BF%E7%98%A4%E7%A7%91_0.jpg",
+      "photo_redirects": [],
+      "content_type": "image/jpeg",
+      "extension": "jpg",
+      "filename": "李卓-肿瘤内科-主治医师-中山大学孙逸仙纪念医院.jpg",
+      "disk_path": "work/中山大学孙逸仙纪念医院_photo_backfill_trial_photos/李卓-肿瘤内科-主治医师-中山大学孙逸仙纪念医院.jpg",
+      "bytes": 1502794,
+      "sha256": "0ce5b817b7e355845c29cbc8de8999dbf6894ea8c00b6012bef6486360aaa544",
+      "width": 1639,
+      "height": 2314
+    }
+  ]
+}
