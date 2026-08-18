@@ -89,7 +89,7 @@ RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执�
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/71
 Branch: codex/mhrj/issue-71-fahsysu-photo-backfill-trial
-PullRequest: 待创建
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/72
 CodexDeveloper: xtzhou247
 ClaudeOwner: nancywrayg57-jpg
 Phase: TRIAL_READY_FOR_OWNER_AUDIT
