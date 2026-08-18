@@ -3,6 +3,7 @@
 ## 目标与授权
 
 - GitHub Issue：<https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/75>
+- GitHub PR：<https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/76>
 - 工作分支：`codex/mhrj/issue-75-gykqyy-photo-backfill-trial`
 - Phase：`TRIAL`；正式资产必须零修改。
 - 固定工作集：总底表本院 297 行既有详情 URL，全部为 `https://www.gykqyy.com/list.html?category=55&id=<ID>`，TRIAL 前 `照片链接`、`照片文件` 全空。
@@ -102,7 +103,7 @@ TRIAL 只在 `work/` 下生成独立照片与审计工件；没有修改总底�
 
 ## 停止点
 
-当前为 `TRIAL_READY_FOR_OWNER_AUDIT`。提交、标准 Git fast-forward 推送并创建关联 Issue #75 的 PR 后等待 Owner 审计；未取得 Owner 在关联 PR 的明确 `FULL_APPEND_AND_OBSIDIAN` 前，不得写正式资产。
+当前为 `TRIAL_READY_FOR_OWNER_AUDIT`。工件已提交、标准 Git fast-forward 推送并创建关联 Issue #75 的 PR #76；未取得 Owner 在该 PR 的明确 `FULL_APPEND_AND_OBSIDIAN` 前，不得写正式资产。
 
 <Handoff_State>
 Target: Issue #75 广州医科大学附属口腔医院照片补录 TRIAL
@@ -110,6 +111,7 @@ AgentConstitution: D:\workspace\信息收集整理\Agent.md
 RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/75
+GitHubPR: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/76
 GitHubRepo: https://github.com/nancywrayg57-jpg/doctor-data-collection.git
 Branch: codex/mhrj/issue-75-gykqyy-photo-backfill-trial
 CodexDeveloper: xtzhou247
@@ -126,7 +128,6 @@ CurrentFacts:
 - category 唯一值 55；其他 category 请求、接口探测、路径构造与第三方来源均为 0
 - 本院画像树 298 文件；正式照片目录仍不存在；总底表和台账未变化
 Next:
-- 提交并以标准 Git fast-forward 推送当前分支，创建关联 Issue #75 的 PR
 - 等待 Owner TRIAL 审计；仅 Owner 明确下发 FULL_APPEND_AND_OBSIDIAN 后才可写正式资产
 Constraints:
 - 只请求 category=55 的页面自身公开 API 与 image 字段实际引用原图
