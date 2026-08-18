@@ -1,0 +1,1222 @@
+{
+  "meta": {
+    "issue": 77,
+    "phase": "TRIAL",
+    "hospital": "广州医科大学附属脑科医院",
+    "official_home": "https://www.gzbrain.cn/",
+    "doctor_directory": "https://www.gzbrain.cn/myzj/list.html",
+    "run_date": "2026-08-19",
+    "scope_count": 183,
+    "unique_source_count": 183,
+    "baseline_photo_filled_count": 0,
+    "photo_success_count": 10,
+    "detail_success_count": 10,
+    "detail_failure_count": 0,
+    "no_photo_container_count": 0,
+    "placeholder_count": 0,
+    "photo_failure_count": 0,
+    "status_flicker_count": 0,
+    "department_coverage_count": 10,
+    "title_level_counts": {
+      "正高": 4,
+      "副高": 3,
+      "中级": 2,
+      "其他": 1
+    },
+    "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+    "unique_photo_url_count": 10,
+    "declared_extension_mismatch_count": 1,
+    "over_5mib_count": 0,
+    "over_20mib_count": 0,
+    "total_bytes": 2225954,
+    "min_bytes": 21126,
+    "median_bytes": 84408,
+    "average_bytes": 222595,
+    "max_bytes": 954574,
+    "size_buckets": {
+      "<200KiB": 7,
+      "200KiB-1MiB": 3,
+      "1-5MiB": 0,
+      "5-20MiB": 0,
+      ">20MiB": 0
+    },
+    "estimated_scope_bytes": 40734885,
+    "estimated_scope_mib": 38.84781360626221,
+    "request_mode": "urllib-default-get/no-cookie/no-proxy/no-custom-headers",
+    "urllib_default_headers": [
+      [
+        "User-agent",
+        "Python-urllib/3.12"
+      ]
+    ],
+    "cookie_names": [],
+    "incomplete_read_retry_count": 0,
+    "excluded_reference_download_count": 0,
+    "constructed_unreferenced_probe_count": 0,
+    "third_party_source_count": 0,
+    "exclusion_rules": [
+      {
+        "kind": "公共图标",
+        "rule": "严格照片容器之外的 header/menu/action 图标一律排除"
+      },
+      {
+        "kind": "装饰图片",
+        "rule": "banner、医院环境、新闻/科普卡片及任何非 single-img 资源一律排除"
+      },
+      {
+        "kind": "二维码",
+        "rule": "路径或语义命中 qrcode/qr_code/erweima/weixin/wechat 时排除"
+      },
+      {
+        "kind": "占位图",
+        "rule": "路径命中 placeholder/nopic/noimage/default 时定格为占位图，不下载"
+      },
+      {
+        "kind": "院徽/Logo",
+        "rule": "路径命中 logo、favicon、gongan 或位于页眉区域时排除"
+      },
+      {
+        "kind": "患者及合影",
+        "rule": "即使位于候选容器，联系表目视发现患者、儿童、合影或非本人职业照也必须排除"
+      }
+    ],
+    "visual_review_status": "PASSED_SINGLE_ADULT_PROFESSIONAL_PORTRAITS_10_OF_10",
+    "visual_review_utc": "2026-08-18T20:25:22Z",
+    "contact_sheet_sha256": "083900e1833a856ad8aa7bb0d1beed0b4cb7464fac35897893a29b6f62c61565",
+    "contact_sheet_bytes": 236037,
+    "protected_assets_before": {
+      "master_assets": {
+        "work/珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24907192,
+          "sha256": "e296b4f9f6cf15550aaac7d13f230b7822bd2fc34e9f3ed4118eba6c3ad12643"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 18554302,
+          "sha256": "c4cd6522231a630867fa4a01786013944737f9078b80de172133c55a7b037c7d"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 5091393,
+          "sha256": "a01b0cab689872f790427f078fc48055da55b025daa565edd31eb5aee52b45a6"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院官网入口台账.xlsx": {
+          "bytes": 40088,
+          "sha256": "04273e1500e8dcb2483280fd53ed775543f0159531eca6f247a5bdf3a70a8911"
+        }
+      },
+      "profile_tree": {
+        "exists": true,
+        "file_count": 184,
+        "bytes": 556756,
+        "sha256": "15d890952f3f6288715cd7caf3836b0d0a0e7390ac9826be5b85f1fedc1b459a"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "protected_assets_after": {
+      "master_assets": {
+        "work/珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24907192,
+          "sha256": "e296b4f9f6cf15550aaac7d13f230b7822bd2fc34e9f3ed4118eba6c3ad12643"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 18554302,
+          "sha256": "c4cd6522231a630867fa4a01786013944737f9078b80de172133c55a7b037c7d"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 5091393,
+          "sha256": "a01b0cab689872f790427f078fc48055da55b025daa565edd31eb5aee52b45a6"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院官网入口台账.xlsx": {
+          "bytes": 40088,
+          "sha256": "04273e1500e8dcb2483280fd53ed775543f0159531eca6f247a5bdf3a70a8911"
+        }
+      },
+      "profile_tree": {
+        "exists": true,
+        "file_count": 184,
+        "bytes": 556756,
+        "sha256": "15d890952f3f6288715cd7caf3836b0d0a0e7390ac9826be5b85f1fedc1b459a"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "photo_samples": [
+    {
+      "name": "宁玉萍",
+      "department": "神经内科",
+      "primary_title": "主任医师",
+      "title_raw": "主任医师",
+      "title_level": "正高",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_966.html",
+      "detail_id": "966",
+      "detail_status": 200,
+      "detail_probe_utc": "2026-08-18T20:24:51Z",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T20:24:51Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzbrain.cn/myzj/info_itemid_966.html",
+          "error": ""
+        }
+      ],
+      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_966.html",
+      "page_name": "宁玉萍",
+      "page_title": "主任医师",
+      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+      "photo_reference_count": 1,
+      "single_con_image_count": 1,
+      "outside_image_reference_count": 21,
+      "excluded_resource_examples": [
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153347740.png?bG9nbzEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153354654.png?bG9nbzIucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/04/20200409112748900.jpg?5o2V6I63LkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/12/20231207094319422.jpg?5b6u5L+h5Zu+54mHXzIwMjMxMjA2MTgwNzA1X+WJr+acrC5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2026/08/20260812105615429.png?U2NyZWVuU2hvdF8yMDI2LTA4LTEyXzEwNTU1OF85MDEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190523111507264.png?6buE5YW05YW1LnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190513094312481.jpg?6YOt5bu66ZuELmpwZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/12/20251204172753476.jpg?My7lpKflkIjnhacuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/09/20250915172104703.jpg?MTc1NzkyNzg3OTE4NS5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2024/03/20240312144935423.jpg?aW1hZ2UwMDcuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        }
+      ],
+      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==\"/> </div>",
+      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
+      "photo_url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+      "opaque_query": "5a6B546J6JCNLnBuZw==",
+      "filename": "宁玉萍-神经内科-主任医师-广州医科大学附属脑科医院.png",
+      "disk_path": "work/广州医科大学附属脑科医院_photo_backfill_trial_photos/宁玉萍-神经内科-主任医师-广州医科大学附属脑科医院.png",
+      "bytes": 86227,
+      "sha256": "8324542d39f1d4890c4b9ec1ff3f91efdc43acb03271bc7046410d2b04f28bb7",
+      "declared_extension": "png",
+      "extension": "png",
+      "content_type": "image/png",
+      "width": 197,
+      "height": 266,
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+      "photo_redirects": []
+    },
+    {
+      "name": "成友军",
+      "department": "神经外科",
+      "primary_title": "副主任医师",
+      "title_raw": "副主任医师",
+      "title_level": "副高",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_803.html",
+      "detail_id": "803",
+      "detail_status": 200,
+      "detail_probe_utc": "2026-08-18T20:24:52Z",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T20:24:52Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzbrain.cn/myzj/info_itemid_803.html",
+          "error": ""
+        }
+      ],
+      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_803.html",
+      "page_name": "成友军",
+      "page_title": "副主任医师",
+      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+      "photo_reference_count": 1,
+      "single_con_image_count": 1,
+      "outside_image_reference_count": 21,
+      "excluded_resource_examples": [
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153347740.png?bG9nbzEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153354654.png?bG9nbzIucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/04/20200409112748900.jpg?5o2V6I63LkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/12/20231207094319422.jpg?5b6u5L+h5Zu+54mHXzIwMjMxMjA2MTgwNzA1X+WJr+acrC5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2026/08/20260812105615429.png?U2NyZWVuU2hvdF8yMDI2LTA4LTEyXzEwNTU1OF85MDEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190523111507264.png?6buE5YW05YW1LnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190513094312481.jpg?6YOt5bu66ZuELmpwZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/12/20251204172753476.jpg?My7lpKflkIjnhacuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/09/20250915172104703.jpg?MTc1NzkyNzg3OTE4NS5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2024/03/20240312144935423.jpg?aW1hZ2UwMDcuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        }
+      ],
+      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2019/05/20190521100304156.jpg?5oiQ5Y+L5YabLeiTneW6lS5qcGc=\"/> </div>",
+      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
+      "photo_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190521100304156.jpg?5oiQ5Y+L5YabLeiTneW6lS5qcGc=",
+      "opaque_query": "5oiQ5Y+L5YabLeiTneW6lS5qcGc=",
+      "filename": "成友军-神经外科-副主任医师-广州医科大学附属脑科医院.png",
+      "disk_path": "work/广州医科大学附属脑科医院_photo_backfill_trial_photos/成友军-神经外科-副主任医师-广州医科大学附属脑科医院.png",
+      "bytes": 79908,
+      "sha256": "a10a649dae3e0852774d53b8111b30259582aab7cd28ee509788eba9478f7525",
+      "declared_extension": "jpg",
+      "extension": "png",
+      "content_type": "image/jpeg",
+      "width": 201,
+      "height": 320,
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190521100304156.jpg?5oiQ5Y+L5YabLeiTneW6lS5qcGc=",
+      "photo_redirects": []
+    },
+    {
+      "name": "周素妙",
+      "department": "中西医结合科",
+      "primary_title": "主治医师",
+      "title_raw": "主治医师",
+      "title_level": "中级",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_96281.html",
+      "detail_id": "96281",
+      "detail_status": 200,
+      "detail_probe_utc": "2026-08-18T20:24:52Z",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T20:24:52Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzbrain.cn/myzj/info_itemid_96281.html",
+          "error": ""
+        }
+      ],
+      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_96281.html",
+      "page_name": "周素妙",
+      "page_title": "主治医师",
+      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+      "photo_reference_count": 1,
+      "single_con_image_count": 1,
+      "outside_image_reference_count": 21,
+      "excluded_resource_examples": [
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153347740.png?bG9nbzEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153354654.png?bG9nbzIucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/04/20200409112748900.jpg?5o2V6I63LkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/12/20231207094319422.jpg?5b6u5L+h5Zu+54mHXzIwMjMxMjA2MTgwNzA1X+WJr+acrC5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2026/08/20260812105615429.png?U2NyZWVuU2hvdF8yMDI2LTA4LTEyXzEwNTU1OF85MDEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190523111507264.png?6buE5YW05YW1LnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190513094312481.jpg?6YOt5bu66ZuELmpwZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/12/20251204172753476.jpg?My7lpKflkIjnhacuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/09/20250915172104703.jpg?MTc1NzkyNzg3OTE4NS5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2024/03/20240312144935423.jpg?aW1hZ2UwMDcuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        }
+      ],
+      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2025/01/20250120110534979.jpg?bW1leHBvcnQxNzM2OTExMDg5MDM2LmpwZw==\"/> </div>",
+      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
+      "photo_url": "https://www.gzbrain.cn/uploadfiles/2025/01/20250120110534979.jpg?bW1leHBvcnQxNzM2OTExMDg5MDM2LmpwZw==",
+      "opaque_query": "bW1leHBvcnQxNzM2OTExMDg5MDM2LmpwZw==",
+      "filename": "周素妙-中西医结合科-主治医师-广州医科大学附属脑科医院.jpg",
+      "disk_path": "work/广州医科大学附属脑科医院_photo_backfill_trial_photos/周素妙-中西医结合科-主治医师-广州医科大学附属脑科医院.jpg",
+      "bytes": 82589,
+      "sha256": "2f46ddc9a40de1729299a44cb928c108a5572762bc5070be393f882c3c39e586",
+      "declared_extension": "jpg",
+      "extension": "jpg",
+      "content_type": "image/jpeg",
+      "width": 969,
+      "height": 1264,
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2025/01/20250120110534979.jpg?bW1leHBvcnQxNzM2OTExMDg5MDM2LmpwZw==",
+      "photo_redirects": []
+    },
+    {
+      "name": "张双春",
+      "department": "临床心理科",
+      "primary_title": "心理治疗师",
+      "title_raw": "心理治疗师",
+      "title_level": "其他",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_11791.html",
+      "detail_id": "11791",
+      "detail_status": 200,
+      "detail_probe_utc": "2026-08-18T20:24:56Z",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T20:24:56Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzbrain.cn/myzj/info_itemid_11791.html",
+          "error": ""
+        }
+      ],
+      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_11791.html",
+      "page_name": "张双春",
+      "page_title": "心理治疗师",
+      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+      "photo_reference_count": 1,
+      "single_con_image_count": 1,
+      "outside_image_reference_count": 21,
+      "excluded_resource_examples": [
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153347740.png?bG9nbzEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153354654.png?bG9nbzIucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/04/20200409112748900.jpg?5o2V6I63LkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/12/20231207094319422.jpg?5b6u5L+h5Zu+54mHXzIwMjMxMjA2MTgwNzA1X+WJr+acrC5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2026/08/20260812105615429.png?U2NyZWVuU2hvdF8yMDI2LTA4LTEyXzEwNTU1OF85MDEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190523111507264.png?6buE5YW05YW1LnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190513094312481.jpg?6YOt5bu66ZuELmpwZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/12/20251204172753476.jpg?My7lpKflkIjnhacuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/09/20250915172104703.jpg?MTc1NzkyNzg3OTE4NS5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2024/03/20240312144935423.jpg?aW1hZ2UwMDcuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        }
+      ],
+      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2019/09/20190926171211532.jpg?5byg5Y+M5pil6K+B5Lu254WnXzIwMTkwOTI2MTcxMDMzLmpwZw==\"/> </div>",
+      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
+      "photo_url": "https://www.gzbrain.cn/uploadfiles/2019/09/20190926171211532.jpg?5byg5Y+M5pil6K+B5Lu254WnXzIwMTkwOTI2MTcxMDMzLmpwZw==",
+      "opaque_query": "5byg5Y+M5pil6K+B5Lu254WnXzIwMTkwOTI2MTcxMDMzLmpwZw==",
+      "filename": "张双春-临床心理科-心理治疗师-广州医科大学附属脑科医院.jpg",
+      "disk_path": "work/广州医科大学附属脑科医院_photo_backfill_trial_photos/张双春-临床心理科-心理治疗师-广州医科大学附属脑科医院.jpg",
+      "bytes": 533853,
+      "sha256": "41a23de684a5f474fbf5489b39597985030a273b5fb821441f9f3f47db9bca8a",
+      "declared_extension": "jpg",
+      "extension": "jpg",
+      "content_type": "image/jpeg",
+      "width": 1507,
+      "height": 1573,
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2019/09/20190926171211532.jpg?5byg5Y+M5pil6K+B5Lu254WnXzIwMTkwOTI2MTcxMDMzLmpwZw==",
+      "photo_redirects": []
+    },
+    {
+      "name": "周亮",
+      "department": "社区精神科",
+      "primary_title": "教授",
+      "title_raw": "教授",
+      "title_level": "正高",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_4746.html",
+      "detail_id": "4746",
+      "detail_status": 200,
+      "detail_probe_utc": "2026-08-18T20:24:56Z",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T20:24:56Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzbrain.cn/myzj/info_itemid_4746.html",
+          "error": ""
+        }
+      ],
+      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_4746.html",
+      "page_name": "周亮",
+      "page_title": "教授",
+      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+      "photo_reference_count": 1,
+      "single_con_image_count": 1,
+      "outside_image_reference_count": 21,
+      "excluded_resource_examples": [
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153347740.png?bG9nbzEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153354654.png?bG9nbzIucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/04/20200409112748900.jpg?5o2V6I63LkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/12/20231207094319422.jpg?5b6u5L+h5Zu+54mHXzIwMjMxMjA2MTgwNzA1X+WJr+acrC5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2026/08/20260812105615429.png?U2NyZWVuU2hvdF8yMDI2LTA4LTEyXzEwNTU1OF85MDEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190523111507264.png?6buE5YW05YW1LnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190513094312481.jpg?6YOt5bu66ZuELmpwZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/12/20251204172753476.jpg?My7lpKflkIjnhacuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/09/20250915172104703.jpg?MTc1NzkyNzg3OTE4NS5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2024/03/20240312144935423.jpg?aW1hZ2UwMDcuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        }
+      ],
+      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==\"/> </div>",
+      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
+      "photo_url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+      "opaque_query": "5ZGo5LquLkpQRw==",
+      "filename": "周亮-社区精神科-教授-广州医科大学附属脑科医院.jpg",
+      "disk_path": "work/广州医科大学附属脑科医院_photo_backfill_trial_photos/周亮-社区精神科-教授-广州医科大学附属脑科医院.jpg",
+      "bytes": 21126,
+      "sha256": "63b8c2d2b1f747859604c631e319fbc64102c3d89840a232c3eb960b8c0c34d0",
+      "declared_extension": "jpg",
+      "extension": "jpg",
+      "content_type": "image/jpeg",
+      "width": 302,
+      "height": 403,
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+      "photo_redirects": []
+    },
+    {
+      "name": "彭妙官",
+      "department": "内分泌科",
+      "primary_title": "副主任医师",
+      "title_raw": "副主任医师",
+      "title_level": "副高",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_100106.html",
+      "detail_id": "100106",
+      "detail_status": 200,
+      "detail_probe_utc": "2026-08-18T20:24:57Z",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T20:24:57Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzbrain.cn/myzj/info_itemid_100106.html",
+          "error": ""
+        }
+      ],
+      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_100106.html",
+      "page_name": "彭妙官",
+      "page_title": "副主任医师",
+      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+      "photo_reference_count": 1,
+      "single_con_image_count": 1,
+      "outside_image_reference_count": 21,
+      "excluded_resource_examples": [
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153347740.png?bG9nbzEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153354654.png?bG9nbzIucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/04/20200409112748900.jpg?5o2V6I63LkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/12/20231207094319422.jpg?5b6u5L+h5Zu+54mHXzIwMjMxMjA2MTgwNzA1X+WJr+acrC5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2026/08/20260812105615429.png?U2NyZWVuU2hvdF8yMDI2LTA4LTEyXzEwNTU1OF85MDEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190523111507264.png?6buE5YW05YW1LnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190513094312481.jpg?6YOt5bu66ZuELmpwZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/12/20251204172753476.jpg?My7lpKflkIjnhacuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/09/20250915172104703.jpg?MTc1NzkyNzg3OTE4NS5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2024/03/20240312144935423.jpg?aW1hZ2UwMDcuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        }
+      ],
+      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2025/04/20250417170630017.jpg?5bm/6ISR6K+B5Lu254WnX+WJr+acrC5qcGc=\"/> </div>",
+      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
+      "photo_url": "https://www.gzbrain.cn/uploadfiles/2025/04/20250417170630017.jpg?5bm/6ISR6K+B5Lu254WnX+WJr+acrC5qcGc=",
+      "opaque_query": "5bm/6ISR6K+B5Lu254WnX+WJr+acrC5qcGc=",
+      "filename": "彭妙官-内分泌科-副主任医师-广州医科大学附属脑科医院.jpg",
+      "disk_path": "work/广州医科大学附属脑科医院_photo_backfill_trial_photos/彭妙官-内分泌科-副主任医师-广州医科大学附属脑科医院.jpg",
+      "bytes": 954574,
+      "sha256": "80929a070621228295f0a59d2fcd6d8f6e6d938336545ac4c431d4153ae50e80",
+      "declared_extension": "jpg",
+      "extension": "jpg",
+      "content_type": "image/jpeg",
+      "width": 6000,
+      "height": 7500,
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2025/04/20250417170630017.jpg?5bm/6ISR6K+B5Lu254WnX+WJr+acrC5qcGc=",
+      "photo_redirects": []
+    },
+    {
+      "name": "王治华",
+      "department": "司法鉴定科",
+      "primary_title": "主治医师",
+      "title_raw": "主治医师",
+      "title_level": "中级",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_560.html",
+      "detail_id": "560",
+      "detail_status": 200,
+      "detail_probe_utc": "2026-08-18T20:24:58Z",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T20:24:58Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzbrain.cn/myzj/info_itemid_560.html",
+          "error": ""
+        }
+      ],
+      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_560.html",
+      "page_name": "王治华",
+      "page_title": "主治医师",
+      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+      "photo_reference_count": 1,
+      "single_con_image_count": 1,
+      "outside_image_reference_count": 21,
+      "excluded_resource_examples": [
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153347740.png?bG9nbzEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153354654.png?bG9nbzIucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/04/20200409112748900.jpg?5o2V6I63LkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/12/20231207094319422.jpg?5b6u5L+h5Zu+54mHXzIwMjMxMjA2MTgwNzA1X+WJr+acrC5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2026/08/20260812105615429.png?U2NyZWVuU2hvdF8yMDI2LTA4LTEyXzEwNTU1OF85MDEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190523111507264.png?6buE5YW05YW1LnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190513094312481.jpg?6YOt5bu66ZuELmpwZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/12/20251204172753476.jpg?My7lpKflkIjnhacuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/09/20250915172104703.jpg?MTc1NzkyNzg3OTE4NS5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2024/03/20240312144935423.jpg?aW1hZ2UwMDcuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        }
+      ],
+      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2019/05/20190507082902653.jpg?546L5rK75Y2OLmpwZw==\"/> </div>",
+      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
+      "photo_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190507082902653.jpg?546L5rK75Y2OLmpwZw==",
+      "opaque_query": "546L5rK75Y2OLmpwZw==",
+      "filename": "王治华-司法鉴定科-主治医师-广州医科大学附属脑科医院.jpg",
+      "disk_path": "work/广州医科大学附属脑科医院_photo_backfill_trial_photos/王治华-司法鉴定科-主治医师-广州医科大学附属脑科医院.jpg",
+      "bytes": 98392,
+      "sha256": "ac7c6efbc721081135536142ec8550187dcf68462d040fc40f5703137d51415b",
+      "declared_extension": "jpg",
+      "extension": "jpg",
+      "content_type": "image/jpeg",
+      "width": 598,
+      "height": 882,
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190507082902653.jpg?546L5rK75Y2OLmpwZw==",
+      "photo_redirects": []
+    },
+    {
+      "name": "郭耀光",
+      "department": "康复科",
+      "primary_title": "副主任医师",
+      "title_raw": "副主任医师",
+      "title_level": "副高",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_101440.html",
+      "detail_id": "101440",
+      "detail_status": 200,
+      "detail_probe_utc": "2026-08-18T20:24:58Z",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T20:24:58Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzbrain.cn/myzj/info_itemid_101440.html",
+          "error": ""
+        }
+      ],
+      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_101440.html",
+      "page_name": "郭耀光",
+      "page_title": "副主任医师",
+      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+      "photo_reference_count": 1,
+      "single_con_image_count": 1,
+      "outside_image_reference_count": 21,
+      "excluded_resource_examples": [
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153347740.png?bG9nbzEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153354654.png?bG9nbzIucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/04/20200409112748900.jpg?5o2V6I63LkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/12/20231207094319422.jpg?5b6u5L+h5Zu+54mHXzIwMjMxMjA2MTgwNzA1X+WJr+acrC5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2026/08/20260812105615429.png?U2NyZWVuU2hvdF8yMDI2LTA4LTEyXzEwNTU1OF85MDEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190523111507264.png?6buE5YW05YW1LnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190513094312481.jpg?6YOt5bu66ZuELmpwZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/12/20251204172753476.jpg?My7lpKflkIjnhacuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/09/20250915172104703.jpg?MTc1NzkyNzg3OTE4NS5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2024/03/20240312144935423.jpg?aW1hZ2UwMDcuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        }
+      ],
+      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2019/05/20190508122705601.jpg?6YOt6ICA5YWJ5Ymv5pys5Ymv5pysLmpwZw==\"/> </div>",
+      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
+      "photo_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190508122705601.jpg?6YOt6ICA5YWJ5Ymv5pys5Ymv5pysLmpwZw==",
+      "opaque_query": "6YOt6ICA5YWJ5Ymv5pys5Ymv5pysLmpwZw==",
+      "filename": "郭耀光-康复科-副主任医师-广州医科大学附属脑科医院.jpg",
+      "disk_path": "work/广州医科大学附属脑科医院_photo_backfill_trial_photos/郭耀光-康复科-副主任医师-广州医科大学附属脑科医院.jpg",
+      "bytes": 44227,
+      "sha256": "d8f3edf932b08f13a5e931ca8a38b72599fba85a009d9ce035c260bd7cc0c8cd",
+      "declared_extension": "jpg",
+      "extension": "jpg",
+      "content_type": "image/jpeg",
+      "width": 413,
+      "height": 626,
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190508122705601.jpg?6YOt6ICA5YWJ5Ymv5pys5Ymv5pysLmpwZw==",
+      "photo_redirects": []
+    },
+    {
+      "name": "张继辉",
+      "department": "睡眠与节律医学中心",
+      "primary_title": "研究员",
+      "title_raw": "研究员（正高）",
+      "title_level": "正高",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_49356.html",
+      "detail_id": "49356",
+      "detail_status": 200,
+      "detail_probe_utc": "2026-08-18T20:24:58Z",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T20:24:58Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzbrain.cn/myzj/info_itemid_49356.html",
+          "error": ""
+        }
+      ],
+      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_49356.html",
+      "page_name": "张继辉",
+      "page_title": "研究员（正高）",
+      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+      "photo_reference_count": 1,
+      "single_con_image_count": 1,
+      "outside_image_reference_count": 21,
+      "excluded_resource_examples": [
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153347740.png?bG9nbzEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153354654.png?bG9nbzIucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/04/20200409112748900.jpg?5o2V6I63LkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/12/20231207094319422.jpg?5b6u5L+h5Zu+54mHXzIwMjMxMjA2MTgwNzA1X+WJr+acrC5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2026/08/20260812105615429.png?U2NyZWVuU2hvdF8yMDI2LTA4LTEyXzEwNTU1OF85MDEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190523111507264.png?6buE5YW05YW1LnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190513094312481.jpg?6YOt5bu66ZuELmpwZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/12/20251204172753476.jpg?My7lpKflkIjnhacuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/09/20250915172104703.jpg?MTc1NzkyNzg3OTE4NS5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2024/03/20240312144935423.jpg?aW1hZ2UwMDcuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        }
+      ],
+      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2022/08/20220811090705206.jpg?5Zu+54mHMS5qcGc=\"/> </div>",
+      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
+      "photo_url": "https://www.gzbrain.cn/uploadfiles/2022/08/20220811090705206.jpg?5Zu+54mHMS5qcGc=",
+      "opaque_query": "5Zu+54mHMS5qcGc=",
+      "filename": "张继辉-睡眠与节律医学中心-研究员-广州医科大学附属脑科医院.jpg",
+      "disk_path": "work/广州医科大学附属脑科医院_photo_backfill_trial_photos/张继辉-睡眠与节律医学中心-研究员-广州医科大学附属脑科医院.jpg",
+      "bytes": 41734,
+      "sha256": "c80bd4a06ad0d7fc624e06584704df4d16a4415eb8b5761ae5a6a37e342da0fe",
+      "declared_extension": "jpg",
+      "extension": "jpg",
+      "content_type": "image/jpeg",
+      "width": 451,
+      "height": 566,
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2022/08/20220811090705206.jpg?5Zu+54mHMS5qcGc=",
+      "photo_redirects": []
+    },
+    {
+      "name": "韩为",
+      "department": "中医科",
+      "primary_title": "主任中医师",
+      "title_raw": "主任中医师",
+      "title_level": "正高",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_33179.html",
+      "detail_id": "33179",
+      "detail_status": 200,
+      "detail_probe_utc": "2026-08-18T20:24:59Z",
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T20:24:59Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gzbrain.cn/myzj/info_itemid_33179.html",
+          "error": ""
+        }
+      ],
+      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_33179.html",
+      "page_name": "韩为",
+      "page_title": "主任中医师",
+      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+      "photo_reference_count": 1,
+      "single_con_image_count": 1,
+      "outside_image_reference_count": 21,
+      "excluded_resource_examples": [
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153347740.png?bG9nbzEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/11/20231127153354654.png?bG9nbzIucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/04/20200409112748900.jpg?5o2V6I63LkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2023/12/20231207094319422.jpg?5b6u5L+h5Zu+54mHXzIwMjMxMjA2MTgwNzA1X+WJr+acrC5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2026/08/20260812105615429.png?U2NyZWVuU2hvdF8yMDI2LTA4LTEyXzEwNTU1OF85MDEucG5n",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/06/20190610095458209.png?5a6B546J6JCNLnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190523111507264.png?6buE5YW05YW1LnBuZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2020/05/20200509152519408.jpg?5ZGo5LquLkpQRw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190513094312481.jpg?6YOt5bu66ZuELmpwZw==",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/12/20251204172753476.jpg?My7lpKflkIjnhacuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2025/09/20250915172104703.jpg?MTc1NzkyNzg3OTE4NS5qcGc=",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        },
+        {
+          "url": "https://www.gzbrain.cn/uploadfiles/2024/03/20240312144935423.jpg?aW1hZ2UwMDcuanBn",
+          "reason": "公共图标/装饰候选",
+          "feature": "outside strict .single-img doctor portrait container"
+        }
+      ],
+      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2021/12/20211210165629193.jpg?5Ymv5pysMS5qcGc=\"/> </div>",
+      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
+      "photo_url": "https://www.gzbrain.cn/uploadfiles/2021/12/20211210165629193.jpg?5Ymv5pysMS5qcGc=",
+      "opaque_query": "5Ymv5pysMS5qcGc=",
+      "filename": "韩为-中医科-主任中医师-广州医科大学附属脑科医院.jpg",
+      "disk_path": "work/广州医科大学附属脑科医院_photo_backfill_trial_photos/韩为-中医科-主任中医师-广州医科大学附属脑科医院.jpg",
+      "bytes": 283324,
+      "sha256": "5ee970aacf8f33c828cc89840500e6733a584fa2e395ac818adc42fb4c1849ee",
+      "declared_extension": "jpg",
+      "extension": "jpg",
+      "content_type": "image/jpeg",
+      "width": 600,
+      "height": 900,
+      "photo_status": 200,
+      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2021/12/20211210165629193.jpg?5Ymv5pysMS5qcGc=",
+      "photo_redirects": []
+    }
+  ]
+}
