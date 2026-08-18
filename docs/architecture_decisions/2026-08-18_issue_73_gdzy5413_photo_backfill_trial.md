@@ -3,6 +3,7 @@
 ## 目标与授权
 
 - GitHub Issue：<https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/73>。
+- Pull Request：<https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/74>。
 - 医院：广东省第二中医院。
 - 官网：<https://www.gdzy5413.com/>。
 - 医生目录：<https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850>。
@@ -88,7 +89,7 @@ RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执�
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/73
 Branch: codex/mhrj/issue-73-gdzy-photo-backfill-trial
-PullRequest: PENDING
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/74
 CodexDeveloper: xtzhou247
 ClaudeOwner: nancywrayg57-jpg
 Phase: TRIAL_READY_FOR_OWNER_AUDIT
