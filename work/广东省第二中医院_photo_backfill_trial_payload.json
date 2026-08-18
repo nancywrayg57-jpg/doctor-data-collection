@@ -1,0 +1,1362 @@
+{
+  "meta": {
+    "issue": 73,
+    "hospital": "广东省第二中医院",
+    "run_date": "2026-08-18",
+    "generated_at_utc": "2026-08-18T15:45:39Z",
+    "phase": "TRIAL",
+    "official_home": "https://www.gdzy5413.com/",
+    "directory_url": "https://www.gdzy5413.com/main/famousdoctorinfo.aspx?fid=81&cid=851&pid=850",
+    "scope_count": 342,
+    "scope_template_counts": {
+      "ksdoctorinfo": 321,
+      "specialist": 21
+    },
+    "trial_count": 10,
+    "trial_template_counts": {
+      "specialist": 2,
+      "ksdoctorinfo": 8
+    },
+    "distinct_department_count": 10,
+    "title_level_counts": {
+      "正高": 4,
+      "其他": 4,
+      "副高": 2
+    },
+    "detail_success_count": 10,
+    "photo_success_count": 10,
+    "total_photo_bytes": 447861,
+    "size_buckets": {
+      "<200KiB": 10,
+      "200KiB-1MiB": 0,
+      "1-5MiB": 0,
+      "5-20MiB": 0,
+      ">20MiB": 0
+    },
+    "over_5_mib_count": 0,
+    "over_20_mib_count": 0,
+    "constructed_unreferenced_path_count": 0,
+    "third_party_source_count": 0,
+    "excluded_resource_download_count": 0,
+    "protected_assets_unchanged": true,
+    "profile_markdown_count": 343,
+    "formal_photo_directory_exists": false,
+    "session_cookie_names": [
+      "ASP.NET_SessionId"
+    ],
+    "incomplete_read_retry_count": 0,
+    "visual_review": "PASSED_SINGLE_ADULT_PROFESSIONAL_PORTRAITS_10_OF_10",
+    "visual_reviewed_at_utc": "2026-08-18T15:48:55Z",
+    "format_counts": {
+      "jpg": 3,
+      "png": 7
+    },
+    "content_type_magic_mismatch_count": 6
+  },
+  "sample_plan": [
+    {
+      "name": "靳利利",
+      "template": "specialist",
+      "title_level": "正高"
+    },
+    {
+      "name": "范德辉",
+      "template": "specialist",
+      "title_level": "正高"
+    },
+    {
+      "name": "孙正平",
+      "template": "ksdoctorinfo",
+      "title_level": "其他"
+    },
+    {
+      "name": "周永霞",
+      "template": "ksdoctorinfo",
+      "title_level": "正高"
+    },
+    {
+      "name": "陈伟萍",
+      "template": "ksdoctorinfo",
+      "title_level": "副高"
+    },
+    {
+      "name": "宫静",
+      "template": "ksdoctorinfo",
+      "title_level": "副高"
+    },
+    {
+      "name": "林谋清",
+      "template": "ksdoctorinfo",
+      "title_level": "其他"
+    },
+    {
+      "name": "何宇巍",
+      "template": "ksdoctorinfo",
+      "title_level": "其他"
+    },
+    {
+      "name": "付啸峰",
+      "template": "ksdoctorinfo",
+      "title_level": "其他"
+    },
+    {
+      "name": "唐敏",
+      "template": "ksdoctorinfo",
+      "title_level": "正高"
+    }
+  ],
+  "structure_diagnostics": [
+    {
+      "template": "specialist",
+      "sample_name": "靳利利",
+      "source_link": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=699",
+      "container_selector": ".main_left_img .docimg_title + .docimg_ming + .docimg_cover + div[style*='background:url']",
+      "detection_feature": "main_left_img 内 docimg_title 姓名一致，且恰有一个 inline background:url(/UploadFiles/image/<file>)",
+      "html_snippet": "<div class=\"docimg_title\">靳利利</div> <div class=\"docimg_ming\" val=\"心血管科主任、主任中医师、教授、医学博士、硕士研究生导师\"> </div> <div class=\"docimg_cover\"></div> <div style=\" overflow:hidden; width:340px; background:url(/UploadFiles/image/2014-2/20140214052754190.jpg) no-repeat center; height:369px;\"></div>"
+    },
+    {
+      "template": "ksdoctorinfo",
+      "sample_name": "孙正平",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=488",
+      "container_selector": "资料卡 div[style*='width: 120px'] > img[width='120px'][height='155px']",
+      "detection_feature": "资料卡姓名字段一致，且恰有一个 120px×155px img 指向 /UploadFiles/image/<file>",
+      "html_snippet": "<div style=\"float: left; width: 120px;\"> <img border=\"5px\" style=\"border-color: Black;\" src=\"/UploadFiles/image/2014-3/20140305102314685_s.jpg\" width=\"120px\" height=\"155px\" /> </div>"
+    }
+  ],
+  "exclusion_policy": [
+    {
+      "rule": "template-style-assets",
+      "match": "path contains /style/images/",
+      "reason": "模板 logo、边框、按钮、排班图或装饰图，不在医生照片容器内"
+    },
+    {
+      "rule": "public-navigation-footer-assets",
+      "match": "known 就诊指南/专家目录/页脚/二维码 asset identifiers",
+      "reason": "全站公共资源，不是医生本人职业照"
+    },
+    {
+      "rule": "empty-upload-path",
+      "match": "path is /UploadFiles/image/ without filename",
+      "reason": "详情页明确没有照片文件，禁止构造或猜测文件名"
+    },
+    {
+      "rule": "placeholder-name-markers",
+      "match": "default/placeholder/nopic/noimage variants",
+      "reason": "占位图命名特征，不作为本人职业照"
+    },
+    {
+      "rule": "placeholder-response-content",
+      "match": "known placeholder SHA-256 or <=4 KiB small 120×160-class response",
+      "reason": "拦截 URL 文件名伪装为医生照片、实际内容为‘暂无图片’的小型合法 JPEG"
+    },
+    {
+      "rule": "outside-doctor-container",
+      "match": "image/background reference is outside the authorized template container",
+      "reason": "仅采页面本人照片容器实际引用版本，其他页面资源全部排除"
+    }
+  ],
+  "samples": [
+    {
+      "name": "靳利利",
+      "department": "心血管科",
+      "primary_title": "主任中医师",
+      "title_level": "正高",
+      "template": "specialist",
+      "source_link": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=699",
+      "detail_id": "specialist-699",
+      "photo_url": "https://www.gdzy5413.com/UploadFiles/image/2014-2/20140214052754190.jpg",
+      "filename": "靳利利-心血管科-主任中医师-广东省第二中医院.jpg",
+      "disk_path": "work/广东省第二中医院_photo_backfill_trial_photos/靳利利-心血管科-主任中医师-广东省第二中医院.jpg",
+      "bytes": 52324,
+      "sha256": "b11b85afe94fafe92e2486b09c3aa14719ed7204f37e28595583445f74a25917",
+      "width": 342,
+      "height": 369,
+      "detail_status": 200,
+      "detail_content_type": "text/html",
+      "detail_final_url": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=699",
+      "photo_status": 200,
+      "photo_content_type": "image/jpeg",
+      "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-2/20140214052754190.jpg",
+      "container_selector": ".main_left_img .docimg_title + .docimg_ming + .docimg_cover + div[style*='background:url']",
+      "detection_feature": "main_left_img 内 docimg_title 姓名一致，且恰有一个 inline background:url(/UploadFiles/image/<file>)",
+      "html_snippet": "<div class=\"docimg_title\">靳利利</div> <div class=\"docimg_ming\" val=\"心血管科主任、主任中医师、教授、医学博士、硕士研究生导师\"> </div> <div class=\"docimg_cover\"></div> <div style=\" overflow:hidden; width:340px; background:url(/UploadFiles/image/2014-2/20140214052754190.jpg) no-repeat center; height:369px;\"></div>",
+      "candidate_count": 1,
+      "excluded_resources": [
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040613496.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040736895.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/doctor/style/images/ks04_r2_c21.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2025-6/20250620113738740_s.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131202104531799.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/doctor/style/images/mainbg2.jpg",
+          "reason": "template-style-assets"
+        }
+      ],
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:33Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=699",
+          "error": ""
+        }
+      ],
+      "photo_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:33Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-2/20140214052754190.jpg",
+          "error": ""
+        }
+      ],
+      "over_5_mib": false
+    },
+    {
+      "name": "范德辉",
+      "department": "针灸康复科五区",
+      "primary_title": "主任中医师",
+      "title_level": "正高",
+      "template": "specialist",
+      "source_link": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=1452",
+      "detail_id": "specialist-1452",
+      "photo_url": "https://www.gdzy5413.com/UploadFiles/image/2014-4/20140410101222463.jpg",
+      "filename": "范德辉-针灸康复科五区-主任中医师-广东省第二中医院.jpg",
+      "disk_path": "work/广东省第二中医院_photo_backfill_trial_photos/范德辉-针灸康复科五区-主任中医师-广东省第二中医院.jpg",
+      "bytes": 52289,
+      "sha256": "77b73f64b55089542b62b8ab4de6aba2bfddb76b0cc47d0f76d7a269579a4ada",
+      "width": 342,
+      "height": 369,
+      "detail_status": 200,
+      "detail_content_type": "text/html",
+      "detail_final_url": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=1452",
+      "photo_status": 200,
+      "photo_content_type": "image/jpeg",
+      "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-4/20140410101222463.jpg",
+      "container_selector": ".main_left_img .docimg_title + .docimg_ming + .docimg_cover + div[style*='background:url']",
+      "detection_feature": "main_left_img 内 docimg_title 姓名一致，且恰有一个 inline background:url(/UploadFiles/image/<file>)",
+      "html_snippet": "<div class=\"docimg_title\">范德辉</div> <div class=\"docimg_ming\" val=\"国务院特殊津贴专家、广东省名中医、主任中医师、二级教授、博士研究生导师、针康五区区长\"> </div> <div class=\"docimg_cover\"></div> <div style=\" overflow:hidden; width:340px; background:url(/UploadFiles/image/2014-4/20140410101222463.jpg) no-repeat center; height:369px;\"></div>",
+      "candidate_count": 1,
+      "excluded_resources": [
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040613496.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040736895.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/doctor/style/images/ks04_r2_c21.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2025-6/20250620113738740_s.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131202104531799.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/doctor/style/images/mainbg2.jpg",
+          "reason": "template-style-assets"
+        }
+      ],
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:34Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gdzy5413.com/main/doctor/specialist.aspx?typeid=1452",
+          "error": ""
+        }
+      ],
+      "photo_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:34Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-4/20140410101222463.jpg",
+          "error": ""
+        }
+      ],
+      "over_5_mib": false
+    },
+    {
+      "name": "孙正平",
+      "department": "治未病(健康体检)中心",
+      "primary_title": "主治中医师",
+      "title_level": "其他",
+      "template": "ksdoctorinfo",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=488",
+      "detail_id": "ksdoctorinfo-488",
+      "photo_url": "https://www.gdzy5413.com/UploadFiles/image/2014-3/20140305102314685_s.jpg",
+      "filename": "孙正平-治未病(健康体检)中心-主治中医师-广东省第二中医院.png",
+      "disk_path": "work/广东省第二中医院_photo_backfill_trial_photos/孙正平-治未病(健康体检)中心-主治中医师-广东省第二中医院.png",
+      "bytes": 72684,
+      "sha256": "2433a183fcefadaca3a3d8d960225f5ec4f04fdeeab5570b78a74cfe6c7aae87",
+      "width": 178,
+      "height": 160,
+      "detail_status": 200,
+      "detail_content_type": "text/html",
+      "detail_final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=488",
+      "photo_status": 200,
+      "photo_content_type": "image/jpeg",
+      "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-3/20140305102314685_s.jpg",
+      "container_selector": "资料卡 div[style*='width: 120px'] > img[width='120px'][height='155px']",
+      "detection_feature": "资料卡姓名字段一致，且恰有一个 120px×155px img 指向 /UploadFiles/image/<file>",
+      "html_snippet": "<div style=\"float: left; width: 120px;\"> <img border=\"5px\" style=\"border-color: Black;\" src=\"/UploadFiles/image/2014-3/20140305102314685_s.jpg\" width=\"120px\" height=\"155px\" /> </div>",
+      "candidate_count": 1,
+      "excluded_resources": [
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logotop.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/lgtitlebcg.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040613496.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040736895.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian1.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian3.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian4.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/pic1.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ks04_r2_c21.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/btn_bg1_r2_c2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2025-6/20250620113738740_s.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131202104531799.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logo_05.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2019-3/20190325083422870_s.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/mainbg2.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ksindextop_bak.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/list02_r4_c1.jpg",
+          "reason": "template-style-assets"
+        }
+      ],
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:34Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=104&typeid=102&cid=104&ksid=102&id=488",
+          "error": ""
+        }
+      ],
+      "photo_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:35Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-3/20140305102314685_s.jpg",
+          "error": ""
+        }
+      ],
+      "over_5_mib": false
+    },
+    {
+      "name": "周永霞",
+      "department": "儿科",
+      "primary_title": "主任医师",
+      "title_level": "正高",
+      "template": "ksdoctorinfo",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=72&typeid=70&cid=72&ksid=70&id=109",
+      "detail_id": "ksdoctorinfo-109",
+      "photo_url": "https://www.gdzy5413.com/UploadFiles/image/upload/633821470657860797.jpg",
+      "filename": "周永霞-儿科-主任医师-广东省第二中医院.jpg",
+      "disk_path": "work/广东省第二中医院_photo_backfill_trial_photos/周永霞-儿科-主任医师-广东省第二中医院.jpg",
+      "bytes": 12269,
+      "sha256": "333e5f5f7b8fed816e941d3a1b1b9cd82c848c41f2738ae3616fe8654274f51e",
+      "width": 86,
+      "height": 126,
+      "detail_status": 200,
+      "detail_content_type": "text/html",
+      "detail_final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=72&typeid=70&cid=72&ksid=70&id=109",
+      "photo_status": 200,
+      "photo_content_type": "image/jpeg",
+      "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/upload/633821470657860797.jpg",
+      "container_selector": "资料卡 div[style*='width: 120px'] > img[width='120px'][height='155px']",
+      "detection_feature": "资料卡姓名字段一致，且恰有一个 120px×155px img 指向 /UploadFiles/image/<file>",
+      "html_snippet": "<div style=\"float: left; width: 120px;\"> <img border=\"5px\" style=\"border-color: Black;\" src=\"/UploadFiles/image/upload/633821470657860797.jpg\" width=\"120px\" height=\"155px\" /> </div>",
+      "candidate_count": 1,
+      "excluded_resources": [
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logotop.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/lgtitlebcg.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040613496.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040736895.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian1.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian3.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian4.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/pic1.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ks04_r2_c21.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/btn_bg1_r2_c2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2025-6/20250620113738740_s.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131202104531799.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logo_05.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2019-3/20190325083422870_s.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/mainbg2.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ksindextop_bak.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/list02_r4_c1.jpg",
+          "reason": "template-style-assets"
+        }
+      ],
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:35Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=72&typeid=70&cid=72&ksid=70&id=109",
+          "error": ""
+        }
+      ],
+      "photo_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:35Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gdzy5413.com/UploadFiles/image/upload/633821470657860797.jpg",
+          "error": ""
+        }
+      ],
+      "over_5_mib": false
+    },
+    {
+      "name": "陈伟萍",
+      "department": "医技科",
+      "primary_title": "副主任医师",
+      "title_level": "副高",
+      "template": "ksdoctorinfo",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=929&typeid=134&cid=929&ksid=134&id=444",
+      "detail_id": "ksdoctorinfo-444",
+      "photo_url": "https://www.gdzy5413.com/UploadFiles/image/2014-3/20140301102516894_s.jpg",
+      "filename": "陈伟萍-医技科-副主任医师-广东省第二中医院.png",
+      "disk_path": "work/广东省第二中医院_photo_backfill_trial_photos/陈伟萍-医技科-副主任医师-广东省第二中医院.png",
+      "bytes": 11443,
+      "sha256": "8ae0c8963d2d89608000ac19af1799079eadfa5947b8dbb02e4d77e7b85f6f03",
+      "width": 75,
+      "height": 100,
+      "detail_status": 200,
+      "detail_content_type": "text/html",
+      "detail_final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=929&typeid=134&cid=929&ksid=134&id=444",
+      "photo_status": 200,
+      "photo_content_type": "image/jpeg",
+      "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-3/20140301102516894_s.jpg",
+      "container_selector": "资料卡 div[style*='width: 120px'] > img[width='120px'][height='155px']",
+      "detection_feature": "资料卡姓名字段一致，且恰有一个 120px×155px img 指向 /UploadFiles/image/<file>",
+      "html_snippet": "<div style=\"float: left; width: 120px;\"> <img border=\"5px\" style=\"border-color: Black;\" src=\"/UploadFiles/image/2014-3/20140301102516894_s.jpg\" width=\"120px\" height=\"155px\" /> </div>",
+      "candidate_count": 1,
+      "excluded_resources": [
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logotop.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/lgtitlebcg.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040613496.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040736895.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian1.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian3.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian4.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/pic1.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ks04_r2_c21.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/btn_bg1_r2_c2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2025-6/20250620113738740_s.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131202104531799.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logo_05.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2019-3/20190325083422870_s.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/mainbg2.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ksindextop_bak.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/list02_r4_c1.jpg",
+          "reason": "template-style-assets"
+        }
+      ],
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:36Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=929&typeid=134&cid=929&ksid=134&id=444",
+          "error": ""
+        }
+      ],
+      "photo_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:36Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-3/20140301102516894_s.jpg",
+          "error": ""
+        }
+      ],
+      "over_5_mib": false
+    },
+    {
+      "name": "宫静",
+      "department": "呼吸与危重症医学科",
+      "primary_title": "副主任中医师",
+      "title_level": "副高",
+      "template": "ksdoctorinfo",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=31&typeid=29&cid=31&ksid=29&id=657",
+      "detail_id": "ksdoctorinfo-657",
+      "photo_url": "https://www.gdzy5413.com/UploadFiles/image/2017-2/20170215031752407_s.jpg",
+      "filename": "宫静-呼吸与危重症医学科-副主任中医师-广东省第二中医院.png",
+      "disk_path": "work/广东省第二中医院_photo_backfill_trial_photos/宫静-呼吸与危重症医学科-副主任中医师-广东省第二中医院.png",
+      "bytes": 164184,
+      "sha256": "f223b5d7c65eb206b366e661395fa06c98e40568acef9ec5e8b9f8cbdb9fec4b",
+      "width": 248,
+      "height": 365,
+      "detail_status": 200,
+      "detail_content_type": "text/html",
+      "detail_final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=31&typeid=29&cid=31&ksid=29&id=657",
+      "photo_status": 200,
+      "photo_content_type": "image/jpeg",
+      "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/2017-2/20170215031752407_s.jpg",
+      "container_selector": "资料卡 div[style*='width: 120px'] > img[width='120px'][height='155px']",
+      "detection_feature": "资料卡姓名字段一致，且恰有一个 120px×155px img 指向 /UploadFiles/image/<file>",
+      "html_snippet": "<div style=\"float: left; width: 120px;\"> <img border=\"5px\" style=\"border-color: Black;\" src=\"/UploadFiles/image/2017-2/20170215031752407_s.jpg\" width=\"120px\" height=\"155px\" /> </div>",
+      "candidate_count": 1,
+      "excluded_resources": [
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logotop.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/lgtitlebcg.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040613496.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040736895.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian1.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian3.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian4.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/pic1.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ks04_r2_c21.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/btn_bg1_r2_c2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2025-6/20250620113738740_s.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131202104531799.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logo_05.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2019-3/20190325083422870_s.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/mainbg2.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2014-1/20140108111712905.jpg",
+          "reason": "outside-doctor-container"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/list02_r4_c1.jpg",
+          "reason": "template-style-assets"
+        }
+      ],
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:36Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=31&typeid=29&cid=31&ksid=29&id=657",
+          "error": ""
+        }
+      ],
+      "photo_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:37Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gdzy5413.com/UploadFiles/image/2017-2/20170215031752407_s.jpg",
+          "error": ""
+        }
+      ],
+      "over_5_mib": false
+    },
+    {
+      "name": "林谋清",
+      "department": "外一科",
+      "primary_title": "主治中医师",
+      "title_level": "其他",
+      "template": "ksdoctorinfo",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=47&typeid=45&cid=47&ksid=45&id=417",
+      "detail_id": "ksdoctorinfo-417",
+      "photo_url": "https://www.gdzy5413.com/UploadFiles/image/2014-2/20140228033357452_s.jpg",
+      "filename": "林谋清-外一科-主治中医师-广东省第二中医院.png",
+      "disk_path": "work/广东省第二中医院_photo_backfill_trial_photos/林谋清-外一科-主治中医师-广东省第二中医院.png",
+      "bytes": 27977,
+      "sha256": "d0e3812f91b3c98d4838518677fe433f69d4b45504acf0b85f9e832257a3871c",
+      "width": 150,
+      "height": 100,
+      "detail_status": 200,
+      "detail_content_type": "text/html",
+      "detail_final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=47&typeid=45&cid=47&ksid=45&id=417",
+      "photo_status": 200,
+      "photo_content_type": "image/jpeg",
+      "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-2/20140228033357452_s.jpg",
+      "container_selector": "资料卡 div[style*='width: 120px'] > img[width='120px'][height='155px']",
+      "detection_feature": "资料卡姓名字段一致，且恰有一个 120px×155px img 指向 /UploadFiles/image/<file>",
+      "html_snippet": "<div style=\"float: left; width: 120px;\"> <img border=\"5px\" style=\"border-color: Black;\" src=\"/UploadFiles/image/2014-2/20140228033357452_s.jpg\" width=\"120px\" height=\"155px\" /> </div>",
+      "candidate_count": 1,
+      "excluded_resources": [
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logotop.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/lgtitlebcg.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040613496.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040736895.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian1.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian3.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian4.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/pic1.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ks04_r2_c21.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/btn_bg1_r2_c2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2025-6/20250620113738740_s.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131202104531799.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logo_05.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2019-3/20190325083422870_s.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/mainbg2.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2024-12/20241224093314202.jpg",
+          "reason": "outside-doctor-container"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/list02_r4_c1.jpg",
+          "reason": "template-style-assets"
+        }
+      ],
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:37Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=47&typeid=45&cid=47&ksid=45&id=417",
+          "error": ""
+        }
+      ],
+      "photo_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:37Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-2/20140228033357452_s.jpg",
+          "error": ""
+        }
+      ],
+      "over_5_mib": false
+    },
+    {
+      "name": "何宇巍",
+      "department": "检验科",
+      "primary_title": "主管技师",
+      "title_level": "其他",
+      "template": "ksdoctorinfo",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=767",
+      "detail_id": "ksdoctorinfo-767",
+      "photo_url": "https://www.gdzy5413.com/UploadFiles/image/2023-3/20230327102839830_s.jpg",
+      "filename": "何宇巍-检验科-主管技师-广东省第二中医院.png",
+      "disk_path": "work/广东省第二中医院_photo_backfill_trial_photos/何宇巍-检验科-主管技师-广东省第二中医院.png",
+      "bytes": 12991,
+      "sha256": "975f31c2124fbd27eaa87658449261f2a4186f774a109fe3da017c2346822b2e",
+      "width": 71,
+      "height": 100,
+      "detail_status": 200,
+      "detail_content_type": "text/html",
+      "detail_final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=767",
+      "photo_status": 200,
+      "photo_content_type": "image/jpeg",
+      "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/2023-3/20230327102839830_s.jpg",
+      "container_selector": "资料卡 div[style*='width: 120px'] > img[width='120px'][height='155px']",
+      "detection_feature": "资料卡姓名字段一致，且恰有一个 120px×155px img 指向 /UploadFiles/image/<file>",
+      "html_snippet": "<div style=\"float: left; width: 120px;\"> <img border=\"5px\" style=\"border-color: Black;\" src=\"/UploadFiles/image/2023-3/20230327102839830_s.jpg\" width=\"120px\" height=\"155px\" /> </div>",
+      "candidate_count": 1,
+      "excluded_resources": [
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logotop.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/lgtitlebcg.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040613496.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040736895.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian1.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian3.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian4.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/pic1.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ks04_r2_c21.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/btn_bg1_r2_c2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2025-6/20250620113738740_s.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131202104531799.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logo_05.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2019-3/20190325083422870_s.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/mainbg2.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ksindextop_bak.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/list02_r4_c1.jpg",
+          "reason": "template-style-assets"
+        }
+      ],
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:37Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=926&typeid=131&cid=926&ksid=131&id=767",
+          "error": ""
+        }
+      ],
+      "photo_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:38Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gdzy5413.com/UploadFiles/image/2023-3/20230327102839830_s.jpg",
+          "error": ""
+        }
+      ],
+      "over_5_mib": false
+    },
+    {
+      "name": "付啸峰",
+      "department": "肿瘤科",
+      "primary_title": "医师",
+      "title_level": "其他",
+      "template": "ksdoctorinfo",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=452",
+      "detail_id": "ksdoctorinfo-452",
+      "photo_url": "https://www.gdzy5413.com/UploadFiles/image/2014-3/20140302120454663_s.jpg",
+      "filename": "付啸峰-肿瘤科-医师-广东省第二中医院.png",
+      "disk_path": "work/广东省第二中医院_photo_backfill_trial_photos/付啸峰-肿瘤科-医师-广东省第二中医院.png",
+      "bytes": 27701,
+      "sha256": "7894a71a55a5a913fa491d514cdfa35d0e2ef0b25f5ad5dd75c7dfc9570f39cf",
+      "width": 123,
+      "height": 160,
+      "detail_status": 200,
+      "detail_content_type": "text/html",
+      "detail_final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=452",
+      "photo_status": 200,
+      "photo_content_type": "image/jpeg",
+      "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-3/20140302120454663_s.jpg",
+      "container_selector": "资料卡 div[style*='width: 120px'] > img[width='120px'][height='155px']",
+      "detection_feature": "资料卡姓名字段一致，且恰有一个 120px×155px img 指向 /UploadFiles/image/<file>",
+      "html_snippet": "<div style=\"float: left; width: 120px;\"> <img border=\"5px\" style=\"border-color: Black;\" src=\"/UploadFiles/image/2014-3/20140302120454663_s.jpg\" width=\"120px\" height=\"155px\" /> </div>",
+      "candidate_count": 1,
+      "excluded_resources": [
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logotop.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/lgtitlebcg.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040613496.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040736895.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian1.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian3.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian4.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/pic1.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ks04_r2_c21.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/btn_bg1_r2_c2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2025-6/20250620113738740_s.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131202104531799.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logo_05.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2019-3/20190325083422870_s.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/mainbg2.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2014-2/20140227045939484.jpg",
+          "reason": "outside-doctor-container"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/list02_r4_c1.jpg",
+          "reason": "template-style-assets"
+        }
+      ],
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:38Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=37&typeid=35&cid=37&ksid=35&id=452",
+          "error": ""
+        }
+      ],
+      "photo_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:38Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-3/20140302120454663_s.jpg",
+          "error": ""
+        }
+      ],
+      "over_5_mib": false
+    },
+    {
+      "name": "唐敏",
+      "department": "眼科",
+      "primary_title": "主任医师",
+      "title_level": "正高",
+      "template": "ksdoctorinfo",
+      "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=314",
+      "detail_id": "ksdoctorinfo-314",
+      "photo_url": "https://www.gdzy5413.com/UploadFiles/image/2025-10/20251014024358559_s.png",
+      "filename": "唐敏-眼科-主任医师-广东省第二中医院.png",
+      "disk_path": "work/广东省第二中医院_photo_backfill_trial_photos/唐敏-眼科-主任医师-广东省第二中医院.png",
+      "bytes": 13999,
+      "sha256": "da5efb96b313ae7895ecee13ea740ade6b57465de6d48839fd366440f7ff2a4b",
+      "width": 100,
+      "height": 100,
+      "detail_status": 200,
+      "detail_content_type": "text/html",
+      "detail_final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=314",
+      "photo_status": 200,
+      "photo_content_type": "image/png",
+      "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/2025-10/20251014024358559_s.png",
+      "container_selector": "资料卡 div[style*='width: 120px'] > img[width='120px'][height='155px']",
+      "detection_feature": "资料卡姓名字段一致，且恰有一个 120px×155px img 指向 /UploadFiles/image/<file>",
+      "html_snippet": "<div style=\"float: left; width: 120px;\"> <img border=\"5px\" style=\"border-color: Black;\" src=\"/UploadFiles/image/2025-10/20251014024358559_s.png\" width=\"120px\" height=\"155px\" /> </div>",
+      "candidate_count": 1,
+      "excluded_resources": [
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logotop.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/lgtitlebcg.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040613496.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131226040736895.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian1.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian3.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/bian4.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/pic1.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ks04_r2_c21.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/btn_bg1_r2_c2.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2025-6/20250620113738740_s.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2013-12/20131202104531799.png",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/logo_05.png",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/UploadFiles/image/2019-3/20190325083422870_s.jpg",
+          "reason": "public-navigation-footer-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/mainbg2.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/ksindextop_bak.jpg",
+          "reason": "template-style-assets"
+        },
+        {
+          "url": "https://www.gdzy5413.com/main/ks/templet2/style/images/list02_r4_c1.jpg",
+          "reason": "template-style-assets"
+        }
+      ],
+      "detail_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:39Z",
+          "status": 200,
+          "content_type": "text/html",
+          "final_url": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=1139&typeid=1137&cid=1139&ksid=1137&id=314",
+          "error": ""
+        }
+      ],
+      "photo_attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T15:45:39Z",
+          "status": 200,
+          "content_type": "image/png",
+          "final_url": "https://www.gdzy5413.com/UploadFiles/image/2025-10/20251014024358559_s.png",
+          "error": ""
+        }
+      ],
+      "over_5_mib": false
+    }
+  ],
+  "protected_before": {
+    "protected_files": {
+      "work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+        "bytes": 25077693,
+        "sha256": "e3e6e5d74f2a607bdcfebd1248674bac8fd22e82e96f0c2c061a8dc1e2200b62"
+      },
+      "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+        "bytes": 18480567,
+        "sha256": "9f45e24c6b770aa6c6710d747f4dbcb772b58d9f0f506f995a33e60f68328761"
+      },
+      "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+        "bytes": 5007630,
+        "sha256": "8dfe49f3dd55e2e2e01a6bb5213e36f310d60ac9fa7c71dfa596d82fbd95eccc"
+      },
+      "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+        "bytes": 5590,
+        "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+      },
+      "work\\pearl_delta_hospital_entry_ledger.json": {
+        "bytes": 146725,
+        "sha256": "a82957b29a78551c50cb443fe75e8784a80a93d7e3c8fa7359490addb6a667ae"
+      },
+      "医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.csv": {
+        "bytes": 61320,
+        "sha256": "8219d8eeb3fb085cfac5595ecf97cc4a487525312ea38dbaa41ae702e91c0bf9"
+      },
+      "医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
+        "bytes": 40088,
+        "sha256": "04273e1500e8dcb2483280fd53ed775543f0159531eca6f247a5bdf3a70a8911"
+      }
+    },
+    "profile_tree": {
+      "exists": true,
+      "file_count": 343,
+      "bytes": 1089877,
+      "sha256": "7e0dedbbeaa9dc953f77ce9c12e8d1771559af1991162505b2890056fd8c1bbb"
+    },
+    "formal_photo_tree": {
+      "exists": false,
+      "file_count": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "protected_after": {
+    "protected_files": {
+      "work\\珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+        "bytes": 25077693,
+        "sha256": "e3e6e5d74f2a607bdcfebd1248674bac8fd22e82e96f0c2c061a8dc1e2200b62"
+      },
+      "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.csv": {
+        "bytes": 18480567,
+        "sha256": "9f45e24c6b770aa6c6710d747f4dbcb772b58d9f0f506f995a33e60f68328761"
+      },
+      "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+        "bytes": 5007630,
+        "sha256": "8dfe49f3dd55e2e2e01a6bb5213e36f310d60ac9fa7c71dfa596d82fbd95eccc"
+      },
+      "医生画像仓库\\99_资料来源\\珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+        "bytes": 5590,
+        "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+      },
+      "work\\pearl_delta_hospital_entry_ledger.json": {
+        "bytes": 146725,
+        "sha256": "a82957b29a78551c50cb443fe75e8784a80a93d7e3c8fa7359490addb6a667ae"
+      },
+      "医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.csv": {
+        "bytes": 61320,
+        "sha256": "8219d8eeb3fb085cfac5595ecf97cc4a487525312ea38dbaa41ae702e91c0bf9"
+      },
+      "医生画像仓库\\99_资料来源\\珠三角三甲医院官网入口台账.xlsx": {
+        "bytes": 40088,
+        "sha256": "04273e1500e8dcb2483280fd53ed775543f0159531eca6f247a5bdf3a70a8911"
+      }
+    },
+    "profile_tree": {
+      "exists": true,
+      "file_count": 343,
+      "bytes": 1089877,
+      "sha256": "7e0dedbbeaa9dc953f77ce9c12e8d1771559af1991162505b2890056fd8c1bbb"
+    },
+    "formal_photo_tree": {
+      "exists": false,
+      "file_count": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}
