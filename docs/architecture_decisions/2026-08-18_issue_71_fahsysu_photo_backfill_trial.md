@@ -115,3 +115,79 @@ Artifacts:
 - work/中山大学附属第一医院_photo_backfill_trial_contact_sheet.jpg
 - work/中山大学附属第一医院_photo_backfill_trial_photos/
 </Handoff_State>
+
+## FULL 授权与 Owner 裁决
+
+- Owner 在 PR #72 明确给出 `TRIAL_AUDIT_PASSED → FULL_APPEND_AND_OBSIDIAN`：<https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/72#issuecomment-5328313673>。
+- FULL 固定范围仍为 860 条：复用 10 张已审计 TRIAL 照片和黄雄庆、张旭宇 2 条已审计失败证据，对其余 848 条执行采集。
+- 杨嵩 `node/33035` 的详情页 HTTP 200 且存在唯一页面引用 `focal_point_480?...itok=`，但照片资源在 3 次请求和随后 5 轮、每轮间隔至少 60 秒的聚合探测中均不可达；未构造无 `itok` 原图路径，未取得或落盘照片字节。
+- Owner 复测同一照片资源为 HTTP 404，并裁决按第四类“照片资源不可达”定格留痕后继续 FULL：<https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/72#issuecomment-5328766700>。完整 5 轮证据保存于 `work/中山大学附属第一医院_photo_backfill_full_flicker_probe.json`。
+
+## FULL 事务结果
+
+- 四数对账：固定目标 860，实采 820，正式照片落盘 820，失败留空 40。
+- TRIAL 复用：成功照片 10、失败证据 2；其余 848 条中成功 810、失败 38。
+- 失败分布：既有兼容计数“详情不可达”10、“照片资源不可达”1、“无照片容器”29、“占位图”0。归入兼容计数的照片请求失败行仍逐行保存详情 HTTP、页面引用数、资源 URL、重试 UTC/HTTP 与判定特征，没有用分类名替代证据。
+- 正式照片总字节 129,293,979（123.30 MiB），最大单图 337,418 bytes；超过 5 MiB / 20 MiB 均为 0。
+- 只采页面实际引用的 `focal_point_480` 原始响应字节；页面未引用路径探测 0、第三方来源 0。
+- 三载体逐值一致；底表差异共 1,680 个单元格：`照片链接` 820、`照片文件` 820、`异常提示` 40。
+- 成功 820 份 AUTO 画像严格 +2/-0；40 份失败画像零触碰；未新建画像；`_索引.md` 零变化。
+- 入口台账 JSON/CSV/XLSX 和总底表更新报告保持 FULL 前哈希与字节数不变。
+
+## FULL 工件与目视复核
+
+- `work/fahsysu_photo_backfill_full.py`
+- `work/tests/test_fahsysu_photo_backfill_full.py`
+- `work/中山大学附属第一医院_photo_backfill_full_payload.json`
+- `work/中山大学附属第一医院_photo_backfill_full_reconciliation.csv`
+- `work/中山大学附属第一医院_photo_backfill_full_report.md`
+- `work/中山大学附属第一医院_photo_backfill_full_audit_sheet.jpg`
+- `work/中山大学附属第一医院_photo_backfill_full_flicker_probe.json`
+- `医生画像仓库/01_试点医院/中山大学附属第一医院/照片/`（820 张）
+
+审计拼图包含最小、最大及 8 个确定性随机样本；2026-08-18 目视复核 10/10 均为单人成人职业照，无占位图、二维码、公共装饰图、患者、儿童或合影。
+
+## FULL 独立验证与停止点
+
+- `work/fahsysu_photo_backfill_full.py --validate-full`：`FULL_VALIDATED`，820 成功、40 失败。
+- Issue #71 TRIAL + FULL 标准库 `unittest` 专项测试：21/21 通过。
+- 全仓 `unittest discover`：339/339 通过。
+- 独立范围复算：对账 860 行；正式照片 820 张 / 129,293,979 bytes；修改画像 820；失败画像触碰 0；`_索引.md` 变化 0；受保护资产哈希差异 0。
+- `git diff --check`：通过。
+- 当前停止点：`FULL_READY_FOR_FINAL_OWNER_AUDIT`。提交并以标准 Git 协议 fast-forward 推送当前分支后，在 PR #72 发布 `FULL_DONE`；不合并 PR、不直接修改 `main`，等待 owner 最终审计。
+
+<Handoff_State>
+Target: Issue #71 中山大学附属第一医院照片补录 FULL
+AgentConstitution: D:\workspace\信息收集整理\Agent.md
+RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
+RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/71
+Branch: codex/mhrj/issue-71-fahsysu-photo-backfill-trial
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/72
+CodexDeveloper: xtzhou247
+ClaudeOwner: nancywrayg57-jpg
+Phase: FULL_READY_FOR_FINAL_OWNER_AUDIT
+Completed:
+- 固定 860 条闭环：820 张正式照片、40 条失败留空，三载体逐值一致
+- 820 份成功画像严格 +2/-0；40 份失败画像和 _索引.md 零触碰
+- 杨嵩 3 次请求 + 5 轮聚合失败证据按 owner 裁决定格为“照片资源不可达”
+- 目视复核 10/10、专项 21/21、全仓 339/339、FULL 安装校验和独立资产复算通过
+CurrentFacts:
+- 照片总字节 129,293,979；最大 337,418；超过 5 MiB / 20 MiB 均为 0
+- 失败分布：兼容计数详情不可达 10、照片资源不可达 1、无照片容器 29、占位图 0
+- 底表差异 1,680 个单元格：照片链接 820、照片文件 820、异常提示 40
+Next:
+- 标准 Git 协议 fast-forward 推送当前分支并在 PR #72 发布 FULL_DONE
+- 等待 owner 最终审计；不得自行合并 PR 或领取下一家医院
+Constraints:
+- 只采页面实际引用 focal_point_480 URL 的原始响应字节并保留唯一 itok
+- 禁止构造原图、下载 mini200/banner/inline/default_images 或使用第三方来源
+- 自动化仅在成功提交、推送和 PR 回报后恢复为 ACTIVE；活跃业务执行期间保持 PAUSED
+Artifacts:
+- work/中山大学附属第一医院_photo_backfill_full_payload.json
+- work/中山大学附属第一医院_photo_backfill_full_reconciliation.csv
+- work/中山大学附属第一医院_photo_backfill_full_report.md
+- work/中山大学附属第一医院_photo_backfill_full_audit_sheet.jpg
+- work/中山大学附属第一医院_photo_backfill_full_flicker_probe.json
+- 医生画像仓库/01_试点医院/中山大学附属第一医院/照片/
+</Handoff_State>

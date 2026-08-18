@@ -51,10 +51,19 @@ EXPECTED_SUCCESS_COUNT = 10
 EXPECTED_FAILURE_EVIDENCE_COUNT = 2
 EXPECTED_RECONCILIATION_COUNT = 12
 EXPECTED_PROFILE_FILE_COUNT = 861
+EXPECTED_TRIAL_COUNT = EXPECTED_SUCCESS_COUNT
 MAX_PHOTO_BYTES = 20 * 1024 * 1024
 OWNER_REPORT_BYTES = 5 * 1024 * 1024
 DETAIL_RETRY_SECONDS = 30
 VISUAL_PASS = "PASSED_SINGLE_ADULT_PROFESSIONAL_PORTRAITS_10_OF_10"
+
+# FULL 事务复用上一批已经过验证的 HTTP、魔数、尺寸与底表契约实现。
+# 这些别名只暴露只读能力，不改变 Issue #71 的 URL 和照片范围门禁。
+BASE_HEADERS = common.BASE_HEADERS
+HttpResult = common.HttpResult
+OfficialSession = common.OfficialSession
+magic_extension = common.magic_extension
+image_dimensions = common.image_dimensions
 
 SUCCESS_SAMPLE_PLAN = (
     ("郭宇", "正高"),
@@ -121,6 +130,10 @@ def detail_id(value: Any) -> str:
         return ""
     match = re.fullmatch(r"/node/(\d+)", parsed.path)
     return match.group(1) if match else ""
+
+
+def detail_template(value: Any) -> str:
+    return "fahsysu_node" if detail_id(value) else ""
 
 
 def atomic_department(row: dict[str, Any]) -> str:

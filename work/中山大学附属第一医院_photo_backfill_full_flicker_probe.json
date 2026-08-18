@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "issue": 71,
+    "phase": "FULL_STATUS_FLICKER_AGGREGATED",
+    "source_link": "https://www.fahsysu.org.cn/node/33035",
+    "name": "杨嵩",
+    "photo_url": "https://www.fahsysu.org.cn/sites/1h.prod.sysucloud1.sysu.edu.cn/files/styles/focal_point_480/public/2024-04/%E5%BF%83%E8%83%B8%E5%A4%96%E7%A7%91ICU%2B%E6%9D%A8%E5%B5%A9%2B%E5%89%AF%E9%AB%98.jpg?itok=D371glCK",
+    "path_kind": "focal_point_480",
+    "round_count": 5,
+    "round_intervals_seconds": [
+      60.0,
+      60.01500000001397,
+      60.0,
+      60.0
+    ],
+    "captured_round": 0,
+    "resolution_state": "照片资源不可达",
+    "photo_final_url": "",
+    "extension": "",
+    "bytes": 0,
+    "width": 0,
+    "height": 0,
+    "sha256": ""
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "start_utc": "2026-08-18T13:59:34Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": 404,
+      "photo_state": "照片资源不可达",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "start_utc": "2026-08-18T14:00:34Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": 404,
+      "photo_state": "照片资源不可达",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "start_utc": "2026-08-18T14:01:34Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": 404,
+      "photo_state": "照片资源不可达",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    },
+    {
+      "round": 4,
+      "start_utc": "2026-08-18T14:02:34Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": 404,
+      "photo_state": "照片资源不可达",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    },
+    {
+      "round": 5,
+      "start_utc": "2026-08-18T14:03:34Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": 404,
+      "photo_state": "照片资源不可达",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    }
+  ]
+}
