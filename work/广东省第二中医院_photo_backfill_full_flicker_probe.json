@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "issue": 73,
+    "phase": "FULL_STATUS_FLICKER_AGGREGATED",
+    "source_link": "https://www.gdzy5413.com/main/ks/templet2/ksdoctorinfo.aspx?bid=50&typeid=48&cid=50&ksid=48&id=79",
+    "name": "于锋",
+    "photo_url": "https://www.gdzy5413.com/UploadFiles/image/2014-4/20140430100008988.jpg",
+    "path_kind": "ksdoctorinfo",
+    "round_count": 5,
+    "round_intervals_seconds": [
+      60.0,
+      60.0,
+      60.0,
+      60.0
+    ],
+    "captured_round": 1,
+    "photo_final_url": "https://www.gdzy5413.com/UploadFiles/image/2014-4/20140430100008988.jpg",
+    "extension": "jpg",
+    "bytes": 38916,
+    "width": 422,
+    "height": 544,
+    "sha256": "0047ae5e371040cc6bf8c97dc204608988ec2acf8ac669be77f96322be54855b",
+    "resolution_state": "CAPTURED"
+  },
+  "rounds": [
+    {
+      "round": 1,
+      "start_utc": "2026-08-18T18:04:27Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": 200,
+      "photo_state": "当轮冻结",
+      "photo_bytes": 38916,
+      "photo_sha256": "0047ae5e371040cc6bf8c97dc204608988ec2acf8ac669be77f96322be54855b",
+      "error": ""
+    },
+    {
+      "round": 2,
+      "start_utc": "2026-08-18T18:05:27Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": null,
+      "photo_state": "已冻结第 1 轮原始照片，后续轮不覆盖",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    },
+    {
+      "round": 3,
+      "start_utc": "2026-08-18T18:06:27Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": null,
+      "photo_state": "已冻结第 1 轮原始照片，后续轮不覆盖",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    },
+    {
+      "round": 4,
+      "start_utc": "2026-08-18T18:07:27Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": null,
+      "photo_state": "已冻结第 1 轮原始照片，后续轮不覆盖",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    },
+    {
+      "round": 5,
+      "start_utc": "2026-08-18T18:08:27Z",
+      "home_status": 200,
+      "detail_status": 200,
+      "detail_state": "",
+      "photo_status": null,
+      "photo_state": "已冻结第 1 轮原始照片，后续轮不覆盖",
+      "photo_bytes": 0,
+      "photo_sha256": "",
+      "error": ""
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# Issue #73 广东省第二中医院照片补录 TRIAL
+# Issue #73 广东省第二中医院照片补录 TRIAL 与 FULL
 
 ## 目标与授权
 
@@ -115,4 +115,79 @@ Artifacts:
 - work/广东省第二中医院_photo_backfill_trial_report.md
 - work/广东省第二中医院_photo_backfill_trial_contact_sheet.jpg
 - work/广东省第二中医院_photo_backfill_trial_photos/
+</Handoff_State>
+
+## FULL 授权与熔断恢复
+
+- Owner 在 PR #74 评论明确给出 `TRIAL_AUDIT_PASSED → FULL_APPEND_AND_OBSIDIAN`：<https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/74#issuecomment-5330738867>。
+- 首次 FULL 临时事务在 `specialist` 页面发现官网姓名 `汪 何`、底表姓名 `汪何` 的 Unicode 空白差异；正式照片目录、总底表和画像均未安装。
+- 最小修正首次回归仍被下游 TRIAL 解析器的严格姓名比较拒绝，按 `Agent.md` 连续两次失败门禁熔断。管理员随后在当前任务会话明确授权解除熔断。
+- 恢复后的唯一修正是：先对官网姓名与底表姓名执行“只忽略 Unicode 空白”的一致性校验；校验通过后，把官网原始姓名传给既有模板解析器。没有放宽不同姓名、不同容器或不同来源的门禁；新增 `汪 何` / `汪何` 回归测试后专项 25/25 通过。
+
+## 状态波动与 5 轮聚合
+
+- FULL 在于锋详情页首次观察到 `2026-08-18T18:03:05Z HTTP 502 → 2026-08-18T18:03:35Z HTTP 200`，立即按 Owner 规则暂停，正式资产未安装。
+- 页面当前实际引用照片为 `https://www.gdzy5413.com/UploadFiles/image/2014-4/20140430100008988.jpg`。
+- 5 轮聚合从 `2026-08-18T18:04:27Z` 到 `18:08:27Z`，相邻轮次单调间隔均为 60 秒；5 轮首页和详情均 HTTP 200。
+- 第 1 轮冻结页面引用原图：JPEG、422×544、38,916 bytes、SHA-256 `0047ae5e371040cc6bf8c97dc204608988ec2acf8ac669be77f96322be54855b`；后续 4 轮不覆盖。聚合 JSON 与冻结照片均进入 FULL payload 验证链。
+
+## FULL 结果
+
+- 四数闭环：固定目标 342 = 实采 305 + 失败留空 37；正式照片目录落盘 305；TRIAL 复用 10，FULL 新抓取成功 295，聚合冻结复用 1。
+- 失败四类：详情不可达 0、照片资源不可达 0、无照片容器 30、占位图 7。30 条无照片容器均为 120×155 资料卡实际引用 `/UploadFiles/image/` 空目录；7 条占位图均保留资源 URL、引用数和内容判定特征。
+- 占位图中 6 条为已知 1,622-byte、86×126 JPEG，SHA-256 `636b19e12d195b9da003dbbed0c68c0004864d6d86e990f8b606aa069b67b5a9`；李有武为另一张 1,320-byte、86×126 小型占位响应，由 `<=4 KiB + 小尺寸` 门禁拒绝。
+- 原始响应总字节 8,364,320；最大 171,348 bytes；>5 MiB 0、>20 MiB 0。按实际魔数落盘 JPEG 42、PNG 263；详情模板分布 `specialist` 21、`ksdoctorinfo` 284。
+- 总底表只发生 647 个允许的单元格变化：`照片链接` 305、`照片文件` 305、`异常提示` 37；payload/CSV/XLSX 9,222 行逐值一致。
+- 305 份 AUTO 画像严格 +2/-0；37 份失败画像零触碰；画像文件集合不变，`_索引.md` SHA-256 不变。
+- FULL manifest 对 305 张逐一重算字节数、SHA-256、魔数/扩展名与尺寸，照片目录零孤儿、零缺失。
+- 抽样拼图覆盖最小、最大和 8 个确定性随机样本；目视复核 10/10 为单人成人职业照，未见占位图、二维码、公共装饰、患者、儿童或合影。
+
+## FULL 工件与验证
+
+- `work/gdzy5413_photo_backfill_full.py`
+- `work/tests/test_gdzy5413_photo_backfill_full.py`
+- `work/广东省第二中医院_photo_backfill_full_payload.json`
+- `work/广东省第二中医院_photo_backfill_full_reconciliation.csv`
+- `work/广东省第二中医院_photo_backfill_full_report.md`
+- `work/广东省第二中医院_photo_backfill_full_audit_sheet.jpg`
+- `work/广东省第二中医院_photo_backfill_full_flicker_probe.json`
+- `work/广东省第二中医院_photo_backfill_full_flicker_probe_photo.bin`
+- `医生画像仓库/01_试点医院/广东省第二中医院/照片/`（305 张）
+- `--validate-full`：`FULL_VALIDATED`，305 实采、37 失败。
+- `py_compile`：通过；Issue #73 TRIAL+FULL 专项测试 25/25；全仓 `unittest discover` 364/364 通过。
+- 使用既有本机 Python 运行时及进程级依赖路径；现场版本 `requests 2.34.2`、`beautifulsoup4 4.15.0`、`openpyxl 3.1.5`、`Pillow 12.3.0`。未安装依赖、未修改系统 PATH 或仓库依赖配置。
+
+<Handoff_State>
+Target: Issue #73 广东省第二中医院照片补录 FULL
+AgentConstitution: D:\workspace\信息收集整理\Agent.md
+RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
+RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/73
+Branch: codex/mhrj/issue-73-gdzy-photo-backfill-trial
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/74
+CodexDeveloper: xtzhou247
+ClaudeOwner: nancywrayg57-jpg
+Phase: FULL_READY_FOR_FINAL_OWNER_AUDIT
+Completed:
+- 342 条固定范围完成 305 实采 + 37 失败留空四数闭环
+- 305 张页面引用原始响应照片完成 manifest 三重复算与正式落盘
+- 305 份 AUTO 画像严格 +2/-0；37 份失败画像与 _索引.md 零触碰
+- 于锋状态波动完成 5 轮 60 秒聚合并冻结首轮原图
+- FULL_VALIDATED、专项 25/25、全仓 364/364、抽样拼图 10/10 目视通过
+CurrentFacts:
+- 失败四类为 0 详情不可达、0 照片资源不可达、30 无照片容器、7 占位图
+- 正式照片 305 张，共 8,364,320 bytes；JPEG 42 + PNG 263；>5 MiB 0
+- 总底表三载体 9,222 行逐值一致；允许字段变化 647 个单元格
+Next:
+- 提交并以标准 Git fast-forward 推送当前分支到 PR #74
+- 发布 FULL_DONE，恢复 doctor-data-single-issue-monitor，等待 owner 最终审计
+Constraints:
+- 不自行合并 PR，不关闭 Issue，不领取下一家医院
+- 仅 Owner 最终明确审计通过、PR 合并、Issue 关闭和 CI 成功后才进入下一 Issue 检查
+Artifacts:
+- work/广东省第二中医院_photo_backfill_full_payload.json
+- work/广东省第二中医院_photo_backfill_full_reconciliation.csv
+- work/广东省第二中医院_photo_backfill_full_report.md
+- work/广东省第二中医院_photo_backfill_full_audit_sheet.jpg
+- 医生画像仓库/01_试点医院/广东省第二中医院/照片/
 </Handoff_State>
