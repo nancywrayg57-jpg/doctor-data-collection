@@ -1,0 +1,1128 @@
+{
+  "meta": {
+    "issue": 83,
+    "phase": "TRIAL_READY_FOR_OWNER_AUDIT",
+    "hospital": "南方医科大学皮肤病医院",
+    "run_date": "2026-08-19",
+    "scope_count": 77,
+    "scope_unique_source_count": 77,
+    "trial_detail_count": 10,
+    "department_coverage_count": 8,
+    "covered_departments": [
+      "中医皮肤科",
+      "儿童皮肤科",
+      "性病科",
+      "整形美容外科",
+      "未标注",
+      "激光美肤中心",
+      "皮肤内科",
+      "皮肤外科"
+    ],
+    "title_level_counts": {
+      "正高": 4,
+      "副高": 2,
+      "中级": 3,
+      "初级": 1
+    },
+    "home_http_status": 200,
+    "homepage_is_gate": false,
+    "reachability_preflight": [
+      {
+        "round": 1,
+        "target": "homepage_non_gate",
+        "url": "https://www.gdskin.com/",
+        "status": 200,
+        "content_type": "text/html",
+        "bytes": 833598,
+        "observed_utc": "2026-08-19T12:33:51Z",
+        "error": ""
+      },
+      {
+        "round": 1,
+        "target": "sample_detail_gate",
+        "url": "https://www.gdskin.com/ShowNews.ASPX?ID=3829",
+        "status": 200,
+        "content_type": "text/html",
+        "bytes": 52173,
+        "observed_utc": "2026-08-19T12:33:54Z",
+        "error": ""
+      },
+      {
+        "round": 2,
+        "target": "homepage_non_gate",
+        "url": "https://www.gdskin.com/",
+        "status": 200,
+        "content_type": "text/html",
+        "bytes": 833598,
+        "observed_utc": "2026-08-19T12:34:25Z",
+        "error": ""
+      },
+      {
+        "round": 2,
+        "target": "sample_detail_gate",
+        "url": "https://www.gdskin.com/ShowNews.ASPX?ID=3829",
+        "status": 200,
+        "content_type": "text/html",
+        "bytes": 52173,
+        "observed_utc": "2026-08-19T12:34:28Z",
+        "error": ""
+      }
+    ],
+    "reachability_retry_interval_seconds": 30,
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
+    "proxy_enabled": false,
+    "cookie_names": [],
+    "incomplete_read_retry_count": 0,
+    "detail_http_200_count": 10,
+    "no_photo_container_count": 0,
+    "placeholder_count": 0,
+    "structure_mismatch_count": 0,
+    "detail_error_count": 0,
+    "photo_error_count": 0,
+    "photo_sample_count": 10,
+    "fuse_problem_count": 0,
+    "fuse_problem_ratio": 0.0,
+    "photo_total_bytes": 7158350,
+    "photo_average_bytes": 715835,
+    "estimated_full_count": 77,
+    "estimated_full_bytes": 55119295,
+    "estimated_full_mib": 52.565855979919434,
+    "over_200kb_count": 9,
+    "over_800px_count": 1,
+    "constructed_unreferenced_probe_count": 0,
+    "third_party_source_count": 0,
+    "visual_review_status": "PASSED_10_OF_10_VISIBLE_SINGLE_DOCTOR_PROFESSIONAL_PORTRAITS",
+    "protected_assets_before": {
+      "master_assets": {
+        "work/珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24998174,
+          "sha256": "66ea238b9ef3327117129028dc8581668081ac16190b1f6e4e8cc3569129d5aa"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 18645284,
+          "sha256": "69d7a2a2393057b34d26630fff042f5ac3274adef8ca35fba8286c28d6934871"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 5110845,
+          "sha256": "f02226df0425b241da5b86aa7ca104997e7eb8e22ea96ced31a23a2232d66810"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_tree": {
+        "exists": true,
+        "file_count": 78,
+        "bytes": 255384,
+        "sha256": "64dd7f0edf76d9c6c6c95711b5c54b59a419d782f7478605f5c408ac1af29653"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "protected_assets_after": {
+      "master_assets": {
+        "work/珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24998174,
+          "sha256": "66ea238b9ef3327117129028dc8581668081ac16190b1f6e4e8cc3569129d5aa"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 18645284,
+          "sha256": "69d7a2a2393057b34d26630fff042f5ac3274adef8ca35fba8286c28d6934871"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 5110845,
+          "sha256": "f02226df0425b241da5b86aa7ca104997e7eb8e22ea96ced31a23a2232d66810"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_tree": {
+        "exists": true,
+        "file_count": 78,
+        "bytes": 255384,
+        "sha256": "64dd7f0edf76d9c6c6c95711b5c54b59a419d782f7478605f5c408ac1af29653"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "trial_photo_dir": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos",
+    "json_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_payload.json",
+    "csv_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_manifest.csv",
+    "report_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_report.md",
+    "contact_sheet_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_contact_sheet.jpg",
+    "over_5mib_count": 0,
+    "over_20mib_count": 0,
+    "cross_doctor_duplicate_sha_groups": 0,
+    "placeholder_query_gate_hits": 0,
+    "near_monochrome_gate_hits": 0,
+    "contact_sheet_background": "gray with dark borders",
+    "entry_coverage_count": 9,
+    "covered_entry_ids": [
+      "901",
+      "902",
+      "906",
+      "910",
+      "913",
+      "915",
+      "917",
+      "921",
+      "922"
+    ],
+    "historical_department_fields_empty": true,
+    "known_placeholder_gate_verified": true,
+    "known_placeholder_gate_hits_in_samples": 0,
+    "serial_request_interval_seconds": 2.0,
+    "serial_request_count": 17,
+    "minimum_observed_request_interval_seconds": 2.0,
+    "reused_photo_count": 9,
+    "newly_downloaded_photo_count": 1,
+    "prior_failure_evidence_count": 3,
+    "replacement_candidate_evidence_count": 3,
+    "repository_relative_paths_only": true,
+    "artifact_hash_policy": "repository_blob_lf",
+    "visual_reviewed_utc": "2026-08-19T12:35:24Z"
+  },
+  "detail_errors": [],
+  "structure_mismatches": [],
+  "failure_states": [],
+  "photo_errors": [],
+  "photo_samples": [
+    {
+      "name": "顾有守",
+      "department": "未标注",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "3829",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=3829",
+      "detail_http_status": 200,
+      "photo_url": "https://www.gdskin.com/uploadimg/广东省皮肤病医院顾有守.jpg",
+      "photo_source_attribute": "unique body img src under /uploadimg/",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "顾有守-未标注-主任医师-南方医科大学皮肤病医院.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/顾有守-未标注-主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 24320,
+      "sha256": "28ab8844986935af70cc86ae2749994561576c643eaaee7a3f4805e9edf57668",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 156,
+      "height": 185,
+      "large_reasons": [],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true,
+      "entry_id": "901",
+      "reused_from_prior_attempt": true
+    },
+    {
+      "name": "杨斌",
+      "department": "未标注",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "3847",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=3847",
+      "detail_http_status": 200,
+      "photo_url": "https://www.gdskin.com/uploadimg/杨斌2021.jpg",
+      "photo_source_attribute": "unique body img src under /uploadimg/",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "杨斌-未标注-主任医师-南方医科大学皮肤病医院.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/杨斌-未标注-主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 731906,
+      "sha256": "87216049d9ba63d03595964aa3ad347ac1b77ac9aad9276539fcb1e45a311461",
+      "magic_hex": "FFD8FFE1206C457869660000",
+      "width": 800,
+      "height": 1200,
+      "large_reasons": [
+        ">200KB"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true,
+      "entry_id": "902",
+      "reused_from_prior_attempt": true
+    },
+    {
+      "name": "吉苏云",
+      "department": "皮肤内科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "4846",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=4846",
+      "detail_http_status": 200,
+      "photo_url": "https://www.gdskin.com/uploadimg/吉苏云.jpg",
+      "photo_source_attribute": "unique body img src under /uploadimg/",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "吉苏云-皮肤内科-副主任医师-南方医科大学皮肤病医院.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/吉苏云-皮肤内科-副主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 526479,
+      "sha256": "e2b74bec18c43d923b984881dc7a8dd3772a2066f7754c3d93717002d481c1ca",
+      "magic_hex": "FFD8FFE11D7A457869660000",
+      "width": 800,
+      "height": 1200,
+      "large_reasons": [
+        ">200KB"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true,
+      "entry_id": "906",
+      "reused_from_prior_attempt": true
+    },
+    {
+      "name": "谷梅",
+      "department": "皮肤内科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "3849",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=3849",
+      "detail_http_status": 200,
+      "photo_url": "https://www.gdskin.com/uploadimg/谷梅2021.jpg",
+      "photo_source_attribute": "unique body img src under /uploadimg/",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "谷梅-皮肤内科-主任医师-南方医科大学皮肤病医院.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/谷梅-皮肤内科-主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 2489392,
+      "sha256": "fea29092ec4c1ab235917837b8ad991476998722cee1a8c95f1cf78baf403d8f",
+      "magic_hex": "FFD8FFE11412457869660000",
+      "width": 1879,
+      "height": 2819,
+      "large_reasons": [
+        ">200KB",
+        "宽>800px"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true,
+      "entry_id": "906",
+      "reused_from_prior_attempt": true
+    },
+    {
+      "name": "王柳苑",
+      "department": "性病科",
+      "title_level": "中级",
+      "title": "主治医师",
+      "detail_id": "5580",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=5580",
+      "detail_http_status": 200,
+      "photo_url": "https://www.gdskin.com/uploadimg/王柳苑.jpg",
+      "photo_source_attribute": "unique body img src under /uploadimg/",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "王柳苑-性病科-主治医师-南方医科大学皮肤病医院.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/王柳苑-性病科-主治医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 680685,
+      "sha256": "c6b1de349d140ef6b97960a1342d49cc9570c961d3f869543d3a1f18abfd5213",
+      "magic_hex": "FFD8FFE12125457869660000",
+      "width": 800,
+      "height": 1200,
+      "large_reasons": [
+        ">200KB"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true,
+      "entry_id": "910",
+      "reused_from_prior_attempt": true
+    },
+    {
+      "name": "鲜华",
+      "department": "整形美容外科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "4287",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=4287",
+      "detail_http_status": 200,
+      "photo_url": "https://www.gdskin.com/uploadimg/鲜华.jpg",
+      "photo_source_attribute": "unique body img src under /uploadimg/",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "鲜华-整形美容外科-副主任医师-南方医科大学皮肤病医院.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/鲜华-整形美容外科-副主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 533486,
+      "sha256": "f8471531bcb0c7abd68acdb5e7acee79a58e17a6770e1be9bc682362147e7e16",
+      "magic_hex": "FFD8FFE11E58457869660000",
+      "width": 800,
+      "height": 1200,
+      "large_reasons": [
+        ">200KB"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true,
+      "entry_id": "913",
+      "reused_from_prior_attempt": true
+    },
+    {
+      "name": "杜美毅",
+      "department": "中医皮肤科",
+      "title_level": "初级",
+      "title": "医师",
+      "detail_id": "5596",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=5596",
+      "detail_http_status": 200,
+      "photo_url": "https://www.gdskin.com/uploadimg/杜美毅.jpg",
+      "photo_source_attribute": "unique body img src under /uploadimg/",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "杜美毅-中医皮肤科-医师-南方医科大学皮肤病医院.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/杜美毅-中医皮肤科-医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 602980,
+      "sha256": "1e5ca9ee46183ff98dd29495e8b33b3e1b802c022d6f11ef2aff0be0f5c19d9e",
+      "magic_hex": "FFD8FFE11FAE457869660000",
+      "width": 800,
+      "height": 1112,
+      "large_reasons": [
+        ">200KB"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true,
+      "entry_id": "915",
+      "reused_from_prior_attempt": false
+    },
+    {
+      "name": "严婷婷",
+      "department": "激光美肤中心",
+      "title_level": "中级",
+      "title": "主治医师",
+      "detail_id": "5599",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=5599",
+      "detail_http_status": 200,
+      "photo_url": "https://www.gdskin.com/uploadimg/严婷婷.jpg",
+      "photo_source_attribute": "unique body img src under /uploadimg/",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "严婷婷-激光美肤中心-主治医师-南方医科大学皮肤病医院.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/严婷婷-激光美肤中心-主治医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 522389,
+      "sha256": "8e82ed6a0f9d49c7272e1bc79823a1e0a724c746e6a971fcbaf045ef485a6f82",
+      "magic_hex": "FFD8FFE11FCC457869660000",
+      "width": 800,
+      "height": 1200,
+      "large_reasons": [
+        ">200KB"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true,
+      "entry_id": "917",
+      "reused_from_prior_attempt": true
+    },
+    {
+      "name": "何仁亮",
+      "department": "皮肤外科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "3854",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=3854",
+      "detail_http_status": 200,
+      "photo_url": "https://www.gdskin.com/uploadimg/何仁亮.jpg",
+      "photo_source_attribute": "unique body img src under /uploadimg/",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "何仁亮-皮肤外科-主任医师-南方医科大学皮肤病医院.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/何仁亮-皮肤外科-主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 524595,
+      "sha256": "4f02999f07f998ee915708597dee3fbf98152c88e585fe48bbb72be77e0301fd",
+      "magic_hex": "FFD8FFE12125457869660000",
+      "width": 800,
+      "height": 1200,
+      "large_reasons": [
+        ">200KB"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true,
+      "entry_id": "921",
+      "reused_from_prior_attempt": true
+    },
+    {
+      "name": "钟泽敏",
+      "department": "儿童皮肤科",
+      "title_level": "中级",
+      "title": "主治医师",
+      "detail_id": "5576",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=5576",
+      "detail_http_status": 200,
+      "photo_url": "https://www.gdskin.com/uploadimg/钟泽敏.jpg",
+      "photo_source_attribute": "unique body img src under /uploadimg/",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "钟泽敏-儿童皮肤科-主治医师-南方医科大学皮肤病医院.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/钟泽敏-儿童皮肤科-主治医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 522118,
+      "sha256": "1a7c3faba1025d1d92005d187e32cd7aa2a8ef34a1c535dc8df00665dc9754a0",
+      "magic_hex": "FFD8FFE11DA6457869660000",
+      "width": 800,
+      "height": 1200,
+      "large_reasons": [
+        ">200KB"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true,
+      "entry_id": "922",
+      "reused_from_prior_attempt": true
+    }
+  ],
+  "selected_rows": [
+    {
+      "姓名": "顾有守",
+      "科室": "未标注",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=3829"
+    },
+    {
+      "姓名": "杨斌",
+      "科室": "未标注",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=3847"
+    },
+    {
+      "姓名": "吉苏云",
+      "科室": "皮肤内科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=4846"
+    },
+    {
+      "姓名": "谷梅",
+      "科室": "皮肤内科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=3849"
+    },
+    {
+      "姓名": "王柳苑",
+      "科室": "性病科",
+      "职称层级": "中级",
+      "主职称": "主治医师",
+      "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=5580"
+    },
+    {
+      "姓名": "鲜华",
+      "科室": "整形美容外科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=4287"
+    },
+    {
+      "姓名": "杜美毅",
+      "科室": "中医皮肤科",
+      "职称层级": "初级",
+      "主职称": "医师",
+      "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=5596"
+    },
+    {
+      "姓名": "严婷婷",
+      "科室": "激光美肤中心",
+      "职称层级": "中级",
+      "主职称": "主治医师",
+      "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=5599"
+    },
+    {
+      "姓名": "何仁亮",
+      "科室": "皮肤外科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=3854"
+    },
+    {
+      "姓名": "钟泽敏",
+      "科室": "儿童皮肤科",
+      "职称层级": "中级",
+      "主职称": "主治医师",
+      "来源链接": "https://www.gdskin.com/ShowNews.ASPX?ID=5576"
+    }
+  ],
+  "structure_diagnostics": [
+    {
+      "name": "顾有守",
+      "entry_id": "901",
+      "detail_id": "3829",
+      "page_title": "首席专家 顾有守",
+      "container_selector": "unique img[src] resolving under /uploadimg/",
+      "container_count": 1,
+      "html_snippet": "<img alt=\"\" src=\"../uploadimg/广东省皮肤病医院顾有守.jpg\" width=\"300\" height=\"325\">",
+      "raw_src": "../uploadimg/广东省皮肤病医院顾有守.jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/广东省皮肤病医院顾有守.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/WebResource.axd 跳过导航零尺寸图",
+        "images/备案图标.png",
+        "logo/banner/nav/foot 等站架资源",
+        "除唯一 /uploadimg/ 正文 img src 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique page-referenced img src resolving under /uploadimg/ is eligible; WebResource, filing icon and all site decorations are excluded",
+      "photo_bytes_reused_from_prior_attempt": true,
+      "observed_utc": "2026-08-19T12:34:36Z"
+    },
+    {
+      "name": "杨斌",
+      "entry_id": "902",
+      "detail_id": "3847",
+      "page_title": "杨斌 院长/主任医师/博士研究生导师/国务院特殊津贴专家",
+      "container_selector": "unique img[src] resolving under /uploadimg/",
+      "container_count": 1,
+      "html_snippet": "<img style=\"border: 0px currentColor;\" alt=\"\" src=\"../system_dntb/../uploadimg/杨斌2021.jpg\" width=\"400\" height=\"600\" align=\"\">",
+      "raw_src": "../system_dntb/../uploadimg/杨斌2021.jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/杨斌2021.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/WebResource.axd 跳过导航零尺寸图",
+        "images/备案图标.png",
+        "logo/banner/nav/foot 等站架资源",
+        "除唯一 /uploadimg/ 正文 img src 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique page-referenced img src resolving under /uploadimg/ is eligible; WebResource, filing icon and all site decorations are excluded",
+      "photo_bytes_reused_from_prior_attempt": true,
+      "observed_utc": "2026-08-19T12:34:38Z"
+    },
+    {
+      "name": "谷梅",
+      "entry_id": "906",
+      "detail_id": "3849",
+      "page_title": "谷梅 主任医师",
+      "container_selector": "unique img[src] resolving under /uploadimg/",
+      "container_count": 1,
+      "html_snippet": "<img src=\"../system_dntb/../uploadimg/谷梅2021.jpg\" align=\"\" width=\"400\" height=\"600\" alt=\"\">",
+      "raw_src": "../system_dntb/../uploadimg/谷梅2021.jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/谷梅2021.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/WebResource.axd 跳过导航零尺寸图",
+        "images/备案图标.png",
+        "logo/banner/nav/foot 等站架资源",
+        "除唯一 /uploadimg/ 正文 img src 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique page-referenced img src resolving under /uploadimg/ is eligible; WebResource, filing icon and all site decorations are excluded",
+      "photo_bytes_reused_from_prior_attempt": true,
+      "observed_utc": "2026-08-19T12:34:43Z"
+    },
+    {
+      "name": "何仁亮",
+      "entry_id": "921",
+      "detail_id": "3854",
+      "page_title": "何仁亮 主任医师",
+      "container_selector": "unique img[src] resolving under /uploadimg/",
+      "container_count": 1,
+      "html_snippet": "<img alt=\"\" src=\"../uploadimg/何仁亮.jpg\" width=\"400\" height=\"525\">",
+      "raw_src": "../uploadimg/何仁亮.jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/何仁亮.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/WebResource.axd 跳过导航零尺寸图",
+        "images/备案图标.png",
+        "logo/banner/nav/foot 等站架资源",
+        "除唯一 /uploadimg/ 正文 img src 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique page-referenced img src resolving under /uploadimg/ is eligible; WebResource, filing icon and all site decorations are excluded",
+      "photo_bytes_reused_from_prior_attempt": true,
+      "observed_utc": "2026-08-19T12:34:52Z"
+    },
+    {
+      "name": "鲜华",
+      "entry_id": "913",
+      "detail_id": "4287",
+      "page_title": "鲜华 副主任医师",
+      "container_selector": "unique img[src] resolving under /uploadimg/",
+      "container_count": 1,
+      "html_snippet": "<img width=\"400\" height=\"525\" alt=\"\" src=\"../uploadimg/鲜华.jpg\">",
+      "raw_src": "../uploadimg/鲜华.jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/鲜华.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/WebResource.axd 跳过导航零尺寸图",
+        "images/备案图标.png",
+        "logo/banner/nav/foot 等站架资源",
+        "除唯一 /uploadimg/ 正文 img src 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique page-referenced img src resolving under /uploadimg/ is eligible; WebResource, filing icon and all site decorations are excluded",
+      "photo_bytes_reused_from_prior_attempt": true,
+      "observed_utc": "2026-08-19T12:34:46Z"
+    },
+    {
+      "name": "吉苏云",
+      "entry_id": "906",
+      "detail_id": "4846",
+      "page_title": "吉苏云 副主任医师",
+      "container_selector": "unique img[src] resolving under /uploadimg/",
+      "container_count": 1,
+      "html_snippet": "<img alt=\"\" src=\"../uploadimg/吉苏云.jpg\" width=\"300\" height=\"394\">",
+      "raw_src": "../uploadimg/吉苏云.jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/吉苏云.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/WebResource.axd 跳过导航零尺寸图",
+        "images/备案图标.png",
+        "logo/banner/nav/foot 等站架资源",
+        "除唯一 /uploadimg/ 正文 img src 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique page-referenced img src resolving under /uploadimg/ is eligible; WebResource, filing icon and all site decorations are excluded",
+      "photo_bytes_reused_from_prior_attempt": true,
+      "observed_utc": "2026-08-19T12:34:40Z"
+    },
+    {
+      "name": "钟泽敏",
+      "entry_id": "922",
+      "detail_id": "5576",
+      "page_title": "钟泽敏 主治医师",
+      "container_selector": "unique img[src] resolving under /uploadimg/",
+      "container_count": 1,
+      "html_snippet": "<img width=\"400\" align=\"\" alt=\"\" src=\"../system_dntb/../uploadimg/钟泽敏.jpg\">",
+      "raw_src": "../system_dntb/../uploadimg/钟泽敏.jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/钟泽敏.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/WebResource.axd 跳过导航零尺寸图",
+        "images/备案图标.png",
+        "logo/banner/nav/foot 等站架资源",
+        "除唯一 /uploadimg/ 正文 img src 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique page-referenced img src resolving under /uploadimg/ is eligible; WebResource, filing icon and all site decorations are excluded",
+      "photo_bytes_reused_from_prior_attempt": true,
+      "observed_utc": "2026-08-19T12:34:55Z"
+    },
+    {
+      "name": "王柳苑",
+      "entry_id": "910",
+      "detail_id": "5580",
+      "page_title": "王柳苑 主治医师",
+      "container_selector": "unique img[src] resolving under /uploadimg/",
+      "container_count": 1,
+      "html_snippet": "<img width=\"400\" =\"\" align=\"\" alt=\"\" src=\"../system_dntb/../uploadimg/王柳苑 .jpg\">",
+      "raw_src": "../system_dntb/../uploadimg/王柳苑\t.jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/王柳苑.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/WebResource.axd 跳过导航零尺寸图",
+        "images/备案图标.png",
+        "logo/banner/nav/foot 等站架资源",
+        "除唯一 /uploadimg/ 正文 img src 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique page-referenced img src resolving under /uploadimg/ is eligible; WebResource, filing icon and all site decorations are excluded",
+      "photo_bytes_reused_from_prior_attempt": true,
+      "observed_utc": "2026-08-19T12:34:45Z"
+    },
+    {
+      "name": "杜美毅",
+      "entry_id": "915",
+      "detail_id": "5596",
+      "page_title": "杜美毅 医师",
+      "container_selector": "unique img[src] resolving under /uploadimg/",
+      "container_count": 1,
+      "html_snippet": "<img src=\"../system_dntb/../uploadimg/杜美毅.jpg\" align=\"\" width=\"200\" height=\"200\" alt=\"\">",
+      "raw_src": "../system_dntb/../uploadimg/杜美毅.jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/杜美毅.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/WebResource.axd 跳过导航零尺寸图",
+        "images/备案图标.png",
+        "logo/banner/nav/foot 等站架资源",
+        "除唯一 /uploadimg/ 正文 img src 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique page-referenced img src resolving under /uploadimg/ is eligible; WebResource, filing icon and all site decorations are excluded",
+      "photo_bytes_reused_from_prior_attempt": false,
+      "observed_utc": "2026-08-19T12:34:48Z"
+    },
+    {
+      "name": "严婷婷",
+      "entry_id": "917",
+      "detail_id": "5599",
+      "page_title": "严婷婷 主治医师",
+      "container_selector": "unique img[src] resolving under /uploadimg/",
+      "container_count": 1,
+      "html_snippet": "<img src=\"../system_dntb/../uploadimg/严婷婷 .jpg\" align=\"\" width=\"400\" =\"\" alt=\"\">",
+      "raw_src": "../system_dntb/../uploadimg/严婷婷\t.jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/严婷婷.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/WebResource.axd 跳过导航零尺寸图",
+        "images/备案图标.png",
+        "logo/banner/nav/foot 等站架资源",
+        "除唯一 /uploadimg/ 正文 img src 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique page-referenced img src resolving under /uploadimg/ is eligible; WebResource, filing icon and all site decorations are excluded",
+      "photo_bytes_reused_from_prior_attempt": true,
+      "observed_utc": "2026-08-19T12:34:50Z"
+    }
+  ],
+  "known_placeholder_evidence": {
+    "name": "文海泉",
+    "detail_id": "5566",
+    "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=5566",
+    "page_title": "文海泉 主任医师 教授 博士研究生导师",
+    "html_snippet": "<img width=\"200\" height=\"200\" align=\"\" alt=\"\" src=\"../uploadimg/占位.png\">",
+    "raw_src": "../uploadimg/占位.png",
+    "photo_url": "https://www.gdskin.com/uploadimg/占位.png",
+    "marker_reason": "explicit_chinese_placeholder_filename",
+    "decision": "占位图",
+    "observed_utc": "2026-08-19T12:34:32Z",
+    "photo_http_status": 200,
+    "content_type": "image/png",
+    "bytes": 4959,
+    "sha256": "d2565a802cdc8d7ca29f218cd60685542d139a7de68ffc9ee559011e2f693aac",
+    "width": 200,
+    "height": 200,
+    "known_sha_match": true,
+    "downloaded_for_gate_only": true,
+    "written_to_disk": false
+  },
+  "serial_request_trace": [
+    {
+      "sequence": 1,
+      "url": "https://www.gdskin.com/",
+      "transport_url": "https://www.gdskin.com/",
+      "interval_seconds_from_previous": null,
+      "observed_utc": "2026-08-19T12:33:51Z"
+    },
+    {
+      "sequence": 2,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=3829",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=3829",
+      "interval_seconds_from_previous": 3.422,
+      "observed_utc": "2026-08-19T12:33:54Z"
+    },
+    {
+      "sequence": 3,
+      "url": "https://www.gdskin.com/",
+      "transport_url": "https://www.gdskin.com/",
+      "interval_seconds_from_previous": 31.375,
+      "observed_utc": "2026-08-19T12:34:25Z"
+    },
+    {
+      "sequence": 4,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=3829",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=3829",
+      "interval_seconds_from_previous": 2.953,
+      "observed_utc": "2026-08-19T12:34:28Z"
+    },
+    {
+      "sequence": 5,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=5566",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=5566",
+      "interval_seconds_from_previous": 2.0,
+      "observed_utc": "2026-08-19T12:34:30Z"
+    },
+    {
+      "sequence": 6,
+      "url": "https://www.gdskin.com/uploadimg/占位.png",
+      "transport_url": "https://www.gdskin.com/uploadimg/%E5%8D%A0%E4%BD%8D.png",
+      "interval_seconds_from_previous": 2.0,
+      "observed_utc": "2026-08-19T12:34:32Z"
+    },
+    {
+      "sequence": 7,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=3829",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=3829",
+      "interval_seconds_from_previous": 2.016,
+      "observed_utc": "2026-08-19T12:34:34Z"
+    },
+    {
+      "sequence": 8,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=3847",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=3847",
+      "interval_seconds_from_previous": 2.0,
+      "observed_utc": "2026-08-19T12:34:36Z"
+    },
+    {
+      "sequence": 9,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=4846",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=4846",
+      "interval_seconds_from_previous": 2.0,
+      "observed_utc": "2026-08-19T12:34:38Z"
+    },
+    {
+      "sequence": 10,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=3849",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=3849",
+      "interval_seconds_from_previous": 2.0,
+      "observed_utc": "2026-08-19T12:34:40Z"
+    },
+    {
+      "sequence": 11,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=5580",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=5580",
+      "interval_seconds_from_previous": 2.203,
+      "observed_utc": "2026-08-19T12:34:43Z"
+    },
+    {
+      "sequence": 12,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=4287",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=4287",
+      "interval_seconds_from_previous": 2.0,
+      "observed_utc": "2026-08-19T12:34:45Z"
+    },
+    {
+      "sequence": 13,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=5596",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=5596",
+      "interval_seconds_from_previous": 2.0,
+      "observed_utc": "2026-08-19T12:34:47Z"
+    },
+    {
+      "sequence": 14,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=5599",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=5599",
+      "interval_seconds_from_previous": 2.0,
+      "observed_utc": "2026-08-19T12:34:49Z"
+    },
+    {
+      "sequence": 15,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=3854",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=3854",
+      "interval_seconds_from_previous": 2.0,
+      "observed_utc": "2026-08-19T12:34:51Z"
+    },
+    {
+      "sequence": 16,
+      "url": "https://www.gdskin.com/ShowNews.ASPX?ID=5576",
+      "transport_url": "https://www.gdskin.com/ShowNews.ASPX?ID=5576",
+      "interval_seconds_from_previous": 2.0,
+      "observed_utc": "2026-08-19T12:34:53Z"
+    },
+    {
+      "sequence": 17,
+      "url": "https://www.gdskin.com/uploadimg/杜美毅.jpg",
+      "transport_url": "https://www.gdskin.com/uploadimg/%E6%9D%9C%E7%BE%8E%E6%AF%85.jpg",
+      "interval_seconds_from_previous": 2.125,
+      "observed_utc": "2026-08-19T12:34:55Z"
+    }
+  ],
+  "reused_photo_trace": [
+    {
+      "sequence": 1,
+      "name": "顾有守",
+      "photo_url": "https://www.gdskin.com/uploadimg/广东省皮肤病医院顾有守.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/顾有守-未标注-主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 24320,
+      "sha256": "28ab8844986935af70cc86ae2749994561576c643eaaee7a3f4805e9edf57668",
+      "observed_utc": "2026-08-19T12:34:55Z"
+    },
+    {
+      "sequence": 2,
+      "name": "杨斌",
+      "photo_url": "https://www.gdskin.com/uploadimg/杨斌2021.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/杨斌-未标注-主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 731906,
+      "sha256": "87216049d9ba63d03595964aa3ad347ac1b77ac9aad9276539fcb1e45a311461",
+      "observed_utc": "2026-08-19T12:34:55Z"
+    },
+    {
+      "sequence": 3,
+      "name": "吉苏云",
+      "photo_url": "https://www.gdskin.com/uploadimg/吉苏云.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/吉苏云-皮肤内科-副主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 526479,
+      "sha256": "e2b74bec18c43d923b984881dc7a8dd3772a2066f7754c3d93717002d481c1ca",
+      "observed_utc": "2026-08-19T12:34:55Z"
+    },
+    {
+      "sequence": 4,
+      "name": "谷梅",
+      "photo_url": "https://www.gdskin.com/uploadimg/谷梅2021.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/谷梅-皮肤内科-主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 2489392,
+      "sha256": "fea29092ec4c1ab235917837b8ad991476998722cee1a8c95f1cf78baf403d8f",
+      "observed_utc": "2026-08-19T12:34:55Z"
+    },
+    {
+      "sequence": 5,
+      "name": "王柳苑",
+      "photo_url": "https://www.gdskin.com/uploadimg/王柳苑.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/王柳苑-性病科-主治医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 680685,
+      "sha256": "c6b1de349d140ef6b97960a1342d49cc9570c961d3f869543d3a1f18abfd5213",
+      "observed_utc": "2026-08-19T12:34:55Z"
+    },
+    {
+      "sequence": 6,
+      "name": "鲜华",
+      "photo_url": "https://www.gdskin.com/uploadimg/鲜华.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/鲜华-整形美容外科-副主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 533486,
+      "sha256": "f8471531bcb0c7abd68acdb5e7acee79a58e17a6770e1be9bc682362147e7e16",
+      "observed_utc": "2026-08-19T12:34:55Z"
+    },
+    {
+      "sequence": 7,
+      "name": "严婷婷",
+      "photo_url": "https://www.gdskin.com/uploadimg/严婷婷.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/严婷婷-激光美肤中心-主治医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 522389,
+      "sha256": "8e82ed6a0f9d49c7272e1bc79823a1e0a724c746e6a971fcbaf045ef485a6f82",
+      "observed_utc": "2026-08-19T12:34:55Z"
+    },
+    {
+      "sequence": 8,
+      "name": "何仁亮",
+      "photo_url": "https://www.gdskin.com/uploadimg/何仁亮.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/何仁亮-皮肤外科-主任医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 524595,
+      "sha256": "4f02999f07f998ee915708597dee3fbf98152c88e585fe48bbb72be77e0301fd",
+      "observed_utc": "2026-08-19T12:34:55Z"
+    },
+    {
+      "sequence": 9,
+      "name": "钟泽敏",
+      "photo_url": "https://www.gdskin.com/uploadimg/钟泽敏.jpg",
+      "disk_path": "work/南方医科大学皮肤病医院_photo_backfill_trial_photos/钟泽敏-儿童皮肤科-主治医师-南方医科大学皮肤病医院.jpg",
+      "bytes": 522118,
+      "sha256": "1a7c3faba1025d1d92005d187e32cd7aa2a8ef34a1c535dc8df00665dc9754a0",
+      "observed_utc": "2026-08-19T12:34:55Z"
+    }
+  ],
+  "replacement_matrix": [
+    {
+      "original_name": "吴芳芳",
+      "replacement_name": "谷梅",
+      "entry_id": "906",
+      "original_title_level": "初级",
+      "replacement_title_level": "正高",
+      "reason": "入口906/初级唯一替代人于碧慧同样无照片容器；Owner裁决入口覆盖优先并允许入口内跨层，取最高可用层"
+    },
+    {
+      "original_name": "孟凡琪",
+      "replacement_name": "杜美毅",
+      "entry_id": "915",
+      "original_title_level": "初级",
+      "replacement_title_level": "初级",
+      "reason": "原样本及龚洋洋/郭先荟候选的NBSP尾缀页面引用均悬空；按Owner指定改用同入口同层且资源200的杜美毅"
+    },
+    {
+      "original_name": "杨超",
+      "replacement_name": "钟泽敏",
+      "entry_id": "922",
+      "original_title_level": "中级",
+      "replacement_title_level": "中级",
+      "reason": "原页面无照片容器；按Owner裁决同入口同层替换"
+    }
+  ],
+  "prior_failure_evidence": [
+    {
+      "name": "吴芳芳",
+      "entry_id": "906",
+      "title_level": "初级",
+      "detail_id": "6197",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=6197",
+      "detail_http_status": 200,
+      "failure_state": "无照片容器",
+      "page_referenced_photo_count": 0,
+      "decision_feature": "全页无 /uploadimg/ 引用；仅 WebResource 与备案装饰图",
+      "observed_utc": "2026-08-19T11:24:41Z"
+    },
+    {
+      "name": "孟凡琪",
+      "entry_id": "915",
+      "title_level": "初级",
+      "detail_id": "5593",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=5593",
+      "detail_http_status": 200,
+      "failure_state": "照片资源不可达",
+      "page_referenced_photo_count": 1,
+      "raw_photo_reference": "../system_dntb/../uploadimg/孟凡琪   .jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/孟凡琪   .jpg",
+      "transport_url": "https://www.gdskin.com/uploadimg/%E5%AD%9F%E5%87%A1%E7%90%AA%C2%A0%20%C2%A0.jpg",
+      "photo_http_status": 404,
+      "photo_content_type": "text/html",
+      "photo_response_bytes": 1163,
+      "decision_feature": "页面原引用含 NBSP+空格尾缀；浏览器语义编码后仍为404，禁止构造变体",
+      "observed_utc": "2026-08-19T11:24:41Z"
+    },
+    {
+      "name": "杨超",
+      "entry_id": "922",
+      "title_level": "中级",
+      "detail_id": "6200",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=6200",
+      "detail_http_status": 200,
+      "failure_state": "无照片容器",
+      "page_referenced_photo_count": 0,
+      "decision_feature": "全页无 /uploadimg/ 引用；仅 WebResource 与备案装饰图",
+      "observed_utc": "2026-08-19T11:24:41Z"
+    }
+  ],
+  "replacement_candidate_evidence": [
+    {
+      "name": "于碧慧",
+      "entry_id": "906",
+      "title_level": "初级",
+      "detail_id": "6196",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=6196",
+      "detail_http_status": 200,
+      "failure_state": "无照片容器",
+      "page_referenced_photo_count": 0,
+      "decision_feature": "入口906/初级唯一替代候选同样无 /uploadimg/ 引用",
+      "observed_utc": "2026-08-19T12:07:00Z"
+    },
+    {
+      "name": "龚洋洋",
+      "entry_id": "915",
+      "title_level": "初级",
+      "detail_id": "5594",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=5594",
+      "detail_http_status": 200,
+      "failure_state": "照片资源不可达",
+      "page_referenced_photo_count": 1,
+      "raw_photo_reference": "../system_dntb/../uploadimg/龚洋洋 .jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/龚洋洋 .jpg",
+      "transport_url": "https://www.gdskin.com/uploadimg/%E9%BE%9A%E6%B4%8B%E6%B4%8B%C2%A0.jpg",
+      "photo_http_status": 404,
+      "photo_content_type": "text/html",
+      "photo_response_bytes": 1163,
+      "decision_feature": "页面原引用含NBSP尾缀；仅作浏览器语义百分号编码后仍为404，禁止构造变体",
+      "observed_utc": "2026-08-19T12:20:58Z"
+    },
+    {
+      "name": "郭先荟",
+      "entry_id": "915",
+      "title_level": "初级",
+      "detail_id": "5595",
+      "source_link": "https://www.gdskin.com/ShowNews.ASPX?ID=5595",
+      "detail_http_status": 200,
+      "failure_state": "照片资源不可达",
+      "page_referenced_photo_count": 1,
+      "raw_photo_reference": "../system_dntb/../uploadimg/郭先荟 .jpg",
+      "normalized_photo_url": "https://www.gdskin.com/uploadimg/郭先荟 .jpg",
+      "transport_url": "https://www.gdskin.com/uploadimg/%E9%83%AD%E5%85%88%E8%8D%9F%C2%A0.jpg",
+      "photo_http_status": 404,
+      "decision_feature": "页面属性以&nbsp;表达NBSP尾缀；按浏览器语义解析并编码后仍为404，禁止构造变体",
+      "observed_utc": "2026-08-19T12:27:35Z"
+    }
+  ]
+}
