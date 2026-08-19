@@ -59,6 +59,8 @@ FULL_AUTHORIZATION = (
 )
 AUTO_MARKER = "<!-- AUTO-GENERATED-BY: work/generate_obsidian_profiles.py -->"
 REQUEST_MODE = "urllib-default-get/no-cookie/no-proxy/no-custom-headers"
+HOME_IS_GATE = True
+PULL_REQUEST_NUMBER = 78
 FULL_RETRY_SECONDS = 30
 VISUAL_PAGE_SIZE = 25
 FULL_VISUAL_PASS_STATUS = (
@@ -854,7 +856,7 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
 
 ## 停止点
 
-`{meta['phase']}`。完成本地实图和工作簿目视核验、提交并推送 PR #78 后发布 `{meta.get('publication_signal', 'FULL_DONE')}`；不得自行合并、关闭 Issue 或领取下一任务。
+`{meta['phase']}`。完成本地实图和工作簿目视核验、提交并推送 PR #{PULL_REQUEST_NUMBER} 后发布 `{meta.get('publication_signal', 'FULL_DONE')}`；不得自行合并、关闭 Issue 或领取下一任务。
 """
     path.write_text(report, encoding="utf-8", newline="\n")
 
@@ -926,6 +928,9 @@ def validate_full_payload(
             "FULL 存在跨医生重复 SHA，必须拦截人工复判："
             + json.dumps(cross_doctor_duplicates, ensure_ascii=False, sort_keys=True)
         )
+    duplicate_validator = globals().get("validate_owner_approved_duplicate_groups")
+    if duplicate_validator is not None:
+        duplicate_validator(payload)
 
     rows_by_source = {trial.clean_text(row.get("来源链接")): row for row in rows}
     photos_by_source = {item["source_link"]: item for item in photos}
@@ -1119,12 +1124,12 @@ def run_full(run_date: str) -> dict[str, Any]:
     session = trial.OfficialUrlOpenSession()
     home = session.get(trial.OFFICIAL_HOME)
     directory = session.get(trial.DIRECTORY_URL)
-    if home.status != 200 or home.content_type != "text/html":
+    if HOME_IS_GATE and (home.status != 200 or home.content_type != "text/html"):
         raise RuntimeError("FULL 官网首页门禁失败")
     if directory.status != 200 or directory.content_type != "text/html":
         raise RuntimeError("FULL 医生目录门禁失败")
 
-    with tempfile.TemporaryDirectory(prefix="issue77_full_", dir=WORK_DIR) as temporary:
+    with tempfile.TemporaryDirectory(prefix=f"issue{ISSUE_NUMBER}_full_", dir=WORK_DIR) as temporary:
         temp_root = Path(temporary)
         temp_photo_dir = temp_root / "photos"
         temp_photo_dir.mkdir()
@@ -1319,7 +1324,9 @@ def run_full(run_date: str) -> dict[str, Any]:
             analysis = analyze_full_doctor_media(
                 html, source, trial.clean_text(row.get("姓名"))
             )
-            if analysis.page_title != trial.clean_text(row.get("职称身份原文")):
+            if not analysis.state and analysis.page_title != trial.clean_text(
+                row.get("职称身份原文")
+            ):
                 raise RuntimeError(
                     f"详情职称与底表不一致：{source} "
                     f"expected={row.get('职称身份原文')!r} actual={analysis.page_title!r}"
@@ -1434,6 +1441,9 @@ def run_full(run_date: str) -> dict[str, Any]:
                 "CROSS_DOCTOR_DUPLICATE_SHA_REQUIRES_MANUAL_REVIEW: "
                 + json.dumps(cross_doctor_duplicates, ensure_ascii=False, sort_keys=True)
             )
+        duplicate_decorator = globals().get("decorate_owner_approved_duplicate_groups")
+        if duplicate_decorator is not None:
+            duplicate_decorator(photo_samples, reconciliation_by_source)
         if set(result_by_source) != target_sources:
             raise RuntimeError("FULL 183 行结果来源集合未闭合")
         result_rows = [result_by_source[trial.clean_text(row.get("来源链接"))] for row in scope_rows]
