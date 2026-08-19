@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import copy
 import csv
 import hashlib
@@ -63,6 +64,24 @@ VISUAL_PAGE_SIZE = 25
 FULL_VISUAL_PASS_STATUS = (
     "PASSED_ALL_FULL_CONTACT_SHEETS_SINGLE_DOCTOR_PROFESSIONAL_PORTRAITS"
 )
+OWNER_FIX_COMMENT_UTC = "2026-08-19T01:56:51Z"
+OWNER_PLACEHOLDER_DETAIL_IDS = frozenset({"765", "766"})
+OWNER_PLACEHOLDER_NAMES = frozenset({"李莹珊", "李荷花"})
+OWNER_PLACEHOLDER_SHA256 = (
+    "42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd"
+)
+OWNER_APPROVED_SAME_DOCTOR_DUPLICATE_GROUPS = {
+    "15898b8d1e158a7ba97ab05ec83d6f2c90d12186c9c74d4213c203070b769cc9": {
+        "name": "沈峰",
+        "sources": frozenset(
+            {
+                "https://www.gzbrain.cn/myzj/info_itemid_102037.html",
+                "https://www.gzbrain.cn/myzj/info_itemid_551.html",
+            }
+        ),
+    }
+}
+DECODED_QUERY_PLACEHOLDER_MARKERS = ("blank", "placeholder", "default")
 
 FULL_PROTECTED_FILES = (
     MASTER_REPORT_PATH,
@@ -198,9 +217,65 @@ def placeholder_response_reason(
     for marker in trial.PLACEHOLDER_PATH_MARKERS:
         if marker in path:
             return f"URL 路径命中占位标记：{marker}"
+    decoded_query = decoded_photo_query(photo_url)
+    lowered_query = decoded_query.casefold()
+    for marker in DECODED_QUERY_PLACEHOLDER_MARKERS:
+        if marker in lowered_query:
+            return f"URL query Base64 解码命中占位标记：{decoded_query}"
+    unique_colors = limited_unique_color_count(content, limit=2)
+    if unique_colors <= 2:
+        return f"全图唯一颜色数={unique_colors}，命中单色/近单色占位启发式"
     if len(content) <= 10 * 1024 and width <= 128 and height <= 128:
         return f"响应呈小尺寸占位图特征：{len(content)} bytes；{width}×{height}"
     return ""
+
+
+def decoded_photo_query(photo_url: str) -> str:
+    query = trial.clean_text(trial.urlparse(photo_url).query)
+    if not query or not re.fullmatch(r"[A-Za-z0-9_+/=-]+", query):
+        return ""
+    padded = query + "=" * (-len(query) % 4)
+    try:
+        decoded = base64.b64decode(padded, altchars=b"-_", validate=True)
+        return decoded.decode("utf-8")
+    except (ValueError, UnicodeDecodeError):
+        return ""
+
+
+def limited_unique_color_count(content: bytes, limit: int = 2) -> int:
+    with Image.open(io.BytesIO(content)) as image:
+        image.load()
+        colors = image.convert("RGBA").getcolors(maxcolors=limit + 1)
+    return limit + 1 if colors is None else len(colors)
+
+
+def cross_doctor_duplicate_sha_groups(
+    samples: list[dict[str, Any]],
+) -> dict[str, list[dict[str, str]]]:
+    grouped: dict[str, list[dict[str, str]]] = {}
+    for sample in samples:
+        digest = trial.clean_text(sample.get("sha256"))
+        grouped.setdefault(digest, []).append(
+            {
+                "name": trial.clean_text(sample.get("name")),
+                "source_link": trial.clean_text(sample.get("source_link")),
+            }
+        )
+    rejected: dict[str, list[dict[str, str]]] = {}
+    for digest, items in grouped.items():
+        if not digest or len(items) < 2:
+            continue
+        approved = OWNER_APPROVED_SAME_DOCTOR_DUPLICATE_GROUPS.get(digest)
+        names = {item["name"] for item in items}
+        sources = {item["source_link"] for item in items}
+        if (
+            approved is not None
+            and names == {approved["name"]}
+            and sources == set(approved["sources"])
+        ):
+            continue
+        rejected[digest] = items
+    return rejected
 
 
 def analyze_full_doctor_media(
@@ -441,6 +516,27 @@ def insert_profile_photo_block_bytes(
     )
 
 
+def remove_profile_photo_block_bytes(
+    after_bytes: bytes, doctor_name: str, photo_file: str
+) -> bytes:
+    bom = b"\xef\xbb\xbf" if after_bytes.startswith(b"\xef\xbb\xbf") else b""
+    body = after_bytes[len(bom) :]
+    try:
+        text = body.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise RuntimeError(f"画像不是有效 UTF-8：{doctor_name}") from exc
+    markdown_path = profile_photo_markdown_path(photo_file)
+    pattern = re.compile(
+        rf"(?m)^!\[{re.escape(doctor_name)}\]\({re.escape(markdown_path)}\)"
+        r"(?P<newline>\r\n|\n)(?P=newline)"
+    )
+    matches = list(pattern.finditer(text))
+    if len(matches) != 1:
+        raise RuntimeError(f"画像待回滚照片区块不唯一：{doctor_name} 数量={len(matches)}")
+    match = matches[0]
+    return bom + (text[: match.start()] + text[match.end() :]).encode("utf-8")
+
+
 def validate_profile_photo_only_bytes(
     before_bytes: bytes, after_bytes: bytes, doctor_name: str, photo_file: str
 ) -> None:
@@ -538,11 +634,32 @@ def draw_review_sheet(
     for index, item in enumerate(selected):
         row, col = divmod(index, columns)
         left, top = col * cell_width + 18, row * cell_height + 8
-        with Image.open(photo_root / item["filename"]) as image:
+        photo_path = photo_root / item["filename"]
+        content = photo_path.read_bytes()
+        visibility_reason = placeholder_response_reason(
+            item["photo_url"], content, int(item["width"]), int(item["height"])
+        )
+        if visibility_reason:
+            raise RuntimeError(
+                "CONTACT_SHEET_BLANK_OR_INVISIBLE_CELL_REQUIRES_MANUAL_REVIEW: "
+                f"{item['name']} {visibility_reason}"
+            )
+        with Image.open(io.BytesIO(content)) as image:
             image.load()
             preview = ImageOps.contain(image.convert("RGB"), (300, 315))
         x = left + (300 - preview.width) // 2
+        draw.rectangle(
+            (left - 2, top - 2, left + 302, top + 317),
+            fill="#e6e6e6",
+            outline="#555555",
+            width=2,
+        )
         canvas.paste(preview, (x, top))
+        draw.rectangle(
+            (x - 1, top - 1, x + preview.width, top + preview.height),
+            outline="#333333",
+            width=1,
+        )
         label = item.get("audit_kind") or f"#{index + 1}"
         draw.text((left, top + 320), f"{label}｜{item['name']}", fill="black", font=name_font)
         draw.text(
@@ -684,7 +801,7 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
     report = f"""# Issue #{ISSUE_NUMBER} {HOSPITAL}照片补录 FULL 报告
 
 > 日期：{meta['run_date']}
-> Phase：`FULL_READY_FOR_FINAL_OWNER_AUDIT`
+> Phase：`{meta['phase']}`
 
 ## 四数对账
 
@@ -711,7 +828,7 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
 
 - 照片总字节 {meta['photo_total_bytes']:,}（{meta['photo_total_mib']:.2f} MiB）；最大 {meta['photo_max_bytes']:,} bytes。
 - 超过 5 MiB {meta['over_5mib_count']}；超过 20 MiB {meta['over_20mib_count']}；声明/魔数不一致 {meta['declared_extension_mismatch_count']}。
-- 实际格式：{json.dumps(meta['format_counts'], ensure_ascii=False)}；重复 SHA-256 组 {meta['duplicate_sha256_group_count']}。
+- 实际格式：{json.dumps(meta['format_counts'], ensure_ascii=False)}；重复 SHA-256 组 {meta['duplicate_sha256_group_count']}；跨医生重复 SHA-256 组 {meta.get('cross_doctor_duplicate_sha256_group_count', 0)}。
 
 ## >5 MiB Owner 终审清单
 
@@ -721,7 +838,7 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
 
 - 总底表 payload/CSV/XLSX 逐值一致；只修改本院成功行 `照片链接`、`照片文件` 与失败行 `异常提示`。
 - 逐单元格变化 {meta['row_diff_count']}：{json.dumps(meta['row_diff_columns'], ensure_ascii=False)}。
-- FULL reconciliation/manifest 对每张照片逐一复算字节、SHA-256、魔数/扩展名、尺寸和同站页面引用 URL；照片目录零孤儿零缺失。
+- FULL reconciliation/manifest 对每张照片逐一复算字节、SHA-256、魔数/扩展名、尺寸和同站页面引用 URL；URL query Base64 占位词、全图唯一颜色数 ≤2、跨医生同 SHA 均已固化拦截；照片目录零孤儿零缺失。
 - 成功 {meta['profile_refreshed_count']} 份 AUTO 画像严格 +2/-0；失败 {meta['profile_untouched_count']} 份零触碰；`_索引.md` 零修改。
 {visual_review_line}
 - 入口台账、总底表更新报告与全部 TRIAL 工件保持不变。
@@ -737,7 +854,7 @@ def write_full_report(path: Path, payload: dict[str, Any]) -> None:
 
 ## 停止点
 
-`FULL_READY_FOR_FINAL_OWNER_AUDIT`。完成本地实图和工作簿目视核验、提交并推送 PR #78 后发布 `FULL_DONE`；不得自行合并、关闭 Issue 或领取下一任务。
+`{meta['phase']}`。完成本地实图和工作簿目视核验、提交并推送 PR #78 后发布 `{meta.get('publication_signal', 'FULL_DONE')}`；不得自行合并、关闭 Issue 或领取下一任务。
 """
     path.write_text(report, encoding="utf-8", newline="\n")
 
@@ -801,6 +918,14 @@ def validate_full_payload(
         raise RuntimeError("FULL rows/reconciliation/photo/failure 数量不闭合")
     if len({item.get("来源链接") for item in reconciliation}) != expected:
         raise RuntimeError("FULL reconciliation 来源链接不唯一")
+    cross_doctor_duplicates = cross_doctor_duplicate_sha_groups(photos)
+    if cross_doctor_duplicates or int(
+        meta.get("cross_doctor_duplicate_sha256_group_count") or 0
+    ):
+        raise RuntimeError(
+            "FULL 存在跨医生重复 SHA，必须拦截人工复判："
+            + json.dumps(cross_doctor_duplicates, ensure_ascii=False, sort_keys=True)
+        )
 
     rows_by_source = {trial.clean_text(row.get("来源链接")): row for row in rows}
     photos_by_source = {item["source_link"]: item for item in photos}
@@ -831,6 +956,11 @@ def validate_full_payload(
                 or trial.image_dimensions(content) != (int(photo["width"]), int(photo["height"]))
             ):
                 raise RuntimeError(f"FULL 照片三重对账失败：{path.name}")
+            placeholder = placeholder_response_reason(
+                photo["photo_url"], content, int(photo["width"]), int(photo["height"])
+            )
+            if placeholder:
+                raise RuntimeError(f"FULL 实采照片命中占位门禁：{path.name} {placeholder}")
             normalized, opaque = trial.page_referenced_photo_url(photo["photo_url"], source)
             if (normalized, opaque) != (photo["photo_url"], photo["opaque_query"]):
                 raise RuntimeError(f"FULL 照片 URL 越界：{path.name}")
@@ -1298,6 +1428,12 @@ def run_full(run_date: str) -> dict[str, Any]:
                     flush=True,
                 )
 
+        cross_doctor_duplicates = cross_doctor_duplicate_sha_groups(photo_samples)
+        if cross_doctor_duplicates:
+            raise RuntimeError(
+                "CROSS_DOCTOR_DUPLICATE_SHA_REQUIRES_MANUAL_REVIEW: "
+                + json.dumps(cross_doctor_duplicates, ensure_ascii=False, sort_keys=True)
+            )
         if set(result_by_source) != target_sources:
             raise RuntimeError("FULL 183 行结果来源集合未闭合")
         result_rows = [result_by_source[trial.clean_text(row.get("来源链接"))] for row in scope_rows]
@@ -1431,6 +1567,9 @@ def run_full(run_date: str) -> dict[str, Any]:
                 ),
                 "format_counts": dict(Counter(item["extension"] for item in photo_samples)),
                 "duplicate_sha256_group_count": len(duplicate_groups),
+                "cross_doctor_duplicate_sha256_group_count": len(
+                    cross_doctor_duplicate_sha_groups(photo_samples)
+                ),
                 "existing_profile_count": len(profile_paths),
                 "profile_refreshed_count": len(success_sources),
                 "profile_untouched_count": EXPECTED_SCOPE_COUNT - len(success_sources),
@@ -1507,6 +1646,369 @@ def run_full(run_date: str) -> dict[str, Any]:
         return full_payload
 
 
+def reconstruct_baseline_rows(
+    current_rows: list[dict[str, Any]], prior_payload: dict[str, Any]
+) -> list[dict[str, Any]]:
+    baseline = copy.deepcopy(current_rows)
+    for item in prior_payload.get("row_diffs", []):
+        index = int(item["底表行"]) - 2
+        column = trial.clean_text(item.get("列名"))
+        if not (0 <= index < len(baseline)) or column not in FULL_ALLOWED_ROW_COLUMNS:
+            raise RuntimeError("FULL 既有逐单元格 diff 无法重建基线")
+        if row_value(baseline[index].get(column)) != row_value(item.get("修改后")):
+            raise RuntimeError(
+                f"FULL 既有逐单元格 diff 与当前底表不一致：row={index + 2} column={column}"
+            )
+        baseline[index][column] = item.get("修改前", "")
+    return baseline
+
+
+def owner_placeholder_failure(
+    photo: dict[str, Any], duplicate_photos: list[dict[str, Any]]
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    resource_urls = sorted({item["photo_url"] for item in duplicate_photos})
+    sources = sorted({item["source_link"] for item in duplicate_photos})
+    decoded_query = decoded_photo_query(photo["photo_url"])
+    evidence = {
+        "observed_utc": OWNER_FIX_COMMENT_UTC,
+        "resource_urls": resource_urls,
+        "photo_reference_count": int(photo["photo_reference_count"]),
+        "detection_feature": (
+            "same-SHA cross-doctor reuse "
+            f"sha256={OWNER_PLACEHOLDER_SHA256}; full-image unique_color_count=1 "
+            "all pixels RGBA=(255,255,255,255); query Base64 decodes to blank2.jpg"
+        ),
+        "template_signature": photo["template_signature"],
+        "excluded_resource_examples": [],
+        "sha256": OWNER_PLACEHOLDER_SHA256,
+        "cross_doctor_sources": sources,
+        "unique_color_count": 1,
+        "decoded_query_filename": decoded_query,
+        "owner_audit_comment": (
+            "https://github.com/nancywrayg57-jpg/doctor-data-collection/"
+            "pull/78#issuecomment-5336568337"
+        ),
+    }
+    error = failure_evidence_text(evidence)
+    failure = {
+        "detail_id": photo["detail_id"],
+        "name": photo["name"],
+        "source_link": photo["source_link"],
+        "state": "占位图",
+        "error": error,
+        "evidence": evidence,
+        "attempts": photo.get("photo_attempts") or [],
+        "origin": "FULL_FETCH",
+    }
+    reconciliation = {
+        "详情ID": photo["detail_id"],
+        "姓名": photo["name"],
+        "来源链接": photo["source_link"],
+        "状态": "失败留空",
+        "失败分类": "占位图",
+        "照片引用数": int(photo["photo_reference_count"]),
+        "照片链接": "",
+        "照片文件": "",
+        "声明格式": "",
+        "实际格式": "",
+        "字节数": "",
+        "SHA-256": "",
+        "宽": "",
+        "高": "",
+        "来源批次": "FULL_FETCH",
+        "错误证据": error,
+    }
+    return failure, reconciliation
+
+
+def fix_owner_rejected_placeholders() -> dict[str, Any]:
+    import collect_official_doctors_batch as collector
+
+    prior = load_full_payload()
+    if (
+        prior.get("meta", {}).get("owner_fix_comment_utc") == OWNER_FIX_COMMENT_UTC
+        and int(prior["meta"].get("downloaded_count") or 0) == 179
+        and int(prior["meta"].get("failed_count") or 0) == 4
+    ):
+        validate_full_installation(prior)
+        return prior
+    if (
+        int(prior.get("meta", {}).get("downloaded_count") or 0) != 181
+        or int(prior["meta"].get("failed_count") or 0) != 2
+    ):
+        raise RuntimeError("Owner 修正前 FULL 状态不是 181 实采 + 2 失败")
+
+    photos = [dict(item) for item in prior.get("photo_samples", [])]
+    affected = [item for item in photos if item["detail_id"] in OWNER_PLACEHOLDER_DETAIL_IDS]
+    if (
+        len(affected) != 2
+        or {item["name"] for item in affected} != set(OWNER_PLACEHOLDER_NAMES)
+        or {item["sha256"] for item in affected} != {OWNER_PLACEHOLDER_SHA256}
+    ):
+        raise RuntimeError("Owner 指定的两条占位记录与已落盘 FULL 不一致")
+    if cross_doctor_duplicate_sha_groups(affected).get(OWNER_PLACEHOLDER_SHA256) is None:
+        raise RuntimeError("Owner 指定的两条记录未形成跨医生同 SHA 证据")
+    affected_by_source = {item["source_link"]: item for item in affected}
+    affected_sources = set(affected_by_source)
+    affected_photo_paths: list[Path] = []
+    for item in affected:
+        path = FORMAL_PHOTO_DIR / item["filename"]
+        ensure_workspace_target(path)
+        content = path.read_bytes()
+        if (
+            len(content) != 1_147
+            or hashlib.sha256(content).hexdigest() != OWNER_PLACEHOLDER_SHA256
+            or trial.image_dimensions(content) != (148, 208)
+            or decoded_photo_query(item["photo_url"]) != "blank2.jpg"
+            or limited_unique_color_count(content, limit=2) != 1
+        ):
+            raise RuntimeError(f"Owner 占位三重证据复算失败：{item['name']}")
+        affected_photo_paths.append(path)
+
+    master_payload = json.loads(MASTER_JSON_PATH.read_text(encoding="utf-8"))
+    current_rows = [dict(row) for row in master_payload.get("rows", [])]
+    headers = list(collector.BASE_HEADERS)
+    baseline_rows = reconstruct_baseline_rows(current_rows, prior)
+    target_sources = {trial.clean_text(row.get("来源链接")) for row in prior["rows"]}
+    if len(target_sources) != EXPECTED_SCOPE_COUNT or not affected_sources <= target_sources:
+        raise RuntimeError("Owner 修正范围越出 Issue #77 固定 183 条")
+
+    corrected_rows = copy.deepcopy(current_rows)
+    corrected_global_by_source = {
+        trial.clean_text(row.get("来源链接")): row for row in corrected_rows
+    }
+    for source in affected_sources:
+        row = corrected_global_by_source[source]
+        row["照片链接"] = ""
+        row["照片文件"] = ""
+        row["异常提示"] = append_warning(row.get("异常提示"), "占位图")
+    row_diffs = collect_full_row_diffs(
+        baseline_rows, corrected_rows, target_sources, headers
+    )
+    corrected_target_rows = [
+        corrected_global_by_source[trial.clean_text(row.get("来源链接"))]
+        for row in prior["rows"]
+    ]
+    corrected_master = copy.deepcopy(master_payload)
+    corrected_master["rows"] = corrected_rows
+    recompute_master_derivatives(corrected_master, corrected_rows)
+
+    corrected_photos = [item for item in photos if item["source_link"] not in affected_sources]
+    existing_failures = {
+        item["source_link"]: dict(item) for item in prior.get("failures", [])
+    }
+    reconciliation_by_source = {
+        item["来源链接"]: dict(item) for item in prior["reconciliation"]
+    }
+    for source, photo in affected_by_source.items():
+        failure, reconciliation = owner_placeholder_failure(photo, affected)
+        existing_failures[source] = failure
+        reconciliation_by_source[source] = reconciliation
+    corrected_failures = [
+        existing_failures[source]
+        for source in (
+            trial.clean_text(row.get("来源链接")) for row in corrected_target_rows
+        )
+        if source in existing_failures
+    ]
+    corrected_reconciliation = [
+        reconciliation_by_source[trial.clean_text(row.get("来源链接"))]
+        for row in corrected_target_rows
+    ]
+
+    integrity_by_source = {
+        item["source_link"]: dict(item) for item in prior["profile_integrity"]
+    }
+    restored_profile_bytes: dict[Path, bytes] = {}
+    for source, photo in affected_by_source.items():
+        integrity = integrity_by_source[source]
+        path = ROOT / integrity["path"]
+        restored = remove_profile_photo_block_bytes(
+            path.read_bytes(), photo["name"], photo["photo_file"]
+        )
+        if hashlib.sha256(restored).hexdigest() != integrity["before_sha256"]:
+            raise RuntimeError(f"Owner 修正画像未恢复 origin/main 字节：{photo['name']}")
+        restored_profile_bytes[path] = restored
+        integrity.update(
+            {
+                "status": "失败留空",
+                "after_sha256": integrity["before_sha256"],
+                "added_lines": 0,
+                "removed_lines": 0,
+            }
+        )
+    corrected_integrity = [
+        integrity_by_source[item["source_link"]] for item in prior["profile_integrity"]
+    ]
+
+    with tempfile.TemporaryDirectory(prefix="issue77_owner_fix_", dir=WORK_DIR) as temporary:
+        temp_root = Path(temporary)
+        temp_photo_dir = temp_root / "photos"
+        shutil.copytree(FORMAL_PHOTO_DIR, temp_photo_dir)
+        for item in affected:
+            (temp_photo_dir / item["filename"]).unlink()
+
+        temp_master_payload = temp_root / MASTER_JSON_PATH.name
+        temp_master_csv = temp_root / MASTER_CSV_PATH.name
+        temp_master_xlsx = temp_root / MASTER_XLSX_PATH.name
+        temp_master_preview = temp_root / "master_preview.png"
+        temp_master_payload.write_text(
+            json.dumps(corrected_master, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        write_master_csv(temp_master_csv, corrected_rows, headers)
+        collector.build_workbook(temp_master_payload, temp_master_xlsx, temp_master_preview)
+        validate_master_layers(temp_master_payload, temp_master_csv, temp_master_xlsx)
+
+        temp_profiles: dict[Path, Path] = {}
+        for index, (target, content) in enumerate(restored_profile_bytes.items()):
+            temp_path = temp_root / f"profile_{index:02d}.md"
+            temp_path.write_bytes(content)
+            temp_profiles[target] = temp_path
+
+        temp_audit_sheet = temp_root / FULL_AUDIT_SHEET_PATH.name
+        audit_samples = build_full_audit_sheet(
+            corrected_photos, temp_photo_dir, temp_audit_sheet
+        )
+        temp_visual_dir = temp_root / FULL_VISUAL_DIR.name
+        visual_review_sheets = build_visual_review_sheets(
+            corrected_photos, temp_photo_dir, temp_visual_dir
+        )
+        duplicate_counter = Counter(item["sha256"] for item in corrected_photos)
+        duplicate_groups = {
+            digest: [
+                item["source_link"]
+                for item in corrected_photos
+                if item["sha256"] == digest
+            ]
+            for digest, count in duplicate_counter.items()
+            if count > 1
+        }
+        cross_doctor_duplicates = cross_doctor_duplicate_sha_groups(corrected_photos)
+        if cross_doctor_duplicates:
+            raise RuntimeError(
+                "Owner 修正后仍存在跨医生同 SHA："
+                + json.dumps(cross_doctor_duplicates, ensure_ascii=False, sort_keys=True)
+            )
+
+        corrected = copy.deepcopy(prior)
+        meta = corrected["meta"]
+        state_counter = Counter(item["state"] for item in corrected_failures)
+        total_bytes = sum(int(item["bytes"]) for item in corrected_photos)
+        meta.update(
+            {
+                "phase": "FULL_FIXED_READY_FOR_OWNER_REAUDIT",
+                "publication_signal": "FULL_FIXED_DONE",
+                "owner_fix_comment_utc": OWNER_FIX_COMMENT_UTC,
+                "owner_fix_affected_detail_ids": sorted(OWNER_PLACEHOLDER_DETAIL_IDS),
+                "owner_fix_removed_sha256": OWNER_PLACEHOLDER_SHA256,
+                "downloaded_count": len(corrected_photos),
+                "failed_count": len(corrected_failures),
+                "blank_count": len(corrected_failures),
+                "disk_photo_count": len(corrected_photos),
+                "failure_state_counts": {
+                    state: state_counter.get(state, 0) for state in FULL_FAILURE_STATES
+                },
+                "trial_reused_count": sum(
+                    item["origin"] == "TRIAL_REUSE" for item in corrected_photos
+                ),
+                "fresh_downloaded_count": sum(
+                    item["origin"] == "FULL_FETCH" for item in corrected_photos
+                ),
+                "fresh_failed_count": sum(
+                    item.get("origin") == "FULL_FETCH" for item in corrected_failures
+                ),
+                "photo_total_bytes": total_bytes,
+                "photo_total_mib": total_bytes / 1024 / 1024,
+                "photo_max_bytes": max(
+                    (int(item["bytes"]) for item in corrected_photos), default=0
+                ),
+                "size_bucket_counts": trial.size_buckets(corrected_photos),
+                "over_5mib_count": sum(
+                    int(item["bytes"]) > trial.OWNER_REPORT_BYTES
+                    for item in corrected_photos
+                ),
+                "over_20mib_count": sum(
+                    int(item["bytes"]) > trial.MAX_PHOTO_BYTES
+                    for item in corrected_photos
+                ),
+                "declared_extension_mismatch_count": sum(
+                    item["declared_extension"].replace("jpeg", "jpg")
+                    != item["extension"]
+                    for item in corrected_photos
+                ),
+                "format_counts": dict(
+                    Counter(item["extension"] for item in corrected_photos)
+                ),
+                "duplicate_sha256_group_count": len(duplicate_groups),
+                "cross_doctor_duplicate_sha256_group_count": 0,
+                "profile_refreshed_count": len(corrected_photos),
+                "profile_untouched_count": len(corrected_failures),
+                "row_diff_count": len(row_diffs),
+                "row_diff_columns": dict(Counter(item["列名"] for item in row_diffs)),
+                "audit_sheet_sha256": hashlib.sha256(
+                    temp_audit_sheet.read_bytes()
+                ).hexdigest(),
+                "visual_review_sheet_count": len(visual_review_sheets),
+                "visual_review_photo_count": sum(
+                    item["count"] for item in visual_review_sheets
+                ),
+                "visual_review_status": "PENDING_CODEX_OWNER_FIX_CONTACT_SHEET_REVIEW",
+                "immutable_after_preinstall": immutable_snapshot(),
+            }
+        )
+        meta.pop("visual_review_utc", None)
+        corrected.update(
+            {
+                "failures": corrected_failures,
+                "photo_samples": corrected_photos,
+                "duplicate_sha256_groups": duplicate_groups,
+                "reconciliation": corrected_reconciliation,
+                "row_diffs": row_diffs,
+                "rows": corrected_target_rows,
+                "profile_integrity": corrected_integrity,
+                "audit_samples": audit_samples,
+                "visual_review_sheets": visual_review_sheets,
+            }
+        )
+        validate_full_payload(
+            corrected, temp_photo_dir, temp_audit_sheet, temp_visual_dir
+        )
+
+        temp_full_payload = temp_root / FULL_JSON_PATH.name
+        temp_full_csv = temp_root / FULL_CSV_PATH.name
+        temp_full_report = temp_root / FULL_REPORT_PATH.name
+        temp_full_payload.write_text(
+            json.dumps(corrected, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        write_reconciliation_csv(temp_full_csv, corrected)
+        write_full_report(temp_full_report, corrected)
+
+        file_map: dict[Path, Path] = {
+            MASTER_JSON_PATH: temp_master_payload,
+            MASTER_CSV_PATH: temp_master_csv,
+            MASTER_XLSX_PATH: temp_master_xlsx,
+            FULL_JSON_PATH: temp_full_payload,
+            FULL_CSV_PATH: temp_full_csv,
+            FULL_REPORT_PATH: temp_full_report,
+            FULL_AUDIT_SHEET_PATH: temp_audit_sheet,
+            **temp_profiles,
+        }
+        for sheet in visual_review_sheets:
+            file_map[FULL_VISUAL_DIR / sheet["path"]] = temp_visual_dir / sheet["path"]
+        targets = list(file_map) + affected_photo_paths
+        backups = backup_file_targets(targets, temp_root / "file_backups")
+        try:
+            apply_file_map(file_map)
+            for path in affected_photo_paths:
+                ensure_workspace_target(path)
+                path.unlink()
+            validate_full_installation(corrected)
+        except Exception:
+            restore_file_targets(backups)
+            raise
+        return corrected
+
+
 def load_full_payload() -> dict[str, Any]:
     if not FULL_JSON_PATH.is_file():
         raise RuntimeError(f"FULL payload 不存在：{FULL_JSON_PATH}")
@@ -1537,6 +2039,11 @@ def parse_args() -> argparse.Namespace:
     mode.add_argument("--full", action="store_true", help="执行 183 行 FULL 事务")
     mode.add_argument("--validate-full", action="store_true", help="验证已落盘 FULL")
     mode.add_argument(
+        "--fix-owner-rejected-placeholders",
+        action="store_true",
+        help="按 PR #78 Owner 终审仅回滚两条纯白占位图并重算受影响工件",
+    )
+    mode.add_argument(
         "--mark-visual-pass",
         action="store_true",
         help="全量联系表逐页人工通过后写入视觉审计状态",
@@ -1551,6 +2058,16 @@ def main() -> None:
         payload = run_full(args.run_date)
         print(
             "FULL_DONE "
+            f"expected={payload['meta']['expected_count']} "
+            f"downloaded={payload['meta']['downloaded_count']} "
+            f"failed={payload['meta']['failed_count']} "
+            f"profiles={payload['meta']['profile_refreshed_count']}"
+        )
+        return
+    if args.fix_owner_rejected_placeholders:
+        payload = fix_owner_rejected_placeholders()
+        print(
+            "FULL_OWNER_FIX_DONE "
             f"expected={payload['meta']['expected_count']} "
             f"downloaded={payload['meta']['downloaded_count']} "
             f"failed={payload['meta']['failed_count']} "

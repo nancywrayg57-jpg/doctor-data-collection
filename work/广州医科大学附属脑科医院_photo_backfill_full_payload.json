@@ -1,25 +1,25 @@
 {
   "meta": {
     "issue": 77,
-    "phase": "FULL_READY_FOR_FINAL_OWNER_AUDIT",
+    "phase": "FULL_FIXED_READY_FOR_OWNER_REAUDIT",
     "hospital": "广州医科大学附属脑科医院",
     "run_date": "2026-08-19",
     "authorization": "PR #78 owner comment 2026-08-18T20:38:28Z: TRIAL_AUDIT_PASSED -> FULL_APPEND_AND_OBSIDIAN; fixed scope 183; reuse the 10 audited TRIAL originals; strict single-img page-reference gate",
     "expected_count": 183,
-    "downloaded_count": 181,
-    "failed_count": 2,
-    "blank_count": 2,
-    "disk_photo_count": 181,
+    "downloaded_count": 179,
+    "failed_count": 4,
+    "blank_count": 4,
+    "disk_photo_count": 179,
     "failure_state_counts": {
       "详情不可达": 0,
       "照片资源不可达": 0,
       "无照片容器": 0,
-      "占位图": 2
+      "占位图": 4
     },
     "trial_reused_count": 10,
     "fresh_target_count": 173,
-    "fresh_downloaded_count": 171,
-    "fresh_failed_count": 2,
+    "fresh_downloaded_count": 169,
+    "fresh_failed_count": 4,
     "detail_status_flicker_count": 0,
     "photo_status_flicker_count": 0,
     "request_mode": "urllib-default-get/no-cookie/no-proxy/no-custom-headers",
@@ -33,11 +33,11 @@
     "incomplete_read_retry_count": 0,
     "constructed_unreferenced_probe_count": 0,
     "third_party_source_count": 0,
-    "photo_total_bytes": 70819590,
-    "photo_total_mib": 67.5388240814209,
+    "photo_total_bytes": 70817296,
+    "photo_total_mib": 67.53663635253906,
     "photo_max_bytes": 11646846,
     "size_bucket_counts": {
-      "<200KiB": 134,
+      "<200KiB": 132,
       "200KiB-1MiB": 29,
       "1-5MiB": 17,
       "5-20MiB": 1,
@@ -48,22 +48,22 @@
     "declared_extension_mismatch_count": 18,
     "format_counts": {
       "png": 66,
-      "jpg": 115
+      "jpg": 113
     },
-    "duplicate_sha256_group_count": 2,
+    "duplicate_sha256_group_count": 1,
     "existing_profile_count": 183,
-    "profile_refreshed_count": 181,
-    "profile_untouched_count": 2,
+    "profile_refreshed_count": 179,
+    "profile_untouched_count": 4,
     "profile_index_before_sha256": "2cdb847f8c67a1e175e0d05eed1cc10fff9ef1159ebe6436778f70216fce935a",
-    "row_diff_count": 364,
+    "row_diff_count": 362,
     "row_diff_columns": {
-      "照片链接": 181,
-      "照片文件": 181,
-      "异常提示": 2
+      "照片链接": 179,
+      "照片文件": 179,
+      "异常提示": 4
     },
-    "audit_sheet_sha256": "3f6d2454d0a15dc4409c948f4a6338127850fdf178874137c4f9ad9b7be6db3b",
+    "audit_sheet_sha256": "f7e4ce35027a051d7b94c372f0ba1e35214c613119b57dad254c3a8be5ce8f4d",
     "visual_review_sheet_count": 8,
-    "visual_review_photo_count": 181,
+    "visual_review_photo_count": 179,
     "visual_review_status": "PASSED_ALL_FULL_CONTACT_SHEETS_SINGLE_DOCTOR_PROFESSIONAL_PORTRAITS",
     "immutable_before": {
       "files": {
@@ -133,9 +133,91 @@
         "sha256": "8ddb31e263c088c34d41cff326862293657babbd513a0d9dad7083a59b6785c0"
       }
     },
-    "visual_review_utc": "2026-08-19T01:15:53Z"
+    "publication_signal": "FULL_FIXED_DONE",
+    "owner_fix_comment_utc": "2026-08-19T01:56:51Z",
+    "owner_fix_affected_detail_ids": [
+      "765",
+      "766"
+    ],
+    "owner_fix_removed_sha256": "42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd",
+    "cross_doctor_duplicate_sha256_group_count": 0,
+    "visual_review_utc": "2026-08-19T02:18:16Z"
   },
   "failures": [
+    {
+      "detail_id": "766",
+      "name": "李荷花",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_766.html",
+      "state": "占位图",
+      "error": "{\"cross_doctor_sources\":[\"https://www.gzbrain.cn/myzj/info_itemid_765.html\",\"https://www.gzbrain.cn/myzj/info_itemid_766.html\"],\"decoded_query_filename\":\"blank2.jpg\",\"detection_feature\":\"same-SHA cross-doctor reuse sha256=42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd; full-image unique_color_count=1 all pixels RGBA=(255,255,255,255); query Base64 decodes to blank2.jpg\",\"excluded_resource_examples\":[],\"observed_utc\":\"2026-08-19T01:56:51Z\",\"owner_audit_comment\":\"https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/78#issuecomment-5336568337\",\"photo_reference_count\":1,\"resource_urls\":[\"https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==\",\"https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==\"],\"sha256\":\"42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd\",\"template_signature\":\".single_con > .single_cn > .single-img > img[src]\",\"unique_color_count\":1}",
+      "evidence": {
+        "observed_utc": "2026-08-19T01:56:51Z",
+        "resource_urls": [
+          "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==",
+          "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw=="
+        ],
+        "photo_reference_count": 1,
+        "detection_feature": "same-SHA cross-doctor reuse sha256=42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd; full-image unique_color_count=1 all pixels RGBA=(255,255,255,255); query Base64 decodes to blank2.jpg",
+        "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+        "excluded_resource_examples": [],
+        "sha256": "42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd",
+        "cross_doctor_sources": [
+          "https://www.gzbrain.cn/myzj/info_itemid_765.html",
+          "https://www.gzbrain.cn/myzj/info_itemid_766.html"
+        ],
+        "unique_color_count": 1,
+        "decoded_query_filename": "blank2.jpg",
+        "owner_audit_comment": "https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/78#issuecomment-5336568337"
+      },
+      "attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T21:02:07Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==",
+          "error": ""
+        }
+      ],
+      "origin": "FULL_FETCH"
+    },
+    {
+      "detail_id": "765",
+      "name": "李莹珊",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_765.html",
+      "state": "占位图",
+      "error": "{\"cross_doctor_sources\":[\"https://www.gzbrain.cn/myzj/info_itemid_765.html\",\"https://www.gzbrain.cn/myzj/info_itemid_766.html\"],\"decoded_query_filename\":\"blank2.jpg\",\"detection_feature\":\"same-SHA cross-doctor reuse sha256=42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd; full-image unique_color_count=1 all pixels RGBA=(255,255,255,255); query Base64 decodes to blank2.jpg\",\"excluded_resource_examples\":[],\"observed_utc\":\"2026-08-19T01:56:51Z\",\"owner_audit_comment\":\"https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/78#issuecomment-5336568337\",\"photo_reference_count\":1,\"resource_urls\":[\"https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==\",\"https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==\"],\"sha256\":\"42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd\",\"template_signature\":\".single_con > .single_cn > .single-img > img[src]\",\"unique_color_count\":1}",
+      "evidence": {
+        "observed_utc": "2026-08-19T01:56:51Z",
+        "resource_urls": [
+          "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==",
+          "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw=="
+        ],
+        "photo_reference_count": 1,
+        "detection_feature": "same-SHA cross-doctor reuse sha256=42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd; full-image unique_color_count=1 all pixels RGBA=(255,255,255,255); query Base64 decodes to blank2.jpg",
+        "template_signature": ".single_con > .single_cn > .single-img > img[src]",
+        "excluded_resource_examples": [],
+        "sha256": "42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd",
+        "cross_doctor_sources": [
+          "https://www.gzbrain.cn/myzj/info_itemid_765.html",
+          "https://www.gzbrain.cn/myzj/info_itemid_766.html"
+        ],
+        "unique_color_count": 1,
+        "decoded_query_filename": "blank2.jpg",
+        "owner_audit_comment": "https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/78#issuecomment-5336568337"
+      },
+      "attempts": [
+        {
+          "attempt": 1,
+          "utc": "2026-08-18T21:02:07Z",
+          "status": 200,
+          "content_type": "image/jpeg",
+          "final_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==",
+          "error": ""
+        }
+      ],
+      "origin": "FULL_FETCH"
+    },
     {
       "detail_id": "877",
       "name": "程道猛",
@@ -2716,78 +2798,6 @@
           "status": 200,
           "content_type": "image/jpeg",
           "final_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514175118322.jpg?6YOR5pa96K+XLmpwZw==",
-          "error": ""
-        }
-      ]
-    },
-    {
-      "detail_id": "766",
-      "name": "李荷花",
-      "department": "情感障碍科",
-      "title": "主治医师",
-      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_766.html",
-      "detail_status": 200,
-      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_766.html",
-      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
-      "photo_reference_count": 1,
-      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==\"/> </div>",
-      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
-      "photo_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==",
-      "opaque_query": "YmxhbmsyLmpwZw==",
-      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==",
-      "photo_file": "01_试点医院/广州医科大学附属脑科医院/照片/李荷花-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg",
-      "filename": "李荷花-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg",
-      "declared_extension": "jpg",
-      "extension": "jpg",
-      "content_type": "image/jpeg",
-      "bytes": 1147,
-      "width": 148,
-      "height": 208,
-      "sha256": "42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd",
-      "origin": "FULL_FETCH",
-      "photo_attempts": [
-        {
-          "attempt": 1,
-          "utc": "2026-08-18T21:02:07Z",
-          "status": 200,
-          "content_type": "image/jpeg",
-          "final_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==",
-          "error": ""
-        }
-      ]
-    },
-    {
-      "detail_id": "765",
-      "name": "李莹珊",
-      "department": "情感障碍科",
-      "title": "主治医师",
-      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_765.html",
-      "detail_status": 200,
-      "detail_final_url": "https://www.gzbrain.cn/myzj/info_itemid_765.html",
-      "template_signature": ".single_con > .single_cn > .single-img > img[src]",
-      "photo_reference_count": 1,
-      "container_html_snippet": "<div class=\"single-img\"> <img alt=\"\" src=\"/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==\"/> </div>",
-      "detection_feature": "single_con direct single_cn; direct single-img contains exactly one img[src]; same-site HTTPS /uploadfiles/YYYY/MM file with one opaque query token",
-      "photo_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==",
-      "opaque_query": "YmxhbmsyLmpwZw==",
-      "photo_final_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==",
-      "photo_file": "01_试点医院/广州医科大学附属脑科医院/照片/李莹珊-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg",
-      "filename": "李莹珊-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg",
-      "declared_extension": "jpg",
-      "extension": "jpg",
-      "content_type": "image/jpeg",
-      "bytes": 1147,
-      "width": 148,
-      "height": 208,
-      "sha256": "42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd",
-      "origin": "FULL_FETCH",
-      "photo_attempts": [
-        {
-          "attempt": 1,
-          "utc": "2026-08-18T21:02:07Z",
-          "status": 200,
-          "content_type": "image/jpeg",
-          "final_url": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==",
           "error": ""
         }
       ]
@@ -6619,10 +6629,6 @@
     }
   ],
   "duplicate_sha256_groups": {
-    "42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd": [
-      "https://www.gzbrain.cn/myzj/info_itemid_766.html",
-      "https://www.gzbrain.cn/myzj/info_itemid_765.html"
-    ],
     "15898b8d1e158a7ba97ab05ec83d6f2c90d12186c9c74d4213c203070b769cc9": [
       "https://www.gzbrain.cn/myzj/info_itemid_102037.html",
       "https://www.gzbrain.cn/myzj/info_itemid_551.html"
@@ -7929,37 +7935,37 @@
       "详情ID": "766",
       "姓名": "李荷花",
       "来源链接": "https://www.gzbrain.cn/myzj/info_itemid_766.html",
-      "状态": "实采",
-      "失败分类": "",
+      "状态": "失败留空",
+      "失败分类": "占位图",
       "照片引用数": 1,
-      "照片链接": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==",
-      "照片文件": "01_试点医院/广州医科大学附属脑科医院/照片/李荷花-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg",
-      "声明格式": "jpg",
-      "实际格式": "jpg",
-      "字节数": 1147,
-      "SHA-256": "42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd",
-      "宽": 148,
-      "高": 208,
+      "照片链接": "",
+      "照片文件": "",
+      "声明格式": "",
+      "实际格式": "",
+      "字节数": "",
+      "SHA-256": "",
+      "宽": "",
+      "高": "",
       "来源批次": "FULL_FETCH",
-      "错误证据": ""
+      "错误证据": "{\"cross_doctor_sources\":[\"https://www.gzbrain.cn/myzj/info_itemid_765.html\",\"https://www.gzbrain.cn/myzj/info_itemid_766.html\"],\"decoded_query_filename\":\"blank2.jpg\",\"detection_feature\":\"same-SHA cross-doctor reuse sha256=42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd; full-image unique_color_count=1 all pixels RGBA=(255,255,255,255); query Base64 decodes to blank2.jpg\",\"excluded_resource_examples\":[],\"observed_utc\":\"2026-08-19T01:56:51Z\",\"owner_audit_comment\":\"https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/78#issuecomment-5336568337\",\"photo_reference_count\":1,\"resource_urls\":[\"https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==\",\"https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==\"],\"sha256\":\"42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd\",\"template_signature\":\".single_con > .single_cn > .single-img > img[src]\",\"unique_color_count\":1}"
     },
     {
       "详情ID": "765",
       "姓名": "李莹珊",
       "来源链接": "https://www.gzbrain.cn/myzj/info_itemid_765.html",
-      "状态": "实采",
-      "失败分类": "",
+      "状态": "失败留空",
+      "失败分类": "占位图",
       "照片引用数": 1,
-      "照片链接": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==",
-      "照片文件": "01_试点医院/广州医科大学附属脑科医院/照片/李莹珊-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg",
-      "声明格式": "jpg",
-      "实际格式": "jpg",
-      "字节数": 1147,
-      "SHA-256": "42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd",
-      "宽": 148,
-      "高": 208,
+      "照片链接": "",
+      "照片文件": "",
+      "声明格式": "",
+      "实际格式": "",
+      "字节数": "",
+      "SHA-256": "",
+      "宽": "",
+      "高": "",
       "来源批次": "FULL_FETCH",
-      "错误证据": ""
+      "错误证据": "{\"cross_doctor_sources\":[\"https://www.gzbrain.cn/myzj/info_itemid_765.html\",\"https://www.gzbrain.cn/myzj/info_itemid_766.html\"],\"decoded_query_filename\":\"blank2.jpg\",\"detection_feature\":\"same-SHA cross-doctor reuse sha256=42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd; full-image unique_color_count=1 all pixels RGBA=(255,255,255,255); query Base64 decodes to blank2.jpg\",\"excluded_resource_examples\":[],\"observed_utc\":\"2026-08-19T01:56:51Z\",\"owner_audit_comment\":\"https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/78#issuecomment-5336568337\",\"photo_reference_count\":1,\"resource_urls\":[\"https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==\",\"https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==\"],\"sha256\":\"42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd\",\"template_signature\":\".single_con > .single_cn > .single-img > img[src]\",\"unique_color_count\":1}"
     },
     {
       "详情ID": "764",
@@ -11226,36 +11232,18 @@
       "序号": "4049",
       "姓名": "李荷花",
       "来源链接": "https://www.gzbrain.cn/myzj/info_itemid_766.html",
-      "列名": "照片链接",
+      "列名": "异常提示",
       "修改前": "",
-      "修改后": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw=="
-    },
-    {
-      "底表行": "4050",
-      "序号": "4049",
-      "姓名": "李荷花",
-      "来源链接": "https://www.gzbrain.cn/myzj/info_itemid_766.html",
-      "列名": "照片文件",
-      "修改前": "",
-      "修改后": "01_试点医院/广州医科大学附属脑科医院/照片/李荷花-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg"
+      "修改后": "官网本人职业照补录失败：占位图"
     },
     {
       "底表行": "4051",
       "序号": "4050",
       "姓名": "李莹珊",
       "来源链接": "https://www.gzbrain.cn/myzj/info_itemid_765.html",
-      "列名": "照片链接",
+      "列名": "异常提示",
       "修改前": "",
-      "修改后": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw=="
-    },
-    {
-      "底表行": "4051",
-      "序号": "4050",
-      "姓名": "李莹珊",
-      "来源链接": "https://www.gzbrain.cn/myzj/info_itemid_765.html",
-      "列名": "照片文件",
-      "修改前": "",
-      "修改后": "01_试点医院/广州医科大学附属脑科医院/照片/李莹珊-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg"
+      "修改后": "官网本人职业照补录失败：占位图"
     },
     {
       "底表行": "4052",
@@ -15164,14 +15152,14 @@
       "详情正文摘录": "2011 年毕业于广东医科大学临床医学（心理学）专业，并于同年 7 月开始在我院从事精神科临床工作，同时担任部分临床教学以及科研任务。 2014 年到北京参加系统的团体心理治疗的培训。",
       "来源类型": "医院官网",
       "来源链接": "https://www.gzbrain.cn/myzj/info_itemid_766.html",
-      "照片链接": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181942717.jpg?YmxhbmsyLmpwZw==",
-      "照片文件": "01_试点医院/广州医科大学附属脑科医院/照片/李荷花-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg",
+      "照片链接": "",
+      "照片文件": "",
       "采集入口": "https://www.gzbrain.cn/myzj/list.html",
       "采集方式": "官网静态专家目录分页+严格 itemid 详情 DOM 结构化抽取",
       "采集日期": "2026-08-13",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "",
+      "异常提示": "官网本人职业照补录失败：占位图",
       "复核状态": "待人工复核"
     },
     {
@@ -15191,14 +15179,14 @@
       "详情正文摘录": "2010年毕业于广州医科大学临床医学本科。 毕业后一直坚守临床第一线，现任广州医科大学精神卫生专业本科生导师、情感障碍科病区教学秘书。 有较丰富的临床、教学经验。",
       "来源类型": "医院官网",
       "来源链接": "https://www.gzbrain.cn/myzj/info_itemid_765.html",
-      "照片链接": "https://www.gzbrain.cn/uploadfiles/2019/05/20190514181659427.jpg?YmxhbmsyLmpwZw==",
-      "照片文件": "01_试点医院/广州医科大学附属脑科医院/照片/李莹珊-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg",
+      "照片链接": "",
+      "照片文件": "",
       "采集入口": "https://www.gzbrain.cn/myzj/list.html",
       "采集方式": "官网静态专家目录分页+严格 itemid 详情 DOM 结构化抽取",
       "采集日期": "2026-08-13",
       "详情页状态": "200",
       "已建画像": "是",
-      "异常提示": "",
+      "异常提示": "官网本人职业照补录失败：占位图",
       "复核状态": "待人工复核"
     },
     {
@@ -19274,19 +19262,19 @@
     {
       "source_link": "https://www.gzbrain.cn/myzj/info_itemid_765.html",
       "path": "医生画像仓库\\01_试点医院\\广州医科大学附属脑科医院\\李莹珊.md",
-      "status": "实采",
+      "status": "失败留空",
       "before_sha256": "b8a1db1eee87f2a87d5b727203f11d485bcda385947bd7cd908ceb5614d8e4da",
-      "after_sha256": "46e1446ef25854273b6ef052593cedab7337f7833e380776ff71e17b5591e36c",
-      "added_lines": 2,
+      "after_sha256": "b8a1db1eee87f2a87d5b727203f11d485bcda385947bd7cd908ceb5614d8e4da",
+      "added_lines": 0,
       "removed_lines": 0
     },
     {
       "source_link": "https://www.gzbrain.cn/myzj/info_itemid_766.html",
       "path": "医生画像仓库\\01_试点医院\\广州医科大学附属脑科医院\\李荷花.md",
-      "status": "实采",
+      "status": "失败留空",
       "before_sha256": "969a27157b9fb9bf83e5acf79fef423f4db3ce7cc70e155c74fcbfe53b77746e",
-      "after_sha256": "35b4bd9a3215b2d4c92eb43018d64912780885e3fe2f72a76694d0882054fad2",
-      "added_lines": 2,
+      "after_sha256": "969a27157b9fb9bf83e5acf79fef423f4db3ce7cc70e155c74fcbfe53b77746e",
+      "added_lines": 0,
       "removed_lines": 0
     },
     {
@@ -19797,11 +19785,11 @@
   "audit_samples": [
     {
       "audit_kind": "最小",
-      "name": "李莹珊",
-      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_765.html",
-      "filename": "李莹珊-情感障碍科-主治医师-广州医科大学附属脑科医院.jpg",
-      "bytes": 1147,
-      "sha256": "42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd"
+      "name": "艾思志",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_76800.html",
+      "filename": "艾思志-睡眠与节律医学中心-教授-广州医科大学附属脑科医院.jpg",
+      "bytes": 10097,
+      "sha256": "9a3a41cff83c5037a4e7c9084379de4b9ad4e93227106f2eb78804b670ef8b06"
     },
     {
       "audit_kind": "最大",
@@ -19826,14 +19814,6 @@
       "filename": "佘生林-精神科-主任医师-广州医科大学附属脑科医院.jpg",
       "bytes": 28643,
       "sha256": "cabca3ede260940f355744e1cc8cbedf3a4b1853637f8494a8c2e1df937d2dc5"
-    },
-    {
-      "audit_kind": "确定性随机",
-      "name": "艾思志",
-      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_76800.html",
-      "filename": "艾思志-睡眠与节律医学中心-教授-广州医科大学附属脑科医院.jpg",
-      "bytes": 10097,
-      "sha256": "9a3a41cff83c5037a4e7c9084379de4b9ad4e93227106f2eb78804b670ef8b06"
     },
     {
       "audit_kind": "确定性随机",
@@ -19874,6 +19854,14 @@
       "filename": "成友军-神经外科-副主任医师-广州医科大学附属脑科医院.png",
       "bytes": 79908,
       "sha256": "a10a649dae3e0852774d53b8111b30259582aab7cd28ee509788eba9478f7525"
+    },
+    {
+      "audit_kind": "确定性随机",
+      "name": "陈超其",
+      "source_link": "https://www.gzbrain.cn/myzj/info_itemid_5378.html",
+      "filename": "陈超其-精神科-主治医师-广州医科大学附属脑科医院.jpg",
+      "bytes": 23512,
+      "sha256": "0cdf0d62f3c557e51df38ce7b1557f7b4425825d676530a8463414474858d919"
     }
   ],
   "visual_review_sheets": [
@@ -19882,64 +19870,64 @@
       "first_name": "彭建玲",
       "last_name": "王怀坤",
       "count": 25,
-      "bytes": 566699,
-      "sha256": "4793e37edbcf3e175edff0e3188424f2bb135f3b4bc1c526a041d0d6cb423c59"
+      "bytes": 648346,
+      "sha256": "00204c8ca72754c54770259976e278febaf45d9210370d78ace39906423b6ff0"
     },
     {
       "path": "page_02.jpg",
       "first_name": "段炼",
       "last_name": "周超",
       "count": 25,
-      "bytes": 589820,
-      "sha256": "9b1a7a4def1fc476a0425b1a1c477213ce74fe41d93363bdc7cc876297cfc979"
+      "bytes": 667185,
+      "sha256": "83c7dd29a5624dde00db1f328d0381d881d8377b01e6a063cd4fab052bccdffe"
     },
     {
       "path": "page_03.jpg",
       "first_name": "蒋泽宇",
-      "last_name": "郭伟坚",
+      "last_name": "李一兰",
       "count": 25,
-      "bytes": 549362,
-      "sha256": "249c57ec1bb8a716a1978c4f5656c6eb811722c786919a78912c9dec08b00748"
+      "bytes": 655478,
+      "sha256": "54e35e4825cb9b876c5a393e368e7ed46bdd859dd842d4712ee9852f02818ed2"
     },
     {
       "path": "page_04.jpg",
-      "first_name": "李淑云",
-      "last_name": "王金伟",
+      "first_name": "卢林生",
+      "last_name": "老帼慧",
       "count": 25,
-      "bytes": 543377,
-      "sha256": "0d43d0cb68d3a0a8186ebdaa84c0613cd290623771145cd114e211f8c94fce5d"
+      "bytes": 635349,
+      "sha256": "4637d02f233b0e7a066622bf3938daf14575e83244031816f749a6cfcc9b3a60"
     },
     {
       "path": "page_05.jpg",
-      "first_name": "陈建平",
-      "last_name": "张杰",
+      "first_name": "王丹逢",
+      "last_name": "周燕玲",
       "count": 25,
-      "bytes": 582383,
-      "sha256": "809ca611a42869f44034c08391e7695d53b187cc061882d584666fab5df39faa"
+      "bytes": 663054,
+      "sha256": "d479a4652a448f277876c5ac50e44fa4d8fc3c56c01ae55fcf7f24929312f661"
     },
     {
       "path": "page_06.jpg",
-      "first_name": "罗新妮",
-      "last_name": "李海燕",
+      "first_name": "范敏珍",
+      "last_name": "李启荣",
       "count": 25,
-      "bytes": 559801,
-      "sha256": "e1b8ea49be3b779337f2849c28e04ee9e59922129dd6edb56977bbbc2a0bb650"
+      "bytes": 641213,
+      "sha256": "eaa185d6074179f70cd91fe17bd8fbfa4800ad44865db053cbdf1bb2873e4e49"
     },
     {
       "path": "page_07.jpg",
-      "first_name": "杨婵娟",
-      "last_name": "缪庆喆",
+      "first_name": "郭建雄",
+      "last_name": "彭妙官",
       "count": 25,
-      "bytes": 569559,
-      "sha256": "de06795df0fb08fb43782a725f1a5117d561b590defbc9947462819525d88a47"
+      "bytes": 649203,
+      "sha256": "fd8f9406a8c0d906d5a785cff7677d27dd1a452f209a06cabb95baafbaa0d18c"
     },
     {
       "path": "page_08.jpg",
-      "first_name": "丁文华",
+      "first_name": "郭耀光",
       "last_name": "李毅",
-      "count": 6,
-      "bytes": 138884,
-      "sha256": "cde67c13203401b77eebd3f918455af09a7d97b45ae4e53ae4f1c8ad3e7d36e8"
+      "count": 4,
+      "bytes": 101071,
+      "sha256": "c6b0ada9eb0d2c7e26a707a852f773374a0d5a92cb7425d977f4c7a74f52c95a"
     }
   ]
 }

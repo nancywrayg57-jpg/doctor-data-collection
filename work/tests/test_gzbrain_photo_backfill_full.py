@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import io
 import json
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+from PIL import Image
 
 
 WORK_DIR = Path(__file__).resolve().parents[1]
@@ -80,15 +83,82 @@ class GzbrainPhotoBackfillFullTests(unittest.TestCase):
                 10,
             ),
         )
+        image = Image.new("RGB", (315, 422), "red")
+        for x in range(105, 210):
+            for y in range(422):
+                image.putpixel((x, y), (0, 255, 0))
+        for x in range(210, 315):
+            for y in range(422):
+                image.putpixel((x, y), (0, 0, 255))
+        buffer = io.BytesIO()
+        image.save(buffer, "PNG")
         self.assertEqual(
             target.placeholder_response_reason(
                 "https://www.gzbrain.cn/uploadfiles/2020/01/doctor.jpg?abc",
-                b"x" * 20000,
+                buffer.getvalue(),
                 315,
                 422,
             ),
             "",
         )
+
+    def test_placeholder_gate_decodes_query_filename(self) -> None:
+        reason = target.placeholder_response_reason(
+            "https://www.gzbrain.cn/uploadfiles/2019/05/x.jpg?YmxhbmsyLmpwZw==",
+            b"not-read-because-query-gate-fires-first",
+            148,
+            208,
+        )
+        self.assertIn("blank2.jpg", reason)
+        self.assertEqual(
+            target.decoded_photo_query(
+                "https://www.gzbrain.cn/uploadfiles/2019/05/x.jpg?YmxhbmsyLmpwZw=="
+            ),
+            "blank2.jpg",
+        )
+
+    def test_placeholder_gate_blocks_large_single_color_image(self) -> None:
+        buffer = io.BytesIO()
+        Image.new("RGB", (148, 208), "white").save(buffer, "JPEG", quality=100)
+        reason = target.placeholder_response_reason(
+            "https://www.gzbrain.cn/uploadfiles/2019/05/x.jpg?eC5qcGc=",
+            buffer.getvalue(),
+            148,
+            208,
+        )
+        self.assertIn("唯一颜色数=1", reason)
+
+    def test_cross_doctor_duplicate_sha_requires_manual_review(self) -> None:
+        approved_digest, approved = next(
+            iter(target.OWNER_APPROVED_SAME_DOCTOR_DUPLICATE_GROUPS.items())
+        )
+        approved_sources = sorted(approved["sources"])
+        samples = [
+            {"sha256": "same", "name": "甲医生", "source_link": "source-a"},
+            {"sha256": "same", "name": "乙医生", "source_link": "source-b"},
+            {
+                "sha256": "same-name-unreviewed",
+                "name": "同名医生",
+                "source_link": "source-c",
+            },
+            {
+                "sha256": "same-name-unreviewed",
+                "name": "同名医生",
+                "source_link": "source-d",
+            },
+            {
+                "sha256": approved_digest,
+                "name": approved["name"],
+                "source_link": approved_sources[0],
+            },
+            {
+                "sha256": approved_digest,
+                "name": approved["name"],
+                "source_link": approved_sources[1],
+            },
+        ]
+        groups = target.cross_doctor_duplicate_sha_groups(samples)
+        self.assertEqual(set(groups), {"same", "same-name-unreviewed"})
 
     def test_full_analysis_classifies_generic_doctor_image_as_placeholder(self) -> None:
         html = """
@@ -133,6 +203,16 @@ class GzbrainPhotoBackfillFullTests(unittest.TestCase):
         before = "## 基础信息\n\n![医生](照片/医生.jpg)\n\n"
         with self.assertRaisesRegex(RuntimeError, "已存在照片"):
             target.insert_profile_photo_block(before, "医生", "照片/医生.jpg")
+
+    def test_profile_remove_restores_exact_preinsert_bytes(self) -> None:
+        before = (
+            f"{target.AUTO_MARKER}\r\n# 医生\r\n\r\n## 基础信息\r\n\r\n- 姓名：医生\r\n"
+        ).encode("utf-8")
+        photo_file = "01_试点医院/广州医科大学附属脑科医院/照片/医生.jpg"
+        after = target.insert_profile_photo_block_bytes(before, "医生", photo_file)
+        self.assertEqual(
+            target.remove_profile_photo_block_bytes(after, "医生", photo_file), before
+        )
 
     def test_collect_row_diffs_rejects_non_photo_columns(self) -> None:
         source = "https://www.gzbrain.cn/myzj/info_itemid_1.html"

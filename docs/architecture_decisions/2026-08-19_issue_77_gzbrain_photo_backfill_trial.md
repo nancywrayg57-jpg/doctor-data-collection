@@ -234,3 +234,79 @@ Artifacts:
 - work/广州医科大学附属脑科医院_photo_backfill_full_visual_review/
 - 医生画像仓库/01_试点医院/广州医科大学附属脑科医院/照片/
 </Handoff_State>
+
+## Owner FULL 终审退回与最小修正
+
+Owner 于 PR #78 对提交 `13ddabc5` 给出 `FULL_AUDIT_REJECTED → FIX_REQUIRED`：<https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/78#issuecomment-5336568337>。除两条纯白占位图外，Owner 明确确认底表范围、181 份原文件三重、画像 `+2/-0`、XLSX/CSV 一致性、程道猛/梁卉薇占位判定、徐文军大图和既有测试均通过，因此本次只重算受两条修正影响的资产，未重新联网抓取或改动其他医生。
+
+根因是既有 `placeholder_response_reason` 只检查 URL path 标记，以及“文件不大于 10 KiB 且宽高均不大于 128”的小尺寸边界。李莹珊（ID 765）与李荷花（ID 766）的同一纯白 JPEG 为 1,147 bytes、148×208，宽高未同时命中旧边界；同时旧联系表使用白底且没有预览框，纯白图片在 page_03 #11/#12 呈不可见空格，人工目视误判为通过。
+
+两条记录的三重证据复算一致：
+
+1. 两文件 SHA-256 均为 `42dac34e29cd304174e89e8552fadacd4a0380b9e3346b9f5c5ebf2393cb96fd`，但属于两个不同医生来源。
+2. Pillow 全图解码唯一颜色数为 1，全部像素为 RGBA `(255,255,255,255)`。
+3. 两个页面引用 URL 的 query `YmxhbmsyLmpwZw==` Base64 解码均为 `blank2.jpg`。
+
+最小修正如下：
+
+- 删除两张精确命名的正式照片；清空两行 `照片链接`、`照片文件`，追加幂等异常提示 `官网本人职业照补录失败：占位图`。
+- 两份画像精确撤销照片块，并以 SHA-256 证明分别恢复为 `b8a1db1eee87f2a87d5b727203f11d485bcda385947bd7cd908ceb5614d8e4da`、`969a27157b9fb9bf83e5acf79fef423f4db3ce7cc70e155c74fcbfe53b77746e`，均与 `origin/main` 一致；`_索引.md` 仍与 `origin/main` 一致。
+- 两条 reconciliation 改为“失败留空/占位图”；错误证据含 `resource_urls`、`photo_reference_count`、`observed_utc`，以及跨医生同 SHA、全图纯白单色、query 解码为 `blank2.jpg` 三项检测特征。
+- 脚本固化四层门禁：query Base64 解码出现 `blank`/`placeholder`/`default`；全图唯一颜色数不大于 2；不同来源同 SHA 时停止并转人工复判，仅允许 Owner 本次已实审通过的沈峰同人双详情精确白名单；联系表预览格增加灰底和边框，空白/不可见格命中同一门禁时停止。
+- 新增 `--fix-owner-rejected-placeholders` 事务模式；只从既有 FULL 状态重建受影响的底表、画像、对账、报告、抽样图和联系表，不重复网络采集。
+
+## 修正后对账与验证
+
+| 固定目标 | 实采成功 | 失败留空 | 正式落盘 | 照片字段留空 |
+|---:|---:|---:|---:|---:|
+| 183 | 179 | 4 | 179 | 4 |
+
+- 失败四类：详情不可达 0、照片资源不可达 0、无照片容器 0、占位图 4；新增两条与既有程道猛、梁卉薇两条共同构成 4 条占位失败。
+- 正式照片 179 张、70,817,296 bytes；PNG 66、JPEG 113；声明/魔数不一致 18；超过 5 MiB 仍仅徐文军一张；超过 20 MiB 为 0。
+- 逐单元格变化 362：`照片链接` 179、`照片文件` 179、`异常提示` 4；总底表 payload/CSV/XLSX 逐值一致。
+- 179 份 AUTO 画像保持 `+2/-0`；4 份失败画像与 `_索引.md` 零变化；两份退回画像已恢复 `origin/main`。
+- FULL 抽样图与 8 页全量联系表已重新生成并逐格目视，覆盖 179/179；全部为单人医生职业照，未见患者、儿童、合影、二维码、装饰、占位或不可见空格。
+- XLSX 重新导入确认 6 张工作表齐全，公式错误扫描为 0；6 张预览逐表目视无空白页、破损表头、公式错误文本或明显布局异常。
+- FULL 专项测试 19/19；全仓 `unittest discover` 417/417；`--validate-full` 输出 `expected=183 downloaded=179 failed=4`。
+- FULL payload SHA-256：`7d6ca4014a34404daa32c5b675c7124d94b30ecf12684b57436d7e3bbcfadb15`。
+- reconciliation SHA-256：`f6a5936e74a5e89a7b40fe7baf498a6923dfcfb76c7e722b59a54034a08d45dc`。
+- FULL 报告 SHA-256：`0467c390ba4166b8d2d0ae201916eea2bd62c637eef9a6d15df982f3a7b6e4ab`。
+- 抽样审计图 SHA-256：`f7e4ce35027a051d7b94c372f0ba1e35214c613119b57dad254c3a8be5ce8f4d`。
+
+当前停止点为 `FULL_FIXED_READY_FOR_OWNER_REAUDIT`。只允许精确暂存、提交、标准 Git fast-forward 推送原分支并在 PR #78 发布 `FULL_FIXED_DONE`；之后等待 Owner 针对受影响面和抽样回归复审。不得自行合并 PR、关闭 Issue 或领取下一 Issue。
+
+<Handoff_State>
+Target: Issue #77 广州医科大学附属脑科医院照片补录 FULL Owner 修正
+AgentConstitution: D:\workspace\信息收集整理\Agent.md
+RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
+RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/77
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/78
+Branch: codex/mhrj/issue-77-gzbrain-photo-backfill-trial
+CodexDeveloper: xtzhou247
+ClaudeOwner: nancywrayg57-jpg
+Phase: FULL_FIXED_READY_FOR_OWNER_REAUDIT
+Completed:
+- 精确移除李莹珊 ID 765、李荷花 ID 766 两张纯白 blank2.jpg 占位图
+- 四数重算为 183 = 179 实采 + 4 占位失败；两份画像恢复 origin/main，索引零触碰
+- 固化 query Base64、唯一颜色数、跨医生同 SHA、联系表可见性四层门禁
+- 179/179 视觉、XLSX 六表、专项 19/19、全仓 417/417、FULL 验证全部通过
+CurrentFacts:
+- 正式照片 179 张、70,817,296 bytes；PNG 66、JPEG 113；跨医生重复 SHA 组 0
+- 失败为程道猛 ID 877、梁卉薇 ID 989、李莹珊 ID 765、李荷花 ID 766，均留空且证据完整
+- Issue #77、PR #78 仍 open；当前等待修正提交发布后 Owner 复审
+Next:
+- 精确暂存、提交、标准 fast-forward 推送当前原分支
+- 在 PR #78 发布 FULL_FIXED_DONE，恢复自动监控并等待 nancywrayg57-jpg 复审
+Constraints:
+- 仅默认 urllib 官方公开 GET；无 Cookie、代理、自定义浏览器头、挑战绕过或第三方来源
+- 患者及任何患者可识别信息绝对禁止
+- 不得合并 PR、关闭 Issue 或领取下一 Issue
+Artifacts:
+- work/广州医科大学附属脑科医院_photo_backfill_full_payload.json
+- work/广州医科大学附属脑科医院_photo_backfill_full_reconciliation.csv
+- work/广州医科大学附属脑科医院_photo_backfill_full_report.md
+- work/广州医科大学附属脑科医院_photo_backfill_full_audit_sheet.jpg
+- work/广州医科大学附属脑科医院_photo_backfill_full_visual_review/
+- 医生画像仓库/01_试点医院/广州医科大学附属脑科医院/照片/
+</Handoff_State>
