@@ -1,0 +1,725 @@
+{
+  "meta": {
+    "issue": 81,
+    "phase": "TRIAL_READY_FOR_OWNER_AUDIT",
+    "hospital": "南方医科大学口腔医院(海珠广场院区)",
+    "run_date": "2026-08-19",
+    "scope_count": 95,
+    "scope_unique_source_count": 95,
+    "trial_detail_count": 10,
+    "department_coverage_count": 9,
+    "covered_departments": [
+      "儿童口腔科",
+      "口腔正畸科",
+      "口腔种植修复科",
+      "口腔预防科",
+      "口腔颌面外科",
+      "牙体牙髓病科一室",
+      "牙体牙髓病科二室",
+      "牙周黏膜病科",
+      "舒适化治疗中心"
+    ],
+    "title_level_counts": {
+      "正高": 2,
+      "副高": 2,
+      "中级": 3,
+      "初级": 3
+    },
+    "home_http_status": 200,
+    "homepage_is_gate": false,
+    "reachability_preflight": [
+      {
+        "round": 1,
+        "target": "homepage_non_gate",
+        "url": "https://www.smukqyy.cn/",
+        "status": 200,
+        "content_type": "text/html",
+        "bytes": 154301,
+        "observed_utc": "2026-08-19T08:24:16Z",
+        "error": ""
+      },
+      {
+        "round": 1,
+        "target": "sample_detail_gate",
+        "url": "https://www.smukqyy.cn/prods/341/36",
+        "status": 200,
+        "content_type": "text/html",
+        "bytes": 48297,
+        "observed_utc": "2026-08-19T08:24:16Z",
+        "error": ""
+      },
+      {
+        "round": 2,
+        "target": "homepage_non_gate",
+        "url": "https://www.smukqyy.cn/",
+        "status": 200,
+        "content_type": "text/html",
+        "bytes": 154301,
+        "observed_utc": "2026-08-19T08:24:46Z",
+        "error": ""
+      },
+      {
+        "round": 2,
+        "target": "sample_detail_gate",
+        "url": "https://www.smukqyy.cn/prods/341/36",
+        "status": 200,
+        "content_type": "text/html",
+        "bytes": 48297,
+        "observed_utc": "2026-08-19T08:24:47Z",
+        "error": ""
+      }
+    ],
+    "reachability_retry_interval_seconds": 30,
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
+    "proxy_enabled": false,
+    "cookie_names": [],
+    "incomplete_read_retry_count": 0,
+    "detail_http_200_count": 10,
+    "no_photo_container_count": 0,
+    "placeholder_count": 0,
+    "structure_mismatch_count": 0,
+    "detail_error_count": 0,
+    "photo_error_count": 0,
+    "photo_sample_count": 10,
+    "fuse_problem_count": 0,
+    "fuse_problem_ratio": 0.0,
+    "photo_total_bytes": 5192350,
+    "photo_average_bytes": 519235,
+    "estimated_full_count": 95,
+    "estimated_full_bytes": 49327325,
+    "estimated_full_mib": 47.042202949523926,
+    "over_200kb_count": 6,
+    "over_800px_count": 5,
+    "constructed_unreferenced_probe_count": 0,
+    "third_party_source_count": 0,
+    "visual_review_status": "PASSED_10_OF_10_VISIBLE_SINGLE_DOCTOR_PROFESSIONAL_PORTRAITS",
+    "protected_assets_before": {
+      "master_assets": {
+        "work/珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24975646,
+          "sha256": "a71842fa134023d566df7bf8aa977f6ff8412d9c3b57d8ebbb75057d68bb46b0"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 18622756,
+          "sha256": "7ee9c59ac8f9d2e42dd1ed7508f4f181f9371e2e413767b62d1b8280df4289ff"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 5105950,
+          "sha256": "cf9a6c20df19da719f205837daccf923cd36859cf8e84f8b434f887b2a200fa3"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_tree": {
+        "exists": true,
+        "file_count": 96,
+        "bytes": 252083,
+        "sha256": "5958ced55c4e0cb36c0bc7e161666324578fc6f4cfae66e5677b9ce8356755b2"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "protected_assets_after": {
+      "master_assets": {
+        "work/珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+          "bytes": 24975646,
+          "sha256": "a71842fa134023d566df7bf8aa977f6ff8412d9c3b57d8ebbb75057d68bb46b0"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv": {
+          "bytes": 18622756,
+          "sha256": "7ee9c59ac8f9d2e42dd1ed7508f4f181f9371e2e413767b62d1b8280df4289ff"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+          "bytes": 5105950,
+          "sha256": "cf9a6c20df19da719f205837daccf923cd36859cf8e84f8b434f887b2a200fa3"
+        },
+        "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+          "bytes": 5590,
+          "sha256": "cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a"
+        }
+      },
+      "profile_tree": {
+        "exists": true,
+        "file_count": 96,
+        "bytes": 252083,
+        "sha256": "5958ced55c4e0cb36c0bc7e161666324578fc6f4cfae66e5677b9ce8356755b2"
+      },
+      "formal_photo_tree": {
+        "exists": false,
+        "file_count": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "trial_photo_dir": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos",
+    "json_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_payload.json",
+    "csv_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_manifest.csv",
+    "report_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_report.md",
+    "contact_sheet_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_contact_sheet.jpg",
+    "over_5mib_count": 0,
+    "over_20mib_count": 0,
+    "cross_doctor_duplicate_sha_groups": 0,
+    "placeholder_query_gate_hits": 0,
+    "near_monochrome_gate_hits": 0,
+    "contact_sheet_background": "gray with dark borders",
+    "section_coverage_count": 9,
+    "covered_sections": [
+      "341",
+      "342",
+      "343",
+      "384",
+      "385",
+      "386",
+      "431",
+      "434",
+      "504"
+    ],
+    "repository_relative_paths_only": true,
+    "artifact_hash_policy": "repository_blob_lf",
+    "visual_reviewed_utc": "2026-08-19T08:25:33Z"
+  },
+  "detail_errors": [],
+  "structure_mismatches": [],
+  "failure_states": [],
+  "photo_errors": [],
+  "photo_samples": [
+    {
+      "name": "管东华",
+      "department": "口腔种植修复科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "36",
+      "source_link": "https://www.smukqyy.cn/prods/341/36",
+      "detail_http_status": 200,
+      "photo_url": "https://www.smukqyy.cn/Uploads/Upload/2024-07-19/6699c33ac6fdc.png",
+      "photo_source_attribute": "img.content_img src",
+      "photo_http_status": 200,
+      "content_type": "image/png",
+      "filename": "管东华-口腔种植修复科-主任医师-南方医科大学口腔医院(海珠广场院区).png",
+      "disk_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/管东华-口腔种植修复科-主任医师-南方医科大学口腔医院(海珠广场院区).png",
+      "bytes": 88568,
+      "sha256": "4c068d8acb174336f9c832b922f9586b7f47efc4e9cef626a4947f61a89bc390",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 257,
+      "height": 312,
+      "large_reasons": [],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "png",
+      "actual_extension": "png",
+      "declared_matches_actual": true
+    },
+    {
+      "name": "陈欢",
+      "department": "牙体牙髓病科一室",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "373",
+      "source_link": "https://www.smukqyy.cn/prods/342/373",
+      "detail_http_status": 200,
+      "photo_url": "https://www.smukqyy.cn/Uploads/Upload//2026-04-09/177572048531460.jpg",
+      "photo_source_attribute": "img.content_img src",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "陈欢-牙体牙髓病科一室-副主任医师-南方医科大学口腔医院(海珠广场院区).png",
+      "disk_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/陈欢-牙体牙髓病科一室-副主任医师-南方医科大学口腔医院(海珠广场院区).png",
+      "bytes": 444539,
+      "sha256": "59b1eb5935128c8f66a9b49c829fd0262c33cf915f60ae6091ebaa0ac152d0ae",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 960,
+      "height": 1390,
+      "large_reasons": [
+        ">200KB",
+        "宽>800px"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "png",
+      "declared_matches_actual": false
+    },
+    {
+      "name": "何龙文",
+      "department": "口腔正畸科",
+      "title_level": "中级",
+      "title": "主治医师",
+      "detail_id": "555",
+      "source_link": "https://www.smukqyy.cn/prods/343/555",
+      "detail_http_status": 200,
+      "photo_url": "https://www.smukqyy.cn/Uploads/Upload/2022-08-18/62fdb8797c6aa.jpg",
+      "photo_source_attribute": "img.content_img src",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "何龙文-口腔正畸科-主治医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "disk_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/何龙文-口腔正畸科-主治医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "bytes": 1028744,
+      "sha256": "92269f9be96873fec245b1e925edc08ad0aea7376e93a597fd844d68d624ebc9",
+      "magic_hex": "FFD8FFE10F8D457869660000",
+      "width": 1191,
+      "height": 1730,
+      "large_reasons": [
+        ">200KB",
+        "宽>800px"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true
+    },
+    {
+      "name": "叶晓平",
+      "department": "口腔颌面外科",
+      "title_level": "初级",
+      "title": "医师",
+      "detail_id": "632",
+      "source_link": "https://www.smukqyy.cn/prods/384/632",
+      "detail_http_status": 200,
+      "photo_url": "https://www.smukqyy.cn/Uploads/Upload//2025-01-03/173587601925582.jpg",
+      "photo_source_attribute": "img.content_img src",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "叶晓平-口腔颌面外科-医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "disk_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/叶晓平-口腔颌面外科-医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "bytes": 602552,
+      "sha256": "74b45d3480c36d28d9d122002cffd2536207f6dfe825517c9a7ed17b26c8ae83",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 2192,
+      "height": 2644,
+      "large_reasons": [
+        ">200KB",
+        "宽>800px"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true
+    },
+    {
+      "name": "熊华翠",
+      "department": "儿童口腔科",
+      "title_level": "副高",
+      "title": "副主任医师",
+      "detail_id": "641",
+      "source_link": "https://www.smukqyy.cn/prods/385/641",
+      "detail_http_status": 200,
+      "photo_url": "https://www.smukqyy.cn/Uploads/Upload//2025-04-22/174531719793431.jpg",
+      "photo_source_attribute": "img.content_img src",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "熊华翠-儿童口腔科-副主任医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "disk_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/熊华翠-儿童口腔科-副主任医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "bytes": 522338,
+      "sha256": "7f94dbd0146c84f81d72f722650c7d7c5eb37f8897dd56410712a60ca7a89e8a",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 780,
+      "height": 1134,
+      "large_reasons": [
+        ">200KB"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true
+    },
+    {
+      "name": "孟文霞",
+      "department": "牙周黏膜病科",
+      "title_level": "正高",
+      "title": "主任医师",
+      "detail_id": "135",
+      "source_link": "https://www.smukqyy.cn/prods/386/135",
+      "detail_http_status": 200,
+      "photo_url": "https://www.smukqyy.cn/Uploads/Upload/product0686234001434443704.jpg",
+      "photo_source_attribute": "img.content_img src",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "孟文霞-牙周黏膜病科-主任医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "disk_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/孟文霞-牙周黏膜病科-主任医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "bytes": 71298,
+      "sha256": "7abc21086c1fcd473b3c07ca5804d1472a83856334d724fb502677cfc9dd9508",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 500,
+      "height": 750,
+      "large_reasons": [],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true
+    },
+    {
+      "name": "曹恒隆",
+      "department": "口腔预防科",
+      "title_level": "初级",
+      "title": "住院医师",
+      "detail_id": "690",
+      "source_link": "https://www.smukqyy.cn/prods/431/690",
+      "detail_http_status": 200,
+      "photo_url": "https://www.smukqyy.cn/Uploads/Upload//2025-11-28/176432358774135.jpg",
+      "photo_source_attribute": "img.content_img src",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "曹恒隆-口腔预防科-住院医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "disk_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/曹恒隆-口腔预防科-住院医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "bytes": 73918,
+      "sha256": "dff448f56df96ad0cbcae42884f0d9488cf83db85399f4b10029bb2bfe05c075",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 1280,
+      "height": 1392,
+      "large_reasons": [
+        "宽>800px"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true
+    },
+    {
+      "name": "张彩美",
+      "department": "牙体牙髓病科二室",
+      "title_level": "中级",
+      "title": "主治医师",
+      "detail_id": "157",
+      "source_link": "https://www.smukqyy.cn/prods/434/157",
+      "detail_http_status": 200,
+      "photo_url": "https://www.smukqyy.cn/Uploads/Upload/2018-07-09/5b4317fa3c9a2.JPG",
+      "photo_source_attribute": "img.content_img src",
+      "photo_http_status": 200,
+      "content_type": "application/octet-stream",
+      "filename": "张彩美-牙体牙髓病科二室-主治医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "disk_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/张彩美-牙体牙髓病科二室-主治医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "bytes": 114582,
+      "sha256": "d702ae5049a79f0372e864d1dae9d0a13c68ec9f64c36769a378f0491666ae8c",
+      "magic_hex": "FFD8FFE000104A4649460001",
+      "width": 300,
+      "height": 450,
+      "large_reasons": [],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "unknown",
+      "actual_extension": "jpg",
+      "declared_matches_actual": false
+    },
+    {
+      "name": "唐凤翔",
+      "department": "舒适化治疗中心",
+      "title_level": "中级",
+      "title": "主治医师",
+      "detail_id": "532",
+      "source_link": "https://www.smukqyy.cn/prods/504/532",
+      "detail_http_status": 200,
+      "photo_url": "https://www.smukqyy.cn/Uploads/Upload/2021-11-02/6180c7563e11c.jpg",
+      "photo_source_attribute": "img.content_img src",
+      "photo_http_status": 200,
+      "content_type": "image/jpeg",
+      "filename": "唐凤翔-舒适化治疗中心-主治医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "disk_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/唐凤翔-舒适化治疗中心-主治医师-南方医科大学口腔医院(海珠广场院区).jpg",
+      "bytes": 331927,
+      "sha256": "ef2884e2155aad7d66c26380049d8e03e47b95d539c3bce68033d9e67c824e42",
+      "magic_hex": "FFD8FFE11390457869660000",
+      "width": 591,
+      "height": 880,
+      "large_reasons": [
+        ">200KB"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "jpg",
+      "actual_extension": "jpg",
+      "declared_matches_actual": true
+    },
+    {
+      "name": "梁慧珉",
+      "department": "口腔种植修复科",
+      "title_level": "初级",
+      "title": "医师",
+      "detail_id": "523",
+      "source_link": "https://www.smukqyy.cn/prods/341/523",
+      "detail_http_status": 200,
+      "photo_url": "https://www.smukqyy.cn/Uploads/Upload//2025-09-12/175764026032115.png",
+      "photo_source_attribute": "img.content_img src",
+      "photo_http_status": 200,
+      "content_type": "image/png",
+      "filename": "梁慧珉-口腔种植修复科-医师-南方医科大学口腔医院(海珠广场院区).png",
+      "disk_path": "work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/梁慧珉-口腔种植修复科-医师-南方医科大学口腔医院(海珠广场院区).png",
+      "bytes": 1913884,
+      "sha256": "3198b5a5da9b5734a74cfdb9879b77faee21188b9a9b1e4b1254c90417735261",
+      "magic_hex": "89504E470D0A1A0A0000000D",
+      "width": 1446,
+      "height": 1994,
+      "large_reasons": [
+        ">200KB",
+        "宽>800px"
+      ],
+      "unique_color_count_lower_bound": 3,
+      "decoded_query_values": [],
+      "declared_extension": "png",
+      "actual_extension": "png",
+      "declared_matches_actual": true
+    }
+  ],
+  "selected_rows": [
+    {
+      "姓名": "管东华",
+      "科室": "口腔种植修复科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.smukqyy.cn/prods/341/36"
+    },
+    {
+      "姓名": "陈欢",
+      "科室": "牙体牙髓病科一室",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.smukqyy.cn/prods/342/373"
+    },
+    {
+      "姓名": "何龙文",
+      "科室": "口腔正畸科",
+      "职称层级": "中级",
+      "主职称": "主治医师",
+      "来源链接": "https://www.smukqyy.cn/prods/343/555"
+    },
+    {
+      "姓名": "叶晓平",
+      "科室": "口腔颌面外科",
+      "职称层级": "初级",
+      "主职称": "医师",
+      "来源链接": "https://www.smukqyy.cn/prods/384/632"
+    },
+    {
+      "姓名": "熊华翠",
+      "科室": "儿童口腔科",
+      "职称层级": "副高",
+      "主职称": "副主任医师",
+      "来源链接": "https://www.smukqyy.cn/prods/385/641"
+    },
+    {
+      "姓名": "孟文霞",
+      "科室": "牙周黏膜病科",
+      "职称层级": "正高",
+      "主职称": "主任医师",
+      "来源链接": "https://www.smukqyy.cn/prods/386/135"
+    },
+    {
+      "姓名": "曹恒隆",
+      "科室": "口腔预防科",
+      "职称层级": "初级",
+      "主职称": "住院医师",
+      "来源链接": "https://www.smukqyy.cn/prods/431/690"
+    },
+    {
+      "姓名": "张彩美",
+      "科室": "牙体牙髓病科二室",
+      "职称层级": "中级",
+      "主职称": "主治医师",
+      "来源链接": "https://www.smukqyy.cn/prods/434/157"
+    },
+    {
+      "姓名": "唐凤翔",
+      "科室": "舒适化治疗中心",
+      "职称层级": "中级",
+      "主职称": "主治医师",
+      "来源链接": "https://www.smukqyy.cn/prods/504/532"
+    },
+    {
+      "姓名": "梁慧珉",
+      "科室": "口腔种植修复科",
+      "职称层级": "初级",
+      "主职称": "医师",
+      "来源链接": "https://www.smukqyy.cn/prods/341/523"
+    }
+  ],
+  "structure_diagnostics": [
+    {
+      "name": "管东华",
+      "section_id": "341",
+      "detail_id": "36",
+      "container_selector": "img.content_img",
+      "container_count": 1,
+      "html_snippet": "<img width=\"118\" height=\"147\" class=\"content_img\" src=\"/Uploads/Upload/2024-07-19/6699c33ac6fdc.png\">",
+      "raw_src": "/Uploads/Upload/2024-07-19/6699c33ac6fdc.png",
+      "normalized_photo_url": "https://www.smukqyy.cn/Uploads/Upload/2024-07-19/6699c33ac6fdc.png",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/Home/images/（top_tel/banner/content_zs/footer/sidebar/btn/oa/wz/wx 等）",
+        "/Public/Home/images/（站架与装饰资源）",
+        "除 img.content_img 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique img.content_img src is eligible; /Home/images/, /Public/Home/images/ and all other page images are excluded",
+      "observed_utc": "2026-08-19T08:24:47Z"
+    },
+    {
+      "name": "孟文霞",
+      "section_id": "386",
+      "detail_id": "135",
+      "container_selector": "img.content_img",
+      "container_count": 1,
+      "html_snippet": "<img width=\"118\" height=\"147\" class=\"content_img\" src=\"/Uploads/Upload/product0686234001434443704.jpg\">",
+      "raw_src": "/Uploads/Upload/product0686234001434443704.jpg",
+      "normalized_photo_url": "https://www.smukqyy.cn/Uploads/Upload/product0686234001434443704.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/Home/images/（top_tel/banner/content_zs/footer/sidebar/btn/oa/wz/wx 等）",
+        "/Public/Home/images/（站架与装饰资源）",
+        "除 img.content_img 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique img.content_img src is eligible; /Home/images/, /Public/Home/images/ and all other page images are excluded",
+      "observed_utc": "2026-08-19T08:24:48Z"
+    },
+    {
+      "name": "张彩美",
+      "section_id": "434",
+      "detail_id": "157",
+      "container_selector": "img.content_img",
+      "container_count": 1,
+      "html_snippet": "<img width=\"118\" height=\"147\" class=\"content_img\" src=\"/Uploads/Upload/2018-07-09/5b4317fa3c9a2.JPG\">",
+      "raw_src": "/Uploads/Upload/2018-07-09/5b4317fa3c9a2.JPG",
+      "normalized_photo_url": "https://www.smukqyy.cn/Uploads/Upload/2018-07-09/5b4317fa3c9a2.JPG",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/Home/images/（top_tel/banner/content_zs/footer/sidebar/btn/oa/wz/wx 等）",
+        "/Public/Home/images/（站架与装饰资源）",
+        "除 img.content_img 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique img.content_img src is eligible; /Home/images/, /Public/Home/images/ and all other page images are excluded",
+      "observed_utc": "2026-08-19T08:24:49Z"
+    },
+    {
+      "name": "陈欢",
+      "section_id": "342",
+      "detail_id": "373",
+      "container_selector": "img.content_img",
+      "container_count": 1,
+      "html_snippet": "<img width=\"118\" height=\"147\" class=\"content_img\" src=\"/Uploads/Upload//2026-04-09/177572048531460.jpg\">",
+      "raw_src": "/Uploads/Upload//2026-04-09/177572048531460.jpg",
+      "normalized_photo_url": "https://www.smukqyy.cn/Uploads/Upload//2026-04-09/177572048531460.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/Home/images/（top_tel/banner/content_zs/footer/sidebar/btn/oa/wz/wx 等）",
+        "/Public/Home/images/（站架与装饰资源）",
+        "除 img.content_img 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique img.content_img src is eligible; /Home/images/, /Public/Home/images/ and all other page images are excluded",
+      "observed_utc": "2026-08-19T08:24:47Z"
+    },
+    {
+      "name": "梁慧珉",
+      "section_id": "341",
+      "detail_id": "523",
+      "container_selector": "img.content_img",
+      "container_count": 1,
+      "html_snippet": "<img width=\"118\" height=\"147\" class=\"content_img\" src=\"/Uploads/Upload//2025-09-12/175764026032115.png\">",
+      "raw_src": "/Uploads/Upload//2025-09-12/175764026032115.png",
+      "normalized_photo_url": "https://www.smukqyy.cn/Uploads/Upload//2025-09-12/175764026032115.png",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/Home/images/（top_tel/banner/content_zs/footer/sidebar/btn/oa/wz/wx 等）",
+        "/Public/Home/images/（站架与装饰资源）",
+        "除 img.content_img 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique img.content_img src is eligible; /Home/images/, /Public/Home/images/ and all other page images are excluded",
+      "observed_utc": "2026-08-19T08:24:49Z"
+    },
+    {
+      "name": "唐凤翔",
+      "section_id": "504",
+      "detail_id": "532",
+      "container_selector": "img.content_img",
+      "container_count": 1,
+      "html_snippet": "<img width=\"118\" height=\"147\" class=\"content_img\" src=\"/Uploads/Upload/2021-11-02/6180c7563e11c.jpg\">",
+      "raw_src": "/Uploads/Upload/2021-11-02/6180c7563e11c.jpg",
+      "normalized_photo_url": "https://www.smukqyy.cn/Uploads/Upload/2021-11-02/6180c7563e11c.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/Home/images/（top_tel/banner/content_zs/footer/sidebar/btn/oa/wz/wx 等）",
+        "/Public/Home/images/（站架与装饰资源）",
+        "除 img.content_img 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique img.content_img src is eligible; /Home/images/, /Public/Home/images/ and all other page images are excluded",
+      "observed_utc": "2026-08-19T08:24:49Z"
+    },
+    {
+      "name": "何龙文",
+      "section_id": "343",
+      "detail_id": "555",
+      "container_selector": "img.content_img",
+      "container_count": 1,
+      "html_snippet": "<img width=\"118\" height=\"147\" class=\"content_img\" src=\"/Uploads/Upload/2022-08-18/62fdb8797c6aa.jpg\">",
+      "raw_src": "/Uploads/Upload/2022-08-18/62fdb8797c6aa.jpg",
+      "normalized_photo_url": "https://www.smukqyy.cn/Uploads/Upload/2022-08-18/62fdb8797c6aa.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/Home/images/（top_tel/banner/content_zs/footer/sidebar/btn/oa/wz/wx 等）",
+        "/Public/Home/images/（站架与装饰资源）",
+        "除 img.content_img 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique img.content_img src is eligible; /Home/images/, /Public/Home/images/ and all other page images are excluded",
+      "observed_utc": "2026-08-19T08:24:48Z"
+    },
+    {
+      "name": "叶晓平",
+      "section_id": "384",
+      "detail_id": "632",
+      "container_selector": "img.content_img",
+      "container_count": 1,
+      "html_snippet": "<img width=\"118\" height=\"147\" class=\"content_img\" src=\"/Uploads/Upload//2025-01-03/173587601925582.jpg\">",
+      "raw_src": "/Uploads/Upload//2025-01-03/173587601925582.jpg",
+      "normalized_photo_url": "https://www.smukqyy.cn/Uploads/Upload//2025-01-03/173587601925582.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/Home/images/（top_tel/banner/content_zs/footer/sidebar/btn/oa/wz/wx 等）",
+        "/Public/Home/images/（站架与装饰资源）",
+        "除 img.content_img 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique img.content_img src is eligible; /Home/images/, /Public/Home/images/ and all other page images are excluded",
+      "observed_utc": "2026-08-19T08:24:48Z"
+    },
+    {
+      "name": "熊华翠",
+      "section_id": "385",
+      "detail_id": "641",
+      "container_selector": "img.content_img",
+      "container_count": 1,
+      "html_snippet": "<img width=\"118\" height=\"147\" class=\"content_img\" src=\"/Uploads/Upload//2025-04-22/174531719793431.jpg\">",
+      "raw_src": "/Uploads/Upload//2025-04-22/174531719793431.jpg",
+      "normalized_photo_url": "https://www.smukqyy.cn/Uploads/Upload//2025-04-22/174531719793431.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/Home/images/（top_tel/banner/content_zs/footer/sidebar/btn/oa/wz/wx 等）",
+        "/Public/Home/images/（站架与装饰资源）",
+        "除 img.content_img 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique img.content_img src is eligible; /Home/images/, /Public/Home/images/ and all other page images are excluded",
+      "observed_utc": "2026-08-19T08:24:48Z"
+    },
+    {
+      "name": "曹恒隆",
+      "section_id": "431",
+      "detail_id": "690",
+      "container_selector": "img.content_img",
+      "container_count": 1,
+      "html_snippet": "<img width=\"118\" height=\"147\" class=\"content_img\" src=\"/Uploads/Upload//2025-11-28/176432358774135.jpg\">",
+      "raw_src": "/Uploads/Upload//2025-11-28/176432358774135.jpg",
+      "normalized_photo_url": "https://www.smukqyy.cn/Uploads/Upload//2025-11-28/176432358774135.jpg",
+      "decoded_query_values": [],
+      "excluded_resource_examples": [
+        "/Home/images/（top_tel/banner/content_zs/footer/sidebar/btn/oa/wz/wx 等）",
+        "/Public/Home/images/（站架与装饰资源）",
+        "除 img.content_img 外的所有页面图片"
+      ],
+      "decision_basis": "only the unique img.content_img src is eligible; /Home/images/, /Public/Home/images/ and all other page images are excluded",
+      "observed_utc": "2026-08-19T08:24:48Z"
+    }
+  ]
+}

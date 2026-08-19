@@ -24,7 +24,7 @@ from urllib.request import HTTPCookieProcessor, Request, build_opener
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 
-ROOT = Path(r"D:\workspace\信息收集整理")
+ROOT = Path(__file__).resolve().parents[1]
 WORK_DIR = ROOT / "work"
 VAULT = ROOT / "医生画像仓库"
 SOURCE_DIR = VAULT / "99_资料来源"
@@ -61,6 +61,7 @@ LARGE_BYTES = 200 * 1024
 LARGE_WIDTH = 800
 MAX_OWNER_REPORT_BYTES = 5 * 1024 * 1024
 PHOTO_RELATIVE_ROOT = Path("01_试点医院") / HOSPITAL / "照片"
+TEXT_DIGEST_SUFFIXES = frozenset({".csv", ".json", ".md"})
 BASE_HEADERS = [
     "序号",
     "医院",
@@ -409,13 +410,23 @@ def image_dimensions(content: bytes) -> tuple[int, int]:
         return int(image.width), int(image.height)
 
 
+def repository_digest_bytes(path: Path) -> bytes:
+    content = path.read_bytes()
+    if path.suffix.lower() in TEXT_DIGEST_SUFFIXES:
+        return content.replace(b"\r\n", b"\n")
+    return content
+
+
 def file_snapshot(paths: list[Path]) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
     for path in paths:
         if not path.is_file():
             raise RuntimeError(f"受保护资产缺失：{path}")
-        content = path.read_bytes()
-        result[str(path)] = {"bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()}
+        content = repository_digest_bytes(path)
+        result[path.as_posix()] = {
+            "bytes": len(content),
+            "sha256": hashlib.sha256(content).hexdigest(),
+        }
     return result
 
 
@@ -426,7 +437,7 @@ def tree_snapshot(root: Path) -> dict[str, Any]:
     if root.is_dir():
         for path in sorted((item for item in root.rglob("*") if item.is_file()), key=lambda item: item.as_posix()):
             relative = path.relative_to(root).as_posix().encode("utf-8")
-            content = path.read_bytes()
+            content = repository_digest_bytes(path)
             digest.update(relative + b"\0" + content)
             count += 1
             total_bytes += len(content)
@@ -772,7 +783,7 @@ def run_trial(run_date: str) -> dict[str, Any]:
             "photo_http_status": photo_status,
             "content_type": content_type,
             "filename": filename,
-            "disk_path": str(path),
+            "disk_path": path.as_posix(),
             "bytes": len(content),
             "sha256": digest,
             "magic_hex": content[:12].hex().upper(),
@@ -848,11 +859,11 @@ def run_trial(run_date: str) -> dict[str, Any]:
             "visual_review_status": "PENDING_MANUAL_CONTACT_SHEET_REVIEW",
             "protected_assets_before": protected_before,
             "protected_assets_after": protected_after,
-            "trial_photo_dir": str(TRIAL_PHOTO_DIR),
-            "json_path": str(TRIAL_JSON_PATH),
-            "csv_path": str(TRIAL_CSV_PATH),
-            "report_path": str(TRIAL_REPORT_PATH),
-            "contact_sheet_path": str(CONTACT_SHEET_PATH),
+            "trial_photo_dir": TRIAL_PHOTO_DIR.as_posix(),
+            "json_path": TRIAL_JSON_PATH.as_posix(),
+            "csv_path": TRIAL_CSV_PATH.as_posix(),
+            "report_path": TRIAL_REPORT_PATH.as_posix(),
+            "contact_sheet_path": CONTACT_SHEET_PATH.as_posix(),
         },
         "detail_errors": detail_errors,
         "structure_mismatches": structure_mismatches,
@@ -1663,9 +1674,9 @@ def run_full(run_date: str) -> dict[str, Any]:
                     Counter(item["列名"] for item in row_diffs)
                 ),
                 "protected_assets_before": baseline_protected,
-                "json_path": str(FULL_JSON_PATH),
-                "csv_path": str(FULL_CSV_PATH),
-                "report_path": str(FULL_REPORT_PATH),
+                "json_path": FULL_JSON_PATH.as_posix(),
+                "csv_path": FULL_CSV_PATH.as_posix(),
+                "report_path": FULL_REPORT_PATH.as_posix(),
             },
             "failures": failures,
             "photo_samples": photo_samples,
@@ -1799,9 +1810,9 @@ def main() -> None:
                     "failure_states": payload["meta"]["failure_state_counts"],
                     "photo_total_bytes": payload["meta"]["photo_total_bytes"],
                     "profiles_refreshed": payload["meta"]["profile_refreshed_count"],
-                    "json": str(FULL_JSON_PATH),
-                    "csv": str(FULL_CSV_PATH),
-                    "report": str(FULL_REPORT_PATH),
+                    "json": FULL_JSON_PATH.as_posix(),
+                    "csv": FULL_CSV_PATH.as_posix(),
+                    "report": FULL_REPORT_PATH.as_posix(),
                     "master_updated": True,
                 },
                 ensure_ascii=False,
