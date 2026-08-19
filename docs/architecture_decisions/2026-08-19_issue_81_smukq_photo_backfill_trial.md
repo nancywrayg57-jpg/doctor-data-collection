@@ -209,3 +209,40 @@ Artifacts:
 - 医生画像仓库/01_试点医院/南方医科大学口腔医院(海珠广场院区)/照片/
 - 医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx
 </Handoff_State>
+
+## Owner 条件终审与跨 checkout 单点修正
+
+- Owner 在 PR #82 下发 [`FULL_AUDIT_CONDITIONAL → FIX_REQUIRED`](https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/82#issuecomment-5340626833)：除跨 checkout 可复现性外，FULL 数据、照片、画像、视觉、三载体和测试证据全部通过，且通过项无需重做。
+- Linux 失败根因是活动引用链 `smukq → ny5y → zssy_photo_backfill_trial.py` 的最底层 `ROOT` 仍硬编码为 Windows 工作区；同时 FULL 画像路径只调用 `Path(...).as_posix()`，无法在 POSIX 主机把输入中的 Windows 反斜杠识别为分隔符。
+- 最小修正将 ZSSY 基座 `ROOT` 改为 `Path(__file__).resolve().parents[1]`，并将该基座写入 payload/快照/命令结果的路径统一经 `as_posix()` 输出；SMUKQ FULL 在构造 `Path` 前先把反斜杠归一化为 `/`，并显式拒绝 Windows 盘符绝对路径与 UNC 路径。
+- 未修改本批总底表、正式照片、画像、TRIAL/FULL 数据工件或其他历史一次性脚本。
+
+验证结果：
+
+- ZSSY、NY5Y、SMUKQ 相关测试：61/61 通过。
+- 全仓 `unittest discover`：462/462 通过。
+- `smukq_photo_backfill_full.py --validate-full`：`expected=95 downloaded=95 failed=0`。
+- `git diff --check`：通过。
+
+当前阶段为 `FULL_FIXED_READY_FOR_PUSH`。仅允许精确暂存本次 3 个代码/测试文件与本 ADR，提交后以标准 Git 协议 fast-forward 推送原分支，并在 PR #82 发布 `FULL_FIXED_DONE`；随后恢复自动监控，等待 Owner 仅复审本修正与回归结果。
+
+<Handoff_State>
+Target: Issue #81 南方医科大学口腔医院(海珠广场院区)照片补录 FULL 单点修正
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/81
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/82
+Branch: codex/mhrj/issue-81-smukq-photo-backfill-trial
+CodexDeveloper: xtzhou247
+ClaudeOwner: nancywrayg57-jpg
+Phase: FULL_FIXED_READY_FOR_PUSH
+Completed:
+- 修复 zssy 基座 Windows ROOT 硬编码及活动引用链路径正斜杠归一化
+- 增加 Windows 盘符绝对路径拒绝回归断言
+- 相关测试 61/61、全仓 462/462、FULL 95/95 验证通过
+Next:
+- 精确暂存、提交并 fast-forward 推送原分支
+- PR #82 发布 FULL_FIXED_DONE 后恢复监控，等待 Owner 跨 checkout 复审
+Constraints:
+- 不修改已通过的 FULL 数据资产与视觉工件
+- 不扩展治理至 Owner 明确排除的更老一次性脚本
+- 不合并 PR、不关闭 Issue、不领取下一 Issue
+</Handoff_State>

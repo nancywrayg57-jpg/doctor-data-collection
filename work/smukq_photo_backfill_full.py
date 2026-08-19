@@ -4,6 +4,7 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 from dataclasses import dataclass
 from datetime import date
 from http.client import IncompleteRead
@@ -379,12 +380,15 @@ def enforce_repository_relative_payload(payload: dict[str, Any]) -> None:
             "master title is immutable in this photo-only scope"
         )
     for item in payload.get("profile_integrity", []):
-        path = Path(trial.clean_text(item.get("path")))
+        raw_path = trial.clean_text(item.get("path"))
+        if re.match(r"^[A-Za-z]:[\\/]", raw_path) or raw_path.startswith(("\\\\", "//")):
+            raise RuntimeError(f"FULL 画像清单泄漏绝对路径：{raw_path}")
+        path = Path(raw_path.replace("\\", "/"))
         if path.is_absolute():
-            raise RuntimeError(f"FULL 画像清单泄漏绝对路径：{path}")
+            raise RuntimeError(f"FULL 画像清单泄漏绝对路径：{raw_path}")
         item["path"] = path.as_posix()
     serialized = json.dumps(payload, ensure_ascii=False)
-    forbidden = {str(ROOT), ROOT.as_posix(), r"D:\workspace"}
+    forbidden = {str(ROOT), ROOT.as_posix(), r"D:\workspace", "D:/workspace"}
     leaked = [value for value in forbidden if value and value in serialized]
     if leaked:
         raise RuntimeError("FULL payload 泄漏仓库绝对路径：" + "、".join(leaked))

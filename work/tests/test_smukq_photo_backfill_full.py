@@ -8,7 +8,7 @@ import json
 import sys
 import tempfile
 import unittest
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from PIL import Image
 
@@ -208,7 +208,12 @@ class SmukqPhotoBackfillFullTests(unittest.TestCase):
                 {"path": r"医生画像仓库\01_试点医院\画像.md"}
             ],
         }
-        full.enforce_repository_relative_payload(payload)
+        concrete_path = full.Path
+        try:
+            full.Path = PurePosixPath
+            full.enforce_repository_relative_payload(payload)
+        finally:
+            full.Path = concrete_path
         self.assertIs(payload["meta"]["repository_relative_paths_only"], True)
         self.assertEqual(
             payload["meta"]["artifact_hash_policy"], "repository_blob_lf"
@@ -226,7 +231,18 @@ class SmukqPhotoBackfillFullTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "绝对路径"):
             full.enforce_repository_relative_payload(payload)
 
+        windows_payload = {
+            "meta": {},
+            "profile_integrity": [{"path": r"C:\checkout\画像.md"}],
+        }
+        with self.assertRaisesRegex(RuntimeError, "绝对路径"):
+            full.enforce_repository_relative_payload(windows_payload)
+
     def test_shared_full_runtime_trial_compatibility_is_complete(self) -> None:
+        self.assertEqual(
+            full.trial.base.ROOT,
+            Path(full.trial.base.__file__).resolve().parents[1],
+        )
         full.configure_framework()
         framework_path = Path(full.framework.__file__)
         tree = ast.parse(
