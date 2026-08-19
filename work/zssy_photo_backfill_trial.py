@@ -61,6 +61,7 @@ LARGE_BYTES = 200 * 1024
 LARGE_WIDTH = 800
 MAX_OWNER_REPORT_BYTES = 5 * 1024 * 1024
 PHOTO_RELATIVE_ROOT = Path("01_试点医院") / HOSPITAL / "照片"
+TEXT_DIGEST_SUFFIXES = frozenset({".csv", ".json", ".md"})
 BASE_HEADERS = [
     "序号",
     "医院",
@@ -409,12 +410,19 @@ def image_dimensions(content: bytes) -> tuple[int, int]:
         return int(image.width), int(image.height)
 
 
+def repository_digest_bytes(path: Path) -> bytes:
+    content = path.read_bytes()
+    if path.suffix.lower() in TEXT_DIGEST_SUFFIXES:
+        return content.replace(b"\r\n", b"\n")
+    return content
+
+
 def file_snapshot(paths: list[Path]) -> dict[str, dict[str, Any]]:
     result: dict[str, dict[str, Any]] = {}
     for path in paths:
         if not path.is_file():
             raise RuntimeError(f"受保护资产缺失：{path}")
-        content = path.read_bytes()
+        content = repository_digest_bytes(path)
         result[path.as_posix()] = {
             "bytes": len(content),
             "sha256": hashlib.sha256(content).hexdigest(),
@@ -429,7 +437,7 @@ def tree_snapshot(root: Path) -> dict[str, Any]:
     if root.is_dir():
         for path in sorted((item for item in root.rglob("*") if item.is_file()), key=lambda item: item.as_posix()):
             relative = path.relative_to(root).as_posix().encode("utf-8")
-            content = path.read_bytes()
+            content = repository_digest_bytes(path)
             digest.update(relative + b"\0" + content)
             count += 1
             total_bytes += len(content)

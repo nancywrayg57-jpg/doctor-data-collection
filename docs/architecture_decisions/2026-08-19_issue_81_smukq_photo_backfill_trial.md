@@ -246,3 +246,49 @@ Constraints:
 - 不扩展治理至 Owner 明确排除的更老一次性脚本
 - 不合并 PR、不关闭 Issue、不领取下一 Issue
 </Handoff_State>
+
+## Owner 第二轮复审与 LF blob digest 收口
+
+- Owner 在 PR #82 下发 [`FIX_ROUND_2_REQUIRED`](https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/82#issuecomment-5340885998)：F1 路径修正已生效，但 Linux checkout 仍发现 FULL 保护快照保存的是 Windows CRLF 工作区字节摘要。
+- 根因是 `file_digest()` 及保护快照基座直接读取工作区字节；文本工件在 Windows `autocrlf` checkout 下与仓库 LF blob 的字节数和 SHA-256 不同，违反既定 `repository_blob_lf` 口径。
+- 新增统一 `repository_digest_bytes()`：`.md/.csv/.json` 先执行字节级 `CRLF → LF` 再统计，二进制文件保持原字节；`file_snapshot()`、`tree_snapshot()` 和 SMUKQ `file_digest()` 均复用该口径。
+- FULL payload 的 `immutable_before` 与 `immutable_after_preinstall` 已同步改为 LF 值。TRIAL payload 的总底表四文件与画像树原值经 7937439a 仓库 blob 复算已是 LF 值，因此无需改写 TRIAL payload。
+- 未修改总底表、入口台账、正式照片、画像、视觉工件、TRIAL 照片或 `_索引.md`。
+
+LF blob SHA-256：
+
+- FULL payload：`b436ba9bafe5c90c2ff2e14f477e3733c6ae8d3e8361f8f0ee04e1b4c349206d`。
+- 被保护 TRIAL payload：`344f6d4894cccf65f399bb9c9538a059b25cd5fa78a6203bb4242b8519421685`，30,868 bytes。
+- 被保护 TRIAL manifest：`adf0be3673d0ea16f6712cd3e8b4e1a0376c3fcb49cd9947a84b2884ba11e0df`，4,501 bytes。
+- 被保护 TRIAL report：`352331a9e40e09ad267e3a857411591ebad1b978aa69053625473a6a2574ce72`，10,467 bytes。
+- 被保护 TRIAL contact sheet（二进制不变）：`08c7e82b510c679d587f808c8abe61de49dc5078203eaee5bf142358f665240b`，339,269 bytes。
+
+验证结果：
+
+- CRLF 文本、二进制原样和保护树混合摘要均加入现有回归测试。
+- ZSSY、NY5Y、SMUKQ 相关测试：61/61 通过。
+- 全仓 `unittest discover`：462/462 通过。
+- `smukq_photo_backfill_full.py --validate-full`：`expected=95 downloaded=95 failed=0`。
+
+当前阶段为 `FULL_FIXED2_READY_FOR_PUSH`。仅允许精确暂存本轮代码、测试、FULL payload 与本 ADR，提交并 fast-forward 推送原分支；CI 成功后发布 `FULL_FIXED2_DONE` 并恢复监控，等待 Owner Linux LF checkout 最终复审。
+
+<Handoff_State>
+Target: Issue #81 FULL 保护快照 LF blob digest 收口
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/81
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/82
+Branch: codex/mhrj/issue-81-smukq-photo-backfill-trial
+CodexDeveloper: xtzhou247
+ClaudeOwner: nancywrayg57-jpg
+Phase: FULL_FIXED2_READY_FOR_PUSH
+Completed:
+- 文本保护摘要统一 CRLF→LF，二进制摘要保持原样
+- FULL 前置/预安装保护快照重写为仓库 LF blob 值
+- 相关测试 61/61、全仓 462/462、FULL 95/95 验证通过
+Next:
+- 精确提交、fast-forward 推送并等待 governance-check
+- PR #82 发布 FULL_FIXED2_DONE 后恢复自动监控
+Constraints:
+- 不修改正式业务资产与已通过视觉工件
+- 不扩展至 Owner 明确排除的历史一次性脚本
+- 不合并 PR、不关闭 Issue、不领取下一 Issue
+</Handoff_State>

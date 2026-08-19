@@ -180,6 +180,51 @@ class SmukqPhotoBackfillFullTests(unittest.TestCase):
             full.validate_full_page_title(row, analysis)
 
     def test_committed_trial_manifest_and_relative_snapshot_are_reusable(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            temporary_root = Path(temporary_dir)
+            text_path = temporary_root / "snapshot.json"
+            text_path.write_bytes(b'{"line": 1}\r\n')
+            normalized_text = b'{"line": 1}\n'
+            expected_text_digest = {
+                "bytes": len(normalized_text),
+                "sha256": hashlib.sha256(normalized_text).hexdigest(),
+            }
+            self.assertEqual(full.file_digest(text_path), expected_text_digest)
+            self.assertEqual(
+                full.trial.base.file_snapshot([text_path]),
+                {text_path.as_posix(): expected_text_digest},
+            )
+
+            binary_path = temporary_root / "snapshot.xlsx"
+            binary_content = b"binary\r\ncontent"
+            binary_path.write_bytes(binary_content)
+            self.assertEqual(
+                full.file_digest(binary_path),
+                {
+                    "bytes": len(binary_content),
+                    "sha256": hashlib.sha256(binary_content).hexdigest(),
+                },
+            )
+
+            tree_root = temporary_root / "tree"
+            tree_root.mkdir()
+            tree_text_path = tree_root / "profile.md"
+            tree_text_path.write_bytes(b"profile\r\n")
+            tree_binary_path = tree_root / "photo.jpg"
+            tree_binary_path.write_bytes(b"photo\r\n")
+            expected_tree_digest = hashlib.sha256()
+            expected_tree_digest.update(b"photo.jpg\0photo\r\n")
+            expected_tree_digest.update(b"profile.md\0profile\n")
+            self.assertEqual(
+                full.trial.base.tree_snapshot(tree_root),
+                {
+                    "exists": True,
+                    "file_count": 2,
+                    "bytes": len(b"photo\r\n") + len(b"profile\n"),
+                    "sha256": expected_tree_digest.hexdigest(),
+                },
+            )
+
         full.configure_framework()
         payload = json.loads(full.trial.TRIAL_JSON_PATH.read_text(encoding="utf-8"))
         full.validate_trial_payload_for_full(payload, require_visual_pass=True)

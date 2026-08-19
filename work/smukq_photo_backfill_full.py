@@ -347,7 +347,7 @@ def size_buckets(samples: list[dict[str, Any]]) -> dict[str, int]:
 def file_digest(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise RuntimeError(f"受保护文件缺失：{path}")
-    content = path.read_bytes()
+    content = trial.base.repository_digest_bytes(path)
     return {"bytes": len(content), "sha256": hashlib.sha256(content).hexdigest()}
 
 
