@@ -582,7 +582,7 @@ def assert_placeholder_gates(samples: list[dict[str, Any]]) -> None:
     _framework_assert_placeholder_gates(samples)
 
 
-def load_scope_rows() -> list[dict[str, Any]]:
+def load_scope_rows(*, require_blank_photo_fields: bool = True) -> list[dict[str, Any]]:
     payload = json.loads(base.MASTER_JSON_PATH.read_text(encoding="utf-8"))
     rows = [
         dict(row)
@@ -593,7 +593,7 @@ def load_scope_rows() -> list[dict[str, Any]]:
         raise RuntimeError(
             f"Issue #{ISSUE_NUMBER} 范围漂移：应为 {EXPECTED_SCOPE_COUNT} 行，实际 {len(rows)} 行"
         )
-    if any(
+    if require_blank_photo_fields and any(
         clean_text(row.get("照片链接")) or clean_text(row.get("照片文件"))
         for row in rows
     ):

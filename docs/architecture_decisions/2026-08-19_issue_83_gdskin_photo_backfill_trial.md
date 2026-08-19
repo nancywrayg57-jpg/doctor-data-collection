@@ -1,4 +1,4 @@
-# 2026-08-19 Issue #83 南方医科大学皮肤病医院照片补录 TRIAL
+# 2026-08-19 Issue #83 南方医科大学皮肤病医院照片补录 TRIAL 与 FULL
 
 ## 目标与授权
 
@@ -92,41 +92,90 @@ TRIAL 前后快照完全一致：
 - 全仓 `unittest discover`：478/478 通过。当前 bundled primary Python 缺少既有 `requests`/`bs4` 依赖，首次发现阶段出现 12 个导入错误；改用本机既有且依赖齐全的 Codex runtime backup Python 后全量通过，未安装依赖、未为环境问题修改生产代码。
 - 精确暂存 17 个 Issue #83 文件；`git diff --cached --check` 通过。
 
+## Owner FULL 授权
+
+Owner 在 PR #84 的 <https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/84#issuecomment-5342284039> 明确发布 `TRIAL_AUDIT_PASSED → FULL_APPEND_AND_OBSIDIAN`，随后又在 <https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/84#issuecomment-5342350959> 确认该指令有效。授权固定工作集为本院全部 77 行，复用 10 张已审计 TRIAL 原字节，失败行按四类留痕，成功画像使用方案 A 严格 `+2/-0`，并继续执行串行间隔至少 2 秒、页面实际引用、NBSP 原引用/传输 URL 双值、占位四门禁、三载体一致和 `_索引.md` 保护。
+
+## FULL 首次失败与最小修正
+
+首次 FULL 运行在正式事务安装前停止：顾有守详情标题为 `首席专家 顾有守 主任医师`，站点标题解析器错误地要求姓名必须位于标题开头。该失败未安装总底表、画像或正式照片。
+
+最小修正只把姓名门禁调整为“标题中姓名必须且只能出现一次”，并把姓名之外的剩余文本记录为官网职称；姓名仍需严格一致，底表职称不修改。新增前缀标题判例后，第二次 FULL 事务成功。此处未放宽详情 URL、照片容器或页面引用边界。
+
+## FULL 四数对账与网络证据
+
+- 四数对账：`77 = 53 实采 + 24 失败留空`；正式照片落盘 53，照片双列留空 24。
+- 10 张复用已审计 TRIAL 原字节；67 个新目标中 43 张成功、24 条失败。
+- 失败四类：详情不可达 0、照片资源不可达 8、无照片容器 10、占位图 6。
+- 53 张均为 JPEG，共 30,736,117 bytes；最大 2,489,392 bytes；大于 5 MiB 与 20 MiB 均为 0；声明/魔数不一致 0；重复 SHA-256 组 0。
+- 全程固定浏览器 UA、无 Cookie、无代理、无并发、无挑战绕过；138 次串行请求，最小相邻启动间隔 2.0 秒；详情/照片状态波动均为 0；页面未引用路径探测与第三方来源均为 0。
+- 8 条照片资源不可达为张佳林、刘应辉、孟凡琪、底大可、朱清华、王冬梅、郭先荟、龚洋洋。每条均保留页面原始引用、规范化 Unicode URL、百分号编码 transport URL 和两次官方 GET 失败证据；未构造或探测 URL 变体。
+- 页面职称与底表职称差异记录 54 条，只留证，不修改底表职称。
+
+## FULL 事务安装与画像保护
+
+- 总底表 JSON/CSV/XLSX 三载体逐值一致；逐单元格变化 130：照片链接 53、照片文件 53、失败行追加异常提示 24。
+- 53 份成功画像严格 `+2/-0` 插入照片；24 份失败画像零触碰；本院 77 份画像均仍存在。
+- `_索引.md` 由共享事务保护，前后 SHA-256 均为 `c5dab69b078a717afea4d6dd4b3122d4f7fe21cb032c4bfb7c3a80df5d549f4f`。
+- 入口台账、总底表更新报告和全部 TRIAL 工件前后摘要一致。
+- FULL 工件为 payload、77 行 reconciliation、报告、抽样审计图、3 页全量视觉联系表、53 张正式照片与 53 份更新画像。
+
+## FULL 视觉与 XLSX 核验
+
+- 全量视觉联系表 3 页覆盖 53/53 张：第 1、2 页各 25 张，第 3 页 3 张。逐格目视均为可见单人医生职业照；未见患者、儿童、合影、二维码、装饰图、占位图、空白格或不可见格。
+- 视觉状态已写为 `PASSED_ALL_FULL_CONTACT_SHEETS_SINGLE_DOCTOR_PROFESSIONAL_PORTRAITS`，随后 `--validate-full` 通过。
+- 使用 loader 指定的 `@oai/artifact-tool` 只读导入正式 XLSX；6 个预期工作表全部存在，公式错误扫描 0 条。
+- `自动采集底表` 中 Issue #83 范围为工作表第 2090–2166 行；起始、中段、末段预览均显示成功行照片 URL/文件已写入，失败行照片字段留空且异常提示追加。
+- 总底表表头、人工复核、科室统计、重点关注统计、医院统计和说明页均完成目视；未见结构错位、不可辨认截断或破损。临时 XLSX 核验脚本和 9 张预览在核验后精确删除，受保护资产不在删除范围。
+
+## FULL 验证
+
+- `py_compile`：TRIAL/FULL 脚本及两份对应测试通过。
+- Issue #83 FULL 专项测试：13/13 通过。
+- Issue #83 TRIAL + FULL、NY5Y TRIAL + FULL、ZSSY 底层基座顺序回归：65/65 通过。
+- 首次顺序回归发现 TRIAL 测试仍要求正式照片字段全空；这是 FULL 完成后的测试阶段迁移问题。最小修正为 `load_scope_rows(require_blank_photo_fields=True)` 保留 TRIAL 运行默认硬门禁，只有阶段稳定性测试显式传 `False`；修正后顺序回归通过。
+- 全仓 `unittest discover`：491/491 通过。
+- FULL 最终验证：`expected=77 downloaded=53 failed=24`。
+
 ## 当前停止点
 
-当前阶段为 `TRIAL_READY_FOR_OWNER_AUDIT`。只允许完成回归验证、精确暂存、提交，以标准 Git 协议 fast-forward 推送当前分支，创建关联 Issue #83 的 PR，并在 `governance-check` 成功后发布 TRIAL 审计材料；随后恢复自动监控并等待 Owner 审计。不得自行进入 FULL、合并 PR、关闭 Issue 或领取下一 Issue。
+当前阶段为 `FULL_READY_FOR_FINAL_OWNER_AUDIT`。只允许精确暂存 Issue #83 FULL 实现、正式资产、工件、测试与本 ADR，执行仓库 blob（LF）哈希和 `git diff --cached --check`，提交后以标准 Git 协议 fast-forward 推送现有分支。等待 `governance-check` 成功后在 PR #84 发布 `FULL_DONE` 并恢复自动监控；不得自行合并 PR、关闭 Issue 或领取下一 Issue。
 
 <Handoff_State>
-Target: Issue #83 南方医科大学皮肤病医院照片补录 TRIAL
+Target: Issue #83 南方医科大学皮肤病医院照片补录 FULL
 AgentConstitution: D:\workspace\信息收集整理\Agent.md
 RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/83
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/84
 Branch: codex/mhrj/issue-83-gdskin-photo-backfill-trial
 CodexDeveloper: xtzhou247
 ClaudeOwner: nancywrayg57-jpg
-Phase: TRIAL_READY_FOR_OWNER_AUDIT
+Phase: FULL_READY_FOR_FINAL_OWNER_AUDIT
 Completed:
-- 按 Owner 最终裁决复用 9 张既有原字节，仅下载杜美毅，完成 10 人/9 入口 TRIAL
-- 固化 Unicode URL 传输编码与孟凡琪/龚洋洋/郭先荟 NBSP 悬空引用证据
-- known-SHA 和中文占位双门禁通过；联系表 10/10 目视通过；正式资产零修改
-- 专项测试 16/16、共享顺序回归 41/41、全仓 478/478、TRIAL 验证通过
+- 完成固定 77 行 FULL：53 张正式照片、24 条失败留空，四数对账一致
+- 同步 JSON/CSV/XLSX，更新 53 份画像且保护 24 份失败画像与 _索引.md
+- 3 页 53/53 实图目视通过；XLSX 六表、公式和目标范围目视/结构核验通过
+- FULL 专项 13/13、共享顺序回归 65/65、全仓 491/491、--validate-full 通过
 CurrentFacts:
-- 固定范围 77 行，照片双列仍全空；本院正式照片目录不存在
-- TRIAL 10 张 JPEG 共 7,158,350 bytes，SHA 全部唯一，>5 MiB 与 >20 MiB 均为 0
-- payload 视觉状态 PASSED_10_OF_10_VISIBLE_SINGLE_DOCTOR_PROFESSIONAL_PORTRAITS
+- 53 张 JPEG 共 30,736,117 bytes，SHA 全部唯一，>5 MiB 与 >20 MiB 均为 0
+- 失败分类为 0 详情不可达、8 照片资源不可达、10 无照片容器、6 占位图
+- 视觉状态 PASSED_ALL_FULL_CONTACT_SHEETS_SINGLE_DOCTOR_PROFESSIONAL_PORTRAITS
 Next:
-- 完成共享基座和全仓回归、精确暂存、提交并标准 fast-forward 推送当前分支
-- 创建关联 Issue #83 的 PR，等待 governance-check 后发布 TRIAL_READY_FOR_OWNER_AUDIT
-- 仅 Owner 在当前 PR 明确下发 FULL_APPEND_AND_OBSIDIAN 后继续
+- 精确暂存、blob 哈希、提交并标准 fast-forward 推送当前分支
+- 等待 governance-check 成功后在 PR #84 发布 FULL_DONE，恢复监控并等待 Owner 终审
 Constraints:
 - 仅医院官网页面实际引用原始字节；串行间隔至少 2 秒
-- 禁止第三方来源、Cookie、代理、挑战绕过、构造未引用路径、患者素材和 TRIAL 正式资产写入
+- 禁止第三方来源、Cookie、代理、挑战绕过、构造未引用路径或患者素材
 - 不得合并 PR、关闭 Issue 或领取下一 Issue
 Artifacts:
-- work/南方医科大学皮肤病医院_photo_backfill_trial_payload.json
-- work/南方医科大学皮肤病医院_photo_backfill_trial_manifest.csv
-- work/南方医科大学皮肤病医院_photo_backfill_trial_report.md
-- work/南方医科大学皮肤病医院_photo_backfill_trial_contact_sheet.jpg
-- work/南方医科大学皮肤病医院_photo_backfill_trial_photos/
+- work/南方医科大学皮肤病医院_photo_backfill_full_payload.json
+- work/南方医科大学皮肤病医院_photo_backfill_full_reconciliation.csv
+- work/南方医科大学皮肤病医院_photo_backfill_full_report.md
+- work/南方医科大学皮肤病医院_photo_backfill_full_audit_sheet.jpg
+- work/南方医科大学皮肤病医院_photo_backfill_full_visual_review/
+- 医生画像仓库/01_试点医院/南方医科大学皮肤病医院/照片/
+- work/珠三角三甲医院_医生画像自动采集总底表_payload.json
+- 医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv
+- 医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx
 </Handoff_State>

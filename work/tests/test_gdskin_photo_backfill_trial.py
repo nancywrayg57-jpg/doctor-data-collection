@@ -37,7 +37,7 @@ class GdskinPhotoBackfillTrialTests(unittest.TestCase):
         self.assertNotIn("D:\\workspace", source)
 
     def test_scope_and_authorization_are_issue_83_specific(self) -> None:
-        rows = target.load_scope_rows()
+        rows = target.load_scope_rows(require_blank_photo_fields=False)
         selected = target.select_trial_rows(rows)
         self.assertEqual(len(rows), 77)
         self.assertEqual(len(selected), 10)
