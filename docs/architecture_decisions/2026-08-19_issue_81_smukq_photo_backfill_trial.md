@@ -113,3 +113,99 @@ Artifacts:
 - work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_contact_sheet.jpg
 - work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_trial_photos/
 </Handoff_State>
+
+## FULL 恢复裁决与第三次事务
+
+- Owner 在 PR #82 下发 [`TRIAL_AUDIT_PASSED → FULL_APPEND_AND_OBSIDIAN`](https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/82#issuecomment-5339639290)，授权固定 95 行进入 FULL。
+- 前两次 FULL 临时事务分别命中“官网职称 span 与底表职称不完全一致”和联系表字体依赖缺口；两次均在安装正式资产前自动回滚，现场保护核验后按协议镜像 PR 并保持自动化暂停。
+- Owner 随后以 [`OWNER_RULING → RESUME_FULL`](https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/82#issuecomment-5340078606) 解除两次熔断并裁决：姓名严格一致、唯一 `img.content_img` 和非空职称 span 为身份门禁，职称增删差异只留证；SMUKQ 薄适配层注入 `contact_sheet_font`；新增离线绘图与共享引擎 `trial.*` 静态兼容测试；离线测试通过后直接执行第三次 FULL。
+- 第三次事务按执行时点重新取证并成功完成，未沿用第二次临时事务数字作为正式结果。
+
+## FULL 实现与正式结果
+
+- `work/smukq_photo_backfill_full.py` 提供 SMUKQ FULL 薄适配层，严格限定 `img.content_img` 与 `/Uploads/Upload/` 页面实引路径；保留标题差异证据，不修改总底表职称。
+- 共享 FULL 框架新增可选 `validate_full_page_title` 钩子；未配置钩子的既有站点继续执行原严格职称一致门禁。
+- 顺带治理已按 Owner 指令完成：`work/ny5y_photo_backfill_trial.py` 改为仓库相对 ROOT；NY5Y legacy Windows payload 路径在测试中按仓库相对位置解析，不修改第 13 批 payload 或正式资产。
+- 正式四数对账：`95 = 95 实采 + 0 失败留空`；TRIAL 复用 10，FULL 新目标 85、下载成功 85、失败 0。
+- 正式照片 95 张，共 44,595,301 bytes；JPEG 73、PNG 22；大于 5 MiB 1 张，大于 20 MiB 0；跨医生重复 SHA 组 0。
+- 唯一大于 5 MiB 的廖阳阳照片为 7,191,769 bytes、3956×5120，已在全量视觉表第 4 页目视确认是可见单人医生职业照。
+- 95 行总底表只更新照片链接与照片文件两列，共 190 个单元格变化；72 条本院既有异常提示均为历史采集期文本清洗留痕，未被照片补录覆盖。
+- 95 份画像均严格 `+2/-0`；`_索引.md` 哈希保持不变；正式照片目录 95 个文件且与 payload 零孤儿、零缺失。
+
+## FULL 视觉与工作簿验收
+
+- 全量视觉联系表 4 页覆盖 95/95：第 1 至 3 页各 25 张，第 4 页 20 张；逐页未见空白格、占位图、患者、儿童、合影、二维码或装饰图。
+- 视觉状态已通过 `--mark-visual-pass` 固化为 `PASSED_ALL_FULL_CONTACT_SHEETS_SINGLE_DOCTOR_PROFESSIONAL_PORTRAITS`；随后 `--validate-full` 输出 `expected=95 downloaded=95 failed=0`。
+- 使用 `@oai/artifact-tool` 只读导入总底表 XLSX：确认六个工作表 `自动采集底表 / 复核清单 / 科室统计 / 重点范围统计 / 医院统计 / 采集说明`，全部完成视觉渲染检查，无公式错误；该工作簿是物化值工作簿，六表未发现公式单元格。
+- XLSX 目标范围为第 1995 至 2089 行，共 95 行；首、中、末代表行照片双列均正确，`医院统计` 显示医生数 95、待复核数 95、已建画像数 95。
+- JSON/CSV/XLSX 均为 9,222 行；去除两个历史非本院记录内的 U+FEFF 展示字符后逐单元格一致，Issue #81 的 95 行原始值不存在载体差异。
+
+## 保护、路径与验证闭环
+
+- 入口台账、总底表更新报告、TRIAL payload/manifest/report/contact sheet 的字节数和 SHA-256 均与 FULL 前快照相同，Git diff 为 0；TRIAL 照片树也由 `--validate-full` 按聚合哈希复核不变。
+- FULL payload/report 无绝对工作区路径，工件和画像路径均为仓库相对路径；`repository_relative_paths_only=true`，哈希政策为 `repository_blob_lf`。
+- FULL payload、reconciliation、95 张照片、画像完整性清单、视觉页、三载体和受保护资产均由 `--validate-full` 复算通过。
+- 最终专项顺序回归：SMUKQ TRIAL 10/10、SMUKQ FULL 15/15、NY5Y FULL 11/11，共 36/36。
+- 最终全仓 `unittest discover`：462/462 通过。
+- 为支持 FULL 已安装后的持续回归，TRIAL/FULL 两个测试仅增加阶段感知：FULL 工件存在时验证已安装 95 行与 FULL payload/保护快照一致；FULL 未安装时仍执行原 TRIAL 空字段与保护快照门禁，生产代码门禁未放宽。
+- `git diff --check` 通过；仅提示两个既有文本工作区 CRLF 将按仓库 LF 规范进入索引。
+
+## 索引态关键工件 SHA-256
+
+以下值均从精确暂存后的 Git index blob 字节计算；文本文件因此采用仓库 LF 内容：
+
+- FULL payload：`d88b62fccf2911b50fccb50d23c84ee8d7ccf154b340bcb611dc7e7a4b4a9340`。
+- FULL reconciliation：`2de0cb57ebe631411e0d7220dbd308a1b75f1c1a82adb3ede4df1bd8ff5177da`。
+- FULL report：`256f2fb486206277137445907a9815a19fb2045540662d15b7e9f34a76bda136`。
+- FULL audit sheet：`81012793c1c3d1be1c611f138501b037c6e0f94a4ceedba8bf76507caa1c2652`。
+- FULL visual page 01：`1251b0ae6aa0032e79cd6e82d0cdbc38f6e7a994287d4cf1e874c42cede3e77e`。
+- FULL visual page 02：`a76acf2551766dc9cfdc91b697331b7ad710de6264d2bae1b3721afea5e5dcd8`。
+- FULL visual page 03：`f6fc71116a0ac3ce5052645a45ed5fb800bf2509c2e8b3904a5e27feae6dac19`。
+- FULL visual page 04：`20fea6207d1a6b4763139229f86e33f1d5c3626277da60faa961aee5e04c0313`。
+- 总底表 payload：`66ea238b9ef3327117129028dc8581668081ac16190b1f6e4e8cc3569129d5aa`。
+- 总底表 CSV：`69d7a2a2393057b34d26630fff042f5ac3274adef8ca35fba8286c28d6934871`。
+- 总底表 XLSX：`f02226df0425b241da5b86aa7ca104997e7eb8e22ea96ced31a23a2232d66810`。
+
+## FULL 停止点
+
+当前阶段为 `FULL_READY_FOR_FINAL_OWNER_AUDIT`。本分支只允许标准 fast-forward 推送并在 PR #82 报 `FULL_DONE`；随后保持自动监控，等待 Owner 最终画像审计。不得自行合并 PR、关闭 Issue #81、修改受保护工件或领取下一 Issue。
+
+<Handoff_State>
+Target: Issue #81 南方医科大学口腔医院(海珠广场院区)照片补录 FULL
+AgentConstitution: D:\workspace\信息收集整理\Agent.md
+RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
+RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/81
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/82
+Branch: codex/mhrj/issue-81-smukq-photo-backfill-trial
+CodexDeveloper: xtzhou247
+ClaudeOwner: nancywrayg57-jpg
+Phase: FULL_READY_FOR_FINAL_OWNER_AUDIT
+Completed:
+- Owner 解除两次熔断后完成第三次 FULL；95=95 实采+0 失败，正式照片与画像各 95
+- 总底表照片双列 190 个单元格更新；画像 95 份严格 +2/-0；索引零修改
+- 四页全量视觉 95/95 目视通过；唯一大于 5 MiB 照片实图通过
+- artifact-tool 六表导入、公式错误扫描、逐表渲染和三载体 9,222 行一致性复核通过
+- 受保护资产、仓库相对路径、照片孤儿/缺失、哈希/魔数/尺寸和视觉页复算全部通过
+- 专项 36/36、全仓 462/462、git diff --check 通过
+CurrentFacts:
+- 总底表 21 家医院、9,222 位医生、1,841 条异常提示；核验日期 2026-08-19
+- 本院 95 行照片双列均非空；既有异常提示 72 条保持原值
+- FULL payload 状态 PASSED_ALL_FULL_CONTACT_SHEETS_SINGLE_DOCTOR_PROFESSIONAL_PORTRAITS
+Next:
+- 标准 fast-forward 推送当前分支，等待 governance-check 成功后在 PR #82 发布 FULL_DONE
+- 恢复 doctor-data-single-issue-monitor 为 ACTIVE，等待 nancywrayg57-jpg 最终画像审计
+- 不合并 PR、不关闭 Issue、不领取下一 Issue
+Constraints:
+- 仅医院官网页面实际引用的 img.content_img 原始字节；禁止第三方来源、构造未引用路径、Cookie/代理/挑战绕过
+- 入口台账、总底表更新报告、TRIAL 工件和 _索引.md 继续受保护
+- 工件路径仅仓库相对；申报哈希仅按暂存 Git blob（LF）计算
+Artifacts:
+- work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_full_payload.json
+- work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_full_reconciliation.csv
+- work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_full_report.md
+- work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_full_audit_sheet.jpg
+- work/南方医科大学口腔医院(海珠广场院区)_photo_backfill_full_visual_review/
+- 医生画像仓库/01_试点医院/南方医科大学口腔医院(海珠广场院区)/照片/
+- 医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx
+</Handoff_State>

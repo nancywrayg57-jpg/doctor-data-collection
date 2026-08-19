@@ -35,7 +35,35 @@ class SmukqPhotoBackfillTrialTests(unittest.TestCase):
         self.assertNotIn("D:\\workspace", source)
 
     def test_scope_and_authorization_are_issue_81_specific(self) -> None:
-        rows = target.load_scope_rows()
+        full_payload_path = WORK_DIR / f"{target.HOSPITAL}_photo_backfill_full_payload.json"
+        if full_payload_path.is_file():
+            master_payload = json.loads(
+                target.base.MASTER_JSON_PATH.read_text(encoding="utf-8")
+            )
+            rows = [
+                dict(row)
+                for row in master_payload.get("rows", [])
+                if target.clean_text(row.get("医院")) == target.HOSPITAL
+            ]
+            installed_payload = json.loads(
+                full_payload_path.read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                {target.clean_text(row.get("来源链接")) for row in rows},
+                {
+                    target.clean_text(row.get("来源链接"))
+                    for row in installed_payload["rows"]
+                },
+            )
+            self.assertTrue(
+                all(
+                    target.clean_text(row.get("照片链接"))
+                    and target.clean_text(row.get("照片文件"))
+                    for row in rows
+                )
+            )
+        else:
+            rows = target.load_scope_rows()
         selected = target.select_trial_rows(rows)
         self.assertEqual(len(rows), 95)
         self.assertEqual(len(selected), 10)

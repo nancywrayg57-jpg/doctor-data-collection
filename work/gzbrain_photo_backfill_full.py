@@ -1324,13 +1324,15 @@ def run_full(run_date: str) -> dict[str, Any]:
             analysis = analyze_full_doctor_media(
                 html, source, trial.clean_text(row.get("姓名"))
             )
-            if not analysis.state and analysis.page_title != trial.clean_text(
-                row.get("职称身份原文")
-            ):
-                raise RuntimeError(
-                    f"详情职称与底表不一致：{source} "
-                    f"expected={row.get('职称身份原文')!r} actual={analysis.page_title!r}"
-                )
+            if not analysis.state:
+                page_title_validator = globals().get("validate_full_page_title")
+                if page_title_validator is not None:
+                    page_title_validator(row, analysis)
+                elif analysis.page_title != trial.clean_text(row.get("职称身份原文")):
+                    raise RuntimeError(
+                        f"详情职称与底表不一致：{source} "
+                        f"expected={row.get('职称身份原文')!r} actual={analysis.page_title!r}"
+                    )
             if analysis.state:
                 failure_state = (
                     analysis.state

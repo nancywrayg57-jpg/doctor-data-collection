@@ -23,7 +23,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 import zssy_photo_backfill_trial as base
 
 
-ROOT = Path(r"D:\workspace\信息收集整理")
+ROOT = Path(__file__).resolve().parents[1]
 WORK_DIR = ROOT / "work"
 VAULT = ROOT / "医生画像仓库"
 SOURCE_DIR = VAULT / "99_资料来源"

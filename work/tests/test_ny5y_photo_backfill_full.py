@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import base64
+import copy
 import io
 import json
 import sys
 import unittest
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from PIL import Image
 
@@ -165,7 +166,22 @@ class Ny5yPhotoBackfillFullTests(unittest.TestCase):
 
     def test_committed_trial_manifest_still_matches_payload(self) -> None:
         payload = json.loads(full.trial.TRIAL_JSON_PATH.read_text(encoding="utf-8"))
-        full.validate_trial_payload_for_full(payload, require_visual_pass=True)
+        portable_payload = copy.deepcopy(payload)
+        for sample in portable_payload["photo_samples"]:
+            legacy_path = PureWindowsPath(sample["disk_path"])
+            if legacy_path.is_absolute():
+                work_index = next(
+                    index
+                    for index, part in enumerate(legacy_path.parts)
+                    if part.casefold() == "work"
+                )
+                relative_path = Path(*legacy_path.parts[work_index:])
+                resolved_path = full.ROOT / relative_path
+                self.assertTrue(resolved_path.is_file())
+                sample["disk_path"] = str(resolved_path)
+        full.validate_trial_payload_for_full(
+            portable_payload, require_visual_pass=True
+        )
         full.validate_trial_manifest(payload)
 
 
