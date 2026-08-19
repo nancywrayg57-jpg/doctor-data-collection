@@ -168,3 +168,92 @@ Artifacts:
 - work/南方医科大学第五附属医院_photo_backfill_trial_contact_sheet.jpg
 - work/南方医科大学第五附属医院_photo_backfill_trial_photos/
 </Handoff_State>
+
+## FULL 阶段：两次失败、Owner allowlist 裁决与第三次事务
+
+Owner 在 PR #80 的 `TRIAL_AUDIT_PASSED → FULL_APPEND_AND_OBSIDIAN` 评论中授权固定 134 行 FULL：
+<https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/80#issuecomment-5337189780>。
+
+FULL 前两次执行均完整回滚、正式资产零残留：
+
+1. 第一次在王敏聪（详情 ID 458）停止。详情 HTTP 200，但页面是无医生正文、姓名、职称及 `div.yisheng_xq_bug_left` 的空医院模板。最小修正仅将该实证分类为 `无照片容器`，并将职称一致性门禁限定在成功媒体行。
+2. 第二次结构预检得到 132 行可采、2 行无照片容器；正式事务完成 `134 = 132 + 2` 后，被跨详情同 SHA 门禁阻断。陈特立 IDs 489/314 共用 SHA `d48a3b1b579a99f88d01d48d201cdc5001efd9361095a81e81c2b1fc93e372f7`；何卓凯 IDs 494/478 共用 SHA `de6da92057b28cb02f8b431ebf32e7b73f9e8229d05571be7ef5d3a1c28c22fc`。Codex 未自行认定，先在 PR 镜像 FATAL 并等待人工裁决。
+
+Owner 在 <https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/80#issuecomment-5337332486> 独立核验四个详情页及两张实图后解除熔断并裁决：
+
+1. 精确批准陈特立 `(489,314)` 与何卓凯 `(494,478)` 两组 same-person allowlist；除此之外任何跨详情同 SHA 仍须拦截。
+2. 两行分别保留各自页面实际引用 URL、各自正式文件及画像嵌入；manifest/对账表的四行均写入 Owner 裁决证据。
+3. 追认王敏聪 ID 458 的 `无照片容器` 分类及“成功媒体行才执行职称一致性门禁”的最小修正。
+4. 预期四数对账固定为 `134 = 实采 132 + 失败 2（无照片容器）`。
+
+第三次 FULL 事务按该精确 allowlist 成功完成；适配层继续拒绝任何非 allowlist 重复 SHA。
+
+## FULL 数据结果
+
+- 固定范围：134 行；实采 132，失败留空 2。
+- 失败行：王敏聪 ID 458、孙乐栋 ID 274；两者详情均 HTTP 200，但无医生正文及唯一照片容器，照片双列留空并将结构化证据写入 `异常提示`。
+- TRIAL 原字节复用 10 张；FULL 新下载 122 张；请求路径仍为固定浏览器 UA 的官方公开 urllib GET，无 Cookie、代理、挑战绕过、构造路径或第三方来源。
+- 正式照片 132 张，共 28,996,303 bytes；PNG 101、JPEG 31；最大单图 2,546,664 bytes。
+- 尺寸分桶：`<200 KiB` 108、`200 KiB–1 MiB` 21、`1–5 MiB` 3、`5–20 MiB` 0、`>20 MiB` 0。
+- 总底表精确字段 diff 266 个：`照片链接` 132、`照片文件` 132、`异常提示` 2；总底表更新报告保持不变。
+- 132 份成功画像均恰好插入方案 A 的 `+2/-0`；2 份失败画像零修改；`_索引.md` 零修改。院目录仍为 135 个 Markdown 文件（132 份已嵌照片的成功画像、2 份未改失败画像、1 个索引）。
+- 正式照片目录包含 132 个文件；所有画像照片引用唯一性与落盘存在性检查通过。
+
+## FULL 视觉审计与验证
+
+- 六张分页联系表已逐页目视检查，132/132 均为可见单人职业照；未见患者、儿童、合影、二维码、装饰图、空白格或不可见格。
+- 10 人审计表已逐格目视检查通过；`--mark-visual-pass` 成功写入 `PASSED_ALL_FULL_CONTACT_SHEETS_SINGLE_DOCTOR_PROFESSIONAL_PORTRAITS`。
+- `--validate-full` 通过：`expected=134 downloaded=132 failed=2`。
+- Issue #79 FULL 专项测试 11/11 通过。
+- 全仓测试最终 437/437 通过。第一次全仓回归发现新增测试调用 `configure_framework()` 后泄漏模块全局状态；唯一修正为用 `try/finally` 作用域替换并恢复相关全局，第二次全仓回归全部通过。
+- XLSX 使用指定 `@oai/artifact-tool` 打开并检查六张工作表；目标行、两条失败、两组 allowlist、待复核清单和医院统计均核验，公式错误扫描为 0。
+
+最终 SHA-256：
+
+- 总底表 CSV：`76cc746cd16cd6151da6e2ee22645bc9b93e7896f89c7dcb6bb01915def72f39`。
+- 总底表 XLSX：`cf9a6c20df19da719f205837daccf923cd36859cf8e84f8b434f887b2a200fa3`。
+- 总底表更新报告：`cd6fff06b933f4a765838281f52f06f3e1228fcea37e5d3b4a9441bd8120d96a`。
+- FULL payload：`1d553db887c50e03b92fb8afbd95dbbd403e19ca8b181421e9715cc04a5ad94c`。
+- FULL reconciliation CSV：`8f8c1b37b01b5c9fb57cb189430f350f002a8d191d5519f319bb407071990e5a`。
+- FULL report：`2fd1adddb7168fbdcf52bf4c24ec9a5b2739971597d22dc1e1bc1ac98931b5`。
+- FULL audit sheet：`c0050299b0ca7a0f4ef627e35ebc175880275340437c3c8870b83a0226addb66`。
+
+## FULL 当前停止点
+
+当前阶段为 `FULL_READY_FOR_FINAL_OWNER_AUDIT`。只允许精确暂存 Issue #79 FULL 文件、提交、确认远端仍指向 TRIAL commit 后以标准 Git 协议 fast-forward 推送当前分支，等待 `governance-check` 成功，再在 PR #80 发布 `FULL_DONE`。随后恢复自动监控并等待 Owner 最终审计；不得合并 PR、关闭 Issue 或领取下一 Issue。
+
+<Handoff_State>
+Target: Issue #79 南方医科大学第五附属医院照片补录 FULL
+AgentConstitution: D:\workspace\信息收集整理\Agent.md
+RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
+RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
+GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/79
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/80
+Branch: codex/mhrj/issue-79-ny5y-photo-backfill-trial
+CodexDeveloper: xtzhou247
+ClaudeOwner: nancywrayg57-jpg
+Phase: FULL_READY_FOR_FINAL_OWNER_AUDIT
+Completed:
+- Owner 精确批准两组 same-person duplicate-SHA allowlist，第三次 FULL 事务成功
+- 完成 134 = 实采 132 + 无照片容器 2；总底表、132 张正式照片与 132 份画像已同步
+- 六页 132 张联系表和 10 人审计表目视通过
+- --validate-full、专项 11/11、全仓 437/437、XLSX 六表和公式错误扫描全部通过
+CurrentFacts:
+- 两条失败为王敏聪 ID 458、孙乐栋 ID 274，照片双列留空且异常提示有结构化证据
+- 两组重复 SHA 仅限陈特立 IDs 489/314 与何卓凯 IDs 494/478；其他跨医生重复组为 0
+- 132 张照片共 28,996,303 bytes，PNG 101/JPEG 31，>5 MiB 与 >20 MiB 均为 0
+Next:
+- 精确暂存、提交并标准 fast-forward 推送当前分支
+- 等待 governance-check 后在 PR #80 发布 FULL_DONE
+- 恢复 monitor ACTIVE 并等待 Owner 最终审计
+Constraints:
+- 不得合并 PR、关闭 Issue 或领取下一 Issue
+- 仅官方公开来源；禁止 Cookie、代理、挑战绕过、构造未引用路径、第三方来源与患者素材
+Artifacts:
+- work/南方医科大学第五附属医院_photo_backfill_full_payload.json
+- work/南方医科大学第五附属医院_photo_backfill_full_reconciliation.csv
+- work/南方医科大学第五附属医院_photo_backfill_full_report.md
+- work/南方医科大学第五附属医院_photo_backfill_full_audit_sheet.jpg
+- work/南方医科大学第五附属医院_photo_backfill_full_visual_review/
+- 医生画像仓库/01_试点医院/南方医科大学第五附属医院/照片/
+</Handoff_State>
