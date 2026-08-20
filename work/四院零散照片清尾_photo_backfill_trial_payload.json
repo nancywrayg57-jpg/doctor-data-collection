@@ -1,0 +1,1691 @@
+{
+  "meta": {
+    "issue_number": 85,
+    "phase": "TRIAL",
+    "scope_count": 249,
+    "scope_by_hospital": {
+      "广东省妇幼保健院": 174,
+      "广东省第二人民医院": 48,
+      "广东药科大学附属第一医院": 2,
+      "广州中医药大学第一附属医院": 25
+    },
+    "sample_count": 12,
+    "sample_by_hospital": {
+      "广东省妇幼保健院": 5,
+      "广东省第二人民医院": 5,
+      "广州中医药大学第一附属医院": 1,
+      "广东药科大学附属第一医院": 1
+    },
+    "downloaded_count": 0,
+    "failed_count": 12,
+    "formal_assets_modified": false,
+    "visual_status": "PASSED_ZERO_DOWNLOADS_FAILURE_EVIDENCE_CONTACT_SHEET_REVIEW",
+    "generated_utc": "2026-08-19T15:07:37.683776Z",
+    "visual_reviewed_utc": "2026-08-19T15:08:23.130166Z"
+  },
+  "request_summary": {
+    "request_count": 20,
+    "minimum_adjacent_start_interval_seconds": 1.0,
+    "maximum_adjacent_start_interval_seconds": 21.875,
+    "all_requests_serial": true,
+    "configured_interval_seconds": 1.0,
+    "manually_injected_cookie": false,
+    "proxy_enabled": false
+  },
+  "request_trace": [
+    {
+      "method": "GET",
+      "url": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/35069.html",
+      "started_monotonic": 1127020.187,
+      "started_utc": "2026-08-19T15:06:36.295614Z",
+      "status": 200,
+      "final_url": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/35069.html",
+      "content_type": "text/html; charset=utf-8",
+      "response_bytes": 31092
+    },
+    {
+      "method": "GET",
+      "url": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/33030.html",
+      "started_monotonic": 1127021.187,
+      "started_utc": "2026-08-19T15:06:37.303733Z",
+      "status": 200,
+      "final_url": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/33030.html",
+      "content_type": "text/html; charset=utf-8",
+      "response_bytes": 31500
+    },
+    {
+      "method": "GET",
+      "url": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/32456.html",
+      "started_monotonic": 1127022.187,
+      "started_utc": "2026-08-19T15:06:38.302256Z",
+      "status": 200,
+      "final_url": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/32456.html",
+      "content_type": "text/html; charset=utf-8",
+      "response_bytes": 32377
+    },
+    {
+      "method": "GET",
+      "url": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/35073.html",
+      "started_monotonic": 1127023.187,
+      "started_utc": "2026-08-19T15:06:39.296264Z",
+      "status": 200,
+      "final_url": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/35073.html",
+      "content_type": "text/html; charset=utf-8",
+      "response_bytes": 31092
+    },
+    {
+      "method": "GET",
+      "url": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/35075.html",
+      "started_monotonic": 1127024.187,
+      "started_utc": "2026-08-19T15:06:40.299543Z",
+      "status": 200,
+      "final_url": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/35075.html",
+      "content_type": "text/html; charset=utf-8",
+      "response_bytes": 31330
+    },
+    {
+      "method": "GET",
+      "url": "https://gd2h.com/site/detail/41951.html",
+      "started_monotonic": 1127025.187,
+      "started_utc": "2026-08-19T15:06:41.297812Z",
+      "status": 200,
+      "final_url": "https://gd2h.com/site/detail/41951.html",
+      "content_type": "text/html",
+      "response_bytes": 92944
+    },
+    {
+      "method": "GET",
+      "url": "https://gd2h.com/site/detail/adb0d1a824b14c5db57e38e0e10ab27f.html",
+      "started_monotonic": 1127026.187,
+      "started_utc": "2026-08-19T15:06:42.291336Z",
+      "status": 200,
+      "final_url": "https://gd2h.com/site/detail/adb0d1a824b14c5db57e38e0e10ab27f.html",
+      "content_type": "text/html",
+      "response_bytes": 94206
+    },
+    {
+      "method": "GET",
+      "url": "https://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg",
+      "started_monotonic": 1127027.187,
+      "started_utc": "2026-08-19T15:06:43.291867Z",
+      "status": 404,
+      "final_url": "https://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg",
+      "content_type": "text/html",
+      "response_bytes": 624
+    },
+    {
+      "method": "GET",
+      "url": "https://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg",
+      "started_monotonic": 1127028.343,
+      "started_utc": "2026-08-19T15:06:44.450192Z",
+      "status": 404,
+      "final_url": "https://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg",
+      "content_type": "text/html",
+      "response_bytes": 624
+    },
+    {
+      "method": "GET",
+      "url": "https://gd2h.com/site/detail/42020.html",
+      "started_monotonic": 1127029.343,
+      "started_utc": "2026-08-19T15:06:45.450732Z",
+      "status": 200,
+      "final_url": "https://gd2h.com/site/detail/42020.html",
+      "content_type": "text/html",
+      "response_bytes": 93436
+    },
+    {
+      "method": "GET",
+      "url": "https://gd2h.com/static//seygw//resources/upload/2024/05/28/6353983839070312502861929.jpg",
+      "started_monotonic": 1127030.359,
+      "started_utc": "2026-08-19T15:06:46.461212Z",
+      "status": 404,
+      "final_url": "https://gd2h.com/static//seygw//resources/upload/2024/05/28/6353983839070312502861929.jpg",
+      "content_type": "text/html",
+      "response_bytes": 624
+    },
+    {
+      "method": "GET",
+      "url": "https://gd2h.com/static//seygw//resources/upload/2024/05/28/6353983839070312502861929.jpg",
+      "started_monotonic": 1127031.39,
+      "started_utc": "2026-08-19T15:06:47.492437Z",
+      "status": 404,
+      "final_url": "https://gd2h.com/static//seygw//resources/upload/2024/05/28/6353983839070312502861929.jpg",
+      "content_type": "text/html",
+      "response_bytes": 624
+    },
+    {
+      "method": "GET",
+      "url": "https://gd2h.com/site/detail/42048.html",
+      "started_monotonic": 1127032.39,
+      "started_utc": "2026-08-19T15:06:48.506990Z",
+      "status": 200,
+      "final_url": "https://gd2h.com/site/detail/42048.html",
+      "content_type": "text/html",
+      "response_bytes": 92953
+    },
+    {
+      "method": "GET",
+      "url": "https://gd2h.com/site/detail/42109.html",
+      "started_monotonic": 1127033.39,
+      "started_utc": "2026-08-19T15:06:49.493654Z",
+      "status": 200,
+      "final_url": "https://gd2h.com/site/detail/42109.html",
+      "content_type": "text/html",
+      "response_bytes": 92935
+    },
+    {
+      "method": "GET",
+      "url": "https://www.gztcm.com.cn/sanneike/kszj/1he5a53bbro2q.shtml",
+      "started_monotonic": 1127034.39,
+      "started_utc": "2026-08-19T15:06:50.497022Z",
+      "status": 200,
+      "final_url": "https://www.gztcm.com.cn/sanneike/kszj/1he5a53bbro2q.shtml",
+      "content_type": "text/html;charset=utf-8",
+      "response_bytes": 15179
+    },
+    {
+      "method": "GET",
+      "url": "https://www.gy120.net/articleshow.asp?articleid=587",
+      "started_monotonic": 1127035.953,
+      "started_utc": "2026-08-19T15:06:52.063819Z",
+      "error": "ConnectTimeout: HTTPSConnectionPool(host='www.gy120.net', port=443): Max retries exceeded with url: /articleshow.asp?articleid=587 (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.gy120.net', port=443) at 0x1c365a34e30>, 'Connection to www.gy120.net timed out. (connect timeout=35)'))"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.gy120.net/articleshow.asp?articleid=587",
+      "started_monotonic": 1127057.828,
+      "started_utc": "2026-08-19T15:07:13.930767Z",
+      "status": 200,
+      "final_url": "https://www.gy120.net/articleshow.asp?articleid=587",
+      "content_type": "text/html",
+      "response_bytes": 21936
+    },
+    {
+      "method": "GET",
+      "url": "https://www.gy120.net/files/20260514205657708.JPG",
+      "started_monotonic": 1127073.625,
+      "started_utc": "2026-08-19T15:07:29.737090Z",
+      "status": 404,
+      "final_url": "https://www.gy120.net/files/20260514205657708.JPG",
+      "content_type": "text/html",
+      "response_bytes": 1163
+    },
+    {
+      "method": "GET",
+      "url": "https://www.gy120.net/files/20260514205657708.JPG",
+      "started_monotonic": 1127074.671,
+      "started_utc": "2026-08-19T15:07:30.778461Z",
+      "status": 404,
+      "final_url": "https://www.gy120.net/files/20260514205657708.JPG",
+      "content_type": "text/html",
+      "response_bytes": 1163
+    },
+    {
+      "method": "GET",
+      "url": "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+      "started_monotonic": 1127075.671,
+      "started_utc": "2026-08-19T15:07:31.780104Z",
+      "status": 200,
+      "final_url": "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+      "content_type": "image/jpeg",
+      "response_bytes": 18293
+    }
+  ],
+  "placeholder_evidence": {
+    "gdmch_shared_qr": {
+      "url": "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+      "http_status": 200,
+      "content_type": "image/jpeg",
+      "bytes": 18293,
+      "sha256": "d374158a2f4a485f1b402591def08daac36d1b10e0d6bcfbd5989d597318eb9c",
+      "width": 235,
+      "height": 234,
+      "classification": "预约二维码（跨页共享功能图，禁止作为医生照片）",
+      "saved_to_disk": false,
+      "observed_utc": "2026-08-19T15:07:31.825917Z"
+    }
+  },
+  "protected_before": {
+    "医生画像仓库/99_资料来源/珠三角三甲医院官网入口台账.xlsx": {
+      "exists": true,
+      "file_count": 1,
+      "bytes": 40088,
+      "sha256": "5899390cc2055de16f7ea7d930646f1bb558609d94b4349af2eea940e42fd0c3"
+    },
+    "work/珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+      "exists": true,
+      "file_count": 1,
+      "bytes": 25008818,
+      "sha256": "2c6599f176d81e9d8b1d5f46ae5aeb1c1539c9878309044847e7dbb2b0ca6fd3"
+    },
+    "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv": {
+      "exists": true,
+      "file_count": 1,
+      "bytes": 18655860,
+      "sha256": "996f09a64d14ae50d031d1545576212297199530f828d7ba49d7808c04cd221b"
+    },
+    "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+      "exists": true,
+      "file_count": 1,
+      "bytes": 5119277,
+      "sha256": "67aa00a8e99c16d852b89c90a5e357497992b0053308be2d826d70c6acbf54a6"
+    },
+    "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+      "exists": true,
+      "file_count": 1,
+      "bytes": 5590,
+      "sha256": "e6debbd0d912c1a54dacbf5329a908841a0959e9752faa5be133aa00f613a217"
+    },
+    "医生画像仓库/01_试点医院/广东省妇幼保健院": {
+      "exists": true,
+      "file_count": 1491,
+      "bytes": 33876077,
+      "sha256": "7a78feb0fff9b252824379c52e958d0ddbe678fa61081ec80901bd84a3bc5638"
+    },
+    "医生画像仓库/01_试点医院/广东省第二人民医院": {
+      "exists": true,
+      "file_count": 1087,
+      "bytes": 394974365,
+      "sha256": "e072c643fbede5c396b8061af569d5b5321cd308b3d867a2607167d81a153809"
+    },
+    "医生画像仓库/01_试点医院/广州中医药大学第一附属医院": {
+      "exists": true,
+      "file_count": 140,
+      "bytes": 35087794,
+      "sha256": "c8aa1bcfee6c8ceb12de7ff4357f9856270b686222c4281b20a77e694eb4c770"
+    },
+    "医生画像仓库/01_试点医院/广东药科大学附属第一医院": {
+      "exists": true,
+      "file_count": 679,
+      "bytes": 157687921,
+      "sha256": "93c8b97747dcee79b27870851a7e66a6e42ed5b44facace4bc368479f357edb9"
+    }
+  },
+  "protected_after": {
+    "医生画像仓库/99_资料来源/珠三角三甲医院官网入口台账.xlsx": {
+      "exists": true,
+      "file_count": 1,
+      "bytes": 40088,
+      "sha256": "5899390cc2055de16f7ea7d930646f1bb558609d94b4349af2eea940e42fd0c3"
+    },
+    "work/珠三角三甲医院_医生画像自动采集总底表_payload.json": {
+      "exists": true,
+      "file_count": 1,
+      "bytes": 25008818,
+      "sha256": "2c6599f176d81e9d8b1d5f46ae5aeb1c1539c9878309044847e7dbb2b0ca6fd3"
+    },
+    "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.csv": {
+      "exists": true,
+      "file_count": 1,
+      "bytes": 18655860,
+      "sha256": "996f09a64d14ae50d031d1545576212297199530f828d7ba49d7808c04cd221b"
+    },
+    "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表.xlsx": {
+      "exists": true,
+      "file_count": 1,
+      "bytes": 5119277,
+      "sha256": "67aa00a8e99c16d852b89c90a5e357497992b0053308be2d826d70c6acbf54a6"
+    },
+    "医生画像仓库/99_资料来源/珠三角三甲医院_医生画像自动采集总底表_更新报告.md": {
+      "exists": true,
+      "file_count": 1,
+      "bytes": 5590,
+      "sha256": "e6debbd0d912c1a54dacbf5329a908841a0959e9752faa5be133aa00f613a217"
+    },
+    "医生画像仓库/01_试点医院/广东省妇幼保健院": {
+      "exists": true,
+      "file_count": 1491,
+      "bytes": 33876077,
+      "sha256": "7a78feb0fff9b252824379c52e958d0ddbe678fa61081ec80901bd84a3bc5638"
+    },
+    "医生画像仓库/01_试点医院/广东省第二人民医院": {
+      "exists": true,
+      "file_count": 1087,
+      "bytes": 394974365,
+      "sha256": "e072c643fbede5c396b8061af569d5b5321cd308b3d867a2607167d81a153809"
+    },
+    "医生画像仓库/01_试点医院/广州中医药大学第一附属医院": {
+      "exists": true,
+      "file_count": 140,
+      "bytes": 35087794,
+      "sha256": "c8aa1bcfee6c8ceb12de7ff4357f9856270b686222c4281b20a77e694eb4c770"
+    },
+    "医生画像仓库/01_试点医院/广东药科大学附属第一医院": {
+      "exists": true,
+      "file_count": 679,
+      "bytes": 157687921,
+      "sha256": "93c8b97747dcee79b27870851a7e66a6e42ed5b44facace4bc368479f357edb9"
+    }
+  },
+  "samples": [
+    {
+      "hospital": "广东省妇幼保健院",
+      "name": "贾杰",
+      "department": "未标注",
+      "title": "主任医师",
+      "source_link": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/35069.html",
+      "detail_id": "35069",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "科室需人工复核；详情正文为空或未识别",
+      "observed_utc": "2026-08-19T15:06:36.657232Z",
+      "parsed_name": "贾杰",
+      "identity_match": true,
+      "raw_photo_reference": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+      "photo_url": "",
+      "photo_state": "placeholder",
+      "portrait_container_html": "<img alt=\"贾杰\" src=\"https://wx.e3861.com/sfyAdmin/Images/Default/doct.png\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "/assets/static/images/header_doll.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/header_doll.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/header_doll.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+          "absolute_url": "https://www.e3861.com/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+          "alt": "广东省妇幼保健院官网",
+          "outer_html": "<img alt=\"广东省妇幼保健院官网\" src=\"/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png\" title=\"广东省妇幼保健院官网\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/menu_btn.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/menu_btn.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/menu_btn.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+          "absolute_url": "https://www.e3861.com/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+          "alt": "科室专家",
+          "outer_html": "<img alt=\"科室专家\" src=\"/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/title_circle.svg",
+          "absolute_url": "https://www.e3861.com/assets/static/images/title_circle.svg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/title_circle.svg\"/>"
+        },
+        {
+          "raw_reference": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+          "absolute_url": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+          "alt": "贾杰",
+          "outer_html": "<img alt=\"贾杰\" src=\"https://wx.e3861.com/sfyAdmin/Images/Default/doct.png\"/>"
+        },
+        {
+          "raw_reference": "https://wx.e3861.com/sfyGW-img/0072.png",
+          "absolute_url": "https://wx.e3861.com/sfyGW-img/0072.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"https://wx.e3861.com/sfyGW-img/0072.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/footer_bg_1.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/footer_bg_1.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/footer_bg_1.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+          "absolute_url": "https://www.e3861.com/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/sydw.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/sydw.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/sydw.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/bei.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/bei.png",
+          "alt": "",
+          "outer_html": "<img src=\"/assets/static/images/bei.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+          "absolute_url": "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+          "alt": "",
+          "outer_html": "<img src=\"/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg\"/>"
+        }
+      ],
+      "page_image_reference_count": 12,
+      "excluded_resource_urls": [
+        "https://www.e3861.com/assets/static/images/header_doll.png",
+        "https://www.e3861.com/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+        "https://www.e3861.com/assets/static/images/menu_btn.png",
+        "https://www.e3861.com/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+        "https://www.e3861.com/assets/static/images/title_circle.svg",
+        "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+        "https://wx.e3861.com/sfyGW-img/0072.png",
+        "https://www.e3861.com/assets/static/images/footer_bg_1.png",
+        "https://www.e3861.com/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+        "https://www.e3861.com/assets/static/images/sydw.png",
+        "https://www.e3861.com/assets/static/images/bei.png",
+        "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg"
+      ],
+      "result": "failed",
+      "failure_state": "占位图",
+      "decision_feature": "详情照片位命中显式 default/placeholder 门禁；页面共享 /uploads/ 图为预约二维码，按 known-SHA 排除",
+      "placeholder_reason": "url_marker:/images/default/"
+    },
+    {
+      "hospital": "广东省妇幼保健院",
+      "name": "袁超",
+      "department": "麻醉科（番禺院区）",
+      "title": "主治医师",
+      "source_link": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/33030.html",
+      "detail_id": "33030",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "",
+      "observed_utc": "2026-08-19T15:06:37.501219Z",
+      "parsed_name": "袁超",
+      "identity_match": true,
+      "raw_photo_reference": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+      "photo_url": "",
+      "photo_state": "placeholder",
+      "portrait_container_html": "<img alt=\"袁超\" src=\"https://wx.e3861.com/sfyAdmin/Images/Default/doct.png\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "/assets/static/images/header_doll.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/header_doll.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/header_doll.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+          "absolute_url": "https://www.e3861.com/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+          "alt": "广东省妇幼保健院官网",
+          "outer_html": "<img alt=\"广东省妇幼保健院官网\" src=\"/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png\" title=\"广东省妇幼保健院官网\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/menu_btn.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/menu_btn.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/menu_btn.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+          "absolute_url": "https://www.e3861.com/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+          "alt": "科室专家",
+          "outer_html": "<img alt=\"科室专家\" src=\"/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/title_circle.svg",
+          "absolute_url": "https://www.e3861.com/assets/static/images/title_circle.svg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/title_circle.svg\"/>"
+        },
+        {
+          "raw_reference": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+          "absolute_url": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+          "alt": "袁超",
+          "outer_html": "<img alt=\"袁超\" src=\"https://wx.e3861.com/sfyAdmin/Images/Default/doct.png\"/>"
+        },
+        {
+          "raw_reference": "https://wx.e3861.com/sfygwcode/1598",
+          "absolute_url": "https://wx.e3861.com/sfygwcode/1598",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"https://wx.e3861.com/sfygwcode/1598\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/footer_bg_1.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/footer_bg_1.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/footer_bg_1.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+          "absolute_url": "https://www.e3861.com/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/sydw.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/sydw.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/sydw.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/bei.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/bei.png",
+          "alt": "",
+          "outer_html": "<img src=\"/assets/static/images/bei.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+          "absolute_url": "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+          "alt": "",
+          "outer_html": "<img src=\"/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg\"/>"
+        }
+      ],
+      "page_image_reference_count": 12,
+      "excluded_resource_urls": [
+        "https://www.e3861.com/assets/static/images/header_doll.png",
+        "https://www.e3861.com/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+        "https://www.e3861.com/assets/static/images/menu_btn.png",
+        "https://www.e3861.com/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+        "https://www.e3861.com/assets/static/images/title_circle.svg",
+        "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+        "https://wx.e3861.com/sfygwcode/1598",
+        "https://www.e3861.com/assets/static/images/footer_bg_1.png",
+        "https://www.e3861.com/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+        "https://www.e3861.com/assets/static/images/sydw.png",
+        "https://www.e3861.com/assets/static/images/bei.png",
+        "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg"
+      ],
+      "result": "failed",
+      "failure_state": "占位图",
+      "decision_feature": "详情照片位命中显式 default/placeholder 门禁；页面共享 /uploads/ 图为预约二维码，按 known-SHA 排除",
+      "placeholder_reason": "url_marker:/images/default/"
+    },
+    {
+      "hospital": "广东省妇幼保健院",
+      "name": "秦克旺",
+      "department": "甲状腺外科（番禺院区）",
+      "title": "主任医师",
+      "source_link": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/32456.html",
+      "detail_id": "32456",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "",
+      "observed_utc": "2026-08-19T15:06:38.516315Z",
+      "parsed_name": "秦克旺",
+      "identity_match": true,
+      "raw_photo_reference": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+      "photo_url": "",
+      "photo_state": "placeholder",
+      "portrait_container_html": "<img alt=\"秦克旺\" src=\"https://wx.e3861.com/sfyAdmin/Images/Default/doct.png\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "/assets/static/images/header_doll.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/header_doll.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/header_doll.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+          "absolute_url": "https://www.e3861.com/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+          "alt": "广东省妇幼保健院官网",
+          "outer_html": "<img alt=\"广东省妇幼保健院官网\" src=\"/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png\" title=\"广东省妇幼保健院官网\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/menu_btn.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/menu_btn.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/menu_btn.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+          "absolute_url": "https://www.e3861.com/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+          "alt": "科室专家",
+          "outer_html": "<img alt=\"科室专家\" src=\"/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/title_circle.svg",
+          "absolute_url": "https://www.e3861.com/assets/static/images/title_circle.svg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/title_circle.svg\"/>"
+        },
+        {
+          "raw_reference": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+          "absolute_url": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+          "alt": "秦克旺",
+          "outer_html": "<img alt=\"秦克旺\" src=\"https://wx.e3861.com/sfyAdmin/Images/Default/doct.png\"/>"
+        },
+        {
+          "raw_reference": "https://wx.e3861.com/sfygwcode/0112",
+          "absolute_url": "https://wx.e3861.com/sfygwcode/0112",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"https://wx.e3861.com/sfygwcode/0112\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/footer_bg_1.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/footer_bg_1.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/footer_bg_1.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+          "absolute_url": "https://www.e3861.com/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/sydw.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/sydw.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/sydw.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/bei.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/bei.png",
+          "alt": "",
+          "outer_html": "<img src=\"/assets/static/images/bei.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+          "absolute_url": "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+          "alt": "",
+          "outer_html": "<img src=\"/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg\"/>"
+        }
+      ],
+      "page_image_reference_count": 12,
+      "excluded_resource_urls": [
+        "https://www.e3861.com/assets/static/images/header_doll.png",
+        "https://www.e3861.com/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+        "https://www.e3861.com/assets/static/images/menu_btn.png",
+        "https://www.e3861.com/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+        "https://www.e3861.com/assets/static/images/title_circle.svg",
+        "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+        "https://wx.e3861.com/sfygwcode/0112",
+        "https://www.e3861.com/assets/static/images/footer_bg_1.png",
+        "https://www.e3861.com/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+        "https://www.e3861.com/assets/static/images/sydw.png",
+        "https://www.e3861.com/assets/static/images/bei.png",
+        "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg"
+      ],
+      "result": "failed",
+      "failure_state": "占位图",
+      "decision_feature": "详情照片位命中显式 default/placeholder 门禁；页面共享 /uploads/ 图为预约二维码，按 known-SHA 排除",
+      "placeholder_reason": "url_marker:/images/default/"
+    },
+    {
+      "hospital": "广东省妇幼保健院",
+      "name": "陈佳",
+      "department": "未标注",
+      "title": "主任医师",
+      "source_link": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/35073.html",
+      "detail_id": "35073",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "科室需人工复核；详情正文为空或未识别",
+      "observed_utc": "2026-08-19T15:06:39.515812Z",
+      "parsed_name": "陈佳",
+      "identity_match": true,
+      "raw_photo_reference": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+      "photo_url": "",
+      "photo_state": "placeholder",
+      "portrait_container_html": "<img alt=\"陈佳\" src=\"https://wx.e3861.com/sfyAdmin/Images/Default/doct.png\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "/assets/static/images/header_doll.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/header_doll.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/header_doll.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+          "absolute_url": "https://www.e3861.com/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+          "alt": "广东省妇幼保健院官网",
+          "outer_html": "<img alt=\"广东省妇幼保健院官网\" src=\"/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png\" title=\"广东省妇幼保健院官网\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/menu_btn.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/menu_btn.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/menu_btn.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+          "absolute_url": "https://www.e3861.com/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+          "alt": "科室专家",
+          "outer_html": "<img alt=\"科室专家\" src=\"/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/title_circle.svg",
+          "absolute_url": "https://www.e3861.com/assets/static/images/title_circle.svg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/title_circle.svg\"/>"
+        },
+        {
+          "raw_reference": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+          "absolute_url": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+          "alt": "陈佳",
+          "outer_html": "<img alt=\"陈佳\" src=\"https://wx.e3861.com/sfyAdmin/Images/Default/doct.png\"/>"
+        },
+        {
+          "raw_reference": "https://wx.e3861.com/sfyGW-img/1220.png",
+          "absolute_url": "https://wx.e3861.com/sfyGW-img/1220.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"https://wx.e3861.com/sfyGW-img/1220.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/footer_bg_1.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/footer_bg_1.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/footer_bg_1.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+          "absolute_url": "https://www.e3861.com/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/sydw.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/sydw.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/sydw.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/bei.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/bei.png",
+          "alt": "",
+          "outer_html": "<img src=\"/assets/static/images/bei.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+          "absolute_url": "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+          "alt": "",
+          "outer_html": "<img src=\"/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg\"/>"
+        }
+      ],
+      "page_image_reference_count": 12,
+      "excluded_resource_urls": [
+        "https://www.e3861.com/assets/static/images/header_doll.png",
+        "https://www.e3861.com/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+        "https://www.e3861.com/assets/static/images/menu_btn.png",
+        "https://www.e3861.com/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+        "https://www.e3861.com/assets/static/images/title_circle.svg",
+        "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+        "https://wx.e3861.com/sfyGW-img/1220.png",
+        "https://www.e3861.com/assets/static/images/footer_bg_1.png",
+        "https://www.e3861.com/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+        "https://www.e3861.com/assets/static/images/sydw.png",
+        "https://www.e3861.com/assets/static/images/bei.png",
+        "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg"
+      ],
+      "result": "failed",
+      "failure_state": "占位图",
+      "decision_feature": "详情照片位命中显式 default/placeholder 门禁；页面共享 /uploads/ 图为预约二维码，按 known-SHA 排除",
+      "placeholder_reason": "url_marker:/images/default/"
+    },
+    {
+      "hospital": "广东省妇幼保健院",
+      "name": "胡克",
+      "department": "未标注",
+      "title": "主任医师",
+      "source_link": "https://www.e3861.com/keshizhuanjia/zhuanjiajieshao/35075.html",
+      "detail_id": "35075",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "科室需人工复核",
+      "observed_utc": "2026-08-19T15:06:40.510353Z",
+      "parsed_name": "胡克",
+      "identity_match": true,
+      "raw_photo_reference": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+      "photo_url": "",
+      "photo_state": "placeholder",
+      "portrait_container_html": "<img alt=\"胡克\" src=\"https://wx.e3861.com/sfyAdmin/Images/Default/doct.png\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "/assets/static/images/header_doll.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/header_doll.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/header_doll.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+          "absolute_url": "https://www.e3861.com/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+          "alt": "广东省妇幼保健院官网",
+          "outer_html": "<img alt=\"广东省妇幼保健院官网\" src=\"/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png\" title=\"广东省妇幼保健院官网\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/menu_btn.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/menu_btn.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/menu_btn.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+          "absolute_url": "https://www.e3861.com/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+          "alt": "科室专家",
+          "outer_html": "<img alt=\"科室专家\" src=\"/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/title_circle.svg",
+          "absolute_url": "https://www.e3861.com/assets/static/images/title_circle.svg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/title_circle.svg\"/>"
+        },
+        {
+          "raw_reference": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+          "absolute_url": "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+          "alt": "胡克",
+          "outer_html": "<img alt=\"胡克\" src=\"https://wx.e3861.com/sfyAdmin/Images/Default/doct.png\"/>"
+        },
+        {
+          "raw_reference": "https://wx.e3861.com/sfyGW-img/0466.png",
+          "absolute_url": "https://wx.e3861.com/sfyGW-img/0466.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"https://wx.e3861.com/sfyGW-img/0466.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/footer_bg_1.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/footer_bg_1.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/footer_bg_1.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+          "absolute_url": "https://www.e3861.com/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/sydw.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/sydw.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/assets/static/images/sydw.png\"/>"
+        },
+        {
+          "raw_reference": "/assets/static/images/bei.png",
+          "absolute_url": "https://www.e3861.com/assets/static/images/bei.png",
+          "alt": "",
+          "outer_html": "<img src=\"/assets/static/images/bei.png\"/>"
+        },
+        {
+          "raw_reference": "/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+          "absolute_url": "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg",
+          "alt": "",
+          "outer_html": "<img src=\"/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg\"/>"
+        }
+      ],
+      "page_image_reference_count": 12,
+      "excluded_resource_urls": [
+        "https://www.e3861.com/assets/static/images/header_doll.png",
+        "https://www.e3861.com/uploads/20250513/642edde25ee202361622c3f0e94bdaa9.png",
+        "https://www.e3861.com/assets/static/images/menu_btn.png",
+        "https://www.e3861.com/uploads/20240906/0576e5d2cfb22cdd13bbcf67591988c9.png",
+        "https://www.e3861.com/assets/static/images/title_circle.svg",
+        "https://wx.e3861.com/sfyAdmin/Images/Default/doct.png",
+        "https://wx.e3861.com/sfyGW-img/0466.png",
+        "https://www.e3861.com/assets/static/images/footer_bg_1.png",
+        "https://www.e3861.com/uploads/20250513/2431701730e83c5cf6ff35df58af143e.png",
+        "https://www.e3861.com/assets/static/images/sydw.png",
+        "https://www.e3861.com/assets/static/images/bei.png",
+        "https://www.e3861.com/uploads/20250421/99cfbdba56620ba44a7c2e8b6bec9515.jpg"
+      ],
+      "result": "failed",
+      "failure_state": "占位图",
+      "decision_feature": "详情照片位命中显式 default/placeholder 门禁；页面共享 /uploads/ 图为预约二维码，按 known-SHA 排除",
+      "placeholder_reason": "url_marker:/images/default/"
+    },
+    {
+      "hospital": "广东省第二人民医院",
+      "name": "杨莲娣",
+      "department": "产科",
+      "title": "主治医师",
+      "source_link": "https://gd2h.com/site/detail/41951.html",
+      "detail_id": "41951",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "",
+      "observed_utc": "2026-08-19T15:06:42.179873Z",
+      "parsed_name": "杨莲娣",
+      "identity_match": true,
+      "raw_photo_reference": "/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+      "photo_url": "",
+      "photo_state": "placeholder",
+      "portrait_container_html": "<img alt=\"\" class=\"col-lg-3 col-6\" src=\"/static//seygw//resources/upload/2024/05/28/default_ys.gif\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "/static/seygw/assets/img/logo22.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/logo22.png",
+          "alt": "Image placeholder",
+          "outer_html": "<img alt=\"Image placeholder\" id=\"navbar-logo\" src=\"/static/seygw/assets/img/logo22.png\" style=\"width:19rem ;height: 3rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/sousuo.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/sousuo.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/sousuo.png\" style=\"    position: absolute; width: 1.5rem; height: 1.5rem; margin: 0.5rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/menu.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/menu.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/menu.png\"/>"
+        },
+        {
+          "raw_reference": "/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+          "absolute_url": "https://gd2h.com/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+          "alt": "",
+          "outer_html": "<img alt=\"\" class=\"col-lg-3 col-6\" src=\"/static//seygw//resources/upload/2024/05/28/default_ys.gif\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/shijian.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/shijian.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/shijian.png\" style=\"width: 1.875rem;height: 1.875rem;margin-right: 1.25rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wxEwm.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wxEwm.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wxEwm.png\" style=\"width:5.5rem;height:5.5rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wx.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wx.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wx.png\" style=\"width:2.4rem;height:2rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/dyEwm.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/dyEwm.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/dyEwm.png\" style=\"width:5.5rem;height:5.5rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wx.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wx.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wx.png\" style=\"width:2.4rem;height:2rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/bom_img2.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/bom_img2.png",
+          "alt": "Image placeholder",
+          "outer_html": "<img alt=\"Image placeholder\" id=\"footer-logo\" src=\"/static/seygw/assets/img/bom_img2.png\" style=\"width:21rem;height:3.6rem\"/>"
+        },
+        {
+          "raw_reference": "https://dcs.conac.cn/image/nis/blue.png",
+          "absolute_url": "https://dcs.conac.cn/image/nis/blue.png",
+          "alt": "",
+          "outer_html": "<img border=\"0\" data-bd-imgshare-binded=\"1\" hspace=\"0\" id=\"imgConac\" src=\"https://dcs.conac.cn/image/nis/blue.png\" style=\"margin-top: 20px;\" vspace=\"0\"/>"
+        }
+      ],
+      "page_image_reference_count": 14,
+      "excluded_resource_urls": [
+        "https://gd2h.com/static/seygw/assets/img/logo22.png",
+        "https://gd2h.com/static/seygw/assets/img/sousuo.png",
+        "https://gd2h.com/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+        "https://gd2h.com/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+        "https://gd2h.com/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+        "https://gd2h.com/static/seygw/assets/img/menu.png",
+        "https://gd2h.com/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+        "https://gd2h.com/static/seygw/assets/img/shijian.png",
+        "https://gd2h.com/static/seygw/assets/img/wxEwm.png",
+        "https://gd2h.com/static/seygw/assets/img/wx.png",
+        "https://gd2h.com/static/seygw/assets/img/dyEwm.png",
+        "https://gd2h.com/static/seygw/assets/img/wx.png",
+        "https://gd2h.com/static/seygw/assets/img/bom_img2.png",
+        "https://dcs.conac.cn/image/nis/blue.png"
+      ],
+      "result": "failed",
+      "failure_state": "占位图",
+      "decision_feature": "详情照片位命中显式 default/placeholder 门禁",
+      "placeholder_reason": "url_marker:default_ys.gif"
+    },
+    {
+      "hospital": "广东省第二人民医院",
+      "name": "陈鹏程",
+      "department": "关节骨一科",
+      "title": "主治医师",
+      "source_link": "https://gd2h.com/site/detail/adb0d1a824b14c5db57e38e0e10ab27f.html",
+      "detail_id": "adb0d1a824b14c5db57e38e0e10ab27f",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "官网照片链接失效（两次 HTTP 404，管理员批准留空）",
+      "observed_utc": "2026-08-19T15:06:42.579627Z",
+      "parsed_name": "陈鹏程",
+      "identity_match": true,
+      "raw_photo_reference": "http://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg",
+      "photo_url": "https://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg",
+      "photo_state": "available",
+      "portrait_container_html": "<img alt=\"\" class=\"col-lg-3 col-6\" src=\"http://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "/static/seygw/assets/img/logo22.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/logo22.png",
+          "alt": "Image placeholder",
+          "outer_html": "<img alt=\"Image placeholder\" id=\"navbar-logo\" src=\"/static/seygw/assets/img/logo22.png\" style=\"width:19rem ;height: 3rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/sousuo.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/sousuo.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/sousuo.png\" style=\"    position: absolute; width: 1.5rem; height: 1.5rem; margin: 0.5rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/menu.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/menu.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/menu.png\"/>"
+        },
+        {
+          "raw_reference": "http://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg",
+          "absolute_url": "http://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" class=\"col-lg-3 col-6\" src=\"http://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/shijian.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/shijian.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/shijian.png\" style=\"width: 1.875rem;height: 1.875rem;margin-right: 1.25rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wxEwm.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wxEwm.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wxEwm.png\" style=\"width:5.5rem;height:5.5rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wx.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wx.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wx.png\" style=\"width:2.4rem;height:2rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/dyEwm.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/dyEwm.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/dyEwm.png\" style=\"width:5.5rem;height:5.5rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wx.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wx.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wx.png\" style=\"width:2.4rem;height:2rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/bom_img2.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/bom_img2.png",
+          "alt": "Image placeholder",
+          "outer_html": "<img alt=\"Image placeholder\" id=\"footer-logo\" src=\"/static/seygw/assets/img/bom_img2.png\" style=\"width:21rem;height:3.6rem\"/>"
+        },
+        {
+          "raw_reference": "https://dcs.conac.cn/image/nis/blue.png",
+          "absolute_url": "https://dcs.conac.cn/image/nis/blue.png",
+          "alt": "",
+          "outer_html": "<img border=\"0\" data-bd-imgshare-binded=\"1\" hspace=\"0\" id=\"imgConac\" src=\"https://dcs.conac.cn/image/nis/blue.png\" style=\"margin-top: 20px;\" vspace=\"0\"/>"
+        }
+      ],
+      "page_image_reference_count": 14,
+      "excluded_resource_urls": [
+        "https://gd2h.com/static/seygw/assets/img/logo22.png",
+        "https://gd2h.com/static/seygw/assets/img/sousuo.png",
+        "https://gd2h.com/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+        "https://gd2h.com/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+        "https://gd2h.com/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+        "https://gd2h.com/static/seygw/assets/img/menu.png",
+        "http://www.gd2h.com/system/profile/upload/2024/10/19/bc6b6e0a-9d42-4cc9-8a63-406963832c04.jpg",
+        "https://gd2h.com/static/seygw/assets/img/shijian.png",
+        "https://gd2h.com/static/seygw/assets/img/wxEwm.png",
+        "https://gd2h.com/static/seygw/assets/img/wx.png",
+        "https://gd2h.com/static/seygw/assets/img/dyEwm.png",
+        "https://gd2h.com/static/seygw/assets/img/wx.png",
+        "https://gd2h.com/static/seygw/assets/img/bom_img2.png",
+        "https://dcs.conac.cn/image/nis/blue.png"
+      ],
+      "result": "failed",
+      "failure_state": "照片资源不可达",
+      "decision_feature": "double_404",
+      "photo_attempt_results": [],
+      "retry_count": 1
+    },
+    {
+      "hospital": "广东省第二人民医院",
+      "name": "廖耀华",
+      "department": "儿科",
+      "title": "主治医师",
+      "source_link": "https://gd2h.com/site/detail/42020.html",
+      "detail_id": "42020",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "官网照片链接失效（两次 HTTP 404，管理员批准留空）",
+      "observed_utc": "2026-08-19T15:06:45.648135Z",
+      "parsed_name": "廖耀华",
+      "identity_match": true,
+      "raw_photo_reference": "/static//seygw//resources/upload/2024/05/28/6353983839070312502861929.jpg",
+      "photo_url": "https://gd2h.com/static//seygw//resources/upload/2024/05/28/6353983839070312502861929.jpg",
+      "photo_state": "available",
+      "portrait_container_html": "<img alt=\"\" class=\"col-lg-3 col-6\" src=\"/static//seygw//resources/upload/2024/05/28/6353983839070312502861929.jpg\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "/static/seygw/assets/img/logo22.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/logo22.png",
+          "alt": "Image placeholder",
+          "outer_html": "<img alt=\"Image placeholder\" id=\"navbar-logo\" src=\"/static/seygw/assets/img/logo22.png\" style=\"width:19rem ;height: 3rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/sousuo.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/sousuo.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/sousuo.png\" style=\"    position: absolute; width: 1.5rem; height: 1.5rem; margin: 0.5rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/menu.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/menu.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/menu.png\"/>"
+        },
+        {
+          "raw_reference": "/static//seygw//resources/upload/2024/05/28/6353983839070312502861929.jpg",
+          "absolute_url": "https://gd2h.com/static//seygw//resources/upload/2024/05/28/6353983839070312502861929.jpg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" class=\"col-lg-3 col-6\" src=\"/static//seygw//resources/upload/2024/05/28/6353983839070312502861929.jpg\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/shijian.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/shijian.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/shijian.png\" style=\"width: 1.875rem;height: 1.875rem;margin-right: 1.25rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wxEwm.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wxEwm.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wxEwm.png\" style=\"width:5.5rem;height:5.5rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wx.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wx.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wx.png\" style=\"width:2.4rem;height:2rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/dyEwm.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/dyEwm.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/dyEwm.png\" style=\"width:5.5rem;height:5.5rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wx.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wx.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wx.png\" style=\"width:2.4rem;height:2rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/bom_img2.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/bom_img2.png",
+          "alt": "Image placeholder",
+          "outer_html": "<img alt=\"Image placeholder\" id=\"footer-logo\" src=\"/static/seygw/assets/img/bom_img2.png\" style=\"width:21rem;height:3.6rem\"/>"
+        },
+        {
+          "raw_reference": "https://dcs.conac.cn/image/nis/blue.png",
+          "absolute_url": "https://dcs.conac.cn/image/nis/blue.png",
+          "alt": "",
+          "outer_html": "<img border=\"0\" data-bd-imgshare-binded=\"1\" hspace=\"0\" id=\"imgConac\" src=\"https://dcs.conac.cn/image/nis/blue.png\" style=\"margin-top: 20px;\" vspace=\"0\"/>"
+        }
+      ],
+      "page_image_reference_count": 14,
+      "excluded_resource_urls": [
+        "https://gd2h.com/static/seygw/assets/img/logo22.png",
+        "https://gd2h.com/static/seygw/assets/img/sousuo.png",
+        "https://gd2h.com/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+        "https://gd2h.com/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+        "https://gd2h.com/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+        "https://gd2h.com/static/seygw/assets/img/menu.png",
+        "https://gd2h.com/static/seygw/assets/img/shijian.png",
+        "https://gd2h.com/static/seygw/assets/img/wxEwm.png",
+        "https://gd2h.com/static/seygw/assets/img/wx.png",
+        "https://gd2h.com/static/seygw/assets/img/dyEwm.png",
+        "https://gd2h.com/static/seygw/assets/img/wx.png",
+        "https://gd2h.com/static/seygw/assets/img/bom_img2.png",
+        "https://dcs.conac.cn/image/nis/blue.png"
+      ],
+      "result": "failed",
+      "failure_state": "照片资源不可达",
+      "decision_feature": "double_404",
+      "photo_attempt_results": [],
+      "retry_count": 1
+    },
+    {
+      "hospital": "广东省第二人民医院",
+      "name": "陈抒扬",
+      "department": "风湿免疫科",
+      "title": "主治医师",
+      "source_link": "https://gd2h.com/site/detail/42048.html",
+      "detail_id": "42048",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "",
+      "observed_utc": "2026-08-19T15:06:48.697500Z",
+      "parsed_name": "陈抒扬",
+      "identity_match": true,
+      "raw_photo_reference": "/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+      "photo_url": "",
+      "photo_state": "placeholder",
+      "portrait_container_html": "<img alt=\"\" class=\"col-lg-3 col-6\" src=\"/static//seygw//resources/upload/2024/05/28/default_ys.gif\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "/static/seygw/assets/img/logo22.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/logo22.png",
+          "alt": "Image placeholder",
+          "outer_html": "<img alt=\"Image placeholder\" id=\"navbar-logo\" src=\"/static/seygw/assets/img/logo22.png\" style=\"width:19rem ;height: 3rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/sousuo.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/sousuo.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/sousuo.png\" style=\"    position: absolute; width: 1.5rem; height: 1.5rem; margin: 0.5rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/menu.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/menu.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/menu.png\"/>"
+        },
+        {
+          "raw_reference": "/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+          "absolute_url": "https://gd2h.com/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+          "alt": "",
+          "outer_html": "<img alt=\"\" class=\"col-lg-3 col-6\" src=\"/static//seygw//resources/upload/2024/05/28/default_ys.gif\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/shijian.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/shijian.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/shijian.png\" style=\"width: 1.875rem;height: 1.875rem;margin-right: 1.25rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wxEwm.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wxEwm.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wxEwm.png\" style=\"width:5.5rem;height:5.5rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wx.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wx.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wx.png\" style=\"width:2.4rem;height:2rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/dyEwm.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/dyEwm.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/dyEwm.png\" style=\"width:5.5rem;height:5.5rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wx.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wx.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wx.png\" style=\"width:2.4rem;height:2rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/bom_img2.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/bom_img2.png",
+          "alt": "Image placeholder",
+          "outer_html": "<img alt=\"Image placeholder\" id=\"footer-logo\" src=\"/static/seygw/assets/img/bom_img2.png\" style=\"width:21rem;height:3.6rem\"/>"
+        },
+        {
+          "raw_reference": "https://dcs.conac.cn/image/nis/blue.png",
+          "absolute_url": "https://dcs.conac.cn/image/nis/blue.png",
+          "alt": "",
+          "outer_html": "<img border=\"0\" data-bd-imgshare-binded=\"1\" hspace=\"0\" id=\"imgConac\" src=\"https://dcs.conac.cn/image/nis/blue.png\" style=\"margin-top: 20px;\" vspace=\"0\"/>"
+        }
+      ],
+      "page_image_reference_count": 14,
+      "excluded_resource_urls": [
+        "https://gd2h.com/static/seygw/assets/img/logo22.png",
+        "https://gd2h.com/static/seygw/assets/img/sousuo.png",
+        "https://gd2h.com/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+        "https://gd2h.com/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+        "https://gd2h.com/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+        "https://gd2h.com/static/seygw/assets/img/menu.png",
+        "https://gd2h.com/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+        "https://gd2h.com/static/seygw/assets/img/shijian.png",
+        "https://gd2h.com/static/seygw/assets/img/wxEwm.png",
+        "https://gd2h.com/static/seygw/assets/img/wx.png",
+        "https://gd2h.com/static/seygw/assets/img/dyEwm.png",
+        "https://gd2h.com/static/seygw/assets/img/wx.png",
+        "https://gd2h.com/static/seygw/assets/img/bom_img2.png",
+        "https://dcs.conac.cn/image/nis/blue.png"
+      ],
+      "result": "failed",
+      "failure_state": "占位图",
+      "decision_feature": "详情照片位命中显式 default/placeholder 门禁",
+      "placeholder_reason": "url_marker:default_ys.gif"
+    },
+    {
+      "hospital": "广东省第二人民医院",
+      "name": "刘婷",
+      "department": "内分泌科",
+      "title": "未标注",
+      "source_link": "https://gd2h.com/site/detail/42109.html",
+      "detail_id": "42109",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "职称/身份需人工复核",
+      "observed_utc": "2026-08-19T15:06:49.682446Z",
+      "parsed_name": "刘婷",
+      "identity_match": true,
+      "raw_photo_reference": "/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+      "photo_url": "",
+      "photo_state": "placeholder",
+      "portrait_container_html": "<img alt=\"\" class=\"col-lg-3 col-6\" src=\"/static//seygw//resources/upload/2024/05/28/default_ys.gif\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "/static/seygw/assets/img/logo22.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/logo22.png",
+          "alt": "Image placeholder",
+          "outer_html": "<img alt=\"Image placeholder\" id=\"navbar-logo\" src=\"/static/seygw/assets/img/logo22.png\" style=\"width:19rem ;height: 3rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/sousuo.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/sousuo.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/sousuo.png\" style=\"    position: absolute; width: 1.5rem; height: 1.5rem; margin: 0.5rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+          "absolute_url": "https://gd2h.com/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png\" style=\"width: 100%;height: auto;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/menu.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/menu.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/menu.png\"/>"
+        },
+        {
+          "raw_reference": "/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+          "absolute_url": "https://gd2h.com/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+          "alt": "",
+          "outer_html": "<img alt=\"\" class=\"col-lg-3 col-6\" src=\"/static//seygw//resources/upload/2024/05/28/default_ys.gif\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/shijian.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/shijian.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/shijian.png\" style=\"width: 1.875rem;height: 1.875rem;margin-right: 1.25rem;\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wxEwm.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wxEwm.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wxEwm.png\" style=\"width:5.5rem;height:5.5rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wx.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wx.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wx.png\" style=\"width:2.4rem;height:2rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/dyEwm.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/dyEwm.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/dyEwm.png\" style=\"width:5.5rem;height:5.5rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/wx.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/wx.png",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/static/seygw/assets/img/wx.png\" style=\"width:2.4rem;height:2rem\"/>"
+        },
+        {
+          "raw_reference": "/static/seygw/assets/img/bom_img2.png",
+          "absolute_url": "https://gd2h.com/static/seygw/assets/img/bom_img2.png",
+          "alt": "Image placeholder",
+          "outer_html": "<img alt=\"Image placeholder\" id=\"footer-logo\" src=\"/static/seygw/assets/img/bom_img2.png\" style=\"width:21rem;height:3.6rem\"/>"
+        },
+        {
+          "raw_reference": "https://dcs.conac.cn/image/nis/blue.png",
+          "absolute_url": "https://dcs.conac.cn/image/nis/blue.png",
+          "alt": "",
+          "outer_html": "<img border=\"0\" data-bd-imgshare-binded=\"1\" hspace=\"0\" id=\"imgConac\" src=\"https://dcs.conac.cn/image/nis/blue.png\" style=\"margin-top: 20px;\" vspace=\"0\"/>"
+        }
+      ],
+      "page_image_reference_count": 14,
+      "excluded_resource_urls": [
+        "https://gd2h.com/static/seygw/assets/img/logo22.png",
+        "https://gd2h.com/static/seygw/assets/img/sousuo.png",
+        "https://gd2h.com/static/seygw//resources/upload/2026/08/07/65bfabbb-7d0b-4f4c-98d6-f19be6f6479f.png",
+        "https://gd2h.com/static/seygw//resources/upload/2024/05/31/9e6b6d64-7169-4bae-9d24-7745cabf438c.png",
+        "https://gd2h.com/static/seygw//resources/upload/2024/06/01/0540dd74-0b8e-480d-8bde-62db903de391.png",
+        "https://gd2h.com/static/seygw/assets/img/menu.png",
+        "https://gd2h.com/static//seygw//resources/upload/2024/05/28/default_ys.gif",
+        "https://gd2h.com/static/seygw/assets/img/shijian.png",
+        "https://gd2h.com/static/seygw/assets/img/wxEwm.png",
+        "https://gd2h.com/static/seygw/assets/img/wx.png",
+        "https://gd2h.com/static/seygw/assets/img/dyEwm.png",
+        "https://gd2h.com/static/seygw/assets/img/wx.png",
+        "https://gd2h.com/static/seygw/assets/img/bom_img2.png",
+        "https://dcs.conac.cn/image/nis/blue.png"
+      ],
+      "result": "failed",
+      "failure_state": "占位图",
+      "decision_feature": "详情照片位命中显式 default/placeholder 门禁",
+      "placeholder_reason": "url_marker:default_ys.gif"
+    },
+    {
+      "hospital": "广州中医药大学第一附属医院",
+      "name": "王超",
+      "department": "肾病一科（慢性肾衰",
+      "title": "副主任中医师",
+      "source_link": "https://www.gztcm.com.cn/sanneike/kszj/1he5a53bbro2q.shtml",
+      "detail_id": "1he5a53bbro2q",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "官网详情未提供符合范围的本人职业照，留空并标注",
+      "observed_utc": "2026-08-19T15:06:52.013201Z",
+      "parsed_name": "王超",
+      "identity_match": true,
+      "raw_photo_reference": "",
+      "photo_url": "",
+      "photo_state": "empty",
+      "portrait_container_html": "",
+      "page_image_references": [
+        {
+          "raw_reference": "/sanneike/-themes-/template2/images/gzb0922-logo.png?v=2",
+          "absolute_url": "https://www.gztcm.com.cn/sanneike/-themes-/template2/images/gzb0922-logo.png?v=2",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/sanneike/-themes-/template2/images/gzb0922-logo.png?v=2\"/>"
+        },
+        {
+          "raw_reference": "/export/sites/default/sanneike/-themes-/template2/images/gzb0922-fwh.jpg",
+          "absolute_url": "https://www.gztcm.com.cn/export/sites/default/sanneike/-themes-/template2/images/gzb0922-fwh.jpg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/export/sites/default/sanneike/-themes-/template2/images/gzb0922-fwh.jpg\"/>"
+        },
+        {
+          "raw_reference": "/export/sites/default/sanneike/-themes-/template2/images/gzb0922-dyh.jpg",
+          "absolute_url": "https://www.gztcm.com.cn/export/sites/default/sanneike/-themes-/template2/images/gzb0922-dyh.jpg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/export/sites/default/sanneike/-themes-/template2/images/gzb0922-dyh.jpg\"/>"
+        },
+        {
+          "raw_reference": "/export/sites/default/sanneike/-themes-/template2/images/gzb0922-fwh.jpg",
+          "absolute_url": "https://www.gztcm.com.cn/export/sites/default/sanneike/-themes-/template2/images/gzb0922-fwh.jpg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/export/sites/default/sanneike/-themes-/template2/images/gzb0922-fwh.jpg\"/>"
+        },
+        {
+          "raw_reference": "/export/sites/default/sanneike/-themes-/template2/images/gzb0922-dyh.jpg",
+          "absolute_url": "https://www.gztcm.com.cn/export/sites/default/sanneike/-themes-/template2/images/gzb0922-dyh.jpg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"/export/sites/default/sanneike/-themes-/template2/images/gzb0922-dyh.jpg\"/>"
+        }
+      ],
+      "page_image_reference_count": 5,
+      "excluded_resource_urls": [
+        "https://www.gztcm.com.cn/sanneike/-themes-/template2/images/gzb0922-logo.png?v=2",
+        "https://www.gztcm.com.cn/export/sites/default/sanneike/-themes-/template2/images/gzb0922-fwh.jpg",
+        "https://www.gztcm.com.cn/export/sites/default/sanneike/-themes-/template2/images/gzb0922-dyh.jpg",
+        "https://www.gztcm.com.cn/export/sites/default/sanneike/-themes-/template2/images/gzb0922-fwh.jpg",
+        "https://www.gztcm.com.cn/export/sites/default/sanneike/-themes-/template2/images/gzb0922-dyh.jpg"
+      ],
+      "result": "failed",
+      "failure_state": "无照片容器",
+      "decision_feature": "详情页无符合既有医院白名单的本人职业照引用",
+      "placeholder_reason": ""
+    },
+    {
+      "hospital": "广东药科大学附属第一医院",
+      "name": "臧晶",
+      "department": "眼科",
+      "title": "主任医师",
+      "source_link": "https://www.gy120.net/articleshow.asp?articleid=587",
+      "detail_id": "587",
+      "detail_http_status": 200,
+      "detail_error": "",
+      "original_warning": "官网本人职业照连续两次获取失败，按管理员裁决留空",
+      "observed_utc": "2026-08-19T15:07:29.641669Z",
+      "parsed_name": "臧晶",
+      "identity_match": true,
+      "raw_photo_reference": "files/20260514205657708.JPG",
+      "photo_url": "https://www.gy120.net/files/20260514205657708.JPG",
+      "photo_state": "available",
+      "portrait_container_html": "<img src=\"files/20260514205657708.JPG\" width=\"200px\"/>",
+      "page_image_references": [
+        {
+          "raw_reference": "images/logo.jpg",
+          "absolute_url": "https://www.gy120.net/images/logo.jpg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"images/logo.jpg\"/>"
+        },
+        {
+          "raw_reference": "files/20260514205657708.JPG",
+          "absolute_url": "https://www.gy120.net/files/20260514205657708.JPG",
+          "alt": "",
+          "outer_html": "<img src=\"files/20260514205657708.JPG\" width=\"200px\"/>"
+        },
+        {
+          "raw_reference": "images/zj.jpg",
+          "absolute_url": "https://www.gy120.net/images/zj.jpg",
+          "alt": "",
+          "outer_html": "<img src=\"images/zj.jpg\"/>"
+        },
+        {
+          "raw_reference": "images/wd.jpg",
+          "absolute_url": "https://www.gy120.net/images/wd.jpg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"images/wd.jpg\"/>"
+        },
+        {
+          "raw_reference": "images/wf.jpg",
+          "absolute_url": "https://www.gy120.net/images/wf.jpg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"images/wf.jpg\"/>"
+        },
+        {
+          "raw_reference": "images/mobile.jpg",
+          "absolute_url": "https://www.gy120.net/images/mobile.jpg",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"images/mobile.jpg\"/>"
+        },
+        {
+          "raw_reference": "images/waicon.gif",
+          "absolute_url": "https://www.gy120.net/images/waicon.gif",
+          "alt": "",
+          "outer_html": "<img alt=\"\" src=\"images/waicon.gif\"/>"
+        }
+      ],
+      "page_image_reference_count": 7,
+      "excluded_resource_urls": [
+        "https://www.gy120.net/images/logo.jpg",
+        "https://www.gy120.net/images/zj.jpg",
+        "https://www.gy120.net/images/wd.jpg",
+        "https://www.gy120.net/images/wf.jpg",
+        "https://www.gy120.net/images/mobile.jpg",
+        "https://www.gy120.net/images/waicon.gif"
+      ],
+      "result": "failed",
+      "failure_state": "照片资源不可达",
+      "decision_feature": "bounded_transfer_failure",
+      "photo_attempt_results": [
+        "HTTP 404",
+        "HTTP 404"
+      ],
+      "retry_count": 1
+    }
+  ],
+  "artifacts": {
+    "payload": "work/四院零散照片清尾_photo_backfill_trial_payload.json",
+    "manifest": "work/四院零散照片清尾_photo_backfill_trial_manifest.csv",
+    "report": "work/四院零散照片清尾_photo_backfill_trial_report.md",
+    "contact_sheet": "work/四院零散照片清尾_photo_backfill_trial_contact_sheet.jpg",
+    "photo_dir": "work/四院零散照片清尾_photo_backfill_trial_photos"
+  }
+}
