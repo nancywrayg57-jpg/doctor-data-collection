@@ -17,6 +17,19 @@ import four_hospital_photo_cleanup_full as target
 
 
 class FourHospitalPhotoCleanupFullTests(unittest.TestCase):
+    def test_trial_manifest_snapshot_matches_repository_lf_blob(self) -> None:
+        expected = {
+            "bytes": 4304,
+            "sha256": "ce1f5d8008f7b44ff0800e9d1c7f2b4f2f896e74a29ea8b8a28bf1715f1505a0",
+        }
+        self.assertEqual(target.file_digest(target.trial.MANIFEST_PATH), expected)
+        self.assertEqual(
+            target.protected_snapshot()[
+                target.trial.repo_relative(target.trial.MANIFEST_PATH)
+            ],
+            expected,
+        )
+
     def test_equivalent_warning_rules_cover_existing_adjudications(self) -> None:
         self.assertTrue(
             target.has_equivalent_failure_warning(

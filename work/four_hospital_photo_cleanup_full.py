@@ -120,7 +120,7 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
 def file_digest(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise RuntimeError(f"受保护文件缺失：{path}")
-    content = path.read_bytes()
+    content = trial.repository_digest_bytes(path)
     return {"bytes": len(content), "sha256": sha256_bytes(content)}
 
 
