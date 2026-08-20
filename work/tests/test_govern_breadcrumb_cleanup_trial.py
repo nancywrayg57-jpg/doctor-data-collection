@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -35,7 +36,13 @@ class BreadcrumbCleanupTrialTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.rows = trial.load_current_layers()
         cls.manifest = trial.affected_master_manifest(cls.rows)
-        cls.profile_impact, cls.atypical = trial.profile_impact_inventory(cls.manifest)
+        if cls.manifest:
+            cls.profile_impact, cls.atypical = trial.profile_impact_inventory(cls.manifest)
+        else:
+            evidence = json.loads(trial.PAYLOAD_PATH.read_text(encoding="utf-8"))
+            cls.manifest = evidence["manifest"]
+            cls.profile_impact = evidence["profile_impact"]
+            cls.atypical = evidence["atypical_profile_cases"]
 
     def test_sysucc_start_position_removal(self) -> None:
         original = (

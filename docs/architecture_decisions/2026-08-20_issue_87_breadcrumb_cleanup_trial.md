@@ -105,43 +105,91 @@ TRIAL 前后以下仓库 blob 摘要完全一致：
 - `git diff --cached --check`：通过；精确暂存 8 个 Issue #87 文件，禁入工件与密钥模式扫描均无命中。
 - 本地 `governance-check` 等价门禁：`SUCCESS`。
 
-当前阶段为 `TRIAL_READY_FOR_OWNER_AUDIT`。只允许精确暂存 Issue #87 实现、测试、五份证据工件与本 ADR，提交后以标准 Git 协议 fast-forward 推送当前分支并创建关闭 Issue #87 的 PR。等待 `governance-check` 成功后发布审计材料并恢复单 Issue 监控；未取得 owner 在当前 PR 明确下发的 FULL 指令前，不得回填正式资产、合并 PR、关闭 Issue 或领取下一任务。
+## Owner FULL 授权与管理员扫码口径裁决
+
+- Owner 在 PR #88 comment `5351062056` 给出 `TRIAL_AUDIT_PASSED → FULL_CLEANUP_AND_SYNC`，确认当前现场为 596/596 `START`、0 邻接孤立撇号，并要求 search-anywhere 与撇号检测继续作为熔断门禁。
+- 原 Owner 硬验收要求“医生画像仓库内导航标记命中 0”，同时要求其他列零修改；现场另有 53 个范围外既有单元格含同类标记，分别位于 `亮眼经历线索` 46 个、`擅长诊疗方向摘录` 7 个，两项要求不能同时满足。
+- 两次正式尝试均在事务门禁下安全回滚，正式资产未保留半成品。管理员随后明确允许扩大范围或修订扫码口径。本轮采用最小影响裁决：只验收 596 个授权 `详情正文摘录` 单元格与 242 份授权画像，不扩大到 53 个其他列单元格；这 53 个单元格继续留存并被证据工件逐项计数。
+
+## FULL 事务实现与结果
+
+新增 `work/govern_breadcrumb_cleanup_full.py`，正式写入遵循：
+
+1. 每个 manifest 项必须为 `START` 且 `NO_ADJACENT_QUOTE`，并以 `segment_start/end`、`original_sha256`、`remaining_sha256` 三重闭合；任何漂移均在替换前熔断。
+2. 总底表只允许 `详情正文摘录` 一列变化；payload、CSV、XLSX 通过仓库授权 writer 重建并逐值核验。
+3. 画像以 `来源链接` 映射到 manifest，只删除 242 份画像实际区块中的 288 个完全一致 `removed_segment` 字节串；不假设固定区块名。
+4. 临时目录完成三载体重建、画像替换、对账、保护摘要与验证后才原子替换；失败路径恢复原文件。
+
+最终闭合：
+
+| 项目 | 结果 |
+|---|---:|
+| 总底表 `详情正文摘录` 更新 | 596 |
+| SYSUCC / ZSSY | 506 / 90 |
+| payload / CSV / XLSX 行数 | 9,222 / 9,222 / 9,222 |
+| 其他列差异 | 0 |
+| 更新画像 | 242 |
+| 清除实际载体 | 288 |
+| 授权范围导航标记残留 | 0 |
+| 范围外留存单元格 | 53 |
+
+入口台账、总底表更新报告、全部 `_索引.md`、照片、非目标画像与退役提示词在 `repository_digest_bytes()` 口径下前后完全一致。姓名、行性质、复核状态、异常提示和其余列均未改变。
+
+## FULL 工件与最终验证
+
+- `work/govern_breadcrumb_cleanup_full.py`
+- `work/tests/test_govern_breadcrumb_cleanup_full.py`
+- `work/GOVERN-2_导航文本污染清理_full_evidence.json`
+- `work/GOVERN-2_导航文本污染清理_full_reconciliation.csv`
+- `work/GOVERN-2_导航文本污染清理_full_summary.md`
+
+已通过：
+
+- Issue #87 脚本与测试 `py_compile`。
+- Issue #87 专项测试：24/24。
+- 全仓 `unittest discover`：538/538。
+- `--validate-full`：`rows=596 profiles=242 replacements=288 authorized_scope_markers=0`。
+- Artifact Tool 从最终 payload 重建 9,222 行工作簿，公式错误扫描 0；`自动采集底表`、`复核清单`、`科室统计`、`重点范围统计`、`医院统计`、`采集说明` 六张工作表均完成最终视觉检查，无明显布局缺陷。
+
+当前阶段为 `FULL_READY_TO_COMMIT_AND_PUSH`。只允许精确提交本 Issue 的正式实现、证据、三载体、242 份画像和本 ADR；标准非强制推送 PR #88 后等待新 `governance-check`，再回报 `FULL_DONE` 并恢复单 Issue 监控。不得自行合并 PR #88 或关闭 Issue #87。
 
 <Handoff_State>
-Target: Issue #87 GOVERN-2 导航文本污染清理 TRIAL
+Target: Issue #87 GOVERN-2 导航文本污染清理 FULL
 AgentConstitution: D:\workspace\信息收集整理\Agent.md
 RouteDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集执行路线图.md
 RequirementDoc: D:\workspace\信息收集整理\docs\2026-08-10_医生画像采集任务需求确认.md
 GitHubRepo: https://github.com/nancywrayg57-jpg/doctor-data-collection.git
 GitHubIssue: https://github.com/nancywrayg57-jpg/doctor-data-collection/issues/87
+PullRequest: https://github.com/nancywrayg57-jpg/doctor-data-collection/pull/88
 Branch: codex/mhrj/issue-87-breadcrumb-cleanup-trial
 CodexDeveloper: xtzhou247
 ClaudeOwner: nancywrayg57-jpg
-Phase: TRIAL_READY_FOR_OWNER_AUDIT
+OwnerInstruction: PR #88 comment 5351062056
+AdministratorRuling: 允许扩大范围或修订扫码口径；采用授权范围内最小修订扫描
+Phase: FULL_READY_TO_COMMIT_AND_PUSH
 Completed:
-- 596 个底表单元格 dry-run 闭合为 SYSUCC 506 + ZSSY 90
-- 242 份画像影响普查闭合为 SYSUCC 204 + ZSSY 38，288 个实际承载位置
-- 8 个异型画像载体、刘慧(小)、16 个站方标题差异与当前 0 中段/0 撇号现场差异已留证
-- 10 个官方 DOM 串行对照全部 HTTP 200 且同意拟删除边界
-- 正式总底表、画像、索引、台账与报告的仓库 blob 摘要前后完全一致
+- 596 个详情正文摘录单元格已事务式清理，其他列差异 0
+- 242 份画像已清除 288 处精确载体
+- payload、CSV、XLSX 9,222 行逐值一致
+- 授权范围标记残留 0，53 个范围外单元格保持不变
+- 入口台账、更新报告、索引、照片、非目标画像与退役提示词保护摘要不变
+- Artifact Tool 六工作表视觉检查、公式扫描、24 项专项测试、538 项全仓测试与 FULL validate 全部通过
 CurrentFacts:
-- 当前只完成 TRIAL，不含任何正式底表或画像更新
-- 自动化保持 PAUSED，待提交、推送、PR 与 governance-check 成功后恢复
+- 自动化保持 PAUSED，待推送、CI 与 FULL_DONE 回报完成后恢复
+- PR #88 与 Issue #87 仍 OPEN；Codex 不自行合并或关闭
 Next:
-- 精确提交并标准非强制推送当前分支，创建关闭 Issue #87 的 PR
-- governance-check 成功后在 PR 回报 TRIAL_READY_FOR_OWNER_AUDIT
-- 等待 owner 对当前基线 0 中段/0 撇号差异和 FULL 范围作唯一明确裁决
+- 精确暂存、提交并标准非强制推送原分支
+- 等待新 governance-check SUCCESS 后在 PR #88 回报 FULL_DONE
+- 恢复 doctor-data-generic-single-issue-monitor 等待 Owner 最终审计
 Constraints:
-- FULL 前不得写正式总底表或画像
-- 只删除导航段，前后正文逐字符保留；不改姓名、行类型、复核状态、异常提示或其他列
-- 只认 owner 在关联 PR 的明确阶段指令
+- 不扩大到 53 个范围外其他列单元格
+- 不改姓名、行性质、复核状态、异常提示、其他列、照片、索引、台账、更新报告或退役提示词
+- 不 force push、不写 main、不自行合并 PR #88 或关闭 Issue #87
 Artifacts:
-- work/govern_breadcrumb_cleanup_trial.py
-- work/tests/test_govern_breadcrumb_cleanup_trial.py
-- work/GOVERN-2_导航文本污染清理_trial_evidence.json
-- work/GOVERN-2_导航文本污染清理_trial_manifest.csv
-- work/GOVERN-2_导航文本污染清理_profile_impact.csv
-- work/GOVERN-2_导航文本污染清理_dom_evidence.csv
-- work/GOVERN-2_导航文本污染清理_trial_summary.md
+- work/govern_breadcrumb_cleanup_full.py
+- work/tests/test_govern_breadcrumb_cleanup_full.py
+- work/GOVERN-2_导航文本污染清理_full_evidence.json
+- work/GOVERN-2_导航文本污染清理_full_reconciliation.csv
+- work/GOVERN-2_导航文本污染清理_full_summary.md
 - docs/architecture_decisions/2026-08-20_issue_87_breadcrumb_cleanup_trial.md
 </Handoff_State>
